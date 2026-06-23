@@ -6,7 +6,7 @@ class Boards::Columns::CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index as JSON" do
-    column = columns(:writebook_in_progress)
+    column = columns(:writebook_doing)
 
     get board_column_cards_path(column.board, column), as: :json
 

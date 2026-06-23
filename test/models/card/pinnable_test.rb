@@ -13,7 +13,7 @@ class Card::PinnableTest < ActiveSupport::TestCase
 
   test "broadcasts pin update when column changes" do
     assert_broadcasted_pin_update do
-      cards(:logo).update!(column: columns(:writebook_in_progress))
+      cards(:logo).update!(column: columns(:writebook_doing))
     end
   end
 

@@ -18,6 +18,7 @@ layout:
   creator: david_uuid
   column: writebook_triage_uuid
   title: Layout is broken
+  due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
@@ -28,8 +29,9 @@ text:
   number: 3
   board: writebook_uuid
   creator: kevin_uuid
-  column: writebook_in_progress_uuid
+  column: writebook_doing_uuid
   title: The text is too small
+  due_on: <%= 2.weeks.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
@@ -40,8 +42,9 @@ shipping:
   number: 4
   board: writebook_uuid
   creator: kevin_uuid
-  column: writebook_triage_uuid
+  column: writebook_done_uuid
   title: We need to ship the app
+  due_on: <%= 3.days.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
@@ -52,7 +55,9 @@ buy_domain:
   number: 5
   board: writebook_uuid
   creator: david_uuid
+  column: writebook_triage_uuid
   title: Buy domain
+  due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
@@ -63,7 +68,9 @@ radio:
   number: 1
   board: miltons_wish_list_uuid
   creator: mike_uuid
+  column: miltons_wish_list_triage_uuid
   title: I want to play my radio at a reasonable volume
+  due_on: <%= 2.weeks.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
@@ -74,7 +81,9 @@ paycheck:
   number: 2
   board: miltons_wish_list_uuid
   creator: mike_uuid
+  column: miltons_wish_list_triage_uuid
   title: I haven't received my paycheck
+  due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
@@ -85,6 +94,7 @@ unfinished_thoughts:
   number: 3
   board: miltons_wish_list_uuid
   creator: mike_uuid
+  column: miltons_wish_list_triage_uuid
   title: Some unfinished thoughts
   created_at: <%= 1.week.ago %>
   status: drafted

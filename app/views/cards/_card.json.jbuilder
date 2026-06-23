@@ -5,8 +5,6 @@ json.cache! card do
   json.image_url card.image.presence && url_for(card.image)
   json.has_attachments card.has_attachments?
 
-  json.tags card.tags.pluck(:title).sort
-
   json.closed card.closed?
   json.postponed card.postponed?
   json.golden card.golden?

@@ -101,7 +101,7 @@ class Account::ImportTest < ActiveSupport::TestCase
     assert_nil import.failure_reason
   end
 
-  test "check sets failure_reason to invalid_export for non-Fizzy ZIP" do
+  test "check sets failure_reason to invalid_export for non-Mudda ZIP" do
     target_account = Account.create!(name: "Import Test")
     import = Account::Import.create!(identity: identities(:david), account: target_account)
 
@@ -228,8 +228,7 @@ class Account::ImportTest < ActiveSupport::TestCase
         column_count: Column.where(account: account).count,
         column_colors: Column.where(account: account).order(:id).pluck(:color),
         card_count: Card.where(account: account).count,
-        comment_count: Comment.where(account: account).count,
-        tag_count: Tag.where(account: account).count
+        comment_count: Comment.where(account: account).count
       }
     end
 end

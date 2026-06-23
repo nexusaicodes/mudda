@@ -49,7 +49,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     delivery = webhook_deliveries(:successfully_completed)
     delivery.update!(request: {
       headers: {
-        "User-Agent" => "fizzy/1.0.0 Webhook",
+        "User-Agent" => "mudda/1.0.0 Webhook",
         "Content-Type" => "application/json",
         "X-Webhook-Signature" => "super-secret-signature",
         "X-Webhook-Timestamp" => "2025-12-05T19:36:35.401Z"
@@ -330,7 +330,7 @@ class Webhook::DeliveryTest < ActiveSupport::TestCase
     text = JSON.parse(captured_body)["text"]
 
     expected = <<~TEXT.strip
-      David added &quot;Tom &amp; Jerry&#39;s &lt;Great&gt; &quot;Adventure&quot;&quot; <http://example.com/897362094/cards/1|Open in Fizzy>
+      David added &quot;Tom &amp; Jerry&#39;s &lt;Great&gt; &quot;Adventure&quot;&quot; <http://example.com/897362094/cards/1|Open in Mudda>
     TEXT
     assert_equal expected, text
   end

@@ -17,7 +17,7 @@ class MentionsTest < ActiveSupport::TestCase
   test "create mentions from plain text mentions when publishing cards" do
     perform_enqueued_jobs only: Mention::CreateJob do
       card = assert_no_difference -> { Mention.count } do
-        boards(:writebook).cards.create title: "Cleanup", description: "Did you finish up with the cleanup, #{mention_html_for(users(:david))}?"
+        boards(:writebook).cards.create title: "Cleanup", due_on: 1.week.from_now, description: "Did you finish up with the cleanup, #{mention_html_for(users(:david))}?"
       end
 
       card = Card.find(card.id)

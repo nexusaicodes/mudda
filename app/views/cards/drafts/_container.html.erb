@@ -1,4 +1,4 @@
-<section id="<%= dom_id(card, :card_container) %>" class="card-perma card-perma--draft" style="--card-color: <%= card.color %>;">
+<section id="<%= dom_id(card, :card_container) %>" class="card-perma card-perma--draft" style="--card-color: <%= card.color %>;" data-controller="publish-guard">
   <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/image", card: card %>
@@ -8,7 +8,7 @@
       <%= card_article_tag card, class: "card" do %>
         <header class="card__header">
           <%= render "cards/display/perma/board", card: card %>
-          <%= render "cards/display/perma/tags", card: card %>
+          <%= render "cards/display/due", card: card %>
         </header>
 
         <div class="card__body justify-space-between">
@@ -26,7 +26,7 @@
     </div>
   <% end %>
 
-  <% if Fizzy.saas? %>
+  <% if Mudda.saas? %>
     <%= render "cards/container/footer/saas/create", card: card %>
   <% else %>
     <%= render "cards/container/footer/create", card: card %>

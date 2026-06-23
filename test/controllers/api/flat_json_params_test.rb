@@ -36,22 +36,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal "New Name", Current.account.reload.name
   end
 
-  test "update board entropy with flat JSON" do
-    board = boards(:writebook)
-
-    put board_entropy_path(board), params: { auto_postpone_period_in_days: 90 }, as: :json
-
-    assert_response :success
-    assert_equal 90.days, board.entropy.reload.auto_postpone_period
-  end
-
-  test "update account entropy with flat JSON" do
-    put account_entropy_path, params: { auto_postpone_period_in_days: 7 }, as: :json
-
-    assert_response :success
-    assert_equal 7.days, Current.account.entropy.reload.auto_postpone_period
-  end
-
   test "create push subscription with flat JSON" do
     stub_web_push_dns_resolution
 
@@ -101,38 +85,15 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     board = boards(:writebook)
 
     put board_path(board),
-      params: { name: "Flat board", auto_postpone_period_in_days: 7, public_description: "<p>Flat public desc</p>" },
+      params: { name: "Flat board", public_description: "<p>Flat public desc</p>" },
       as: :json
 
     assert_response :success
     board.reload
     assert_equal "Flat board", board.name
-    assert_equal 7.days, board.entropy.auto_postpone_period
     assert_equal "Flat public desc", board.public_description.to_plain_text
     assert_equal board.id, @response.parsed_body["id"]
     assert_equal "Flat board", @response.parsed_body["name"]
-  end
-
-  test "create column with flat JSON" do
-    board = boards(:writebook)
-
-    assert_difference -> { board.columns.count }, +1 do
-      post board_columns_path(board), params: { name: "Flat Column" }, as: :json
-    end
-
-    assert_response :created
-    assert_equal "Flat Column", Column.last.name
-  end
-
-  test "update column with flat JSON" do
-    column = columns(:writebook_in_progress)
-
-    put board_column_path(column.board, column), params: { name: "Flat Updated" }, as: :json
-
-    assert_response :success
-    assert_equal "Flat Updated", column.reload.name
-    assert_equal column.id, @response.parsed_body["id"]
-    assert_equal "Flat Updated", @response.parsed_body["name"]
   end
 
   test "create step with flat JSON" do

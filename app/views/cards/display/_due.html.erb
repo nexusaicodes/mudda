@@ -1,0 +1,6 @@
+<% if card.due_on.present? %>
+  <span class="card__due <%= "card__due--overdue" if card.overdue? %>" title="Due <%= l(card.due_on, format: :long) %>">
+    <%= icon_tag "bell-alert" if card.overdue? %>
+    Due <%= card_due_label(card) %>
+  </span>
+<% end %>

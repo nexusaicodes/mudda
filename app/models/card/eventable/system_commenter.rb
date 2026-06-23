@@ -20,22 +20,12 @@ class Card::Eventable::SystemCommenter
         "#{creator_name} <strong>assigned</strong> this to #{assignee_names}."
       when "card_unassigned"
         "#{creator_name} <strong>unassigned</strong> from #{assignee_names}."
-      when "card_closed"
-        "<strong>Moved</strong> to “Done” by #{creator_name}"
-      when "card_reopened"
-        "<strong>Reopened</strong> by #{creator_name}"
-      when "card_postponed"
-        "#{creator_name} <strong>moved</strong> this to “Not Now”"
-      when "card_auto_postponed"
-        "<strong>Moved</strong> to “Not Now” due to inactivity"
       when "card_title_changed"
         "#{creator_name} <strong>changed the title</strong> from “#{old_title}” to “#{new_title}”."
       when "card_board_changed"
         "#{creator_name} <strong>moved</strong> this from “#{old_board}” to “#{new_board}”."
       when "card_triaged"
         "#{creator_name} <strong>moved</strong> this to “#{column}”"
-      when "card_sent_back_to_triage"
-        "#{creator_name} <strong>moved</strong> this back to “Maybe?”"
       end
     end
 

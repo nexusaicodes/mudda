@@ -1,1 +1,5 @@
 <%= turbo_stream.replace(dom_id(@column), partial: "boards/show/column", method: :morph, locals: { column: @column }) %>
+
+<% if @source_column && @source_column != @column %>
+  <%= turbo_stream.replace(dom_id(@source_column), partial: "boards/show/column", method: :morph, locals: { column: @source_column }) %>
+<% end %>

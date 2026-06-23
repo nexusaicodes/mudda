@@ -3,7 +3,6 @@ Rails.application.routes.draw do
 
   namespace :account do
     resource :cancellation, only: [ :create ]
-    resource :entropy
     resource :join_code
     resource :settings
     resources :exports, only: [ :create, :show ]
@@ -31,15 +30,8 @@ Rails.application.routes.draw do
       resource :subscriptions
       resource :involvement
       resource :publication
-      resource :entropy
 
-      namespace :columns do
-        resource :not_now
-        resource :stream
-        resource :closed
-      end
-
-      resources :columns do
+      resources :columns, only: %i[ index show update ] do
         scope module: :columns do
           resources :cards, only: :index
         end
@@ -56,18 +48,10 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :columns, only: [] do
-    resource :left_position, module: :columns
-    resource :right_position, module: :columns
-  end
-
   namespace :columns do
     resources :cards do
       scope module: :cards do
         namespace :drops do
-          resource :not_now
-          resource :stream
-          resource :closure
           resource :column
         end
       end
@@ -82,32 +66,25 @@ Rails.application.routes.draw do
     scope module: :cards do
       resource :draft, only: :show
       resource :board
-      resource :closure
       resource :column
       resource :goldness
       resource :image
-      resource :not_now
       resource :pin
       resource :publish
       resource :reading
-      resource :triage
       resource :watch
-      resource :reading
 
       resources :reactions
 
       resources :assignments
       resource :self_assignment, only: :create
       resources :steps
-      resources :taggings
 
       resources :comments do
         resources :reactions, module: :comments
       end
     end
   end
-
-  resources :tags, only: :index
 
   namespace :notifications do
     resource :settings
@@ -202,12 +179,6 @@ Rails.application.routes.draw do
   namespace :public do
     resources :boards do
       scope module: :boards do
-        namespace :columns do
-          resource :not_now, only: :show
-          resource :stream, only: :show
-          resource :closed, only: :show
-        end
-
         resources :columns, only: :show
       end
 

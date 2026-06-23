@@ -12,20 +12,24 @@
     <kbd class="txt-x-small hide-on-touch">e</kbd>
   <% end %>
 
-  <%= button_to card_closure_path(card), class: "btn btn--circle-mobile borderless hide-on-native",
-        data: {
-          controller: "hotkey",
-          form_target: "submit",
-          bridge__buttons_target: ("button" unless card.postponed?),
-          bridge_title: "Mark done",
-          bridge_display_as_primary_action: true,
-          bridge_display_title: true, bridge_icon_url: bridge_icon("check"),
-          action: "keydown.d@document->hotkey#click"
-        },
-        form: { data: { controller: "form" } } do %>
-    <%= icon_tag "check", class: "icon--mobile-only" %>
-    <span class="overflow-ellipsis">Mark as Done</span>
-    <kbd class="txt-x-small hide-on-touch">d</kbd>
+  <% if (done_column = card.board.done_column) && !card.closed? %>
+    <%= button_to card_column_path(card, column_id: done_column.id), method: :patch,
+          class: "btn btn--circle-mobile borderless hide-on-native",
+          data: {
+            controller: "hotkey",
+            form_target: "submit",
+            turbo_frame: "_top",
+            bridge__buttons_target: "button",
+            bridge_title: "Mark done",
+            bridge_display_as_primary_action: true,
+            bridge_display_title: true, bridge_icon_url: bridge_icon("check"),
+            action: "keydown.d@document->hotkey#click"
+          },
+          form: { data: { controller: "form" } } do %>
+      <%= icon_tag "check", class: "icon--mobile-only" %>
+      <span class="overflow-ellipsis">Mark as Done</span>
+      <kbd class="txt-x-small hide-on-touch">d</kbd>
+    <% end %>
   <% end %>
 
   <%= bridged_button_to_board(card.board) %>

@@ -14,21 +14,11 @@ class FilterTest < ActiveSupport::TestCase
 
     assert_not_includes users(:kevin).filters.new.cards, @new_card
 
-    filter = users(:david).filters.new creator_ids: [ users(:david).id ], tag_ids: [ tags(:mobile).id ]
-    assert_equal [ cards(:layout) ], filter.cards
-
     filter = users(:david).filters.new assignment_status: "unassigned", board_ids: [ @new_board.id ]
     assert_equal [ @new_card ], filter.cards
 
-    filter = users(:david).filters.new indexed_by: "closed"
-    assert_equal [ cards(:shipping) ], filter.cards
-
-    filter = users(:david).filters.new indexed_by: "maybe", board_ids: [ boards(:writebook).id ]
-    assert_equal [ cards(:buy_domain) ], filter.cards
-
-    cards(:shipping).postpone
-    filter = users(:david).filters.new indexed_by: "not_now"
-    assert_includes filter.cards, cards(:shipping)
+    filter = users(:david).filters.new column_ids: [ columns(:writebook_doing).id ]
+    assert_equal [ cards(:text) ], filter.cards
 
     filter = users(:david).filters.new card_ids: [ cards(:logo, :layout).collect(&:id) ]
     assert_equal [ cards(:logo), cards(:layout) ], filter.cards
@@ -50,23 +40,23 @@ class FilterTest < ActiveSupport::TestCase
 
   test "remembering equivalent filters" do
     assert_difference "Filter.count", +1 do
-      filter = users(:david).filters.remember(sorted_by: "latest", assignment_status: "unassigned", tag_ids: [ tags(:mobile).id ])
+      filter = users(:david).filters.remember(sorted_by: "latest", assignment_status: "unassigned", assignee_ids: [ users(:jz).id ])
 
       assert_changes "filter.reload.updated_at" do
-        assert_equal filter, users(:david).filters.remember(tag_ids: [ tags(:mobile).id ], assignment_status: "unassigned")
+        assert_equal filter, users(:david).filters.remember(assignee_ids: [ users(:jz).id ], assignment_status: "unassigned")
       end
     end
   end
 
   test "remembering equivalent filters for different users" do
     assert_difference "Filter.count", +2 do
-      users(:david).filters.remember(assignment_status: "unassigned", tag_ids: [ tags(:mobile).id ])
-      users(:kevin).filters.remember(assignment_status: "unassigned", tag_ids: [ tags(:mobile).id ])
+      users(:david).filters.remember(assignment_status: "unassigned", assignee_ids: [ users(:jz).id ])
+      users(:kevin).filters.remember(assignment_status: "unassigned", assignee_ids: [ users(:jz).id ])
     end
   end
 
   test "turning into params" do
-    filter = users(:david).filters.new sorted_by: "latest", tag_ids: "", assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ]
+    filter = users(:david).filters.new sorted_by: "latest", assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ]
     expected = { assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ] }
     assert_equal expected, filter.as_params
   end
@@ -82,47 +72,44 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "resource removal" do
-    filter = users(:david).filters.create! tag_ids: [ tags(:mobile).id ], board_ids: [ boards(:writebook).id ]
+    other_board = users(:david).boards.create!(name: "Another board")
+    filter = users(:david).filters.create! board_ids: [ boards(:writebook).id, other_board.id ]
 
-    assert_includes filter.as_params[:tag_ids], tags(:mobile).id
-    assert_includes filter.tags, tags(:mobile)
     assert_includes filter.as_params[:board_ids], boards(:writebook).id
     assert_includes filter.boards, boards(:writebook)
 
     assert_changes "filter.reload.updated_at" do
-      tags(:mobile).destroy!
+      boards(:writebook).destroy!
     end
-    assert_nil Filter.find(filter.id).as_params[:tag_ids]
+    assert_not_includes Filter.find(filter.id).as_params[:board_ids], boards(:writebook).id
 
     assert_changes "Filter.exists?(filter.id)" do
-      boards(:writebook).destroy!
+      other_board.destroy!
     end
   end
 
   test "duplicate filters are removed after a resource is destroyed" do
-    users(:david).filters.create! tag_ids: [ tags(:mobile).id ], board_ids: [ boards(:writebook).id ]
-    users(:david).filters.create! tag_ids: [ tags(:mobile).id, tags(:web).id ], board_ids: [ boards(:writebook).id ]
+    other_board = users(:david).boards.create!(name: "Another board")
+    users(:david).filters.create! board_ids: [ other_board.id ]
+    users(:david).filters.create! board_ids: [ other_board.id, boards(:writebook).id ]
 
     assert_difference "Filter.count", -1 do
-      tags(:web).destroy!
+      boards(:writebook).destroy!
     end
   end
 
   test "summary" do
-    assert_equal "Newest, #mobile, and assigned to JZ", filters(:jz_assignments).summary
+    assert_equal "Newest and assigned to JZ", filters(:jz_assignments).summary
 
-    filters(:jz_assignments).update!(assignees: [], tags: [], boards: [ boards(:writebook) ])
+    filters(:jz_assignments).update!(assignees: [], boards: [ boards(:writebook) ])
     assert_equal "Newest", filters(:jz_assignments).summary
-
-    filters(:jz_assignments).update!(indexed_by: "stalled", sorted_by: "latest")
-    assert_equal "Stalled", filters(:jz_assignments).summary
   end
 
   test "get a clone with some changed params" do
     seed_filter = users(:david).filters.new indexed_by: "all", terms: [ "haggis" ]
-    filter = seed_filter.with(indexed_by: "closed")
+    filter = seed_filter.with(indexed_by: "golden")
 
-    assert filter.indexed_by.closed?
+    assert filter.indexed_by.golden?
     assert_equal [ "haggis" ], filter.terms
   end
 
@@ -136,31 +123,6 @@ class FilterTest < ActiveSupport::TestCase
     assert_includes filter.cards, cards(:logo)
   end
 
-  test "closure window" do
-    filter = users(:david).filters.new closure: "this week"
-
-    cards(:shipping).closure.update_columns created_at: 2.weeks.ago
-    assert_not_includes filter.cards, cards(:shipping)
-
-    cards(:shipping).closure.update_columns created_at: Time.current
-    assert_includes filter.cards, cards(:shipping)
-  end
-
-  test "completed by" do
-    cards(:shipping).closure.update_columns user_id: users(:david).id
-
-    filter = users(:david).filters.new closer_ids: [ users(:david).id ]
-    assert_includes filter.cards, cards(:shipping)
-
-    filter = users(:david).filters.new closer_ids: [ users(:jz).id ]
-    assert_not_includes filter.cards, cards(:shipping)
-
-    cards(:shipping).closure.update_columns user_id: users(:jz).id
-
-    filter = users(:david).filters.new closer_ids: [ users(:jz).id ]
-    assert_includes filter.cards, cards(:shipping)
-  end
-
   test "check if a filter is used" do
     assert users(:david).filters.new(creator_ids: [ users(:david).id ]).used?
     assert_not users(:david).filters.new.used?
@@ -170,12 +132,12 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "column ids filter cards by workflow columns" do
-    assert_equal [ cards(:text) ], users(:david).filters.new(column_ids: [ columns(:writebook_in_progress).id ]).cards.to_a
+    assert_equal [ cards(:text) ], users(:david).filters.new(column_ids: [ columns(:writebook_doing).id ]).cards.to_a
     assert_equal [ cards(:logo), cards(:layout) ].sort_by(&:id), users(:david).filters.new(column_ids: [ columns(:writebook_triage).id ]).cards.to_a.sort_by(&:id)
   end
 
   test "column ids are ORed together" do
-    filter = users(:david).filters.new(column_ids: [ columns(:writebook_triage).id, columns(:writebook_in_progress).id ])
+    filter = users(:david).filters.new(column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ])
 
     assert_equal [ cards(:logo), cards(:layout), cards(:text) ].sort_by(&:id), filter.cards.to_a.sort_by(&:id)
   end

@@ -15,10 +15,10 @@ class Event < ApplicationRecord
   scope :preloaded, -> {
     includes(:creator, :board, {
       eventable: [
-        :creator, :goldness, :closure, :image_attachment,
+        :creator, :goldness, :image_attachment,
         { rich_text_body: :embeds_attachments },
         { rich_text_description: :embeds_attachments },
-        { card: [ :goldness, :closure, :image_attachment ] }
+        { card: [ :goldness, :image_attachment ] }
       ]
     })
   }

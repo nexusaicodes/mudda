@@ -1,5 +1,5 @@
 Rails.application.configure do
-  # SaaS version of Fizzy is multi-tenanted
+  # SaaS version of Mudda is multi-tenanted
   config.x.multi_tenant.enabled = true
 
   if Rails.root.join("tmp/structured-logging.txt").exist?

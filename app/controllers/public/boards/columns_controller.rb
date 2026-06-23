@@ -2,7 +2,7 @@ class Public::Boards::ColumnsController < Public::BaseController
   before_action :set_column
 
   def show
-    set_page_and_extract_portion_from @column.cards.active.latest.with_golden_first
+    set_page_and_extract_portion_from @column.cards.published.latest.with_golden_first
   end
 
   private

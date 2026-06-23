@@ -1,7 +1,7 @@
 module Filter::Fields
   extend ActiveSupport::Concern
 
-  INDEXES = %w[ all closed not_now stalled postponing_soon golden ]
+  INDEXES = %w[ all golden ]
   SORTED_BY = %w[ newest oldest latest ]
 
   delegate :default_value?, to: :class
@@ -17,10 +17,6 @@ module Filter::Fields
 
     def indexed_by_human_name(index)
       case index
-      when "postponing_soon"
-        "Closing soon"
-      when "closed"
-        "Done"
       when "all"
         "Open"
       else
@@ -31,7 +27,7 @@ module Filter::Fields
 
   included do
     store_accessor :fields, :assignment_status, :indexed_by, :sorted_by, :terms,
-      :card_ids, :creation, :closure, :column_ids
+      :card_ids, :creation, :column_ids
 
     def assignment_status
       super.to_s.inquiry
@@ -47,10 +43,6 @@ module Filter::Fields
 
     def creation_window
       TimeWindowParser.parse(creation)
-    end
-
-    def closure_window
-      TimeWindowParser.parse(closure)
     end
 
     def terms

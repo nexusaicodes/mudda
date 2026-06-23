@@ -1,5 +1,5 @@
 class CardsController < ApplicationController
-  wrap_parameters :card, include: %i[ title description image created_at last_active_at ]
+  wrap_parameters :card, include: %i[ title description image due_on created_at last_active_at ]
 
   include FilterScoped
 
@@ -68,6 +68,6 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :title, :description, :image, :created_at, :last_active_at ])
+      params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at ])
     end
 end

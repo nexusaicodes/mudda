@@ -5,8 +5,8 @@ ACCOUNT_ID = nil # restrict to an account_id
 
 # Split sibling <p> tags with content by inserting <p><br</p> to replicaate previous view.
 # Run for the time range before paragraphs were not spaced
-# See https://app.fizzy.do/5986089/cards/3472
-# and https://github.com/basecamp/fizzy/pull/2107
+# See https://app.mudda.do/5986089/cards/3472
+# and https://github.com/basecamp/mudda/pull/2107
 #
 # MUST BE RUN AFTER `decrypt!` when using ActiveRecord Encryption
 #

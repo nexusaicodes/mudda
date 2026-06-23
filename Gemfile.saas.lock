@@ -175,7 +175,7 @@ GIT
 PATH
   remote: saas
   specs:
-    fizzy-saas (0.1.0)
+    mudda-saas (0.1.0)
       audits1984
       console1984
       prometheus-client-mmap (~> 1.4.0)
@@ -721,7 +721,7 @@ DEPENDENCIES
   console1984!
   debug
   faker
-  fizzy-saas!
+  mudda-saas!
   geared_pagination (~> 1.2)
   gvltools
   image_processing (~> 1.14)

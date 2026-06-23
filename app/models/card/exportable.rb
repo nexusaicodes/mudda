@@ -71,15 +71,6 @@ module Card::Exportable
     end
 
     def export_status
-      case
-      when closed?
-        "Done"
-      when postponed?
-        "Not now"
-      when column.present?
-        column.name
-      else
-        "Maybe?"
-      end
+      column&.name
     end
 end

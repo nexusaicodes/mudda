@@ -29,6 +29,7 @@ class SmokeTest < ApplicationSystemTestCase
     click_on "Add a card"
     fill_in "card_title", with: "Hello, world!"
     fill_in_lexxy with: "I am editing this thing"
+    fill_in "card_due_on", with: 1.week.from_now.to_date
     click_on "Create card"
 
     assert_selector "h3", text: "Hello, world!"
@@ -91,7 +92,7 @@ class SmokeTest < ApplicationSystemTestCase
     card_el.drag_to(column_el)
 
     column_el.find(".cards__expander-count", text: cards_count + 1)
-    assert_equal("Triage", card.reload.column.name)
+    assert_equal("Todo", card.reload.column.name)
   end
 
   private

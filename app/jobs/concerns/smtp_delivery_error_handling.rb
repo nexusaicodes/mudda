@@ -15,7 +15,7 @@ module SmtpDeliveryErrorHandling
       case error.message
       when /\A501 5\.1\.3/
         # Ignore undeliverable email addresses.
-        Sentry.capture_exception error, level: :info if Fizzy.saas?
+        Sentry.capture_exception error, level: :info if Mudda.saas?
       else
         raise
       end
@@ -27,7 +27,7 @@ module SmtpDeliveryErrorHandling
     rescue_from Net::SMTPFatalError do |error|
       case error.message
       when /\A550 5\.1\.1/, /\A552 5\.6\.0/, /\A555 5\.5\.4/
-        Sentry.capture_exception error, level: :info if Fizzy.saas?
+        Sentry.capture_exception error, level: :info if Mudda.saas?
       else
         raise
       end

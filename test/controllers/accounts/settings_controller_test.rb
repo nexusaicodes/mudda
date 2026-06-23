@@ -36,6 +36,5 @@ class Account::SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal Current.account.name, @response.parsed_body["name"]
     assert_equal Current.account.cards_count, @response.parsed_body["cards_count"]
-    assert_equal Current.account.entropy.auto_postpone_period_in_days, @response.parsed_body["auto_postpone_period_in_days"]
   end
 end

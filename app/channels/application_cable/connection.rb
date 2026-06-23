@@ -9,7 +9,7 @@ module ApplicationCable
     private
       def set_current_user
         if session = find_session_by_cookie
-          account = Account.find_by(external_account_id: request.env["fizzy.external_account_id"])
+          account = Account.find_by(external_account_id: request.env["mudda.external_account_id"])
           Current.account = account
           self.current_user = session.identity.users.find_by!(account: account) if account
         end

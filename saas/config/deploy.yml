@@ -1,15 +1,15 @@
-service: fizzy
-image: basecamp/fizzy
+service: mudda
+image: nexus-ai/mudda
 asset_path: /rails/public/assets
-hooks_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal", "hooks") %>
-secrets_path: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, ".kamal/secrets") %>
+hooks_path: <%= File.join(Gem::Specification.find_by_name("mudda-saas").gem_dir, ".kamal", "hooks") %>
+secrets_path: <%= File.join(Gem::Specification.find_by_name("mudda-saas").gem_dir, ".kamal/secrets") %>
 
 servers:
   jobs:
     cmd: bin/jobs
 
 volumes:
-  - fizzy:/rails/storage
+  - mudda:/rails/storage
 
 proxy:
   ssl: true
@@ -22,7 +22,7 @@ registry:
 
 builder:
   arch: amd64
-  dockerfile: <%= File.join(Gem::Specification.find_by_name("fizzy-saas").gem_dir, "Dockerfile") %>
+  dockerfile: <%= File.join(Gem::Specification.find_by_name("mudda-saas").gem_dir, "Dockerfile") %>
   secrets:
     - GITHUB_TOKEN
   remote: ssh://app@docker-builder-102

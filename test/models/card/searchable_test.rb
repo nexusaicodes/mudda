@@ -106,7 +106,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   test "publishing a draft card indexes it" do
     search_record_class = Search::Record.for(@user.account_id)
 
-    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "drafted")
+    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "drafted", due_on: 1.week.from_now)
     assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
 
     card.publish

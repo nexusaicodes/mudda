@@ -8,14 +8,14 @@ pidfile ENV.fetch("PIDFILE", "tmp/pids/server.pid")
 plugin :tmp_restart
 
 # Run Solid Queue with Puma by default.
-# Disabled when running fizzy-saas or via SOLID_QUEUE_IN_PUMA=false.
-unless Fizzy.saas? || ENV["SOLID_QUEUE_IN_PUMA"] == "false"
+# Disabled when running mudda-saas or via SOLID_QUEUE_IN_PUMA=false.
+unless Mudda.saas? || ENV["SOLID_QUEUE_IN_PUMA"] == "false"
   plugin :solid_queue
 end
 
 # Expose Prometheus metrics at http://0.0.0.0:9394/metrics (SaaS only).
 # In dev, overridden to http://127.0.0.1:9306/metrics in .mise.toml.
-if Fizzy.saas?
+if Mudda.saas?
   control_uri = Rails.env.local? ? "unix://tmp/pumactl.sock" : "auto"
   activate_control_app control_uri, no_token: true
   plugin :yabeda

@@ -26,7 +26,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
   end
 
   test "an event is created when a card is published" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card"
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card", due_on: 1.week.from_now
     assert_difference(-> { Event.count } => +1) do
       card.publish
     end
@@ -40,7 +40,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
     freeze_time
 
     card = travel_to 1.week.ago do
-      boards(:writebook).cards.create! creator: users(:kevin), title: "Newly created card"
+      boards(:writebook).cards.create! creator: users(:kevin), title: "Newly created card", due_on: 1.week.from_now
     end
 
     assert card.drafted?
@@ -52,7 +52,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
   end
 
   test "detect drafts that were just published" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Draft Card"
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Draft Card", due_on: 1.week.from_now
     assert card.drafted?
     assert_not card.was_just_published?
 

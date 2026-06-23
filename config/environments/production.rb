@@ -22,7 +22,7 @@ Rails.application.configure do
   end
 
   # Base URL for links in emails and other external references.
-  # Set BASE_URL to your instance's public URL (e.g., https://fizzy.example.com)
+  # Set BASE_URL to your instance's public URL (e.g., https://mudda.example.com)
   if base_url = ENV["BASE_URL"].presence
     uri = URI.parse(base_url)
     url_options = { host: uri.host, protocol: uri.scheme }
@@ -55,7 +55,7 @@ Rails.application.configure do
   }
 
   # Select Active Storage service via env var; default to local disk.
-  # Don't overwrite if it's already been set (e.g. by fizzy-saas)
+  # Don't overwrite if it's already been set (e.g. by mudda-saas)
   if config.active_storage.service.blank?
     config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
   end
@@ -101,7 +101,7 @@ Rails.application.configure do
   # Use a real queuing backend for Active Job (and separate queues per environment).
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue, reading: :queue } }
-  # config.active_job.queue_name_prefix = "fizzy_production"
+  # config.active_job.queue_name_prefix = "mudda_production"
 
   config.action_mailer.perform_caching = false
 

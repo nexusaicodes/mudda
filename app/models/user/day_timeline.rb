@@ -30,15 +30,15 @@ class User::DayTimeline
   end
 
   def added_column
-    @added_column ||= build_column(:added, "Added", 1, events.where(action: %w[card_published card_reopened]))
+    @added_column ||= build_column(:added, "Added", 1, events.where(action: "card_published"))
   end
 
   def updated_column
-    @updated_column ||= build_column(:updated, "Updated", 2, events.where.not(action: %w[card_published card_closed card_reopened]))
+    @updated_column ||= build_column(:updated, "Updated", 2, events.where.not(action: "card_published").where.not(id: done_events))
   end
 
   def closed_column
-    @closed_column ||= build_column(:closed, "Done", 3, events.where(action: "card_closed"))
+    @closed_column ||= build_column(:closed, "Done", 3, done_events)
   end
 
   def cache_key
@@ -50,14 +50,9 @@ class User::DayTimeline
       card_assigned
       card_unassigned
       card_published
-      card_closed
-      card_reopened
       card_collection_changed
       card_board_changed
-      card_postponed
-      card_auto_postponed
       card_triaged
-      card_sent_back_to_triage
       comment_created
     ]
 
@@ -86,6 +81,12 @@ class User::DayTimeline
 
     def build_column(id, base_title, index, events)
       Column.new(self, id, base_title, index, events)
+    end
+
+    def done_events
+      @done_events ||= events
+        .where(action: "card_triaged")
+        .where("particulars->>'$.particulars.column' = ?", Card::Triageable::DONE_COLUMN)
     end
 
     def window

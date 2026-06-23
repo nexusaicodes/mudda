@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 #
 # Fetches push notification credentials from 1Password for development.
-# Uses the same 1Password items as production (Deploy/Fizzy Production).
+# Uses the same 1Password items as production (Deploy/Mudda Production).
 #
 # Usage: eval "$(bundle exec push-dev)"
 
 OP_ACCOUNT = "23QPQDKZC5BKBIIG7UGT5GR5RM"
 OP_VAULT = "Deploy"
-OP_ITEM = "Fizzy"
+OP_ITEM = "Mudda"
 
 def op_read(field)
   `op read "op://#{OP_VAULT}/#{OP_ITEM}/Production/#{field}" --account #{OP_ACCOUNT} 2>/dev/null`.strip

@@ -1,7 +1,7 @@
 class User::DataExport < Export
   private
     def filename
-      "fizzy-user-data-export-#{id}.zip"
+      "mudda-user-data-export-#{id}.zip"
     end
 
     def populate_zip(zip)

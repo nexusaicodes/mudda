@@ -1,7 +1,7 @@
 class Card < ApplicationRecord
-  include Accessible, Assignable, Attachments, Broadcastable, Closeable, Colored, Commentable,
-    Entropic, Eventable, Exportable, Golden, Mentions, Multistep, Pinnable, Postponable, Promptable,
-    Readable, Searchable, Stallable, Statuses, Storage::Tracked, Taggable, Triageable, Watchable
+  include Accessible, Assignable, Attachments, Broadcastable, Colored, Commentable,
+    Due, Eventable, Exportable, Golden, Mentions, Multistep, Pinnable, Promptable,
+    Readable, Searchable, Statuses, Storage::Tracked, Triageable, Watchable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board
@@ -23,15 +23,10 @@ class Card < ApplicationRecord
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
   scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ], assignees: [ :avatar_attachment, :account ]) }
-  scope :preloaded,               -> { with_users.preload(:column, :tags, :steps, :closure, :goldness, :activity_spike, :image_attachment, reactions: :reacter, board: [ :entropy, :columns ], not_now: [ :user ]).with_rich_text_description_and_embeds }
+  scope :preloaded,               -> { with_users.preload(:column, :steps, :goldness, :image_attachment, reactions: :reacter, board: [ :columns ]).with_rich_text_description_and_embeds }
 
   scope :indexed_by, ->(index) do
     case index
-    when "stalled" then stalled
-    when "postponing_soon" then postponing_soon
-    when "closed" then closed
-    when "maybe" then awaiting_triage
-    when "not_now" then postponed.latest
     when "golden" then golden
     when "draft" then drafted
     else all
@@ -76,7 +71,7 @@ class Card < ApplicationRecord
       old_board = account.boards.find_by(id: board_id_before_last_save)
 
       transaction do
-        update! column: nil
+        update! column: board.triage_column
         track_board_change_event(old_board.name)
         grant_access_to_assignees unless board.all_access?
       end

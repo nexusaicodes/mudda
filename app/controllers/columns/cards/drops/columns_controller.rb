@@ -3,6 +3,7 @@ class Columns::Cards::Drops::ColumnsController < ApplicationController
 
   def create
     @column = @card.board.columns.find(params[:column_id])
+    @source_column = @card.column
     @card.triage_into(@column)
   end
 end

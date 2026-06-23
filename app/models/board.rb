@@ -1,12 +1,11 @@
 class Board < ApplicationRecord
-  include Accessible, AutoPostponing, Board::Storage, Broadcastable, Cards, Entropic, Filterable, Publishable, ::Storage::Tracked, Triageable
+  include Accessible, Board::Storage, Broadcastable, Cards, Filterable, Publishable, ::Storage::Tracked, Triageable
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
   belongs_to :account, default: -> { creator.account }
 
   has_rich_text :public_description
 
-  has_many :tags, -> { distinct }, through: :cards
   has_many :events
   has_many :webhooks, dependent: :destroy
 

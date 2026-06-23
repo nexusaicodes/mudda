@@ -1,6 +1,6 @@
 # Authentication
 
-There are two ways to authenticate with the Fizzy API:
+There are two ways to authenticate with the Mudda API:
 
 1. **Personal access tokens** - Long-lived tokens for scripts and integrations
 2. **Magic link authentication** - Session-based authentication for native apps
@@ -35,7 +35,7 @@ Then click on "Generate access token".
 To authenticate a request using your access token, include it in the `Authorization` header:
 
 ```bash
-curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" https://app.fizzy.do/my/identity
+curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" https://app.mudda.do/my/identity
 ```
 
 ## Magic Link Authentication
@@ -51,7 +51,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{"email_address": "user@example.com"}' \
-  https://app.fizzy.do/session
+  https://app.mudda.do/session
 ```
 
 __Response:__
@@ -87,7 +87,7 @@ curl -X POST \
   -H "Accept: application/json" \
   -H "Cookie: pending_authentication_token=eyJfcmFpbHMi..." \
   -d '{"code": "ABC123"}' \
-  https://app.fizzy.do/session/magic_link
+  https://app.mudda.do/session/magic_link
 ```
 
 __Response:__
@@ -103,7 +103,7 @@ The `session_token` can be used to authenticate subsequent requests by including
 ```bash
 curl -H "Cookie: session_token=eyJfcmFpbHMi..." \
   -H "Accept: application/json" \
-  https://app.fizzy.do/my/identity
+  https://app.mudda.do/my/identity
 ```
 
 __Error responses:__
@@ -122,7 +122,7 @@ To log out and destroy the server-side session:
 curl -X DELETE \
   -H "Accept: application/json" \
   -H "Cookie: session_token=eyJfcmFpbHMi..." \
-  https://app.fizzy.do/session
+  https://app.mudda.do/session
 ```
 
 __Response:__
@@ -138,8 +138,8 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -H "Cookie: session_token=eyJfcmFpbHMi..." \
-  -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
-  https://app.fizzy.do/1234567/my/access_tokens
+  -d '{"access_token": {"description": "Mudda CLI", "permission": "write"}}' \
+  https://app.mudda.do/1234567/my/access_tokens
 ```
 
 Or with a Bearer token (must have `write` permission):
@@ -149,8 +149,8 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer put-your-access-token-here" \
-  -d '{"access_token": {"description": "Fizzy CLI", "permission": "write"}}' \
-  https://app.fizzy.do/1234567/my/access_tokens
+  -d '{"access_token": {"description": "Mudda CLI", "permission": "write"}}' \
+  https://app.mudda.do/1234567/my/access_tokens
 ```
 
 The `permission` field accepts `read` or `write`.
@@ -164,7 +164,7 @@ HTTP/1.1 201 Created
 ```json
 {
   "token": "4f9Q6d2wXr8Kp1Ls0Vz3BnTa",
-  "description": "Fizzy CLI",
+  "description": "Mudda CLI",
   "permission": "write"
 }
 ```
@@ -178,7 +178,7 @@ Returns all access tokens for the authenticated identity.
 ```bash
 curl -H "Authorization: Bearer put-your-access-token-here" \
   -H "Accept: application/json" \
-  https://app.fizzy.do/my/access_tokens
+  https://app.mudda.do/my/access_tokens
 ```
 
 __Response:__
@@ -187,7 +187,7 @@ __Response:__
 [
   {
     "id": "03f5v9zo9qlcwwpyc0ascnikz",
-    "description": "Fizzy CLI",
+    "description": "Mudda CLI",
     "permission": "write",
     "created_at": "2025-12-05T19:36:35.534Z"
   }
@@ -202,7 +202,7 @@ Note: The raw token value is only returned once at creation time and cannot be r
 curl -X DELETE \
   -H "Authorization: Bearer put-your-access-token-here" \
   -H "Accept: application/json" \
-  https://app.fizzy.do/my/access_tokens/:id
+  https://app.mudda.do/my/access_tokens/:id
 ```
 
 __Response:__

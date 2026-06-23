@@ -80,7 +80,20 @@ class Account::DataTransfer::RecordSet
         end
       end
 
+      ensure_required_columns_present!(batch_data)
       model.insert_all!(batch_data)
+    end
+
+    def ensure_required_columns_present!(batch_data)
+      batch_data.each do |record_data|
+        if missing = required_columns.find { |name| record_data[name].nil? }
+          raise IntegrityError, "#{model} record #{record_data["id"]} has null #{missing}; the export was produced by an incompatible Mudda version"
+        end
+      end
+    end
+
+    def required_columns
+      @required_columns ||= model.columns.reject { |column| column.null || !column.default.nil? }.map(&:name)
     end
 
     def check_record(file_path)

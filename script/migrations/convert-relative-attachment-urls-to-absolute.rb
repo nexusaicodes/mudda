@@ -104,7 +104,7 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: bin/rails runner #{__FILE__} [options]"
 
-  opts.on("--host HOST", "Host to prepend (e.g., https://app.fizzy.do)") do |host|
+  opts.on("--host HOST", "Host to prepend (e.g., https://app.mudda.do)") do |host|
     options[:host] = host
   end
 
@@ -120,7 +120,7 @@ end.parse!
 
 if options[:host].nil? || options[:since].nil?
   puts "Error: --host and --since are required"
-  puts "Example: bin/rails runner #{__FILE__} --host https://app.fizzy.do --since 2026-01-14T10:00:00Z"
+  puts "Example: bin/rails runner #{__FILE__} --host https://app.mudda.do --since 2026-01-14T10:00:00Z"
   exit 1
 end
 

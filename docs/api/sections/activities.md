@@ -34,7 +34,7 @@ __Supported actions:__
 | `card_unassigned` | `Card` | `{ "assignee_ids": [USER_ID, ...] }` |
 | `comment_created` | `Comment` | `{}` |
 
-`particulars` is always an object. It contains action-specific metadata in a normalized format intended for API clients. It does not necessarily mirror the internal event JSON stored by Fizzy. Unknown keys may appear in the future and should be ignored. For `card_assigned` and `card_unassigned`, `assignee_ids` is currently a single-element array in practice.
+`particulars` is always an object. It contains action-specific metadata in a normalized format intended for API clients. It does not necessarily mirror the internal event JSON stored by Mudda. Unknown keys may appear in the future and should be ignored. For `card_assigned` and `card_unassigned`, `assignee_ids` is currently a single-element array in practice.
 
 __`particulars` examples:__
 
@@ -65,7 +65,7 @@ __Response:__
     "created_at": "2026-03-25T15:11:04.000Z",
     "description": "David Heinemeier Hansson moved \"Fix mobile login\" to \"Done\"",
     "particulars": {},
-    "url": "http://app.fizzy.localhost:3006/897362094/cards/42",
+    "url": "http://app.mudda.localhost:3006/897362094/cards/42",
     "eventable_type": "Card",
     "eventable": {
       "id": "03f6card042",
@@ -82,7 +82,7 @@ __Response:__
       "golden": false,
       "last_active_at": "2026-03-25T15:11:04.000Z",
       "created_at": "2026-03-25T09:00:00.000Z",
-      "url": "http://app.fizzy.localhost:3006/897362094/cards/42"
+      "url": "http://app.mudda.localhost:3006/897362094/cards/42"
     },
     "board": {
       "id": "03f6abc123",
@@ -90,7 +90,7 @@ __Response:__
       "all_access": true,
       "created_at": "2026-03-01T10:00:00.000Z",
       "auto_postpone_period_in_days": 14,
-      "url": "http://app.fizzy.localhost:3006/897362094/boards/03f6abc123"
+      "url": "http://app.mudda.localhost:3006/897362094/boards/03f6abc123"
     },
     "creator": {
       "id": "03f5user123",
@@ -99,8 +99,8 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2026-03-01T09:00:00.000Z",
-      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5user123",
-      "avatar_url": "http://app.fizzy.localhost:3006/897362094/users/03f5user123/avatar"
+      "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
+      "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
     }
   },
   {
@@ -109,7 +109,7 @@ __Response:__
     "created_at": "2026-03-25T14:17:22.000Z",
     "description": "David Heinemeier Hansson commented on \"Fix mobile login\"",
     "particulars": {},
-    "url": "http://app.fizzy.localhost:3006/897362094/cards/42#comment_03facomment9",
+    "url": "http://app.mudda.localhost:3006/897362094/cards/42#comment_03facomment9",
     "eventable_type": "Comment",
     "eventable": {
       "id": "03facomment9",
@@ -126,15 +126,15 @@ __Response:__
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2026-03-01T09:00:00.000Z",
-        "url": "http://app.fizzy.localhost:3006/897362094/users/03f5user123",
-        "avatar_url": "http://app.fizzy.localhost:3006/897362094/users/03f5user123/avatar"
+        "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
+        "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
       },
       "card": {
         "id": "03f6card042",
-        "url": "http://app.fizzy.localhost:3006/897362094/cards/42"
+        "url": "http://app.mudda.localhost:3006/897362094/cards/42"
       },
-      "reactions_url": "http://app.fizzy.localhost:3006/897362094/cards/42/comments/03facomment9/reactions",
-      "url": "http://app.fizzy.localhost:3006/897362094/cards/42/comments/03facomment9"
+      "reactions_url": "http://app.mudda.localhost:3006/897362094/cards/42/comments/03facomment9/reactions",
+      "url": "http://app.mudda.localhost:3006/897362094/cards/42/comments/03facomment9"
     },
     "board": {
       "id": "03f6abc123",
@@ -142,7 +142,7 @@ __Response:__
       "all_access": true,
       "created_at": "2026-03-01T10:00:00.000Z",
       "auto_postpone_period_in_days": 14,
-      "url": "http://app.fizzy.localhost:3006/897362094/boards/03f6abc123"
+      "url": "http://app.mudda.localhost:3006/897362094/boards/03f6abc123"
     },
     "creator": {
       "id": "03f5user123",
@@ -151,11 +151,11 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2026-03-01T09:00:00.000Z",
-      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5user123",
-      "avatar_url": "http://app.fizzy.localhost:3006/897362094/users/03f5user123/avatar"
+      "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
+      "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
     }
   }
 ]
 ```
 
-All `url` fields are opaque absolute URLs for the current Fizzy instance. Clients should not construct them.
+All `url` fields are opaque absolute URLs for the current Mudda instance. Clients should not construct them.

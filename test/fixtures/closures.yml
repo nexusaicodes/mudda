@@ -1,5 +1,0 @@
-shipping:
-  id: <%= ActiveRecord::FixtureSet.identify("shipping_closure", :uuid) %>
-  account: 37s_uuid
-  card: shipping_uuid
-  user: kevin_uuid

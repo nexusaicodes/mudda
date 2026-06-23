@@ -11,7 +11,7 @@ module ApplicationCable
     test "connects with valid session and account info" do
       cookies.signed[:session_token] = @session.signed_id
 
-      connect "/cable", env: { "fizzy.external_account_id" => @account.external_account_id }
+      connect "/cable", env: { "mudda.external_account_id" => @account.external_account_id }
 
       assert_equal users(:mike), connection.current_user
       assert_equal @account, Current.account
@@ -21,7 +21,7 @@ module ApplicationCable
       cookies.signed[:session_token] = "invalid-session-id"
 
       assert_reject_connection do
-        connect "/cable", env: { "fizzy.external_account_id" => @account.external_account_id }
+        connect "/cable", env: { "mudda.external_account_id" => @account.external_account_id }
       end
     end
 
@@ -29,7 +29,7 @@ module ApplicationCable
       cookies.signed[:session_token] = @session.signed_id
 
       assert_reject_connection do
-        connect "/cable", env: { "fizzy.external_account_id" => -1 }
+        connect "/cable", env: { "mudda.external_account_id" => -1 }
       end
     end
   end

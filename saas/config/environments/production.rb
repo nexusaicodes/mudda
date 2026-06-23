@@ -4,11 +4,11 @@ Rails.application.configure do
   # Enable structured logging
   config.structured_logging.logger = ActiveSupport::Logger.new(STDOUT)
 
-  config.action_controller.default_url_options = { host: "app.fizzy.do", protocol: "https" }
-  config.action_mailer.default_url_options     = { host: "app.fizzy.do", protocol: "https" }
-  config.action_mailer.smtp_settings = { domain: "app.fizzy.do", address: "smtp-outbound", port: 25, enable_starttls_auto: false }
+  config.action_controller.default_url_options = { host: "app.mudda.do", protocol: "https" }
+  config.action_mailer.default_url_options     = { host: "app.mudda.do", protocol: "https" }
+  config.action_mailer.smtp_settings = { domain: "app.mudda.do", address: "smtp-outbound", port: 25, enable_starttls_auto: false }
 
-  # SaaS version of Fizzy is multi-tenanted
+  # SaaS version of Mudda is multi-tenanted
   config.x.multi_tenant.enabled = true
 
   # Content Security Policy

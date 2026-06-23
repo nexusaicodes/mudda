@@ -24,16 +24,5 @@
         drop->drag-and-drop#drop
         dragend->drag-and-drop#dragEnd
         click@document->navigable-list#deselectWhenClickingOutside" } do %>
-  <div class="card-columns__left">
-    <%= render "boards/show/not_now", board: board %>
-  </div>
-
-  <%= render "boards/show/stream", board: board, page: page %>
-
-  <div class="card-columns__right">
-    <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, column.leftmost?, column.rightmost? ] } %>
-    <%= render "boards/show/closed", board: board %>
-
-    <%= render "boards/show/menu/columns", board: board %>
-  </div>
+  <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, column.leftmost?, column.rightmost? ] } %>
 <% end %>

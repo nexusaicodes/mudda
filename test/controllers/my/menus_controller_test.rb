@@ -37,28 +37,6 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "etag invalidates when tags change" do
-    get my_menu_path
-    assert_response :success
-    etag = response.headers["ETag"]
-
-    @account.tags.create!(title: "new-tag")
-
-    get my_menu_path, headers: { "If-None-Match" => etag }
-    assert_response :success
-  end
-
-  test "etag invalidates when users change" do
-    get my_menu_path
-    assert_response :success
-    etag = response.headers["ETag"]
-
-    @user.touch
-
-    get my_menu_path, headers: { "If-None-Match" => etag }
-    assert_response :success
-  end
-
   test "etag invalidates when account changes" do
     get my_menu_path
     assert_response :success

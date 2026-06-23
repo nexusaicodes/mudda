@@ -1,11 +1,11 @@
 require_relative "boot"
 require "rails/all"
-require_relative "../lib/fizzy"
+require_relative "../lib/mudda"
 require_relative "../lib/action_pack/railtie"
 
 Bundler.require(*Rails.groups)
 
-module Fizzy
+module Mudda
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1

@@ -8,9 +8,9 @@ class AccountExistsError < StandardError; end
 
 class Import
   FIX_LINK_HOSTS = {
-    "fizzy.37signals.com" => "app.fizzy.do",
-    "box-car.com" => "app.fizzy.do",
-    "app.box-car.com" => "app.fizzy.do"
+    "mudda.37signals.com" => "app.mudda.do",
+    "box-car.com" => "app.mudda.do",
+    "app.box-car.com" => "app.mudda.do"
   }.freeze
 
   attr_reader :db_path, :untenanted_db_path, :skip_already_imported

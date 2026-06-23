@@ -3,7 +3,7 @@ module My::MenuHelper
     text_field_tag :search, nil,
       type: "search",
       role: "combobox",
-      placeholder: "Type to jump to a board, person, place, or tag…",
+      placeholder: "Type to jump to a board or place…",
       class: "input input--transparent txt-small",
       autofocus: true,
       autocorrect: "off",
@@ -21,20 +21,6 @@ module My::MenuHelper
   def my_menu_board_item(board)
     my_menu_item("board", board) do
       link_to(tag.span(board.name, class: "overflow-ellipsis"), board, class: "popup__btn btn")
-    end
-  end
-
-  def my_menu_tag_item(the_tag)
-    my_menu_item("tag", tag) do
-      link_to(tag.span(class: "overflow-ellipsis") do
-        tag.span("##{the_tag.title}", class: "visually-hidden") + the_tag.title
-      end, cards_path(tag_ids: [ the_tag ]), class: "popup__btn btn", title: "##{the_tag.title}")
-    end
-  end
-
-  def my_menu_user_item(user)
-    my_menu_item("person", user) do
-      link_to(tag.span(user.name, class: "overflow-ellipsis"), user, class: "popup__btn btn")
     end
   end
 

@@ -51,7 +51,7 @@ class Card::EventableTest < ActiveSupport::TestCase
   test "tracking events update the last activity time" do
     travel_to Time.current
 
-    cards(:logo).close
+    cards(:logo).triage_into(columns(:writebook_done))
     assert_equal Time.current, cards(:logo).last_active_at
   end
 end

@@ -10,8 +10,6 @@
             <span class="overflow-ellipsis"><%= card.board.name %></span>
           </span>
       </div>
-
-      <%= render "cards/display/preview/tags", card: card %>
     </header>
 
     <div class="card__body justify-space-between">
@@ -34,10 +32,5 @@
 
   <%= link_to published_card_path(card), class: "card__link", title: card_title_tag(card), data: { turbo_frame: "_top" } do %>
     <span class="for-screen-reader"><%= card.title %></span>
-  <% end %>
-
-  <% if card.entropic? %>
-    <%= render "cards/display/preview/bubble", card: card %>
-    <span class="card__board-name"></span>
   <% end %>
 <% end %>

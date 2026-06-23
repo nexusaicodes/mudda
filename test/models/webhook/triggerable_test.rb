@@ -41,7 +41,7 @@ class Webhook::TriggerableTest < ActiveSupport::TestCase
     other_webhook = @board.webhooks.create!(
       name: "Other Webhook",
       url: "https://example.com/other",
-      subscribed_actions: [ "card_closed" ]
+      subscribed_actions: [ "card_triaged" ]
     )
 
     matching_webhooks = Webhook.triggered_by(@event)

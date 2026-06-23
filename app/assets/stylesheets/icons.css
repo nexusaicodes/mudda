@@ -69,8 +69,8 @@
   .icon--gear { --svg: url("gear.svg "); }
   .icon--grid { --svg: url("grid.svg "); }
   .icon--filter { --svg: url("filter.svg "); }
-  .icon--fizzy {
-    --svg: url("fizzy.svg");
+  .icon--mudda {
+    --svg: url("mudda.svg");
     top: -0.1em;
     margin-right: 0.1375em;
   }
@@ -123,8 +123,6 @@
   .icon--sliders { --svg: url("sliders.svg "); }
   .icon--sun { --svg: url("sun.svg "); }
   .icon--switch { --svg: url("switch.svg "); }
-  .icon--tag { --svg: url("tag.svg "); }
-  .icon--tag-outline { --svg: url("tag-outline.svg "); }
   .icon--thumb-up { --svg: url("thumb-up.svg "); }
   .icon--trash { --svg: url("trash.svg "); }
   .icon--unpinned { --svg: url("unpinned.svg"); }

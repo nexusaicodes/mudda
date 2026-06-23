@@ -1,6 +1,6 @@
 # Fix comment events that are on the wrong board after a card move.
 #
-# See https://github.com/basecamp/fizzy/pull/2486
+# See https://github.com/basecamp/mudda/pull/2486
 #
 # Usage:
 #   bin/rails runner script/migrations/20260204-fix-misplaced-comment-events.rb           # dry run

@@ -25,65 +25,54 @@ class Account::Seeder
       # Playground Board
       # ---------------
       playground = account.boards.create! name: "Playground", creator: creator, all_access: true
-      playground.update! auto_postpone_period: 365.days
 
       # Cards
-      playground.cards.create! creator: creator, title: "Finally, watch this Fizzy orientation video", status: "published", description: <<~HTML
-        <p>There’s a whole lot more you can do in Fizzy. In the video below, 37signals founder and CEO, Jason Fried, will walk you through the basics in just 17 minutes.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/fizzyorientation-4k.mp4" caption="Fizzy orientation" content-type="video/mp4" filename="fizzyorientation-4k.mp4"></action-text-attachment>
+      playground.cards.create! creator: creator, title: "Finally, watch this Mudda orientation video", status: "published", description: <<~HTML
+        <p>There’s a whole lot more you can do in Mudda. The short video below walks you through the basics in just a few minutes.</p>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/videos/muddaorientation-4k.mp4" caption="Mudda orientation" content-type="video/mp4" filename="muddaorientation-4k.mp4"></action-text-attachment>
       HTML
 
       # TODO: Replace the video here with a screencap of creating a passkey
       playground.cards.create! creator: creator, title: "Then, set up a Passkey", status: "published", description: <<~HTML
-        <p>Passkeys let you sign in securely without using passwords or email codes. To set one up, open the Fizzy menu and go to “<b><strong>My Profile > Manage Passkeys</b></strong>”. Using a passkey is optional, but recommended.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/videos/creating_a_passkey.mp4" alt="Demo of adding a passkey" caption="Create a passkey to sign in without passwords or email codes" content-type="video/mp4" filename="creating_a_passkey.mp4"></action-text-attachment>
+        <p>Passkeys let you sign in securely without using passwords or email codes. To set one up, open the Mudda menu and go to “<b><strong>My Profile > Manage Passkeys</b></strong>”. Using a passkey is optional, but recommended.</p>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/videos/creating_a_passkey.mp4" alt="Demo of adding a passkey" caption="Create a passkey to sign in without passwords or email codes" content-type="video/mp4" filename="creating_a_passkey.mp4"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Now, grab the invite link to invite someone else", status: "published", description: <<~HTML
-        <p>Open the Fizzy menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make a login for themselves in your account.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/invite-link.gif" alt="Demo of copying invite link" caption="Get a link to invite co-workers" content-type="image/*" filename="invite-link.gif" presentation="gallery"></action-text-attachment>
+        <p>Open the Mudda menu, select “<b><strong>+ Add people</b></strong>”, then copy the invite link. You can give this link to someone else so they can make a login for themselves in your account.</p>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/invite-link.gif" alt="Demo of copying invite link" caption="Get a link to invite co-workers" content-type="image/*" filename="invite-link.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Then, head back home to check out activity", status: "published", description: <<~HTML
-        <p>Hit “1” or pull down the Fizzy menu and select “Home”.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/back-to-home.gif" alt="Demo of visiting Home" caption="Go back to Home for Latest Activity" content-type="image/*" filename="back-to-home.gif" presentation="gallery"></action-text-attachment>
+        <p>Hit “1” or pull down the Mudda menu and select “Home”.</p>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/back-to-home.gif" alt="Demo of visiting Home" caption="Go back to Home for Latest Activity" content-type="image/*" filename="back-to-home.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Now, check out all cards assigned to you", status: "published", description: <<~HTML
-        <p>Pull down the Fizzy menu at the top of the screen, and select “<b><strong>Assigned to me</b></strong>” or just hit “2” on your keyboard any time.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/all-assigned.gif" alt="Demo of navigating to 'Assigned to Me'" caption="See all cards assigned to me" content-type="image/*" filename="all-assigned.gif" presentation="gallery"></action-text-attachment>
+        <p>Pull down the Mudda menu at the top of the screen, and select “<b><strong>Assigned to me</b></strong>” or just hit “2” on your keyboard any time.</p>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/all-assigned.gif" alt="Demo of navigating to 'Assigned to Me'" caption="See all cards assigned to me" content-type="image/*" filename="all-assigned.gif" presentation="gallery"></action-text-attachment>
       HTML
 
-      playground.cards.create! creator: creator, title: "Then, open the Fizzy menu", status: "published", description: <<~HTML
-        <p>The Fizzy menu is how you get around the app. Click “<b><strong>Fizzy</b></strong>” at the top of the screen or hit the “J” key on your keyboard to pop it open.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/open-menu.gif" alt="Demo of opening the main menu" caption="Open the Fizzy menu" content-type="image/*" filename="open-menu.gif" presentation="gallery"></action-text-attachment>
+      playground.cards.create! creator: creator, title: "Then, open the Mudda menu", status: "published", description: <<~HTML
+        <p>The Mudda menu is how you get around the app. Click “<b><strong>Mudda</b></strong>” at the top of the screen or hit the “J” key on your keyboard to pop it open.</p>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/open-menu.gif" alt="Demo of opening the main menu" caption="Open the Mudda menu" content-type="image/*" filename="open-menu.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "Next, assign this card to yourself", status: "published", description: <<~HTML
         <p>Click the little head with the + next to it, then pick yourself.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/assign-to-self.gif" alt="Demo of assigning a card" caption="Assign this to yourself" content-type="image/*" filename="assign-to-self.gif" presentation="gallery"></action-text-attachment>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/assign-to-self.gif" alt="Demo of assigning a card" caption="Assign this to yourself" content-type="image/*" filename="assign-to-self.gif" presentation="gallery"></action-text-attachment>
       HTML
 
-      playground.cards.create! creator: creator, title: "Now, tag this card “Design” then move it to YES", status: "published", description: <<~HTML
-        <p>Click the little Tag icon, type “design”, then “<b><strong>Create tag</b></strong>”. Then, move the card to the new “YES” column you created in the previous step.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/tag-design.gif" alt="Demo of tagging a card" caption="Tag this #design" content-type="image/*" filename="tag-design.gif" presentation="gallery"></action-text-attachment>
-      HTML
-
-      playground.cards.create! creator: creator, title: "Next, make two more columns", status: "published", description: <<~HTML
-        <ol>
-          <li>Make one called "Yes"</li>
-          <li>Make another called "Working on"</li>
-        </ol>
-        <p>Go back to the Board view, click the little “+” to the right of the DONE column, name the column, pick a color, then do it again.</p>
+      playground.cards.create! creator: creator, title: "Next, move this card to DOING", status: "published", description: <<~HTML
+        <p>Every board has the same fixed columns: Triage, Backlog, Todo, Doing, and Done.</p>
         <p><br></p>
-        <p>After that, drag this card to “DONE” or select “DONE” in the sidebar.</p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/make-columns.gif" alt="Demo of adding columns" caption="Make two more columns" content-type="image/*" filename="make-columns.gif" presentation="gallery"></action-text-attachment>
+        <p>Drag this card into the “DOING” column, or pick “DOING” in the sidebar.</p>
       HTML
 
-      playground.cards.create! creator: creator, title: "Second, move this card to NOT NOW", status: "published", description: <<~HTML
-        <p>You can either select “NOT NOW” over in the sidebar, or you can go back out to the board view and drag this card into the “NOT NOW” column on the left side.</p>
+      playground.cards.create! creator: creator, title: "Second, move this card to BACKLOG", status: "published", description: <<~HTML
+        <p>You can either select “BACKLOG” over in the sidebar, or you can go back out to the board view and drag this card into the “BACKLOG” column.</p>
         <p><br></p>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/not-now.gif" alt="Demo of moving a card to Not Now" caption="Move to Not Now" content-type="image/*" filename="not-now.gif" presentation="gallery"></action-text-attachment>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/not-now.gif" alt="Demo of moving a card to Backlog" caption="Move to Backlog" content-type="image/*" filename="not-now.gif" presentation="gallery"></action-text-attachment>
       HTML
 
       playground.cards.create! creator: creator, title: "First, rename this card", status: "published", description: <<~HTML
@@ -92,7 +81,7 @@ class Account::Seeder
           <li>Then, hit "Mark as Done" at the bottom of the card.</li>
           <li>Finally, hit “<b><strong>Back to Playground</strong></b>” in the top left of the screen to go back to the board.</li>
         </ol>
-        <action-text-attachment url="https://videos.37signals.com/fizzy/assets/images/rename.gif" alt="Demo of renaming a card" caption="Rename this card" content-type="image/*" filename="rename.gif" presentation="gallery"></action-text-attachment>
+        <action-text-attachment url="https://videos.37signals.com/mudda/assets/images/rename.gif" alt="Demo of renaming a card" caption="Rename this card" content-type="image/*" filename="rename.gif" presentation="gallery"></action-text-attachment>
       HTML
     end
 

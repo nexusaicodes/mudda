@@ -1,10 +1,13 @@
-# How to contribute to Fizzy
+# How to contribute to Mudda
 
-Fizzy uses GitHub
-[discussions](https://github.com/basecamp/fizzy/discussions) to track
+Mudda uses GitHub
+[discussions](https://github.com/nexus-ai/mudda/discussions) to track
 feature requests and questions, rather than [the issue
-tracker](https://github.com/basecamp/fizzy/issues). If you're considering
+tracker](https://github.com/nexus-ai/mudda/issues). If you're considering
 opening an issue or pull request, please open a discussion instead.
+
+Mudda is a fork of [Fizzy](https://github.com/basecamp/fizzy) by 37signals, maintained by
+Nexus AI. Please direct contributions here rather than upstream.
 
 Whenever a discussion leads to an actionable and well-understood task, we'll
 move it to the issue tracker where it can be worked on.

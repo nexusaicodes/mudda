@@ -74,7 +74,7 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
   end
 
   test "transform_body_for_import handles non-existent record GIDs gracefully" do
-    nonexistent_gid = "gid://fizzy/User/00000000000000000000000000"
+    nonexistent_gid = "gid://mudda/User/00000000000000000000000000"
     html = %(<action-text-attachment gid="#{nonexistent_gid}"></action-text-attachment>)
 
     record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(accounts(:"37s"))
@@ -100,12 +100,12 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
   test "replace_account_slugs leaves absolute URLs alone" do
     target_account = accounts(:"37s")
 
-    html = %(<p>See <a href="https://fizzy.app/9999999/boards/7">board</a></p>)
+    html = %(<p>See <a href="https://mudda.app/9999999/boards/7">board</a></p>)
 
     record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(target_account)
     result = record_set.send(:transform_body_for_import, html)
 
-    assert_includes result, "https://fizzy.app/9999999/boards/7"
+    assert_includes result, "https://mudda.app/9999999/boards/7"
   end
 
   test "replace_account_slugs leaves plain text alone" do
@@ -120,31 +120,31 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
   end
 
   test "relativize_urls strips instance host from absolute URLs" do
-    with_default_url_host("fizzy.example.com") do
+    with_default_url_host("mudda.example.com") do
       record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(accounts(:"37s"))
 
-      html = %(<p>See <a href="https://fizzy.example.com/123/cards/42">card</a></p>)
+      html = %(<p>See <a href="https://mudda.example.com/123/cards/42">card</a></p>)
       result = record_set.send(:relativize_urls, html)
 
       assert_includes result, %(/123/cards/42)
-      assert_not_includes result, "fizzy.example.com"
+      assert_not_includes result, "mudda.example.com"
     end
   end
 
   test "relativize_urls preserves query and fragment" do
-    with_default_url_host("fizzy.example.com") do
+    with_default_url_host("mudda.example.com") do
       record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(accounts(:"37s"))
 
-      html = %(<p><a href="https://fizzy.example.com/123/cards/42?tab=comments#comment_1">link</a></p>)
+      html = %(<p><a href="https://mudda.example.com/123/cards/42?tab=comments#comment_1">link</a></p>)
       result = record_set.send(:relativize_urls, html)
 
       assert_includes result, "/123/cards/42?tab=comments#comment_1"
-      assert_not_includes result, "fizzy.example.com"
+      assert_not_includes result, "mudda.example.com"
     end
   end
 
   test "relativize_urls leaves external URLs alone" do
-    with_default_url_host("fizzy.example.com") do
+    with_default_url_host("mudda.example.com") do
       record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(accounts(:"37s"))
 
       html = %(<p><a href="https://github.com/some/repo">link</a></p>)
@@ -158,10 +158,10 @@ class Account::DataTransfer::ActionText::RichTextRecordSetTest < ActiveSupport::
     with_default_url_host(nil) do
       record_set = Account::DataTransfer::ActionText::RichTextRecordSet.new(accounts(:"37s"))
 
-      html = %(<p><a href="https://fizzy.example.com/123/cards/42">link</a></p>)
+      html = %(<p><a href="https://mudda.example.com/123/cards/42">link</a></p>)
       result = record_set.send(:relativize_urls, html)
 
-      assert_includes result, "https://fizzy.example.com/123/cards/42"
+      assert_includes result, "https://mudda.example.com/123/cards/42"
     end
   end
 

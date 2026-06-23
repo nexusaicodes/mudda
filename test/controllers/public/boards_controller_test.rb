@@ -21,14 +21,15 @@ class Public::BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "show excludes draft cards from closed count" do
-    draft_card = cards(:buy_domain)
-    draft_card.update!(status: :drafted)
-    Current.set(user: users(:david)) { draft_card.close }
+  test "show excludes draft cards from column counts" do
+    done = columns(:writebook_done)
+    cards(:layout).update!(column: done, status: :drafted)
 
     get published_board_path(boards(:writebook))
     assert_response :success
-    assert_select ".cards--closed .cards__expander-count", "1"
+
+    # shipping (published) is in Done; the draft is excluded from the count.
+    assert_select "#column_#{done.id} .cards__expander-count", "1"
   end
 
   test "show works without authentication" do

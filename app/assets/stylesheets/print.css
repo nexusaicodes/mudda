@@ -165,7 +165,6 @@
   .card__meta-avatars--assignees > div > div:last-child,
   .steps > .step:last-child,
   .card__board-name .icon,
-  div:has(> .card__tag-picker-button),
   .delete-card,
   .header--card .header__title {
     display: none;

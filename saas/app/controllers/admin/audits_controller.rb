@@ -1,6 +1,6 @@
 class Admin::AuditsController < ::AdminController
   private
-    # Extend Fizzy's authentication to support auditor bearer tokens.
+    # Extend Mudda's authentication to support auditor bearer tokens.
     def require_authentication
       authenticate_by_audit_bearer_token || super
     end

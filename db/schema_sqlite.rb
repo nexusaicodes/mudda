@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
+ActiveRecord::Schema[8.2].define(version: 2026_06_22_010000) do
   create_table "accesses", id: :uuid, force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
@@ -186,15 +186,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["filter_id"], name: "index_boards_filters_on_filter_id"
   end
 
-  create_table "card_activity_spikes", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_card_activity_spikes_on_account_id"
-    t.index ["card_id"], name: "index_card_activity_spikes_on_card_id", unique: true
-  end
-
   create_table "card_goldnesses", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "card_id", null: false
@@ -204,21 +195,10 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["card_id"], name: "index_card_goldnesses_on_card_id", unique: true
   end
 
-  create_table "card_not_nows", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id"
-    t.index ["account_id"], name: "index_card_not_nows_on_account_id"
-    t.index ["card_id"], name: "index_card_not_nows_on_card_id", unique: true
-    t.index ["user_id"], name: "index_card_not_nows_on_user_id"
-  end
-
   create_table "cards", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "board_id", null: false
-    t.uuid "column_id"
+    t.uuid "column_id", null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id", null: false
     t.date "due_on"
@@ -231,25 +211,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.index ["account_id", "number"], name: "index_cards_on_account_id_and_number", unique: true
     t.index ["board_id"], name: "index_cards_on_board_id"
     t.index ["column_id"], name: "index_cards_on_column_id"
-  end
-
-  create_table "closers_filters", id: false, force: :cascade do |t|
-    t.uuid "closer_id", null: false
-    t.uuid "filter_id", null: false
-    t.index ["closer_id"], name: "index_closers_filters_on_closer_id"
-    t.index ["filter_id"], name: "index_closers_filters_on_filter_id"
-  end
-
-  create_table "closures", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id"
-    t.index ["account_id"], name: "index_closures_on_account_id"
-    t.index ["card_id", "created_at"], name: "index_closures_on_card_id_and_created_at"
-    t.index ["card_id"], name: "index_closures_on_card_id", unique: true
-    t.index ["user_id"], name: "index_closures_on_user_id"
   end
 
   create_table "columns", id: :uuid, force: :cascade do |t|
@@ -280,18 +241,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.uuid "filter_id", null: false
     t.index ["creator_id"], name: "index_creators_filters_on_creator_id"
     t.index ["filter_id"], name: "index_creators_filters_on_filter_id"
-  end
-
-  create_table "entropies", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.bigint "auto_postpone_period", default: 2592000, null: false
-    t.uuid "container_id", null: false
-    t.string "container_type", limit: 255, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_entropies_on_account_id"
-    t.index ["container_type", "container_id", "auto_postpone_period"], name: "idx_on_container_type_container_id_auto_postpone_pe_3d79b50517"
-    t.index ["container_type", "container_id"], name: "index_entropy_configurations_on_container", unique: true
   end
 
   create_table "events", id: :uuid, force: :cascade do |t|
@@ -333,13 +282,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_filters_on_account_id"
     t.index ["creator_id", "params_digest"], name: "index_filters_on_creator_id_and_params_digest", unique: true
-  end
-
-  create_table "filters_tags", id: false, force: :cascade do |t|
-    t.uuid "filter_id", null: false
-    t.uuid "tag_id", null: false
-    t.index ["filter_id"], name: "index_filters_tags_on_filter_id"
-    t.index ["tag_id"], name: "index_filters_tags_on_tag_id"
   end
 
   create_table "identities", id: :uuid, force: :cascade do |t|
@@ -530,25 +472,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_02_18_120000) do
     t.string "owner_type", limit: 255, null: false
     t.datetime "updated_at", null: false
     t.index ["owner_type", "owner_id"], name: "index_storage_totals_on_owner_type_and_owner_id", unique: true
-  end
-
-  create_table "taggings", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.uuid "tag_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_taggings_on_account_id"
-    t.index ["card_id", "tag_id"], name: "index_taggings_on_card_id_and_tag_id", unique: true
-    t.index ["tag_id"], name: "index_taggings_on_tag_id"
-  end
-
-  create_table "tags", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "created_at", null: false
-    t.string "title", limit: 255
-    t.datetime "updated_at", null: false
-    t.index ["account_id", "title"], name: "index_tags_on_account_id_and_title", unique: true
   end
 
   create_table "user_settings", id: :uuid, force: :cascade do |t|

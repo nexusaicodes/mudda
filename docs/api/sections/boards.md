@@ -12,11 +12,11 @@ __Response:__
 [
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-    "name": "Fizzy",
+    "name": "Mudda",
     "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
     "auto_postpone_period_in_days": 30,
-    "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+    "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
       "name": "David Heinemeier Hansson",
@@ -24,7 +24,7 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
     }
   }
 ]
@@ -39,11 +39,11 @@ __Response:__
 ```json
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-  "name": "Fizzy",
+  "name": "Mudda",
   "all_access": false,
   "created_at": "2025-12-05T19:36:35.534Z",
   "auto_postpone_period_in_days": 30,
-  "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+  "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
     "name": "David Heinemeier Hansson",
@@ -51,7 +51,7 @@ __Response:__
     "active": true,
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
   "public_description": "Follow along with public product updates.",
   "public_description_html": "<div class=\"trix-content\"><p>Follow along with public product updates.</p></div>",
@@ -59,7 +59,7 @@ __Response:__
     "03f5v9zjw7pz8717a4no1h8a7",
     "03f5v9zppzlksuj4mxba2nbzn"
   ],
-  "public_url": "http://app.fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
+  "public_url": "http://app.mudda.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
 }
 ```
 
@@ -135,7 +135,7 @@ Returns `200 OK` with the updated board in the same shape as `GET /:account_slug
   "all_access": false,
   "created_at": "2025-12-05T19:36:35.534Z",
   "auto_postpone_period_in_days": 30,
-  "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+  "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
     "name": "David Heinemeier Hansson",
@@ -143,7 +143,7 @@ Returns `200 OK` with the updated board in the same shape as `GET /:account_slug
     "active": true,
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
   "user_ids": [
     "03f5v9zppzlksuj4mxba2nbzn",
@@ -184,8 +184,8 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-      "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar",
+      "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+      "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar",
       "has_access": true,
       "involvement": "watching"
     },
@@ -196,8 +196,8 @@ __Response:__
       "active": true,
       "email_address": "kevin@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn",
-      "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn/avatar",
+      "url": "http://mudda.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn",
+      "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn/avatar",
       "has_access": false,
       "involvement": null
     }
@@ -229,11 +229,11 @@ HTTP/1.1 201 Created
 ```json
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-  "name": "Fizzy",
+  "name": "Mudda",
   "all_access": true,
   "created_at": "2025-12-05T19:36:35.534Z",
   "auto_postpone_period_in_days": 30,
-  "url": "http://app.fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+  "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
     "name": "David Heinemeier Hansson",
@@ -241,9 +241,9 @@ HTTP/1.1 201 Created
     "active": true,
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://app.fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
   },
-  "public_url": "http://app.fizzy.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
+  "public_url": "http://app.mudda.localhost:3006/897362094/public/boards/aB3dEfGhIjKlMnOp"
 }
 ```
 

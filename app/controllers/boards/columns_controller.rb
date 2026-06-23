@@ -1,9 +1,9 @@
 class Boards::ColumnsController < ApplicationController
-  wrap_parameters :column, include: %i[ name color ]
+  wrap_parameters :column, include: %i[ color ]
 
   include BoardScoped
 
-  before_action :set_column, only: %i[ show update destroy ]
+  before_action :set_column, only: %i[ show update ]
 
   def index
     @columns = @board.columns.sorted
@@ -11,19 +11,11 @@ class Boards::ColumnsController < ApplicationController
   end
 
   def show
-    set_page_and_extract_portion_from @column.cards.active.latest.with_golden_first.preloaded
+    set_page_and_extract_portion_from @column.cards.published.latest.with_golden_first.preloaded
     fresh_when etag: @page.records
   end
 
-  def create
-    @column = @board.columns.create!(column_params)
-
-    respond_to do |format|
-      format.turbo_stream
-      format.json { render :show, status: :created, location: board_column_path(@board, @column, format: :json) }
-    end
-  end
-
+  # Columns are fixed; only their color is editable.
   def update
     @column.update!(column_params)
 
@@ -33,21 +25,12 @@ class Boards::ColumnsController < ApplicationController
     end
   end
 
-  def destroy
-    @column.destroy
-
-    respond_to do |format|
-      format.html { redirect_back_or_to @board }
-      format.json { head :no_content }
-    end
-  end
-
   private
     def set_column
       @column = @board.columns.find(params[:id])
     end
 
     def column_params
-      params.expect(column: [ :name, :color ])
+      params.expect(column: [ :color ])
     end
 end

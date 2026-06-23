@@ -21,9 +21,9 @@ class Card::Eventable::SystemCommenterTest < ActiveSupport::TestCase
     end
   end
 
-  test "card_closed" do
-    assert_system_comment "Moved to “Done” by David" do
-      @card.close
+  test "card_triaged" do
+    assert_system_comment "David moved this to “Done”" do
+      @card.triage_into(columns(:writebook_done))
     end
   end
 

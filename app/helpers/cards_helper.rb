@@ -32,6 +32,14 @@ module CardsHelper
     card.drafted? ? "Drafted" : "Added"
   end
 
+  def card_due_label(card)
+    if card.due_on.year == Date.current.year
+      card.due_on.strftime("%b %-d")
+    else
+      card.due_on.strftime("%b %-d, %Y")
+    end
+  end
+
   def card_social_tags(card)
     tag.meta(property: "og:title", content: "#{card.title} | #{card.board.name}") +
     tag.meta(property: "og:description", content: format_excerpt(card&.description, length: 200)) +

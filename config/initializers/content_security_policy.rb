@@ -4,7 +4,7 @@
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 #
 # Directives are configurable via environment variables with fallback to config.x
-# settings. This allows fizzy-saas (or other deployments) to extend the base policy
+# settings. This allows mudda-saas (or other deployments) to extend the base policy
 # without duplicating it.
 #
 # ENV vars (space-separated sources):

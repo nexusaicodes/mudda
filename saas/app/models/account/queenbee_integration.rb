@@ -42,7 +42,7 @@ module Account::QueenbeeIntegration
   end
 
   def transferred_ownership!
-    raise NotImplementedError, "Fizzy does not support Queenbee-initiated ownership transfers"
+    raise NotImplementedError, "Mudda does not support Queenbee-initiated ownership transfers"
   end
 
   def plan

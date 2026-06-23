@@ -61,24 +61,12 @@ class Event::Description
         unassigned_sentence(creator, card_title)
       when "card_published"
         "#{creator} added #{card_title}"
-      when "card_closed"
-        %(#{creator} moved #{card_title} to "Done")
-      when "card_reopened"
-        "#{creator} reopened #{card_title}"
-      when "card_postponed"
-        %(#{creator} moved #{card_title} to "Not Now")
-      when "card_auto_postponed"
-        %(#{card_title} moved to "Not Now" due to inactivity)
-      when "card_resumed"
-        "#{creator} resumed #{card_title}"
       when "card_title_changed"
         renamed_sentence(creator, card_title)
       when "card_board_changed", "card_collection_changed"
         moved_sentence(creator, card_title)
       when "card_triaged"
         triaged_sentence(creator, card_title)
-      when "card_sent_back_to_triage"
-        %(#{creator} moved #{card_title} back to "Maybe?")
       end
     end
 

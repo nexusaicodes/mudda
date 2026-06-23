@@ -27,13 +27,13 @@ class AccountMailerTest < ActionMailer::TestCase
   test "cancellation includes support email" do
     email = AccountMailer.cancellation(@cancellation)
 
-    assert_match "support@fizzy.do", email.body.encoded
+    assert_match "support@mudda.do", email.body.encoded
   end
 
   test "cancellation has correct subject" do
     email = AccountMailer.cancellation(@cancellation)
 
-    assert_equal "Your Fizzy account was cancelled", email.subject
+    assert_equal "Your Mudda account was cancelled", email.subject
   end
 
   test "cancellation has both HTML and text parts" do

@@ -61,7 +61,7 @@ class AccountSlugExtractorTest < ActiveSupport::TestCase
       app = ->(env) do
         captured[:script_name] = env["SCRIPT_NAME"]
         captured[:path_info] = env["PATH_INFO"]
-        captured[:external_account_id] = env["fizzy.external_account_id"]
+        captured[:external_account_id] = env["mudda.external_account_id"]
         captured[:current_account] = Current.account
         [ 200, {}, [ "ok" ] ]
       end

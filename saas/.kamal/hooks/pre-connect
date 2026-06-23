@@ -54,7 +54,7 @@ fi
 # Verify SSH access
 echo "Deploying via Tailscale. Verifying SSH access…" >&2
 
-TEST_HOST="fizzy-app-101.df-iad-int.37signals.com"
+TEST_HOST="mudda-app-101.df-iad-int.37signals.com"
 
 SSH_OUTPUT=$(ssh -o ConnectTimeout=5 "app@$TEST_HOST" true 2>&1)
 SSH_EXIT=$?

@@ -43,30 +43,6 @@ class CardTest < ActiveSupport::TestCase
     assert_equal [ users(:kevin) ], assign_event.assignees
   end
 
-  test "tagged states" do
-    assert cards(:logo).tagged_with?(tags(:web))
-    assert_not cards(:logo).tagged_with?(tags(:mobile))
-  end
-
-  test "tag toggling" do
-    assert cards(:logo).tagged_with?(tags(:web))
-
-    assert_difference "cards(:logo).taggings.count", -1 do
-      cards(:logo).toggle_tag_with tags(:web).title
-    end
-    assert_not cards(:logo).tagged_with?(tags(:web))
-
-    assert_difference "cards(:logo).taggings.count", +1 do
-      cards(:logo).toggle_tag_with tags(:web).title
-    end
-    assert cards(:logo).tagged_with?(tags(:web))
-
-    assert_difference %w[ cards(:logo).taggings.count Tag.count ], +1 do
-      cards(:logo).toggle_tag_with "prioritized"
-    end
-    assert_equal "prioritized", cards(:logo).taggings.last.tag.title
-  end
-
   test "closed" do
     assert_equal [ cards(:shipping) ], Card.closed
   end
@@ -94,12 +70,8 @@ class CardTest < ActiveSupport::TestCase
     assert_empty Card.where(board: new_board)
   end
 
-  test "tagged with" do
-    assert_equal cards(:layout, :text), Card.tagged_with(tags(:mobile))
-  end
-
   test "for published cards, it should set the default title 'Untitiled' when not provided" do
-    card = boards(:writebook).cards.create!
+    card = boards(:writebook).cards.create! due_on: 1.week.from_now
     assert_nil card.title
 
     card.publish
@@ -107,7 +79,7 @@ class CardTest < ActiveSupport::TestCase
   end
 
   test "send back to triage when moved to a new board" do
-    cards(:logo).update! column: columns(:writebook_in_progress)
+    cards(:logo).update! column: columns(:writebook_doing)
 
     assert_changes -> { cards(:logo).reload.triaged? }, from: true, to: false do
       cards(:logo).update! board: boards(:private)

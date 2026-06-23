@@ -8,8 +8,6 @@
 } %>
 
 <% if card.open? %>
-  <% card_data[:card_not_now_url] = card_not_now_path(card) %>
-  <% card_data[:card_closure_url] = card_closure_path(card) %>
   <% card_data[:action] = "mouseenter->navigable-list#hoverSelect" %>
   <% card_data[:card_assign_to_self_url] = card_self_assignment_path(card) %>
 <% end %>
@@ -22,9 +20,9 @@
 
     <header class="card__header">
       <%= render "cards/display/preview/board", card: card %>
-      <%= render "cards/display/preview/tags", card: card %>
       <%= render "cards/display/preview/steps", card: card %>
       <%= icon_tag "attachment", class: "card__attachments-indicator translucent" if card.has_attachments? %>
+      <%= render "cards/display/due", card: card %>
 
       <% if card.triaged? %>
         <span class="btn justify-start card__column-name card__column-name--current txt-uppercase min-width max-width">
@@ -53,8 +51,4 @@
     </div>
     <%= render "cards/display/common/background", card: card %>
   </footer>
-
-  <% if card.entropic? %>
-    <%= render "cards/display/preview/bubble", card: card %>
-  <% end %>
 <% end %>

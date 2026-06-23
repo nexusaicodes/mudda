@@ -15,8 +15,7 @@
     <%= render "account/settings/users", users: @users %>
   </div>
 
-  <div class="settings__panel settings__panel--entropy panel shadow center">
-    <%= render "account/settings/entropy", account: @account %>
+  <div class="settings__panel panel shadow center">
     <%= render "account/settings/export" if Current.user.admin? || Current.user.owner? %>
     <%= render "account/settings/cancellation" %>
   </div>

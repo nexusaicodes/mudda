@@ -4,7 +4,7 @@ class Webhook::Delivery < ApplicationRecord
   class ResponseTooLarge < StandardError; end
 
   STALE_TRESHOLD = 7.days
-  USER_AGENT = "fizzy/1.0.0 Webhook"
+  USER_AGENT = "mudda/1.0.0 Webhook"
   ENDPOINT_TIMEOUT = 7.seconds
   MAX_RESPONSE_SIZE = 100.kilobytes
 
@@ -176,7 +176,7 @@ class Webhook::Delivery < ApplicationRecord
       text = event.description_for(nil).to_plain_text
       url = polymorphic_url(event.eventable, base_url_options.merge(script_name: account.slug))
 
-      { text: "#{text} <#{url}|Open in Fizzy>" }.to_json
+      { text: "#{text} <#{url}|Open in Mudda>" }.to_json
     end
 
     def base_url_options

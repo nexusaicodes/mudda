@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # Convert absolute attachment URLs in rich text content to relative paths.
-# This fixes URLs that were stored with full hostnames (e.g., https://app.fizzy.do/...)
+# This fixes URLs that were stored with full hostnames (e.g., https://app.mudda.do/...)
 # making them portable across beta environments and host changes.
 #
 # MUST BE RUN AFTER `decrypt!` when using ActiveRecord Encryption

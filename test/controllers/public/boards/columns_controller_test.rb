@@ -6,7 +6,7 @@ class Public::Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show" do
-    column = columns(:writebook_in_progress)
+    column = columns(:writebook_doing)
     get public_board_column_path(boards(:writebook).publication.key, column)
     assert_response :success
   end

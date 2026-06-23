@@ -53,28 +53,6 @@ export default class extends Controller {
     return null
   }
 
-  async #postponeCard(event) {
-    const selection = this.#selectedCard
-    if (!selection) return
-
-    const url = selection.card.dataset.cardNotNowUrl
-    if (url) {
-      event.preventDefault()
-      await this.#performCardAction(url, selection)
-    }
-  }
-
-  async #closeCard(event) {
-    const selection = this.#selectedCard
-    if (!selection) return
-
-    const url = selection.card.dataset.cardClosureUrl
-    if (url) {
-      event.preventDefault()
-      await this.#performCardAction(url, selection)
-    }
-  }
-
   async #assignToMe(event) {
     const selection = this.#selectedCard
     if (!selection) return
@@ -86,49 +64,11 @@ export default class extends Controller {
     }
   }
 
-  async #performCardAction(url, selection) {
-    const { controller } = selection
-    const visibleItems = controller.visibleItems
-    const currentIndex = visibleItems.indexOf(selection.card)
-    const wasLastItem = currentIndex === visibleItems.length - 1
-
-    // Set up promise to wait for morph completion
-    this.morphCompletePromise = new Promise(resolve => {
-      this.morphCompleteResolver = resolve
-    })
-
-    await post(url, { responseKind: "turbo-stream" })
-
-    // Wait for Turbo Stream morph to complete
-    await Promise.race([
-      this.morphCompletePromise,
-      new Promise(resolve => setTimeout(resolve, 200)) // Fallback timeout
-    ])
-
-    // Select the next card (or previous if it was the last)
-    const newVisibleItems = controller.visibleItems
-    if (newVisibleItems.length === 0) {
-      controller.clearSelection()
-      return
-    }
-
-    if (wasLastItem) {
-      controller.selectLast()
-    } else {
-      const nextIndex = Math.min(currentIndex, newVisibleItems.length - 1)
-      if (newVisibleItems[nextIndex]) {
-        await controller.selectItem(newVisibleItems[nextIndex])
-      }
-    }
-  }
-
   #hotkeysDisabled(navigableList) {
     return navigableList?.element.dataset.cardHotkeysDisabled === "true"
   }
 
   #keyHandlers = {
-    "["(event) { this.#postponeCard(event) },
-    "]"(event) { this.#closeCard(event) },
     m(event) { this.#assignToMe(event) }
   }
 }

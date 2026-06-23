@@ -23,13 +23,13 @@ end
 
 require "rubygems"
 
-require_relative "../lib/fizzy"
-Fizzy.configure_bundle
+require_relative "../lib/mudda"
+Mudda.configure_bundle
 
 require "bundler/setup"
 
-if Fizzy.saas?
-  gem_path = Gem::Specification.find_by_name("fizzy-saas").gem_dir
+if Mudda.saas?
+  gem_path = Gem::Specification.find_by_name("mudda-saas").gem_dir
   deploy_config = File.join(gem_path, "config", "deploy.yml")
 
   unless ARGV.include?("-c") || ARGV.include?("--config-file")

@@ -9,7 +9,7 @@
       <%= card_article_tag card, class: "card" do %>
         <header class="card__header">
           <%= render "cards/display/perma/board", card: card %>
-          <%= render "cards/display/perma/tags", card: card %>
+          <%= render "cards/display/due", card: card %>
         </header>
 
         <div class="card__body justify-space-between">
@@ -30,10 +30,6 @@
           <%= render "cards/display/perma/background", card: card %>
           <%= render "reactions/reactions", reactable: card %>
         </footer>
-      <% end %>
-
-      <% if card.entropic? %>
-        <%= render "cards/display/preview/bubble", card: card %>
       <% end %>
     </div>
   <% end %>

@@ -16,14 +16,14 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index as JSON can filter by workflow column id" do
-    get cards_path(format: :json), params: { column_ids: [ columns(:writebook_in_progress).id ] }
+    get cards_path(format: :json), params: { column_ids: [ columns(:writebook_doing).id ] }
     assert_response :success
 
     assert_equal [ cards(:text).number ], @response.parsed_body.pluck("number")
   end
 
   test "index as JSON can OR multiple workflow column ids" do
-    get cards_path(format: :json), params: { column_ids: [ columns(:writebook_triage).id, columns(:writebook_in_progress).id ] }
+    get cards_path(format: :json), params: { column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ] }
     assert_response :success
 
     assert_equal [ cards(:logo).number, cards(:layout).number, cards(:text).number ].sort, @response.parsed_body.pluck("number").sort
@@ -90,7 +90,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "edit card with invalid attachments in description" do
     card = cards(:logo)
     card.update! description: <<~HTML
-      <action-text-attachment sgid="gid://fizzy/Card/nonexistent" content-type="application/octet-stream"></action-text-attachment>
+      <action-text-attachment sgid="gid://mudda/Card/nonexistent" content-type="application/octet-stream"></action-text-attachment>
     HTML
 
     get edit_card_path(card)

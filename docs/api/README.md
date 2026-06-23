@@ -1,7 +1,16 @@
-# Fizzy API
+# Mudda API
 
-Fizzy has an API that allows you to integrate your application with it or to create
+Mudda has an API that allows you to integrate your application with it or to create
 a bot to perform various actions for you.
+
+> **⚠️ Accuracy notice (Mudda fork).** This API reference predates Mudda's fixed-column
+> refactor and has **not yet been fully revised**. Known stale areas: the **Tags** endpoints
+> were removed (tagging no longer exists); card `tag_ids`, `auto_postpone_period_in_days`,
+> the `not_now` endpoint, and the old `indexed_by` buckets (`maybe`, `closed`, `not_now`,
+> `stalled`, `postponing_soon`) no longer apply. Cards now carry a `due_on` date and a card's
+> lifecycle is determined entirely by its **column** (Triage / Backlog / Todo / Doing /
+> Done). Treat [`AGENTS.md`](../../AGENTS.md) as the source of truth until each section here
+> is updated.
 
 ## API Endpoints
 
@@ -15,7 +24,6 @@ a bot to perform various actions for you.
 - [Steps](sections/steps.md)
 - [Comments](sections/comments.md)
 - [Reactions](sections/reactions.md)
-- [Tags](sections/tags.md)
 - [Users](sections/users.md)
 - [Activities](sections/activities.md)
 - [Notifications](sections/notifications.md)
@@ -25,7 +33,7 @@ a bot to perform various actions for you.
 
 ## Authentication
 
-There are two ways to authenticate with the Fizzy API:
+There are two ways to authenticate with the Mudda API:
 
 1. **Personal access tokens** - Long-lived tokens for scripts and integrations
 2. **Magic link authentication** - Session-based authentication for native apps
@@ -110,9 +118,9 @@ and we use a dynamic page size where initial pages return fewer results than lat
 If there are more results to fetch, the response will include a `Link` header with a `rel="next"` link to the next page of results:
 
 ```bash
-curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" -v http://app.fizzy.localhost:3006/686465299/cards
+curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: application/json" -v http://app.mudda.localhost:3006/686465299/cards
 # ...
-< link: <http://app.fizzy.localhost:3006/686465299/cards?page=2>; rel="next"
+< link: <http://app.mudda.localhost:3006/686465299/cards?page=2>; rel="next"
 # ...
 ```
 
@@ -138,7 +146,7 @@ curl -X PUT \
   -H "Authorization: Bearer put-your-access-token-here" \
   -F "user[name]=David H. Hansson" \
   -F "user[avatar]=@/path/to/avatar.jpg" \
-  http://app.fizzy.localhost:3006/686465299/users/03f5v9zjw7pz8717a4no1h8a7
+  http://app.mudda.localhost:3006/686465299/users/03f5v9zjw7pz8717a4no1h8a7
 ```
 
 ## Rich Text Fields

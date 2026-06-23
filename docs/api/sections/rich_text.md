@@ -31,7 +31,7 @@ curl -X POST \
       "content_type": "image/png"
     }
   }' \
-  https://app.fizzy.do/123456/rails/active_storage/direct_uploads
+  https://app.mudda.do/123456/rails/active_storage/direct_uploads
 ```
 
 The `checksum` is a Base64-encoded MD5 hash of the file content.

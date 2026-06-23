@@ -34,7 +34,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
         webhook: {
           name: "Test Webhook",
           url: "https://example.com/webhook",
-          subscribed_actions: [ "", "card_published", "card_closed" ]
+          subscribed_actions: [ "", "card_published", "card_triaged" ]
         }
       }
     end
@@ -45,7 +45,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal board, webhook.board
     assert_equal "Test Webhook", webhook.name
     assert_equal "https://example.com/webhook", webhook.url
-    assert_equal [ "card_published", "card_closed" ], webhook.subscribed_actions
+    assert_equal [ "card_published", "card_triaged" ], webhook.subscribed_actions
   end
 
   test "create with invalid params" do
@@ -165,7 +165,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
         webhook: {
           name: "Test Webhook",
           url: "https://example.com/webhook",
-          subscribed_actions: [ "", "card_published", "card_closed" ]
+          subscribed_actions: [ "", "card_published", "card_triaged" ]
         }
       }, as: :json
     end

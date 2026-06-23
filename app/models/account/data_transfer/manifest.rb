@@ -28,11 +28,9 @@ class Account::DataTransfer::Manifest
         Account::DataTransfer::UserRecordSet.new(account),
         *record_sets_for(
           ::User::Settings,
-          ::Tag,
           ::Board,
           ::Column
         ),
-        Account::DataTransfer::EntropyRecordSet.new(account),
         *record_sets_for(
           ::Board::Publication,
           ::Webhook,
@@ -41,11 +39,7 @@ class Account::DataTransfer::Manifest
           ::Comment,
           ::Step,
           ::Assignment,
-          ::Tagging,
-          ::Closure,
           ::Card::Goldness,
-          ::Card::NotNow,
-          ::Card::ActivitySpike,
           ::Watch,
           ::Pin,
           ::Reaction,

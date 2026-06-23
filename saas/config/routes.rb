@@ -1,4 +1,4 @@
-Fizzy::Saas::Engine.routes.draw do
+Mudda::Saas::Engine.routes.draw do
   Queenbee.routes(self)
 
   namespace :my do

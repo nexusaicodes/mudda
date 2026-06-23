@@ -4,8 +4,8 @@ require "queenbee/testing/client"
 class Account::QueenbeeIntegrationTest < ActiveSupport::TestCase
   include Queenbee::Testing::Client
 
-  # Fizzy creates accounts via its own Signup flow (Fizzy → Queenbee),
-  # not via Queenbee pushing to Fizzy, so create_with_dependents is N/A.
+  # Mudda creates accounts via its own Signup flow (Mudda → Queenbee),
+  # not via Queenbee pushing to Mudda, so create_with_dependents is N/A.
   undef_method :test_client_class_should_respond_to_create_with_dependents
 
   setup do

@@ -15,14 +15,14 @@ __Response:__
     "name": "Recording",
     "color": "var(--color-card-default)",
     "created_at": "2025-12-05T19:36:35.534Z",
-    "cards_url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
+    "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
   },
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcn",
     "name": "Published",
     "color": "var(--color-card-4)",
     "created_at": "2025-12-05T19:36:35.534Z",
-    "cards_url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
+    "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
   }
 ]
 ```
@@ -39,7 +39,7 @@ __Response:__
   "name": "In Progress",
   "color": "var(--color-card-default)",
   "created_at": "2025-12-05T19:36:35.534Z",
-  "cards_url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
+  "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
 }
 ```
 
@@ -70,14 +70,14 @@ __Response:__
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
     "created_at": "2025-12-05T19:38:48.540Z",
-    "url": "http://fizzy.localhost:3006/897362094/cards/4",
+    "url": "http://mudda.localhost:3006/897362094/cards/4",
     "board": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-      "name": "Fizzy",
+      "name": "Mudda",
       "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
       "auto_postpone_period_in_days": 30,
-      "url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+      "url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
         "name": "David Heinemeier Hansson",
@@ -85,8 +85,8 @@ __Response:__
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-        "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
+        "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+        "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
       }
     },
     "column": {
@@ -94,7 +94,7 @@ __Response:__
       "name": "In Progress",
       "color": "var(--color-card-4)",
       "created_at": "2025-12-05T19:36:35.534Z",
-      "cards_url": "http://fizzy.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
+      "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
     },
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
@@ -103,8 +103,8 @@ __Response:__
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-      "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
+      "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+      "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
     },
     "assignees": [
       {
@@ -114,13 +114,13 @@ __Response:__
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-        "avatar_url": "http://fizzy.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
+        "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+        "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
       }
     ],
     "has_more_assignees": false,
-    "comments_url": "http://fizzy.localhost:3006/897362094/cards/4/comments",
-    "reactions_url": "http://fizzy.localhost:3006/897362094/cards/4/reactions"
+    "comments_url": "http://mudda.localhost:3006/897362094/cards/4/comments",
+    "reactions_url": "http://mudda.localhost:3006/897362094/cards/4/reactions"
   }
 ]
 ```

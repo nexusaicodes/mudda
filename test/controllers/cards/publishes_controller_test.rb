@@ -27,6 +27,26 @@ class Cards::PublishesControllerTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 
+  test "create is blocked without a due date" do
+    card = cards(:logo)
+    card.update! status: :drafted, due_on: nil
+
+    assert_no_changes -> { card.reload.published? } do
+      post card_publish_path(card)
+    end
+
+    assert_redirected_to card_draft_path(card)
+  end
+
+  test "create as JSON is unprocessable without a due date" do
+    card = cards(:logo)
+    card.update! status: :drafted, due_on: nil
+
+    post card_publish_path(card), as: :json
+
+    assert_response :unprocessable_entity
+  end
+
   test "create and add another" do
     card = cards(:logo)
     card.drafted!

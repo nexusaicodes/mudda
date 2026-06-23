@@ -1,9 +1,9 @@
 <%
-  config_path = if Fizzy.saas?
+  config_path = if Mudda.saas?
     gem_path = Rails.root.join("saas").to_s
     File.join(gem_path, "config", "database.yml")
   else
-    File.join("config", "database.#{Fizzy.db_adapter}.yml")
+    File.join("config", "database.#{Mudda.db_adapter}.yml")
   end
 %>
 <%= ERB.new(File.read(config_path)).result %>

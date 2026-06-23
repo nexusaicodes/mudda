@@ -76,7 +76,7 @@ class AutoLinkScrubber < Loofah::Scrubber
 
       links
     rescue Regexp::TimeoutError => error
-      Sentry.capture_exception error if Fizzy.saas?
+      Sentry.capture_exception error if Mudda.saas?
       []
     end
 

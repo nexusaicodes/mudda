@@ -7,15 +7,6 @@
     data-collapsible-columns-no-transitions-class="no-transitions"
     data-collapsible-columns-title-not-visible-class="is-off-screen">
 
-    <div class="card-columns__left">
-      <%= render "public/boards/show/not_now", board: board %>
-    </div>
-
-    <%= render "public/boards/show/stream", board: board, page: page %>
-
-    <div class="card-columns__right">
-      <%= render partial: "public/boards/show/column", collection: board.columns, cached: true %>
-      <%= render "public/boards/show/closed", board: board %>
-    </div>
+    <%= render partial: "public/boards/show/column", collection: board.columns.sorted, cached: true %>
   </div>
 <% end %>

@@ -1,8 +1,8 @@
-This is a Rails engine that [37signals](https://37signals.com/) bundles with [Fizzy](https://github.com/basecamp/fizzy) to offer the hosted version at https://fizzy.do.
+This is a Rails engine that [37signals](https://37signals.com/) bundles with [Mudda](https://github.com/basecamp/mudda) to offer the hosted version at https://mudda.do.
 
 ## Development
 
-To make Fizzy run in SaaS mode, run this in the terminal:
+To make Mudda run in SaaS mode, run this in the terminal:
 
 ```ruby
 bin/rails saas:enable
@@ -14,14 +14,14 @@ To go back to open source mode:
 bin/rails saas:disable
 ```
 
-Then you can do [Fizzy development as usual](https://github.com/basecamp/fizzy).
+Then you can do [Mudda development as usual](https://github.com/basecamp/mudda).
 
-## How to update Fizzy
+## How to update Mudda
 
-After making changes to this gem, you need to update Fizzy to pick up the changes:
+After making changes to this gem, you need to update Mudda to pick up the changes:
 
 ```ruby
-BUNDLE_GEMFILE=Gemfile.saas bundle update --conservative fizzy-saas
+BUNDLE_GEMFILE=Gemfile.saas bundle update --conservative mudda-saas
 ```
 
 ## Working with Stripe
@@ -58,15 +58,15 @@ This will ask for your 1Password authorization to fetch the push credentials. No
 
 ## Environments
 
-Fizzy is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/kamal deploy` to the correct environment.
+Mudda is deployed with [Kamal](https://kamal-deploy.org/). You'll need to have the 1Password CLI set up in order to access the secrets that are used when deploying. Provided you have that, it should be as simple as `bin/kamal deploy` to the correct environment.
 
 ## Handbook
 
-See the [Fizzy handbook](https://handbooks.37signals.works/18/fizzy) for runbooks and more.
+See the [Mudda handbook](https://handbooks.37signals.works/18/mudda) for runbooks and more.
 
 ### Production
 
-- https://app.fizzy.do/
+- https://app.mudda.do/
 
 This environment uses a FlashBlade bucket for blob storage.
 
@@ -76,10 +76,10 @@ Beta is primarily intended for testing product features. It uses the same produc
 
 There are 4 beta environments:
 
-- https://beta1.fizzy-beta.com
-- https://beta2.fizzy-beta.com
-- https://beta3.fizzy-beta.com
-- https://beta4.fizzy-beta.com
+- https://beta1.mudda-beta.com
+- https://beta2.mudda-beta.com
+- https://beta3.mudda-beta.com
+- https://beta4.mudda-beta.com
 
 Deploy with: `bin/kamal deploy -d beta1` (or `-d beta2`, `-d beta3`, `-d beta4`)
 
@@ -87,24 +87,24 @@ Deploy with: `bin/kamal deploy -d beta1` (or `-d beta2`, `-d beta3`, `-d beta4`)
 
 Staging is primarily intended for testing infrastructure changes. It uses production-like but separate database and Active Storage configurations.
 
-- https://app.fizzy-staging.com/
+- https://app.mudda-staging.com/
 
 ## Maintenance mode
 
 To take production offline for maintenance, run `kamal-proxy stop` on the load balancers via `knife ssh`:
 
 ```bash
-knife ssh 'hostname:fizzy-lb-*' "sudo docker exec fizzy-load-balancer kamal-proxy stop fizzy --message='Sorry! Fizzy is undergoing some maintenance and will be back shortly.'"
+knife ssh 'hostname:mudda-lb-*' "sudo docker exec mudda-load-balancer kamal-proxy stop mudda --message='Sorry! Mudda is undergoing some maintenance and will be back shortly.'"
 ```
 
-Verify maintenance is enabled by visiting https://app.fizzy.do/.
+Verify maintenance is enabled by visiting https://app.mudda.do/.
 
 To lift maintenance mode:
 
 ```bash
-knife ssh 'hostname:fizzy-lb-*' 'sudo docker exec fizzy-load-balancer kamal-proxy resume fizzy'
+knife ssh 'hostname:mudda-lb-*' 'sudo docker exec mudda-load-balancer kamal-proxy resume mudda'
 ```
 
 ## License
 
-fizzy-saas is released under the [O'Saasy License](LICENSE.md).
+mudda-saas is released under the [O'Saasy License](LICENSE.md).

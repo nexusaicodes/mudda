@@ -1,14 +1,15 @@
 module ColumnsHelper
   def button_to_set_column(card, column)
+    current = column == card.column
     button_to \
       tag.span(column.name, class: "overflow-ellipsis"),
-      card_triage_path(card, column_id: column),
-      method: :post,
-      class: [ "card__column-name btn", { "card__column-name--current": column == card.column && card.open? } ],
-      disabled: column == card.column && card.open?,
+      card_column_path(card, column_id: column.id),
+      method: :patch,
+      class: [ "card__column-name btn", { "card__column-name--current": current } ],
+      disabled: current,
       style: "--column-color: #{column.color}",
       form_class: "flex gap-half",
-      data: { turbo_frame: "_top", scroll_to_target: column == card.column && card.open? ? "target" : nil }
+      data: { turbo_frame: "_top", scroll_to_target: current ? "target" : nil }
   end
 
   def column_tag(id:, name:, drop_url:, collapsed: true, selected: nil, card_color: "var(--color-card-default)", data: {}, **properties, &block)

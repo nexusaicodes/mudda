@@ -12,7 +12,7 @@ class Webhooks::DeliveriesControllerTest < ActionDispatch::IntegrationTest
     delivery.update!(
       request: {
         headers: {
-          "User-Agent" => "fizzy/1.0.0 Webhook",
+          "User-Agent" => "mudda/1.0.0 Webhook",
           "Content-Type" => "application/json",
           "X-Webhook-Signature" => "super-secret-signature",
           "X-Webhook-Timestamp" => webhook_timestamp
@@ -33,7 +33,7 @@ class Webhooks::DeliveriesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "completed", completed_delivery["state"]
     assert_equal delivery.created_at.utc.iso8601(3), completed_delivery["created_at"]
     assert_equal delivery.updated_at.utc.iso8601(3), completed_delivery["updated_at"]
-    assert_equal "fizzy/1.0.0 Webhook", completed_delivery.dig("request", "headers", "User-Agent")
+    assert_equal "mudda/1.0.0 Webhook", completed_delivery.dig("request", "headers", "User-Agent")
     assert_equal "application/json", completed_delivery.dig("request", "headers", "Content-Type")
     assert_equal webhook_timestamp, completed_delivery.dig("request", "headers", "X-Webhook-Timestamp")
     assert_not completed_delivery.dig("request", "headers").key?("X-Webhook-Signature")

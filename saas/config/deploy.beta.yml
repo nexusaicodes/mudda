@@ -3,42 +3,42 @@
   @data = {
     "1" => {
       "hosts" => {
-        "web" => ["fizzy-beta-app-101.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-101.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-101.df-iad-int.37signals.com"
+        "web" => ["mudda-beta-app-101.df-iad-int.37signals.com"],
+        "jobs" => ["mudda-beta-jobs-101.df-iad-int.37signals.com"],
+        "lb" => "mudda-beta-lb-101.df-iad-int.37signals.com"
       },
       "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-101.df-iad-int.37signals.com"
+        "solidqueue" => "mudda-beta-solidqueue-db-101.df-iad-int.37signals.com"
       }
     },
     "2" => {
       "hosts" => {
-        "web" => ["fizzy-beta-app-102.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-102.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-102.df-iad-int.37signals.com"
+        "web" => ["mudda-beta-app-102.df-iad-int.37signals.com"],
+        "jobs" => ["mudda-beta-jobs-102.df-iad-int.37signals.com"],
+        "lb" => "mudda-beta-lb-102.df-iad-int.37signals.com"
       },
       "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-102.df-iad-int.37signals.com"
+        "solidqueue" => "mudda-beta-solidqueue-db-102.df-iad-int.37signals.com"
       }
     },
     "3" => {
       "hosts" => {
-        "web" => ["fizzy-beta-app-103.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-103.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-103.df-iad-int.37signals.com"
+        "web" => ["mudda-beta-app-103.df-iad-int.37signals.com"],
+        "jobs" => ["mudda-beta-jobs-103.df-iad-int.37signals.com"],
+        "lb" => "mudda-beta-lb-103.df-iad-int.37signals.com"
       },
       "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-103.df-iad-int.37signals.com"
+        "solidqueue" => "mudda-beta-solidqueue-db-103.df-iad-int.37signals.com"
       }
     },
     "4" => {
       "hosts" => {
-        "web" => ["fizzy-beta-app-104.df-iad-int.37signals.com"],
-        "jobs" => ["fizzy-beta-jobs-104.df-iad-int.37signals.com"],
-        "lb" => "fizzy-beta-lb-104.df-iad-int.37signals.com"
+        "web" => ["mudda-beta-app-104.df-iad-int.37signals.com"],
+        "jobs" => ["mudda-beta-jobs-104.df-iad-int.37signals.com"],
+        "lb" => "mudda-beta-lb-104.df-iad-int.37signals.com"
       },
       "dbs" => {
-        "solidqueue" => "fizzy-beta-solidqueue-db-104.df-iad-int.37signals.com"
+        "solidqueue" => "mudda-beta-solidqueue-db-104.df-iad-int.37signals.com"
       }
     }
   }
@@ -74,15 +74,15 @@ ssh:
 
 env:
   clear:
-    APP_FQDN: beta<%= @beta_number %>.fizzy-beta.com
+    APP_FQDN: beta<%= @beta_number %>.mudda-beta.com
     CACHE_NAMESPACE: <%= @beta_number %>
     RAILS_ENV: beta
     RAILS_LOG_LEVEL: fatal # suppress unstructured log lines
-    MYSQL_DATABASE_HOST: fizzy-mysql-primary
-    MYSQL_DATABASE_REPLICA_HOST: fizzy-mysql-replica
-    MYSQL_SOLID_CABLE_HOST: fizzy-mysql-primary
+    MYSQL_DATABASE_HOST: mudda-mysql-primary
+    MYSQL_DATABASE_REPLICA_HOST: mudda-mysql-replica
+    MYSQL_SOLID_CABLE_HOST: mudda-mysql-primary
     MYSQL_SOLID_QUEUE_HOST: <%= @solidqueue_db %>
-    MYSQL_SOLID_CACHE_HOST: fizzy-beta-solidcache-db-101.df-iad-int.37signals.com
+    MYSQL_SOLID_CACHE_HOST: mudda-beta-solidcache-db-101.df-iad-int.37signals.com
   secret:
     - RAILS_MASTER_KEY
     - MYSQL_ALTER_PASSWORD
@@ -120,7 +120,7 @@ accessories:
     host: <%= @lb_host %>
     labels:
       otel_role: load-balancer
-      otel_service: fizzy-load-balancer
+      otel_service: mudda-load-balancer
       otel_scrape_enabled: true
     options:
       publish:

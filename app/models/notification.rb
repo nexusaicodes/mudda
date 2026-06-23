@@ -13,8 +13,8 @@ class Notification < ApplicationRecord
   scope :preloaded, -> {
     preload(
       :creator, :account,
-      card: [ :board, :column, :closure, :not_now ],
-      source: [ :board, :creator, { eventable: [ :closure, :board, :assignments ] } ]
+      card: [ :board, :column ],
+      source: [ :board, :creator, { eventable: [ :board, :assignments ] } ]
     )
   }
 

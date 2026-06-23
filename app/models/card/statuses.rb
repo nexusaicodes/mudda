@@ -14,8 +14,14 @@ module Card::Statuses
   def publish
     transaction do
       self.created_at = Time.current
-      published!
-      track_event :published
+      self.status = :published
+
+      if save(context: :publish)
+        track_event :published
+        true
+      else
+        false
+      end
     end
   end
 

@@ -103,18 +103,6 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
     Notification::PushTarget::Web.new(@notification).process
   end
 
-  test "payload for sent back to triage includes Maybe?" do
-    event = events(:logo_published)
-    event.update!(action: "card_sent_back_to_triage")
-    @notification.update!(source: event)
-
-    @web_push_pool.expects(:queue).once.with do |payload, _|
-      payload[:body] == "Moved back to Maybe? by #{event.creator.name}"
-    end
-
-    Notification::PushTarget::Web.new(@notification).process
-  end
-
   test "payload for board change includes new board name" do
     event = events(:logo_published)
     event.update!(
@@ -235,25 +223,13 @@ class Notification::PushTarget::WebTest < ActiveSupport::TestCase
     Notification::PushTarget::Web.new(@notification).process
   end
 
-  test "payload for postponed includes Not Now" do
+  test "payload for triaged includes the destination column" do
     event = events(:logo_published)
-    event.update!(action: "card_postponed")
+    event.update!(action: "card_triaged", particulars: { particulars: { column: "Done" } })
     @notification.update!(source: event)
 
     @web_push_pool.expects(:queue).once.with do |payload, _|
-      payload[:body] == "Moved to Not Now by #{event.creator.name}"
-    end
-
-    Notification::PushTarget::Web.new(@notification).process
-  end
-
-  test "payload for auto postponed includes inactivity message" do
-    event = events(:logo_published)
-    event.update!(action: "card_auto_postponed")
-    @notification.update!(source: event)
-
-    @web_push_pool.expects(:queue).once.with do |payload, _|
-      payload[:body] == "Moved to Not Now due to inactivity"
+      payload[:body] == "Moved to Done by #{event.creator.name}"
     end
 
     Notification::PushTarget::Web.new(@notification).process

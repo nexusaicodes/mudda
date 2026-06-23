@@ -4,7 +4,7 @@ active:
   name: Production API
   url: https://api.example.com/webhooks
   signing_secret: p94Bx2HjempCdYB4DTyZkY1b # gitleaks:allow randomly generated
-  subscribed_actions: '<%= %w[ card_published card_assigned card_closed ].to_json %>'
+  subscribed_actions: '<%= %w[ card_published card_assigned card_triaged ].to_json %>'
   board: writebook_uuid
   account: 37s_uuid
 
@@ -14,6 +14,6 @@ inactive:
   name: Test Webhook
   url: https://test.example.com/webhooks
   signing_secret: H8ms8ADcV92v2x17hnLEiL5m # gitleaks:allow randomly generated
-  subscribed_actions: '<%= %w[ card_published card_assigned card_closed ].to_json %>'
+  subscribed_actions: '<%= %w[ card_published card_assigned card_triaged ].to_json %>'
   board: private_uuid
   account: 37s_uuid

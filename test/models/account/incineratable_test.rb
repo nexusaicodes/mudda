@@ -36,7 +36,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     user.create_settings!(bundle_email_frequency: :never)
 
     # Direct on Account
-    tag = Tag.create!(title: "urgent")
     column = Column.create!(board: board, name: "Test", position: 0)
     export = Account::Export.create!(account: account, user: user)
     search_query = Search::Query.create!(user: user, terms: "test search")
@@ -55,15 +54,11 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     comment = card.comments.create!(body: "Test comment")
     step = Step.create!(card: card, content: "Test step")
     assignment = Assignment.create!(card: card, assignee: user, assigner: user)
-    tagging = Tagging.create!(card: card, tag: tag)
     watch = Watch.create!(card: card, user: user)
     pin = Pin.create!(card: card, user: user)
     reaction = Reaction.create!(reactable: card, content: "thumbs_up")
     mention = Mention.create!(source: card, mentioner: user, mentionee: user)
-    closure = Closure.create!(card: cards(:paycheck), user: user)
     goldness = Card::Goldness.create!(card: card)
-    not_now = Card::NotNow.create!(card: cards(:unfinished_thoughts), user: user)
-    activity_spike = Card::ActivitySpike.create!(card: card)
 
     # Via User
     notification = Notification.create!(user: user, source: event, creator: user)
@@ -80,11 +75,9 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert User.where(account_id: account_id).exists?
     assert Board.where(account_id: account_id).exists?
     assert Card.where(account_id: account_id).exists?
-    assert Tag.where(account_id: account_id).exists?
     assert Column.where(account_id: account_id).exists?
     assert Webhook.where(account_id: account_id).exists?
     assert Access.where(account_id: account_id).exists?
-    assert Entropy.where(account_id: account_id).exists?
     assert Account::JoinCode.where(account_id: account_id).exists?
     assert Account::Export.where(account_id: account_id).exists?
     assert Search::Query.where(account_id: account_id).exists?
@@ -96,15 +89,11 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert Comment.where(account_id: account_id).exists?
     assert Step.where(account_id: account_id).exists?
     assert Assignment.where(account_id: account_id).exists?
-    assert Tagging.where(account_id: account_id).exists?
     assert Watch.where(account_id: account_id).exists?
     assert Pin.where(account_id: account_id).exists?
     assert Reaction.where(account_id: account_id).exists?
     assert Mention.where(account_id: account_id).exists?
-    assert Closure.where(account_id: account_id).exists?
     assert Card::Goldness.where(account_id: account_id).exists?
-    assert Card::NotNow.where(account_id: account_id).exists?
-    assert Card::ActivitySpike.where(account_id: account_id).exists?
     assert Notification.where(account_id: account_id).exists?
     assert Notification::Bundle.where(account_id: account_id).exists?
     assert Filter.where(account_id: account_id).exists?
@@ -127,9 +116,7 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty Board.where(account_id: account_id)
     assert_empty Card.where(account_id: account_id)
     assert_empty Webhook.where(account_id: account_id)
-    assert_empty Tag.where(account_id: account_id)
     assert_empty Column.where(account_id: account_id)
-    assert_empty Entropy.where(account_id: account_id)
     assert_empty Account::JoinCode.where(account_id: account_id)
     assert_empty Account::Export.where(account_id: account_id)
     assert_empty Account::Import.where(account_id: account_id)
@@ -148,15 +135,11 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty Comment.where(account_id: account_id)
     assert_empty Step.where(account_id: account_id)
     assert_empty Assignment.where(account_id: account_id)
-    assert_empty Tagging.where(account_id: account_id)
     assert_empty Watch.where(account_id: account_id)
     assert_empty Pin.where(account_id: account_id)
     assert_empty Reaction.where(account_id: account_id)
     assert_empty Mention.where(account_id: account_id)
-    assert_empty Closure.where(account_id: account_id)
     assert_empty Card::Goldness.where(account_id: account_id)
-    assert_empty Card::NotNow.where(account_id: account_id)
-    assert_empty Card::ActivitySpike.where(account_id: account_id)
 
     # Via User
     assert_empty Notification.where(account_id: account_id)

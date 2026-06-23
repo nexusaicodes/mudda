@@ -1,7 +1,7 @@
 class Account::Export < Export
   private
     def filename
-      "fizzy-account-#{account_id}-export-#{id}.zip"
+      "mudda-account-#{account_id}-export-#{id}.zip"
     end
 
     def populate_zip(zip)
