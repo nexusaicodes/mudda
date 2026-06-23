@@ -7,11 +7,8 @@ class Account < ApplicationRecord
   has_many :cards, dependent: :destroy
   has_many :webhooks, dependent: :destroy
   has_many :columns, dependent: :destroy
-  has_many :exports, class_name: "Account::Export", dependent: :destroy
-  has_many :imports, class_name: "Account::Import", dependent: :destroy
 
-  scope :importing, -> { left_joins(:imports).where(account_imports: { status: %i[pending processing failed] }) }
-  scope :active, -> { where.missing(:cancellation).and(where.not(id: importing)) }
+  scope :active, -> { where.missing(:cancellation) }
 
   before_create :assign_external_account_id
   after_create :create_join_code
@@ -40,11 +37,7 @@ class Account < ApplicationRecord
   end
 
   def active?
-    !cancelled? && !importing?
-  end
-
-  def importing?
-    imports.where(status: %i[pending processing failed]).exists?
+    !cancelled?
   end
 
   private

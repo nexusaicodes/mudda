@@ -1,0 +1,40 @@
+name: fizzy
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        RUBY_VERSION: "3.4.8"
+    image: fizzy-dev
+    command: ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
+    ports:
+      - "${PORT:-3006}:3006"
+    environment:
+      RAILS_ENV: development
+      # No queue database in SQLite dev; jobs run on the in-process async adapter,
+      # so don't start Solid Queue inside Puma.
+      SOLID_QUEUE_IN_PUMA: "false"
+    volumes:
+      # Live code reload: the host checkout is the source of truth at /rails.
+      - .:/rails
+      # Writable paths kept off the bind mount so the repo stays clean and
+      # `docker compose down -v` wipes all state for a truly fresh start.
+      - storage:/rails/storage
+      - log:/rails/log
+      - tmp:/rails/tmp
+    # Keep STDIN/TTY open for `binding.irb`/debug and a readable server log.
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3006/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+volumes:
+  storage:
+  log:
+  tmp:

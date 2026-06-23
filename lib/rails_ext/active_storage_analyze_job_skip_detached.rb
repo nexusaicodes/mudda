@@ -1,6 +1,6 @@
 # Skip analysis for blobs whose attachments have already been destroyed.
 #   e.g. when a user uploads a file but deletes it before the analysis runs.
-# Avoids `Aws::S3::Errors::NoSuchKey` when an upload is deleted before AnalyzeJob runs.
+# Avoids a missing-file error when the upload is gone before AnalyzeJob runs.
 module ActiveStorageAnalyzeJobSkipDetached
   def perform(blob)
     return unless blob.attachments.exists?

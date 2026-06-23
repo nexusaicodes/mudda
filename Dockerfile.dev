@@ -1,0 +1,43 @@
+# syntax=docker/dockerfile:1
+
+# Development image for Fizzy. The root Dockerfile targets production (Thruster,
+# precompiled assets, a master key); this one runs RAILS_ENV=development with all
+# gem groups and live code reloading via a bind mount from docker-compose.yml.
+
+ARG RUBY_VERSION=3.4.8
+FROM docker.io/library/ruby:${RUBY_VERSION}-slim
+
+# build-essential/libyaml-dev/pkg-config: compile native gems.
+# libvips: image processing (Active Storage variants).
+# sqlite3: the development database.
+# git: install gems sourced from GitHub (rails, turbo, web-console).
+# curl: container healthcheck.
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      curl \
+      git \
+      libssl-dev \
+      libvips \
+      libyaml-dev \
+      pkg-config \
+      sqlite3 && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+WORKDIR /rails
+
+# Gems install into BUNDLE_PATH, which lives outside /rails so the source bind
+# mount can't hide them.
+ENV RAILS_ENV=development \
+    BUNDLE_PATH=/usr/local/bundle
+
+# Install gems in their own layer so editing source doesn't trigger a reinstall.
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# The entrypoint is run from the bind-mounted source at runtime, so edits to it
+# take effect on container restart without rebuilding the image.
+ENTRYPOINT ["bin/docker-entrypoint-dev"]
+
+EXPOSE 3006
+CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]

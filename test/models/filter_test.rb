@@ -72,7 +72,7 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "resource removal" do
-    other_board = users(:david).boards.create!(name: "Another board")
+    other_board = Board.create!(name: "Another board", creator: users(:david))
     filter = users(:david).filters.create! board_ids: [ boards(:writebook).id, other_board.id ]
 
     assert_includes filter.as_params[:board_ids], boards(:writebook).id
@@ -89,7 +89,7 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "duplicate filters are removed after a resource is destroyed" do
-    other_board = users(:david).boards.create!(name: "Another board")
+    other_board = Board.create!(name: "Another board", creator: users(:david))
     users(:david).filters.create! board_ids: [ other_board.id ]
     users(:david).filters.create! board_ids: [ other_board.id, boards(:writebook).id ]
 
@@ -133,13 +133,13 @@ class FilterTest < ActiveSupport::TestCase
 
   test "column ids filter cards by workflow columns" do
     assert_equal [ cards(:text) ], users(:david).filters.new(column_ids: [ columns(:writebook_doing).id ]).cards.to_a
-    assert_equal [ cards(:logo), cards(:layout) ].sort_by(&:id), users(:david).filters.new(column_ids: [ columns(:writebook_triage).id ]).cards.to_a.sort_by(&:id)
+    assert_equal [ cards(:logo), cards(:layout), cards(:buy_domain) ].sort_by(&:id), users(:david).filters.new(column_ids: [ columns(:writebook_triage).id ]).cards.to_a.sort_by(&:id)
   end
 
   test "column ids are ORed together" do
     filter = users(:david).filters.new(column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ])
 
-    assert_equal [ cards(:logo), cards(:layout), cards(:text) ].sort_by(&:id), filter.cards.to_a.sort_by(&:id)
+    assert_equal [ cards(:logo), cards(:layout), cards(:buy_domain), cards(:text) ].sort_by(&:id), filter.cards.to_a.sort_by(&:id)
   end
 
   test "board titles are scoped to creator's account" do

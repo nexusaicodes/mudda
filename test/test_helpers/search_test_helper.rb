@@ -29,13 +29,7 @@ module SearchTestHelper
 
   private
     def clear_search_records
-      if ActiveRecord::Base.connection.adapter_name == "SQLite"
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records")
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
-      else
-        Search::Record::Trilogy::SHARD_COUNT.times do |shard_id|
-          ActiveRecord::Base.connection.execute("DELETE FROM search_records_#{shard_id}")
-        end
-      end
+      ActiveRecord::Base.connection.execute("DELETE FROM search_records")
+      ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
     end
 end

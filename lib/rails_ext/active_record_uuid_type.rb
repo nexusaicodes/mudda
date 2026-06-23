@@ -1,4 +1,4 @@
-# Custom UUID attribute type for MySQL binary storage with base36 string representation
+# Custom UUID attribute type stored as 16-byte binary with a base36 string representation
 module ActiveRecord
   module Type
     class Uuid < Binary
@@ -41,6 +41,5 @@ module ActiveRecord
   end
 end
 
-# Register the UUID type for Trilogy (MySQL) and SQLite3 adapters
-ActiveRecord::Type.register(:uuid, ActiveRecord::Type::Uuid, adapter: :trilogy)
+# Register the UUID type for the SQLite3 adapter
 ActiveRecord::Type.register(:uuid, ActiveRecord::Type::Uuid, adapter: :sqlite3)

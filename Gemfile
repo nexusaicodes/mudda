@@ -10,16 +10,13 @@ gem "propshaft"
 gem "stimulus-rails"
 gem "turbo-rails", github: "hotwired/turbo-rails", branch: "offline-cache"
 
-# Deployment and drivers
+# Drivers
 gem "bootsnap", require: false
-gem "kamal", require: false
 gem "puma", "~> 7.2", ">= 7.2.1"
 gem "solid_cable", ">= 3.0"
 gem "solid_cache", "~> 1.0"
 gem "solid_queue", "~> 1.4"
 gem "sqlite3", ">= 2.0"
-gem "thruster", require: false
-gem "trilogy", "~> 2.11"
 
 # Features
 gem "bcrypt", "~> 3.1.22"
@@ -30,22 +27,13 @@ gem "jbuilder"
 gem "lexxy", "0.9.14.beta"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
-gem "aws-sdk-s3", require: false
-gem "web-push"
-gem "net-http-persistent"
-gem "zip_kit"
 gem "mittens"
 gem "useragent", bc: "useragent"
 
 # Operations
-gem "autotuner"
-gem "mission_control-jobs"
-gem "stackprof"
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
 
 group :development, :test do
-  gem "brakeman", require: false
-  gem "bundler-audit", require: false
   gem "debug"
   gem "faker"
   gem "letter_opener"

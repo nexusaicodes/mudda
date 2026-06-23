@@ -67,16 +67,8 @@ class SearchReindexJobTest < ActiveJob::TestCase
   end
 
   private
-    def sqlite?
-      ActiveRecord::Base.connection.adapter_name == "SQLite"
-    end
-
     def nuke_search_records
-      if sqlite?
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records")
-        ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
-      else
-        Search::Record::Trilogy::SHARD_CLASSES.each(&:delete_all)
-      end
+      ActiveRecord::Base.connection.execute("DELETE FROM search_records")
+      ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
     end
 end

@@ -15,58 +15,39 @@ SaaS engine layered on top (see `CLAUDE.md`).
 
 ## Development Commands
 
+This is a standalone, single-tenant SQLite build run entirely through Docker Compose.
+See [DOCKER.md](DOCKER.md) for the full reference; `make` lists every target.
+
 ### Setup and Server
 ```bash
-bin/setup              # Initial setup (installs gems, creates DB, loads schema)
-bin/dev                # Start development server (runs on port 3006)
+make setup    # Build the image and start the app (first run)
+make logs     # Tail the server log (magic login links appear here)
+make down     # Stop, keeping data
+make fresh    # Wipe all data and rebuild from scratch
 ```
 
-Development URL: http://app.mudda.localhost:3006
-Login with: david@example.com (development fixtures); the magic-link/password appears in the
-Rails console / browser console.
+Development URL: http://app.mudda.localhost:3006 (or http://localhost:3006)
+Login with: david@example.com (development fixtures); the magic link appears in `make logs`.
 
 ### Testing
 ```bash
-bin/rails test                         # Run unit tests (fast)
-bin/rails test test/path/file_test.rb  # Run a single test file
-bin/rails test:system                  # Run system tests (Capybara + Selenium)
-bin/ci                                 # Run the full CI suite (boots Rails, runs config/ci.rb)
-
-# For parallel test execution issues, use:
-PARALLEL_WORKERS=1 bin/rails test
+make test                                          # Run unit/integration tests
+make lint                                          # RuboCop
+docker compose run --rm web bin/rails test PATH    # Run a single test file
+docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test   # Serial run
 ```
-
-`bin/ci` is **not** a shell script — it boots Rails and runs `config/ci.rb` via
-`ActiveSupport::ContinuousIntegration`. That file is the source of truth for the pipeline:
-Rubocop → bundler-audit → importmap audit → Brakeman → application tests → system tests.
 
 ### Database
 ```bash
-bin/rails db:fixtures:load   # Load fixture data
-bin/rails db:migrate          # Run migrations
-bin/rails db:reset            # Drop, create, and load schema
-```
-
-### Other Utilities
-```bash
-bin/rails dev:email          # Toggle letter_opener for email preview
-bin/jobs                     # Manage Solid Queue jobs
+docker compose exec web bin/rails db:migrate   # Run migrations
+make reset-db                                  # Drop, recreate, and reseed
 ```
 
 ## Deploy
 
-Deployment is a **SaaS-engine concern** — the Kamal configs live under `saas/config/`
-(`deploy.yml`, `deploy.production.yml`, `deploy.staging.yml`, `deploy.beta.yml`), not in the
-OSS app. Deploying requires running in SaaS mode.
-
-- Pre-deploy: `bin/rails saas:enable`
-- Deploy: `bin/kamal deploy -d <destination>` (requires 1Password CLI for secrets)
-- Destinations: `production`, `staging`, `beta1`–`beta4` (`beta` is a template requiring
-  `BETA_NUMBER`).
-
-> The deploy configs still reference upstream hosting (e.g. `*-int.37signals.com` hosts,
-> `storage.basecamp.com`, container registries). Replace these with Nexus AI infrastructure
-> before deploying your own hosted instance — see `CLAUDE.md`.
+This is a standalone build with no deploy tooling: the production `Dockerfile`, Kamal
+configs, and the SaaS engine have all been removed. Run it locally — or on any Docker
+host — with the Compose setup in [DOCKER.md](DOCKER.md).
 
 ## Architecture Overview
 
@@ -190,45 +171,26 @@ binary / SQLite blob. Note that `Account#external_account_id` (the URL slug) and
 
 ### Background Jobs (Solid Queue)
 
-Database-backed job queue (no Redis); monitored via Mission Control Jobs at `/admin/jobs`.
+Database-backed job queue (no Redis). In development jobs run on the in-process async
+adapter (Solid Queue itself is configured but not the active dev adapter).
 - The `AccountTenanted` concern (`app/jobs/concerns/account_tenanted.rb`) is `prepend`ed in
   `ApplicationJob`. It serializes `Current.account` as a GID and restores it via
   `around_perform`, so jobs run in the correct tenant context.
 - We write shallow jobs that delegate to domain models, using `_later` / `_now` naming
   (see `STYLE.md`).
 
-Recurring jobs (`config/recurring.yml`, production profile):
+Recurring jobs (`config/recurring.yml`):
 - `deliver_bundled_notifications` — every 30 min
 - `clear_solid_queue_finished_jobs` — hourly at :12
 - `cleanup_webhook_deliveries` — every 15 min
 - `cleanup_magic_links` — every 4 hours
-- `cleanup_exports` — hourly at :20
-- `cleanup_imports` — hourly at :25
 - `incineration` (`Account::IncinerateDueJob`) — every 8 hours at :16
-- `yabeda_actioncable` — SaaS only, every 60s
 
-`beta`/`staging` run only Solid Queue cleanup; `development` aliases `production`.
+### Full-Text Search
 
-### Full-Text Search (adapter-dependent)
-
-`app/models/search/` denormalizes searchable content into `Search::Record`, which picks an
-adapter at load time based on the database:
-- **SaaS / MySQL (Trilogy):** 16 shards (`search_records_0..15`), shard chosen by
-  `Zlib.crc32(account_id.to_s) % 16`, queried with `MATCH ... AGAINST (... IN BOOLEAN MODE)`
-  and an account-key term for isolation.
-- **OSS / SQLite:** a single FTS5 virtual table (`search_records_fts`).
-
-Stemming, highlighting, and query sanitizing live in `Search::Stemmer`,
-`Search::Highlighter`, and `Search::Query`.
-
-### Imports and Exports
-
-Let people move between OSS and SaaS Mudda instances:
-- Exports/imports read/write **local or S3** storage depending on instance config (both
-  must be supported).
-- Must handle very large ZIP files (500+ GB) via streaming (`app/models/zip_file/*`, built
-  on `zip_kit`, including `remote_io` for S3-backed reads).
-- Models in `app/models/account/data_transfer/` and `app/models/zip_file`.
+`app/models/search/` denormalizes searchable content into `Search::Record`, which uses a
+single SQLite FTS5 virtual table (`search_records_fts`). Stemming, highlighting, and query
+sanitizing live in `Search::Stemmer`, `Search::Highlighter`, and `Search::Query`.
 
 ## Tools
 

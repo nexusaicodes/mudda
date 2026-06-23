@@ -9,34 +9,12 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
     @card.assignments.destroy_all
     @assignee.notifications.destroy_all
 
-    stub_dns_resolution("142.250.185.206")
-    stub_web_push_pool
-
-    @original_targets = Notification.push_targets.dup
-    Notification.push_targets = []
-    Notification.register_push_target(:web)
-    Notification.register_push_target(push_target_with_tracking)
-
-    stub_web_push_dns_resolution
-
-    # Give assignee a web push subscription
-    @assignee.push_subscriptions.create!(
-      endpoint: "https://fcm.googleapis.com/fcm/send/test123",
-      p256dh_key: "test_key",
-      auth_key: "test_auth"
-    )
-
     Current.user = @assigner
   end
 
-  teardown do
-    Notification.push_targets = @original_targets
-    @assignee.push_subscriptions.delete_all
-  end
-
-  test "card assignment creates notification and triggers push" do
+  test "card assignment creates a notification" do
     assert_difference -> { Notification.count }, 1 do
-      perform_enqueued_jobs only: [ NotifyRecipientsJob, Notification::PushJob ] do
+      perform_enqueued_jobs only: NotifyRecipientsJob do
         @card.toggle_assignment(@assignee)
       end
     end
@@ -45,9 +23,6 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
     assert_equal @assignee, notification.user
     assert_equal @assigner, notification.creator
     assert_equal "card_assigned", notification.source.action
-
-    assert_push_delivered_for notification
-    assert_web_push_delivered
   end
 
   test "card assignment notification is bundled for email delivery when bundling enabled" do
@@ -67,11 +42,11 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
     assert_includes bundle.notifications, notification
   end
 
-  test "comment creates notification for card watchers and triggers push" do
+  test "comment creates a notification for card watchers" do
     @card.watch_by(@assignee)
 
     assert_difference -> { Notification.count }, 1 do
-      perform_enqueued_jobs only: [ NotifyRecipientsJob, Notification::PushJob ] do
+      perform_enqueued_jobs only: NotifyRecipientsJob do
         @card.comments.create!(body: "Great work on this!", creator: @assigner)
       end
     end
@@ -79,15 +54,12 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
     notification = Notification.last
     assert_equal @assignee, notification.user
     assert_equal "comment_created", notification.source.action
-
-    assert_push_delivered
-    assert_web_push_delivered
   end
 
-  test "mention creates notification and triggers push" do
+  test "mention creates a notification" do
     mention_html = ActionText::Attachment.from_attachable(@assignee).to_html
 
-    perform_enqueued_jobs only: [ Mention::CreateJob, NotifyRecipientsJob, Notification::PushJob ] do
+    perform_enqueued_jobs only: [ Mention::CreateJob, NotifyRecipientsJob ] do
       @card.comments.create!(
         body: "#{mention_html} check this out",
         creator: @assigner
@@ -96,80 +68,25 @@ class NotificationDeliveryTest < ActiveSupport::TestCase
 
     mention_notification = @assignee.notifications.find_by(source_type: "Mention")
     assert_not_nil mention_notification
-
-    assert_push_delivered_for mention_notification
-    assert_web_push_delivered
   end
 
   test "system user actions do not create notifications" do
     Current.user = users(:system)
 
     assert_no_difference -> { Notification.count } do
-      perform_enqueued_jobs only: [ NotifyRecipientsJob, Notification::PushJob ] do
+      perform_enqueued_jobs only: NotifyRecipientsJob do
         @card.toggle_assignment(@assignee)
       end
     end
-
-    assert_no_push_delivered
-    assert_no_web_push_delivered
   end
 
-  test "notifications for inactive users are created but do not trigger push" do
+  test "notifications are created for inactive users" do
     @assignee.deactivate
 
     assert_difference -> { Notification.count }, 1 do
-      perform_enqueued_jobs only: [ NotifyRecipientsJob, Notification::PushJob ] do
+      perform_enqueued_jobs only: NotifyRecipientsJob do
         @card.toggle_assignment(@assignee)
       end
     end
-
-    assert_no_push_delivered
-    assert_no_web_push_delivered
   end
-
-  private
-    def stub_web_push_pool
-      @web_push_calls = []
-      web_push_pool = stub("web_push_pool")
-      web_push_pool.stubs(:queue).with do |payload, subs|
-        @web_push_calls << { payload: payload, subscriptions: subs }
-      end
-
-      Rails.configuration.x.stubs(:web_push_pool).returns(web_push_pool)
-    end
-
-    def push_target_with_tracking
-      @push_target_calls = []
-      fake_push_target = Class.new(Notification::PushTarget) do
-        class << self
-          attr_accessor :calls
-        end
-
-        def self.process(notification)
-          calls << notification
-        end
-      end
-
-      fake_push_target.tap { it.calls = @push_target_calls }
-    end
-
-    def assert_push_delivered
-      assert_not_empty @push_target_calls, "Expected push to be delivered"
-    end
-
-    def assert_push_delivered_for(notification)
-      assert_includes @push_target_calls, notification, "Expected push to be delivered for notification"
-    end
-
-    def assert_no_push_delivered
-      assert_empty @push_target_calls, "Expected no push to be delivered"
-    end
-
-    def assert_web_push_delivered
-      assert_not_empty @web_push_calls, "Expected web push to be delivered"
-    end
-
-    def assert_no_web_push_delivered
-      assert_empty @web_push_calls, "Expected no web push to be delivered"
-    end
 end

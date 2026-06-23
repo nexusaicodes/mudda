@@ -1,9 +1,9 @@
-<%
-  config_path = if Mudda.saas?
-    gem_path = Gem::Specification.find_by_name("mudda-saas").gem_dir
-    File.join(gem_path, "config", "storage.yml")
-  else
-    File.join(__dir__, "storage.oss.yml")
-  end
-%>
-<%= ERB.new(File.read(config_path)).result %>
+# Active Storage services. Local disk only — development, test, and production
+# all store uploads on the file system under storage/ (or tmp/ for tests).
+test:
+  service: Disk
+  root: <%= Rails.root.join("tmp/storage/files") %>
+
+local:
+  service: Disk
+  root: <%= Rails.root.join("storage", Rails.env, "files") %>

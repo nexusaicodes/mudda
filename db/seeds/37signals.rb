@@ -19,6 +19,6 @@ create_board("Mudda", access_to: [ jason, jz, kevin ]).tap do |mudda|
 
   create_card("Plain text mentions", description: "We'll support plain text mentions first.", board: mudda).tap do |card|
     card.toggle_assignment(david)
-    card.close
+    card.triage_into(card.board.done_column)
   end
 end

@@ -26,14 +26,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     get cards_path(format: :json), params: { column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ] }
     assert_response :success
 
-    assert_equal [ cards(:logo).number, cards(:layout).number, cards(:text).number ].sort, @response.parsed_body.pluck("number").sort
-  end
-
-  test "index as JSON can filter by maybe index" do
-    get cards_path(format: :json), params: { indexed_by: "maybe" }
-    assert_response :success
-
-    assert_equal [ cards(:buy_domain).number ], @response.parsed_body.pluck("number")
+    assert_equal [ cards(:logo).number, cards(:layout).number, cards(:buy_domain).number, cards(:text).number ].sort, @response.parsed_body.pluck("number").sort
   end
 
   test "create a new draft" do

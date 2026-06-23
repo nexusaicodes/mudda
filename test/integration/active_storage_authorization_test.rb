@@ -200,45 +200,6 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     assert_includes response.headers["Cache-Control"], "public"
   end
 
-  # Account exports
-
-  test "export owner can download their export" do
-    sign_in_as :david
-
-    blob = create_export_blob_for(users(:david))
-
-    get rails_blob_path(blob, disposition: :attachment)
-    assert_response :redirect
-    assert_match %r{rails/active_storage}, response.location
-  end
-
-  test "export owner can download their export with bearer token" do
-    blob = create_export_blob_for(users(:david))
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
-
-    get rails_blob_path(blob, disposition: :attachment), env: bearer_token
-
-    assert_response :redirect
-    assert_match %r{rails/active_storage}, response.location
-  end
-
-  test "non-owner cannot download another user's export" do
-    sign_in_as :jz
-
-    blob = create_export_blob_for(users(:david))
-
-    get rails_blob_path(blob, disposition: :attachment)
-    assert_response :forbidden
-  end
-
-  test "unauthenticated user cannot download export" do
-    blob = create_export_blob_for(users(:david))
-
-    get rails_blob_path(blob, disposition: :attachment)
-    assert_response :redirect
-    assert_match %r{/session/new}, response.location
-  end
-
   private
     def attach_blob_to_card(card)
       Current.with(session: sessions(:david)) do
@@ -263,12 +224,6 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
 
         blob.reload
       end
-    end
-
-    def create_export_blob_for(user)
-      export = Account::Export.create!(account: @account, user: user)
-      export.file.attach io: StringIO.new("test export content"), filename: "export.zip", content_type: "application/zip"
-      export.file.blob
     end
 
     def attach_avatar_to(user)

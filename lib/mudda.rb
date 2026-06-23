@@ -1,33 +1,15 @@
 module Mudda
   class << self
+    # Single-tenant OSS build on SQLite. The SaaS product layer and the MySQL
+    # path have been removed, so this is always false; the predicate is kept
+    # because it still guards a handful of view/job branches.
     def saas?
-      return @saas if defined?(@saas)
-      @saas = !!(((ENV["SAAS"] || File.exist?(File.expand_path("../tmp/saas.txt", __dir__))) && ENV["SAAS"] != "false"))
+      false
     end
 
-    def db_adapter
-      @db_adapter ||= DbAdapter.new ENV.fetch("DATABASE_ADAPTER", saas? ? "mysql" : "sqlite")
-    end
-
+    # Retained as a no-op: bin/rails calls it before boot to optionally swap in
+    # the SaaS Gemfile, which no longer exists here.
     def configure_bundle
-      if saas?
-        ENV["BUNDLE_GEMFILE"] = "Gemfile.saas"
-      end
-    end
-  end
-
-  class DbAdapter
-    def initialize(name)
-      @name = name.to_s
-    end
-
-    def to_s
-      @name
-    end
-
-    # Not using inquiry so that it works before Rails env loads.
-    def sqlite?
-      @name == "sqlite"
     end
   end
 end

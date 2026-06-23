@@ -37,7 +37,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
 
     # Direct on Account
     column = Column.create!(board: board, name: "Test", position: 0)
-    export = Account::Export.create!(account: account, user: user)
     search_query = Search::Query.create!(user: user, terms: "test search")
     storage_entry = Storage::Entry.create!(account: account, delta: 100, operation: "attach")
 
@@ -79,7 +78,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert Webhook.where(account_id: account_id).exists?
     assert Access.where(account_id: account_id).exists?
     assert Account::JoinCode.where(account_id: account_id).exists?
-    assert Account::Export.where(account_id: account_id).exists?
     assert Search::Query.where(account_id: account_id).exists?
     assert Storage::Entry.where(account_id: account_id).exists?
     assert Board::Publication.where(account_id: account_id).exists?
@@ -118,8 +116,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty Webhook.where(account_id: account_id)
     assert_empty Column.where(account_id: account_id)
     assert_empty Account::JoinCode.where(account_id: account_id)
-    assert_empty Account::Export.where(account_id: account_id)
-    assert_empty Account::Import.where(account_id: account_id)
     assert_empty Search::Query.where(account_id: account_id)
 
     # Via Board

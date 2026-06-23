@@ -1,6 +1,4 @@
 class Notification < ApplicationRecord
-  include Notification::Pushable
-
   belongs_to :account, default: -> { user.account }
   belongs_to :user
   belongs_to :creator, class_name: "User"

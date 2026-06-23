@@ -5,8 +5,6 @@ Rails.application.routes.draw do
     resource :cancellation, only: [ :create ]
     resource :join_code
     resource :settings
-    resources :exports, only: [ :create, :show ]
-    resources :imports, only: [ :new, :create, :show ]
   end
 
   resources :users do
@@ -14,13 +12,10 @@ Rails.application.routes.draw do
       resource :avatar
       resource :role
       resource :events
-      resources :push_subscriptions
 
       resources :email_addresses, param: :token do
         resource :confirmation, module: :email_addresses
       end
-
-      resources :data_exports, only: [ :create, :show ]
     end
   end
 
@@ -227,8 +222,4 @@ Rails.application.routes.draw do
   # Mobile clients
   get "client_configurations/(:platform)_v(:version)" => "client_configurations#show",
     platform: /android|ios/, version: /\d+/
-
-  namespace :admin do
-    mount MissionControl::Jobs::Engine, at: "/jobs"
-  end
 end

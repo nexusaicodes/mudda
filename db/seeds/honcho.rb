@@ -60,7 +60,7 @@ boards.each_with_index do |board_name, index|
             card.triage_into(column)
           end
         when 1
-          card.close
+          card.triage_into(card.board.done_column)
           # 2 remains open
         end
       end

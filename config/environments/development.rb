@@ -31,14 +31,8 @@ Rails.application.configure do
     config.cache_store = :null_store
   end
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  if Rails.root.join("tmp/minio-dev.txt").exist?
-    config.active_storage.service = :devminio
-    config.x.content_security_policy.connect_src = "http://minio.mudda.localhost:39000"
-    config.x.content_security_policy.img_src = "http://minio.mudda.localhost:39000"
-  else
-    config.active_storage.service = :local
-  end
+  # Store uploaded files on the local file system (see config/storage.yml).
+  config.active_storage.service = :local
 
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false

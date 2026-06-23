@@ -36,16 +36,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal "New Name", Current.account.reload.name
   end
 
-  test "create push subscription with flat JSON" do
-    stub_web_push_dns_resolution
-
-    post user_push_subscriptions_path(users(:kevin)),
-      params: { endpoint: "https://fcm.googleapis.com/fcm/send/abc123", p256dh_key: "key1", auth_key: "key2" },
-      as: :json
-
-    assert_response :created
-  end
-
   test "create card with flat JSON" do
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),

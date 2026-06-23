@@ -133,40 +133,14 @@ GEM
       public_suffix (>= 2.0.2, < 8.0)
     ansi (1.6.0)
     ast (2.4.3)
-    autotuner (1.1.0)
-    aws-eventstream (1.4.0)
-    aws-partitions (1.1240.0)
-    aws-sdk-core (3.245.0)
-      aws-eventstream (~> 1, >= 1.3.0)
-      aws-partitions (~> 1, >= 1.992.0)
-      aws-sigv4 (~> 1.9)
-      base64
-      bigdecimal
-      jmespath (~> 1, >= 1.6.1)
-      logger
-    aws-sdk-kms (1.123.0)
-      aws-sdk-core (~> 3, >= 3.244.0)
-      aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.219.0)
-      aws-sdk-core (~> 3, >= 3.244.0)
-      aws-sdk-kms (~> 1)
-      aws-sigv4 (~> 1.5)
-    aws-sigv4 (1.12.1)
-      aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
     bcrypt (3.1.22)
-    bcrypt_pbkdf (1.1.2)
     benchmark (0.5.0)
     bigdecimal (4.1.2)
     bindex (0.8.1)
     bootsnap (1.24.5)
       msgpack (~> 1.2)
-    brakeman (8.0.4)
-      racc
     builder (3.3.0)
-    bundler-audit (0.9.3)
-      bundler (>= 1.2.0)
-      thor (~> 1.0)
     capybara (3.40.0)
       addressable
       matrix
@@ -189,9 +163,7 @@ GEM
     debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
-    dotenv (3.2.0)
     drb (2.2.3)
-    ed25519 (1.4.0)
     erb (6.0.4)
     erubi (1.13.1)
     et-orbi (1.4.0)
@@ -233,21 +205,7 @@ GEM
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    jmespath (1.6.2)
     json (2.19.7)
-    jwt (3.2.0)
-      base64
-    kamal (2.11.0)
-      activesupport (>= 7.0)
-      base64 (~> 0.2)
-      bcrypt_pbkdf (~> 1.0)
-      concurrent-ruby (~> 1.2)
-      dotenv (~> 3.1)
-      ed25519 (~> 1.4)
-      net-ssh (~> 7.3)
-      sshkit (>= 1.23.0, < 2.0)
-      thor (~> 1.3)
-      zeitwerk (>= 2.6.18, < 3.0)
     language_server-protocol (3.17.0.5)
     launchy (3.1.1)
       addressable (~> 2.8)
@@ -281,22 +239,10 @@ GEM
       builder
       minitest (>= 5.0, < 7)
       ruby-progressbar
-    mission_control-jobs (1.1.0)
-      actioncable (>= 7.1)
-      actionpack (>= 7.1)
-      activejob (>= 7.1)
-      activerecord (>= 7.1)
-      importmap-rails (>= 1.2.1)
-      irb (~> 1.13)
-      railties (>= 7.1)
-      stimulus-rails
-      turbo-rails
     mittens (0.3.1)
     mocha (3.1.0)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.8.1)
-    net-http-persistent (4.0.8)
-      connection_pool (>= 2.2.4, < 4)
     net-imap (0.6.4.1)
       date
       net-protocol
@@ -304,13 +250,8 @@ GEM
       net-protocol
     net-protocol (0.2.2)
       timeout
-    net-scp (4.1.0)
-      net-ssh (>= 2.6.5, < 8.0.0)
-    net-sftp (4.0.0)
-      net-ssh (>= 5.0.0, < 8.0.0)
     net-smtp (0.5.1)
       net-protocol
-    net-ssh (7.3.2)
     nio4r (2.7.5)
     nokogiri (1.19.4-aarch64-linux-gnu)
       racc (~> 1.4)
@@ -328,8 +269,6 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.4-x86_64-linux-musl)
       racc (~> 1.4)
-    openssl (4.0.0)
-    ostruct (0.6.3)
     parallel (1.27.0)
     parser (3.3.10.0)
       ast (~> 2.4.1)
@@ -450,26 +389,11 @@ GEM
     sqlite3 (2.9.5-x86_64-darwin)
     sqlite3 (2.9.5-x86_64-linux-gnu)
     sqlite3 (2.9.5-x86_64-linux-musl)
-    sshkit (1.25.0)
-      base64
-      logger
-      net-scp (>= 1.1.2)
-      net-sftp (>= 2.1.2)
-      net-ssh (>= 2.8.0)
-      ostruct
-    stackprof (0.2.28)
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.2.0)
     thor (1.5.0)
-    thruster (0.1.21)
-    thruster (0.1.21-aarch64-linux)
-    thruster (0.1.21-arm64-darwin)
-    thruster (0.1.21-x86_64-darwin)
-    thruster (0.1.21-x86_64-linux)
     timeout (0.6.1)
-    trilogy (2.11.1)
-      bigdecimal
     tsort (0.2.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -478,9 +402,6 @@ GEM
     unicode-emoji (4.1.0)
     uri (1.1.1)
     vcr (6.4.0)
-    web-push (3.1.0)
-      jwt (~> 3.0)
-      openssl (>= 3.0)
     webmock (3.26.2)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -493,7 +414,6 @@ GEM
     xpath (3.2.0)
       nokogiri (~> 1.8)
     zeitwerk (2.7.5)
-    zip_kit (6.3.4)
 
 PLATFORMS
   aarch64-linux
@@ -508,13 +428,9 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  autotuner
-  aws-sdk-s3
   bcrypt (~> 3.1.22)
   benchmark
   bootsnap
-  brakeman
-  bundler-audit
   capybara
   debug
   faker
@@ -522,14 +438,11 @@ DEPENDENCIES
   image_processing (~> 1.14)
   importmap-rails
   jbuilder
-  kamal
   letter_opener
   lexxy (= 0.9.14.beta)
   minitest-reporters
-  mission_control-jobs
   mittens
   mocha
-  net-http-persistent
   platform_agent
   propshaft
   puma (~> 7.2, >= 7.2.1)
@@ -543,17 +456,12 @@ DEPENDENCIES
   solid_cache (~> 1.0)
   solid_queue (~> 1.4)
   sqlite3 (>= 2.0)
-  stackprof
   stimulus-rails
-  thruster
-  trilogy (~> 2.11)
   turbo-rails!
   useragent!
   vcr
   web-console!
-  web-push
   webmock
-  zip_kit
 
 BUNDLED WITH
    2.7.2

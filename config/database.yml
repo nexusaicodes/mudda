@@ -1,9 +1,42 @@
-<%
-  config_path = if Mudda.saas?
-    gem_path = Rails.root.join("saas").to_s
-    File.join(gem_path, "config", "database.yml")
-  else
-    File.join("config", "database.#{Mudda.db_adapter}.yml")
-  end
-%>
-<%= ERB.new(File.read(config_path)).result %>
+default: &default
+  adapter: sqlite3
+  pool: 5
+  timeout: 5000
+
+development:
+  primary:
+    <<: *default
+    database: storage/development.sqlite3
+    schema_dump: schema_sqlite.rb
+  cable:
+    <<: *default
+    database: storage/development_cable.sqlite3
+    migrations_paths: db/cable_migrate
+
+test:
+  primary:
+    <<: *default
+    database: storage/test.sqlite3
+    schema_dump: schema_sqlite.rb
+  cable:
+    <<: *default
+    database: storage/test_cable.sqlite3
+    migrations_paths: db/cable_migrate
+
+production:
+  primary:
+    <<: *default
+    database: storage/production.sqlite3
+    schema_dump: schema_sqlite.rb
+  cable:
+    <<: *default
+    database: storage/production_cable.sqlite3
+    migrations_paths: db/cable_migrate
+  cache:
+    <<: *default
+    database: storage/production_cache.sqlite3
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: storage/production_queue.sqlite3
+    migrations_paths: db/queue_migrate

@@ -1,0 +1,19 @@
+#!/bin/bash -e
+
+# Clear a stale Puma pidfile left by an unclean shutdown.
+rm -f tmp/pids/server.pid
+
+# Prepare the database only when booting the server, so one-off commands
+# (tests, console, rubocop via `docker compose run`) start instantly.
+if [ "$1" = "bin/rails" ] && [ "$2" = "server" ]; then
+  # db:prepare creates databases, loads the schema, runs migrations, and (on a
+  # fresh database) loads db/seeds.rb. The schema is in place before seeds run,
+  # so a seed failure is surfaced as a warning but kept non-fatal.
+  if ! ./bin/rails db:prepare; then
+    echo "WARN: db:prepare failed (commonly a broken db/seeds.rb)."
+    echo "      Continuing without demo data; run 'make seed' once it's fixed."
+    ./bin/rails db:migrate
+  fi
+fi
+
+exec "${@}"

@@ -16,7 +16,6 @@
   </div>
 
   <div class="settings__panel panel shadow center">
-    <%= render "account/settings/export" if Current.user.admin? || Current.user.owner? %>
     <%= render "account/settings/cancellation" %>
   </div>
 </div>

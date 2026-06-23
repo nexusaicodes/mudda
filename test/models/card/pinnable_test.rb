@@ -19,7 +19,7 @@ class Card::PinnableTest < ActiveSupport::TestCase
 
   test "broadcasts pin update when board changes" do
     assert_broadcasted_pin_update do
-      cards(:logo).update!(board: boards(:private), column: nil)
+      cards(:logo).update!(board: boards(:private))
     end
   end
 

@@ -9,28 +9,28 @@ Mudda is built and maintained by **Nexus AI**. It is a fork of
 We're grateful to 37signals for releasing Fizzy as open source; Mudda continues that work
 under the same [O'Saasy License](LICENSE.md).
 
-> **Heads up:** Mudda is an early fork. Some hosting-specific values still point at
-> upstream infrastructure (deploy hosts, CDNs, container registries). See
-> [`CLAUDE.md`](CLAUDE.md) for the list of values you must change before running your own
-> hosted deployment.
+> **Heads up:** This is a trimmed standalone build — a single-tenant app on SQLite, run via
+> Docker Compose. The SaaS engine, Kamal deploy tooling, MySQL, S3/object storage, push
+> notifications, and cross-instance import/export have been removed.
 
 
-## Running your own Mudda instance
+## Running Mudda
 
-If you want to run your own Mudda instance but don't need to change its code, you can use a
-pre-built Docker image. You'll need a server that can run Docker, and you'll configure a few
-options to customize your installation.
+Everything runs through Docker Compose. With Docker installed:
 
-See the [Docker deployment guide](docs/docker-deployment.md) for details.
+```bash
+make setup    # build the image and start the app
+```
 
-If you want more flexibility to customize Mudda by changing its code and deploying those
-changes, we recommend deploying with Kamal. See the [Kamal deployment guide](docs/kamal-deployment.md).
+Then open http://app.mudda.localhost:3006 and log in as `david@example.com` (the magic link
+is printed by `make logs`). See [DOCKER.md](DOCKER.md) for the full reference, and run `make`
+for all targets.
 
 
 ## Development
 
-You are welcome — and encouraged — to modify Mudda to your liking.
-See the [Development guide](docs/development.md) to get Mudda set up locally.
+You are welcome — and encouraged — to modify Mudda to your liking. The Compose setup
+([DOCKER.md](DOCKER.md)) bind-mounts your source for live reload.
 
 For architecture and conventions, start with [AGENTS.md](AGENTS.md) (architecture) and
 [STYLE.md](STYLE.md) (house style).

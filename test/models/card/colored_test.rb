@@ -2,8 +2,9 @@ require "test_helper"
 
 class Card::ColoredTest < ActiveSupport::TestCase
   test "use default color if no column" do
-    cards(:logo).update! column: nil
-    assert_equal Column::Colored::DEFAULT_COLOR, cards(:logo).color
+    card = cards(:logo)
+    card.column = nil
+    assert_equal Column::Colored::DEFAULT_COLOR, card.color
   end
 
   test "infer color from column" do
