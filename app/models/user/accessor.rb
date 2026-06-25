@@ -1,13 +1,16 @@
 module User::Accessor
   extend ActiveSupport::Concern
 
-  included do
-    has_many :accesses, dependent: :destroy
-    has_many :boards, through: :accesses
-    has_many :accessible_cards, through: :boards, source: :cards
-    has_many :accessible_comments, through: :accessible_cards, source: :comments
+  def boards
+    account.boards
+  end
 
-    after_create_commit :grant_access_to_boards, unless: :system?
+  def accessible_cards
+    account.cards
+  end
+
+  def accessible_events
+    Event.where(account_id: account_id)
   end
 
   def draft_new_card_in(board)
@@ -15,9 +18,4 @@ module User::Accessor
       card.update!(created_at: Time.current, updated_at: Time.current, last_active_at: Time.current)
     end
   end
-
-  private
-    def grant_access_to_boards
-      Access.insert_all account.boards.all_access.ids.collect { |board_id| { id: ActiveRecord::Type::Uuid.generate, board_id: board_id, user_id: id, account_id: account.id } }
-    end
 end

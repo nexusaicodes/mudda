@@ -33,7 +33,7 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     Current.session = Session.new(identity: identities(:mike))
 
     user = users(:mike)
-    user.create_settings!(bundle_email_frequency: :never)
+    user.create_settings!
 
     # Direct on Account
     column = Column.create!(board: board, name: "Test", position: 0)
@@ -41,22 +41,15 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     storage_entry = Storage::Entry.create!(account: account, delta: 100, operation: "attach")
 
     # Via Board
-    publication = Board::Publication.create!(board: board)
     event = Event.create!(board: board, creator: user, eventable: card, action: "card_published")
 
     # Via Card
-    comment = card.comments.create!(body: "Test comment")
+    note = card.notes.create!(body: "Test note")
     step = Step.create!(card: card, content: "Test step")
-    assignment = Assignment.create!(card: card, assignee: user, assigner: user)
-    watch = Watch.create!(card: card, user: user)
     pin = Pin.create!(card: card, user: user)
-    reaction = Reaction.create!(reactable: card, content: "thumbs_up")
-    mention = Mention.create!(source: card, mentioner: user, mentionee: user)
     goldness = Card::Goldness.create!(card: card)
 
     # Via User
-    notification = Notification.create!(user: user, source: event, creator: user)
-    notification_bundle = Notification::Bundle.create!(user: user, starts_at: 1.hour.ago, ends_at: 1.hour.from_now)
     filter = Filter.create!(creator: user, fields: { indexed_by: :all, sorted_by: :newest }.to_json, params_digest: SecureRandom.hex)
 
     # ActiveStorage (attach image to card)
@@ -70,22 +63,13 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert Board.where(account_id: account_id).exists?
     assert Card.where(account_id: account_id).exists?
     assert Column.where(account_id: account_id).exists?
-    assert Access.where(account_id: account_id).exists?
-    assert Account::JoinCode.where(account_id: account_id).exists?
     assert Search::Query.where(account_id: account_id).exists?
     assert Storage::Entry.where(account_id: account_id).exists?
-    assert Board::Publication.where(account_id: account_id).exists?
     assert Event.where(account_id: account_id).exists?
-    assert Comment.where(account_id: account_id).exists?
+    assert Note.where(account_id: account_id).exists?
     assert Step.where(account_id: account_id).exists?
-    assert Assignment.where(account_id: account_id).exists?
-    assert Watch.where(account_id: account_id).exists?
     assert Pin.where(account_id: account_id).exists?
-    assert Reaction.where(account_id: account_id).exists?
-    assert Mention.where(account_id: account_id).exists?
     assert Card::Goldness.where(account_id: account_id).exists?
-    assert Notification.where(account_id: account_id).exists?
-    assert Notification::Bundle.where(account_id: account_id).exists?
     assert Filter.where(account_id: account_id).exists?
     assert User::Settings.where(user_id: user.id).exists?
     assert ActiveStorage::Attachment.where(account_id: account_id).exists?
@@ -106,27 +90,18 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty Board.where(account_id: account_id)
     assert_empty Card.where(account_id: account_id)
     assert_empty Column.where(account_id: account_id)
-    assert_empty Account::JoinCode.where(account_id: account_id)
     assert_empty Search::Query.where(account_id: account_id)
 
     # Via Board
-    assert_empty Board::Publication.where(account_id: account_id)
-    assert_empty Access.where(account_id: account_id)
     assert_empty Event.where(account_id: account_id)
 
     # Via Card
-    assert_empty Comment.where(account_id: account_id)
+    assert_empty Note.where(account_id: account_id)
     assert_empty Step.where(account_id: account_id)
-    assert_empty Assignment.where(account_id: account_id)
-    assert_empty Watch.where(account_id: account_id)
     assert_empty Pin.where(account_id: account_id)
-    assert_empty Reaction.where(account_id: account_id)
-    assert_empty Mention.where(account_id: account_id)
     assert_empty Card::Goldness.where(account_id: account_id)
 
     # Via User
-    assert_empty Notification.where(account_id: account_id)
-    assert_empty Notification::Bundle.where(account_id: account_id)
     assert_empty Filter.where(account_id: account_id)
     assert_empty User::Settings.where(user_id: user_ids)
 

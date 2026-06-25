@@ -19,11 +19,11 @@ class Card::SearchableTest < ActiveSupport::TestCase
     results = Card.mentioning("layout", user: @user)
     assert_includes results, card
 
-    # Searching by comment
-    card_with_comment = @board.cards.create!(title: "Some card", status: "published", creator: @user)
-    card_with_comment.comments.create!(body: "overflowing text", creator: @user)
+    # Searching by note
+    card_with_note = @board.cards.create!(title: "Some card", status: "published", creator: @user)
+    card_with_note.notes.create!(body: "overflowing text", creator: @user)
     results = Card.mentioning("overflowing", user: @user)
-    assert_includes results, card_with_comment
+    assert_includes results, card_with_note
 
     # Sanitizing search query
     card_broken = @board.cards.create!(title: "broken layout", status: "published", creator: @user)
@@ -33,13 +33,13 @@ class Card::SearchableTest < ActiveSupport::TestCase
     # Empty query returns no results
     assert_empty Card.mentioning("\"", user: @user)
 
-    # Filtering by board_ids
+    # Searching spans every board in the account
     other_board = Board.create!(name: "Other Board", account: @account, creator: @user)
     card_in_board = @board.cards.create!(title: "searchable content", status: "published", creator: @user)
     card_in_other_board = other_board.cards.create!(title: "searchable content", status: "published", creator: @user)
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_in_board
-    assert_not_includes results, card_in_other_board
+    assert_includes results, card_in_other_board
   end
 
   test "search content is truncated to a reasonable limit" do

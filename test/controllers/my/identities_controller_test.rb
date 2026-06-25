@@ -23,9 +23,9 @@ class My::IdentitiesControllerTest < ActionDispatch::IntegrationTest
     active_account = Account.create!(external_account_id: 9999981, name: "Active Account")
     cancelled_account = Account.create!(external_account_id: 9999982, name: "Cancelled Account")
 
-    identity.users.create!(account: active_account, name: "Kevin", role: :owner)
+    identity.users.create!(account: active_account, name: "Kevin")
 
-    cancelling_user = identity.users.create!(account: cancelled_account, name: "Kevin", role: :owner)
+    cancelling_user = identity.users.create!(account: cancelled_account, name: "Kevin")
     cancelled_account.cancel(initiated_by: cancelling_user)
 
     untenanted do

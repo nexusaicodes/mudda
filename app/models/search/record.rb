@@ -25,8 +25,8 @@ class Search::Record < ApplicationRecord
   scope :for_query, ->(query, user:) do
     query = Search::Query.wrap(query)
 
-    if query.valid? && user.board_ids.any?
-      matching(query.to_s, user.account_id).where(account_id: user.account_id, board_id: user.board_ids)
+    if query.valid?
+      matching(query.to_s, user.account_id).where(account_id: user.account_id)
     else
       none
     end
@@ -42,10 +42,10 @@ class Search::Record < ApplicationRecord
   end
 
   def source
-    searchable_type == "Comment" ? searchable : card
+    searchable_type == "Note" ? searchable : card
   end
 
-  def comment
-    searchable if searchable_type == "Comment"
+  def note
+    searchable if searchable_type == "Note"
   end
 end

@@ -1,21 +1,21 @@
-class Cards::CommentsController < ApplicationController
-  wrap_parameters :comment, include: %i[ body created_at ]
+class Cards::NotesController < ApplicationController
+  wrap_parameters :note, include: %i[ body created_at ]
   include CardScoped
 
-  before_action :set_comment, only: %i[ show edit update destroy ]
+  before_action :set_note, only: %i[ show edit update destroy ]
   before_action :ensure_creatorship, only: %i[ edit update destroy ]
-  before_action :ensure_card_is_commentable, only: :create
+  before_action :ensure_card_is_notable, only: :create
 
   def index
-    set_page_and_extract_portion_from @card.comments.chronologically
+    set_page_and_extract_portion_from @card.notes.chronologically
   end
 
   def create
-    @comment = @card.comments.create!(comment_params)
+    @note = @card.notes.create!(note_params)
 
     respond_to do |format|
       format.turbo_stream
-      format.json { render :show, status: :created, location: card_comment_path(@card, @comment, format: :json) }
+      format.json { render :show, status: :created, location: card_note_path(@card, @note, format: :json) }
     end
   end
 
@@ -26,7 +26,7 @@ class Cards::CommentsController < ApplicationController
   end
 
   def update
-    @comment.update! comment_params
+    @note.update! note_params
 
     respond_to do |format|
       format.turbo_stream
@@ -35,7 +35,7 @@ class Cards::CommentsController < ApplicationController
   end
 
   def destroy
-    @comment.destroy
+    @note.destroy
 
     respond_to do |format|
       format.turbo_stream
@@ -44,19 +44,19 @@ class Cards::CommentsController < ApplicationController
   end
 
   private
-    def set_comment
-      @comment = @card.comments.find(params[:id])
+    def set_note
+      @note = @card.notes.find(params[:id])
     end
 
     def ensure_creatorship
-      head :forbidden if Current.user != @comment.creator
+      head :forbidden if Current.user != @note.creator
     end
 
-    def ensure_card_is_commentable
-      head :forbidden unless @card.commentable?
+    def ensure_card_is_notable
+      head :forbidden unless @card.notable?
     end
 
-    def comment_params
-      params.expect(comment: [ :body, :created_at ])
+    def note_params
+      params.expect(note: [ :body, :created_at ])
     end
 end

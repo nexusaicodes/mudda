@@ -37,11 +37,11 @@ module Search::Record::SQLite
   end
 
   def card_description
-    escape_fts_highlight(result_content) unless comment
+    escape_fts_highlight(result_content) unless note
   end
 
-  def comment_body
-    escape_fts_highlight(result_content) if comment
+  def note_body
+    escape_fts_highlight(result_content) if note
   end
 
   private

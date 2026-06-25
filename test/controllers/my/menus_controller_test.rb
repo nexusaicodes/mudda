@@ -31,18 +31,7 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     etag = response.headers["ETag"]
 
-    @account.boards.create!(name: "New Board", all_access: true, creator: @user)
-
-    get my_menu_path, headers: { "If-None-Match" => etag }
-    assert_response :success
-  end
-
-  test "etag invalidates when account changes" do
-    get my_menu_path
-    assert_response :success
-    etag = response.headers["ETag"]
-
-    @account.update!(name: "Renamed Account")
+    @account.boards.create!(name: "New Board", creator: @user)
 
     get my_menu_path, headers: { "If-None-Match" => etag }
     assert_response :success
@@ -60,7 +49,7 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
   test "show excludes cancelled accounts" do
     # Create another account for the same identity
     another_account = Account.create!(external_account_id: 9999996, name: "Cancelled Account")
-    another_user = @user.identity.users.create!(account: another_account, name: "Kevin", role: "owner")
+    another_user = @user.identity.users.create!(account: another_account, name: "Kevin")
 
     # Cancel the other account
     another_account.cancel(initiated_by: another_user)

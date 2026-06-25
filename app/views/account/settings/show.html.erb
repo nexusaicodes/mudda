@@ -3,16 +3,12 @@
 <% content_for :header do %>
   <h1 class="header__title" data-bridge--title-target="header">
     <%= @page_title %>
-    <% unless Current.user.admin? %>
-      <div class="txt-normal font-weight-normal">Only admins can change these settings</div>
-    <% end %>
   </h1>
 <% end %>
 
 <div class="settings margin-block-start-half">
   <div class="settings__panel settings__panel--users panel shadow center">
     <%= render "account/settings/name", account: @account %>
-    <%= render "account/settings/users", users: @users %>
   </div>
 
   <div class="settings__panel panel shadow center">

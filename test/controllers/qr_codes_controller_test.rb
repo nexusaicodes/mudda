@@ -2,10 +2,7 @@ require "test_helper"
 
 class QrCodesControllerTest < ActionDispatch::IntegrationTest
   test "show" do
-    join_code = account_join_codes(:"37s")
-    account = accounts("37s")
-    url = join_url(code: join_code.code, script_name: account.slug, host: "app.mudda.do")
-    signed_token = QrCodeLink.new(url).signed
+    signed_token = QrCodeLink.new("https://app.mudda.do/").signed
 
     get qr_code_path(signed_token)
 

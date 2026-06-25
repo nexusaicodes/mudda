@@ -27,13 +27,13 @@ class Event::DescriptionTest < ActiveSupport::TestCase
     assert_includes description.to_plain_text, "logo"
   end
 
-  test "generates description for comment event" do
+  test "generates description for note event" do
     description = events(:layout_commented).description_for(users(:jz))
 
-    assert_includes description.to_plain_text, "David commented on"
+    assert_includes description.to_plain_text, "David added a note to"
   end
 
-  test "uses always the name even when the event creator is the current user" do
+  test "uses always the name in plain text even when the event creator is the current user" do
     description = events(:logo_published).description_for(users(:david))
 
     assert_includes description.to_plain_text, "David added"
@@ -43,42 +43,6 @@ class Event::DescriptionTest < ActiveSupport::TestCase
     description = events(:logo_published).description_for(users(:jz))
 
     assert_includes description.to_plain_text, "David added"
-  end
-
-  test "to_html escapes assignee names" do
-    users(:jz).update_column(:name, "Tom & Jerry")
-    description = events(:logo_assignment_jz).description_for(users(:david))
-
-    assert_includes description.to_html, "Tom &amp; Jerry"
-    assert_not_includes description.to_html, "Tom & Jerry"
-  end
-
-  test "to_plain_text escapes assignee names" do
-    users(:jz).update_column(:name, "Tom & Jerry")
-    description = events(:logo_assignment_jz).description_for(users(:david))
-
-    assert_includes description.to_plain_text, "Tom &amp; Jerry"
-    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
-  end
-
-  test "to_html escapes unassigned names" do
-    users(:jz).update_column(:name, "Tom & Jerry")
-    event = events(:logo_assignment_jz)
-    event.update_column(:action, "card_unassigned")
-    description = event.description_for(users(:david))
-
-    assert_includes description.to_html, "Tom &amp; Jerry"
-    assert_not_includes description.to_html, "Tom & Jerry"
-  end
-
-  test "to_plain_text escapes unassigned names" do
-    users(:jz).update_column(:name, "Tom & Jerry")
-    event = events(:logo_assignment_jz)
-    event.update_column(:action, "card_unassigned")
-    description = event.description_for(users(:david))
-
-    assert_includes description.to_plain_text, "Tom &amp; Jerry"
-    assert_not_includes description.to_plain_text, "Tom &amp;amp; Jerry"
   end
 
   test "to_html escapes old title in renamed description" do

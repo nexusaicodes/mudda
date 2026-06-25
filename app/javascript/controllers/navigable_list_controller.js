@@ -231,7 +231,6 @@ export default class extends Controller {
     })
   }
 
-  // Public accessors for card_hotkeys_controller outlet
   get visibleItems() {
     return this.#visibleItems
   }

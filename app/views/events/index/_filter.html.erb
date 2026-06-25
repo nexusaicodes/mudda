@@ -5,9 +5,4 @@
   <% unless user_filtering.boards.one? %>
     <%= render "events/index/filter/board", user_filtering: %>
   <% end %>
-
-  <% unless user_filtering.users.one? %>
-    <span>by</span>
-    <%= render "events/index/filter/user", user_filtering: %>
-  <% end %>
 <% end %>

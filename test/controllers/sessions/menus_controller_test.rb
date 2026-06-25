@@ -53,8 +53,8 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
     @identity.users.delete_all
     account1 = Account.create!(external_account_id: 9999994, name: "Active Account")
     account2 = Account.create!(external_account_id: 9999995, name: "Cancelled Account")
-    user1 = @identity.users.create!(account: account1, name: "Kevin", role: "owner")
-    user2 = @identity.users.create!(account: account2, name: "Kevin", role: "owner")
+    user1 = @identity.users.create!(account: account1, name: "Kevin")
+    user2 = @identity.users.create!(account: account2, name: "Kevin")
 
     # Cancel one account
     account2.cancel(initiated_by: user2)

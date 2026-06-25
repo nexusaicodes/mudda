@@ -1,1 +1,1 @@
-json.partial! "cards/comments/comment", comment: @comment
+json.partial! "cards/notes/note", note: @note

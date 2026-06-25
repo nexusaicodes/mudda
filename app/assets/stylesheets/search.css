@@ -82,9 +82,9 @@ summary {
     font-size: var(--text-small);
   }
 
-  .search__excerpt--comment {
-    --avatar-size: var(--comment-avatar-size);
-    --comment-avatar-size: 32px;
+  .search__excerpt--note {
+    --avatar-size: var(--note-avatar-size);
+    --note-avatar-size: 32px;
     --padding: 1ch;
 
     align-items: center;
@@ -92,11 +92,11 @@ summary {
     border-radius: 1ch;
     display: flex;
     gap: 1ch;
-    margin-inline-start: calc(var(--comment-avatar-size) / 2);
+    margin-inline-start: calc(var(--note-avatar-size) / 2);
     padding-block: 0.5ch;
 
     .avatar {
-      margin-inline-start: calc(-0.5 * var(--comment-avatar-size));
+      margin-inline-start: calc(-0.5 * var(--note-avatar-size));
     }
   }
 

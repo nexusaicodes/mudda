@@ -1,13 +1,12 @@
 class Card < ApplicationRecord
-  include Accessible, Assignable, Attachments, Broadcastable, Colored, Commentable,
-    Due, Eventable, Golden, Mentions, Multistep, Pinnable, Promptable,
-    Readable, Searchable, Statuses, Storage::Tracked, Triageable, Watchable
+  include Attachments, Broadcastable, Colored, Notable,
+    Due, Eventable, Golden, Multistep, Pinnable, Promptable,
+    Searchable, Statuses, Storage::Tracked, Triageable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
-  has_many :reactions, -> { order(:created_at) }, as: :reactable, dependent: :delete_all
   has_one_attached :image, dependent: :purge_later
 
   has_rich_text :description
@@ -22,8 +21,8 @@ class Card < ApplicationRecord
   scope :reverse_chronologically, -> { order created_at:     :desc, id: :desc }
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
-  scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ], assignees: [ :avatar_attachment, :account ]) }
-  scope :preloaded,               -> { with_users.preload(:column, :steps, :goldness, :image_attachment, reactions: :reacter, board: [ :columns ]).with_rich_text_description_and_embeds }
+  scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ]) }
+  scope :preloaded,               -> { with_users.preload(:column, :steps, :goldness, :image_attachment, board: [ :columns ]).with_rich_text_description_and_embeds }
 
   scope :indexed_by, ->(index) do
     case index
@@ -54,12 +53,16 @@ class Card < ApplicationRecord
     transaction do
       card.update!(board: new_board)
       card.events.update_all(board_id: new_board.id)
-      Event.where(eventable: card.comments).update_all(board_id: new_board.id)
+      Event.where(eventable: card.notes).update_all(board_id: new_board.id)
     end
   end
 
   def filled?
     title.present? || description.present?
+  end
+
+  def accessible_to?(user)
+    user&.account_id == account_id
   end
 
   private
@@ -73,11 +76,7 @@ class Card < ApplicationRecord
       transaction do
         update! column: board.triage_column
         track_board_change_event(old_board.name)
-        grant_access_to_assignees unless board.all_access?
       end
-
-      remove_inaccessible_notifications_later
-      clean_inaccessible_data_later
     end
 
     def track_board_change_event(old_board_name)

@@ -440,7 +440,7 @@
     .card__stages,
     .card__steps,
     .card__boosts,
-    .card__comments,
+    .card__notes,
     .card__closed {
       display: none;
     }

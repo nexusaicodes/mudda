@@ -1,6 +1,6 @@
 class User < ApplicationRecord
-  include Accessor, Assignee, Attachable, Avatar, Configurable, EmailAddressChangeable,
-    Mentionable, Named, Notifiable, Role, Searcher, Watcher
+  include Accessor, Avatar, Configurable, EmailAddressChangeable,
+    Named, Searcher
   include Timelined # Depends on Accessor
 
   belongs_to :account
@@ -8,7 +8,9 @@ class User < ApplicationRecord
 
   validates :name, presence: true
 
-  has_many :comments, inverse_of: :creator, dependent: :destroy
+  scope :active, -> { where(active: true) }
+
+  has_many :notes, foreign_key: :creator_id, inverse_of: :creator, dependent: :destroy
 
   has_many :filters, foreign_key: :creator_id, inverse_of: :creator, dependent: :destroy
   has_many :pins, dependent: :destroy
@@ -16,7 +18,6 @@ class User < ApplicationRecord
 
   def deactivate
     transaction do
-      accesses.destroy_all
       update! active: false, identity: nil
       close_remote_connections
     end

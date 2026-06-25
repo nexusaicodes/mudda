@@ -22,9 +22,6 @@ class Filter < ApplicationRecord
       result = result.indexed_by(indexed_by)
       result = result.sorted_by(sorted_by)
       result = result.where(id: card_ids) if card_ids.present?
-      result = result.unassigned if assignment_status.unassigned?
-      result = result.assigned_to(assignees.ids) if assignees.present?
-      result = result.where(creator_id: creators.ids) if creators.present?
       result = result.where(board: boards.ids) if boards.present?
       result = result.where(cards: { created_at: creation_window }) if creation_window
       result = terms.reduce(result) do |result, term|

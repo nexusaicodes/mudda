@@ -1,11 +1,7 @@
 module EventsHelper
   def event_action_icon(event)
     case event.action
-    when "card_assigned"
-      "assigned"
-    when "card_unassigned"
-      "minus"
-    when "comment_created"
+    when "note_created"
       "comment"
     when "card_title_changed"
       "rename"

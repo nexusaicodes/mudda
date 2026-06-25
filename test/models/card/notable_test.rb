@@ -1,30 +1,20 @@
 require "test_helper"
 
-class Card::CommentableTest < ActiveSupport::TestCase
+class Card::NotableTest < ActiveSupport::TestCase
   setup do
     Current.session = sessions(:david)
   end
 
-  test "capturing comments" do
-    assert_difference -> { cards(:logo).comments.count }, +1 do
-      cards(:logo).comments.create!(body: "Agreed.")
+  test "capturing notes" do
+    assert_difference -> { cards(:logo).notes.count }, +1 do
+      cards(:logo).notes.create!(body: "Agreed.")
     end
 
-    assert_equal "Agreed.", cards(:logo).comments.last.body.to_plain_text.chomp
+    assert_equal "Agreed.", cards(:logo).notes.last.body.to_plain_text.chomp
   end
 
-  test "creating a comment on a card makes the creator watch the card" do
-    assert_not cards(:text).watched_by?(users(:kevin))
-
-    with_current_user(:kevin) do
-      cards(:text).comments.create!(body: "This sounds interesting!")
-    end
-
-    assert cards(:text).watched_by?(users(:kevin))
-  end
-
-  test "commentable is true for published cards, false for drafts" do
-    assert cards(:logo).commentable?
-    assert_not cards(:unfinished_thoughts).commentable?
+  test "notable? is true for published cards, false for drafts" do
+    assert cards(:logo).notable?
+    assert_not cards(:unfinished_thoughts).notable?
   end
 end

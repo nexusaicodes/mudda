@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  include Notifiable, Particulars, Promptable
+  include Particulars, Promptable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board
@@ -8,7 +8,6 @@ class Event < ApplicationRecord
 
   scope :chronologically, -> { order created_at: :asc, id: :desc }
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
-  scope :for_creators, ->(ids) { where(creator_id: ids) if ids.present? }
   scope :for_boards, ->(ids) { where(board_id: ids) if ids.present? }
   scope :preloaded, -> {
     includes(:creator, :board, {
@@ -27,10 +26,6 @@ class Event < ApplicationRecord
 
   def action
     super.inquiry
-  end
-
-  def notifiable_target
-    eventable
   end
 
   def description_for(user)

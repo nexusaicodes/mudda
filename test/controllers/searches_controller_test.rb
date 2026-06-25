@@ -4,12 +4,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   include SearchTestHelper
 
   setup do
-    @board.update!(all_access: true)
     @card = @board.cards.create!(title: "Layout is broken", description: "Look at this mess.", status: "published", creator: @user)
-    @comment_card = @board.cards.create!(title: "Some card", status: "published", creator: @user)
-    @comment_card.comments.create!(body: "overflowing text issue", creator: @user)
-    @comment2_card = @board.cards.create!(title: "Just haggis", description: "More haggis", status: "published", creator: @user)
-    @comment2_card.comments.create!(body: "I love haggis", creator: @user)
+    @note_card = @board.cards.create!(title: "Some card", status: "published", creator: @user)
+    @note_card.notes.create!(body: "overflowing text issue", creator: @user)
+    @note2_card = @board.cards.create!(title: "Just haggis", description: "More haggis", status: "published", creator: @user)
+    @note2_card.notes.create!(body: "I love haggis", creator: @user)
 
     untenanted { sign_in_as @user }
   end
@@ -24,16 +23,16 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__title", text: /Layout is broken/
     assert_select "li .search__excerpt", text: /Look at this mess/
 
-    # Searching by comment
+    # Searching by note
     get search_path(q: "overflowing", script_name: "/#{@account.external_account_id}")
     assert_select "li .search__title", text: /Some card/
-    assert_select "li .search__excerpt--comment", text: /overflowing text issue/
+    assert_select "li .search__excerpt--note", text: /overflowing text issue/
 
-    # Searching for a term that appears in a card and in a comment
+    # Searching for a term that appears in a card and in a note
     get search_path(q: "haggis", script_name: "/#{@account.external_account_id}")
     assert_select "li .search__title", text: /Just haggis/, count: 2 # card title shows up in two entries
     assert_select "li .search__excerpt", text: /More haggis/ # one entry for the card description
-    assert_select "li .search__excerpt--comment", text: /I love haggis/ # one entry for the comment
+    assert_select "li .search__excerpt--note", text: /I love haggis/ # one entry for the note
     assert_match(/<mark class="circled-text"><span><\/span>haggis<\/mark>/, response.body)
 
     # Searching by card id
@@ -73,7 +72,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     body = @response.parsed_body
     assert_kind_of Array, body
     assert_equal 1, body.size
-    assert_equal @comment2_card.id, body.first["id"]
+    assert_equal @note2_card.id, body.first["id"]
   end
 
   test "search highlights matched terms with proper HTML marks" do

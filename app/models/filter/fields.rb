@@ -26,12 +26,8 @@ module Filter::Fields
   end
 
   included do
-    store_accessor :fields, :assignment_status, :indexed_by, :sorted_by, :terms,
+    store_accessor :fields, :indexed_by, :sorted_by, :terms,
       :card_ids, :creation, :column_ids
-
-    def assignment_status
-      super.to_s.inquiry
-    end
 
     def indexed_by
       (super || default_indexed_by).inquiry

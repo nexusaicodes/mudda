@@ -4,7 +4,7 @@ json.description event.description_for(Current.user).to_plain_text
 json.particulars event.api_particulars
 json.url(
   case event.eventable
-  when Comment then card_url(event.eventable.card, anchor: dom_id(event.eventable))
+  when Note then card_url(event.eventable.card, anchor: dom_id(event.eventable))
   else polymorphic_url(event.eventable)
   end
 )
@@ -12,8 +12,8 @@ json.eventable_type event.eventable_type
 
 json.eventable do
   case event.eventable
-  when Card    then json.partial! "cards/card", card: event.eventable
-  when Comment then json.partial! "cards/comments/comment", comment: event.eventable
+  when Card then json.partial! "cards/card", card: event.eventable
+  when Note then json.partial! "cards/notes/note", note: event.eventable
   end
 end
 

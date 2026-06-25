@@ -19,8 +19,8 @@ class Event::Description
 
   private
     def to_sentence(creator, card_title)
-      if event.action.comment_created?
-        comment_sentence(creator, card_title)
+      if event.action.note_created?
+        note_sentence(creator, card_title)
       else
         action_sentence(creator, card_title)
       end
@@ -46,19 +46,15 @@ class Event::Description
     end
 
     def card
-      @card ||= event.action.comment_created? ? event.eventable.card : event.eventable
+      @card ||= event.action.note_created? ? event.eventable.card : event.eventable
     end
 
-    def comment_sentence(creator, card_title)
-      "#{creator} commented on #{card_title}"
+    def note_sentence(creator, card_title)
+      "#{creator} added a note to #{card_title}"
     end
 
     def action_sentence(creator, card_title)
       case event.action
-      when "card_assigned"
-        assigned_sentence(creator, card_title)
-      when "card_unassigned"
-        unassigned_sentence(creator, card_title)
       when "card_published"
         "#{creator} added #{card_title}"
       when "card_title_changed"
@@ -68,18 +64,6 @@ class Event::Description
       when "card_triaged"
         triaged_sentence(creator, card_title)
       end
-    end
-
-    def assigned_sentence(creator, card_title)
-      if event.assignees.include?(user)
-        "#{creator} will handle #{card_title}"
-      else
-        "#{creator} assigned #{assignee_names} to #{card_title}"
-      end
-    end
-
-    def unassigned_sentence(creator, card_title)
-      "#{creator} unassigned #{unassigned_names} from #{card_title}"
     end
 
     def renamed_sentence(creator, card_title)
@@ -92,14 +76,6 @@ class Event::Description
 
     def triaged_sentence(creator, card_title)
       %(#{creator} moved #{card_title} to "#{column}")
-    end
-
-    def assignee_names
-      h event.assignees.pluck(:name).to_sentence
-    end
-
-    def unassigned_names
-      h(event.assignees.include?(user) ? "yourself" : assignee_names)
     end
 
     def old_title

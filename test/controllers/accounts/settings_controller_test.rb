@@ -23,13 +23,6 @@ class Account::SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "New Account Name", Current.account.reload.name
   end
 
-  test "update requires admin" do
-    logout_and_sign_in_as :david
-
-    put account_settings_path, params: { account: { name: "New Account Name" } }
-    assert_response :forbidden
-  end
-
   test "show as JSON" do
     get account_settings_path, as: :json
 

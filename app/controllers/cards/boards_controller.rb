@@ -5,7 +5,7 @@ class Cards::BoardsController < ApplicationController
   before_action :set_card
 
   def edit
-    @boards = Current.user.boards.ordered_by_recently_accessed
+    @boards = Current.user.boards.ordered_by_recent_activity
     fresh_when @boards
   end
 

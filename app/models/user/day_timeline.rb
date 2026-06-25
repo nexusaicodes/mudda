@@ -47,21 +47,15 @@ class User::DayTimeline
 
   private
     TIMELINEABLE_ACTIONS = %w[
-      card_assigned
-      card_unassigned
       card_published
       card_collection_changed
       card_board_changed
       card_triaged
-      comment_created
+      note_created
     ]
 
     def filtered_events
-      @filtered_events ||= begin
-        events = timelineable_events
-        events = events.where(creator_id: filter.creators.ids) if filter.creators.present?
-        events
-      end
+      @filtered_events ||= timelineable_events
     end
 
     def timelineable_events

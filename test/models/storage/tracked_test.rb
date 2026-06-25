@@ -111,25 +111,25 @@ class Storage::TrackedTest < ActiveSupport::TestCase
     assert_equal @board2.id, transfer_in.board_id
   end
 
-  test "board transfer moves comment embeds" do
+  test "board transfer moves note embeds" do
     blob = ActiveStorage::Blob.create_and_upload! \
       io: file_fixture("moon.jpg").open,
-      filename: "comment_embed.jpg",
+      filename: "note_embed.jpg",
       content_type: "image/jpeg"
 
     embed_html = ActionText::Attachment.from_attachable(blob).to_html
-    comment = @card.comments.create!(body: "<p>Comment with image #{embed_html}</p>")
+    note = @card.notes.create!(body: "<p>Note with image #{embed_html}</p>")
 
     old_board_id = @card.board_id
 
-    assert_difference -> { Storage::Entry.where(operation: "transfer_out", recordable: comment).count }, +1 do
-      assert_difference -> { Storage::Entry.where(operation: "transfer_in", recordable: comment).count }, +1 do
+    assert_difference -> { Storage::Entry.where(operation: "transfer_out", recordable: note).count }, +1 do
+      assert_difference -> { Storage::Entry.where(operation: "transfer_in", recordable: note).count }, +1 do
         @card.update!(board: @board2)
       end
     end
 
-    transfer_out = Storage::Entry.where(operation: "transfer_out", recordable: comment).last
-    transfer_in = Storage::Entry.where(operation: "transfer_in", recordable: comment).last
+    transfer_out = Storage::Entry.where(operation: "transfer_out", recordable: note).last
+    transfer_in = Storage::Entry.where(operation: "transfer_in", recordable: note).last
 
     assert_equal(-blob.byte_size, transfer_out.delta)
     assert_equal old_board_id, transfer_out.board_id
@@ -165,7 +165,7 @@ class Storage::TrackedTest < ActiveSupport::TestCase
     assert_equal expected_bytes, transfer_in.delta
   end
 
-  test "board transfer moves multiple comments with embeds" do
+  test "board transfer moves multiple notes with embeds" do
     blob1 = ActiveStorage::Blob.create_and_upload! \
       io: file_fixture("moon.jpg").open,
       filename: "embed1.jpg",
@@ -175,23 +175,23 @@ class Storage::TrackedTest < ActiveSupport::TestCase
       filename: "embed2.jpg",
       content_type: "image/jpeg"
 
-    comment1 = @card.comments.create!(body: "<p>#{ActionText::Attachment.from_attachable(blob1).to_html}</p>")
-    comment2 = @card.comments.create!(body: "<p>#{ActionText::Attachment.from_attachable(blob2).to_html}</p>")
+    note1 = @card.notes.create!(body: "<p>#{ActionText::Attachment.from_attachable(blob1).to_html}</p>")
+    note2 = @card.notes.create!(body: "<p>#{ActionText::Attachment.from_attachable(blob2).to_html}</p>")
 
     old_board_id = @card.board_id
 
-    # Should create transfer entries for both comments
+    # Should create transfer entries for both notes
     assert_difference -> { Storage::Entry.where(operation: "transfer_out").count }, +2 do
       assert_difference -> { Storage::Entry.where(operation: "transfer_in").count }, +2 do
         @card.update!(board: @board2)
       end
     end
 
-    # Verify each comment's transfer
-    assert_equal(-blob1.byte_size, Storage::Entry.find_by(operation: "transfer_out", recordable: comment1).delta)
-    assert_equal blob1.byte_size, Storage::Entry.find_by(operation: "transfer_in", recordable: comment1).delta
-    assert_equal(-blob2.byte_size, Storage::Entry.find_by(operation: "transfer_out", recordable: comment2).delta)
-    assert_equal blob2.byte_size, Storage::Entry.find_by(operation: "transfer_in", recordable: comment2).delta
+    # Verify each note's transfer
+    assert_equal(-blob1.byte_size, Storage::Entry.find_by(operation: "transfer_out", recordable: note1).delta)
+    assert_equal blob1.byte_size, Storage::Entry.find_by(operation: "transfer_in", recordable: note1).delta
+    assert_equal(-blob2.byte_size, Storage::Entry.find_by(operation: "transfer_out", recordable: note2).delta)
+    assert_equal blob2.byte_size, Storage::Entry.find_by(operation: "transfer_in", recordable: note2).delta
   end
 
   test "board transfer net effect on account is zero" do

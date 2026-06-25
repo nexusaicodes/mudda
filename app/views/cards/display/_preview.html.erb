@@ -9,7 +9,6 @@
 
 <% if card.open? %>
   <% card_data[:action] = "mouseenter->navigable-list#hoverSelect" %>
-  <% card_data[:card_assign_to_self_url] = card_self_assignment_path(card) %>
 <% end %>
 
 <%= card_article_tag card, class: "card", draggable: draggable, data: card_data, tabindex: 0 do %>
@@ -46,8 +45,7 @@
   <footer class="card__footer flex gap-half">
     <%= render "cards/display/preview/meta", card: card, preview: true %>
     <div class="card__counts">
-      <%= render "cards/display/preview/boosts", card: card %>
-      <%= render "cards/display/preview/comments", card: card %>
+      <%= render "cards/display/preview/notes", card: card %>
     </div>
     <%= render "cards/display/common/background", card: card %>
   </footer>

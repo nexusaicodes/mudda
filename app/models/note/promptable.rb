@@ -1,4 +1,4 @@
-module Comment::Promptable
+module Note::Promptable
   extend ActiveSupport::Concern
 
   included do

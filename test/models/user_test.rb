@@ -4,31 +4,24 @@ class UserTest < ActiveSupport::TestCase
   test "create" do
     user = User.create!(
       account: accounts("37s"),
-      role: "member",
       name: "Victor Cooper"
     )
 
-    assert_equal [ boards(:writebook) ], user.boards
+    assert_equal accounts("37s").boards.to_a, user.boards.to_a
     assert user.settings.present?
   end
 
-  test "creation gives access to all_access boards" do
-    user = User.create!(
-      account: accounts("37s"),
-      role: "member",
-      name: "Victor Cooper"
-    )
+  test "boards returns the account's boards" do
+    user = users(:david)
 
-    assert_equal [ boards(:writebook) ], user.boards
+    assert_equal user.account.boards.to_a, user.boards.to_a
   end
 
   test "deactivate" do
     assert_changes -> { users(:jz).active? }, from: true, to: false do
-      assert_changes -> { users(:jz).accesses.count }, from: 1, to: 0 do
-        users(:jz).tap do |user|
-          user.stubs(:close_remote_connections).once
-          user.deactivate
-        end
+      users(:jz).tap do |user|
+        user.stubs(:close_remote_connections).once
+        user.deactivate
       end
     end
   end
@@ -48,7 +41,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "validates name presence" do
-    user = User.new(account: accounts("37s"), role: "member", name: "")
+    user = User.new(account: accounts("37s"), name: "")
     assert_not user.valid?
     assert_includes user.errors[:name], "can't be blank"
 

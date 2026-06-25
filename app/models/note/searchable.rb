@@ -1,4 +1,4 @@
-module Comment::Searchable
+module Note::Searchable
   extend ActiveSupport::Concern
 
   included do

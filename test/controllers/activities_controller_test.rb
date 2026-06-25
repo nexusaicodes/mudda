@@ -47,14 +47,14 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert item["url"].end_with?("/cards/#{cards(:logo).number}")
   end
 
-  test "index includes comment eventable" do
+  test "index includes note eventable" do
     event = events(:layout_commented)
     get activities_path, as: :json
     assert_response :success
 
     item = @response.parsed_body.find { |e| e["id"] == event.id }
     assert_not_nil item
-    assert_equal "Comment", item["eventable_type"]
+    assert_equal "Note", item["eventable_type"]
     assert_equal card_url(event.eventable.card, anchor: ActionView::RecordIdentifier.dom_id(event.eventable)), item["url"]
     assert item["eventable"]["body"].present?
   end
@@ -68,35 +68,6 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert item["board"]["name"].present?
     assert item["creator"]["id"].present?
     assert item["creator"]["name"].present?
-  end
-
-  test "index normalizes particulars for card_assigned" do
-    event = events(:logo_assignment_jz)
-    get activities_path, as: :json
-    assert_response :success
-
-    item = @response.parsed_body.find { |e| e["id"] == event.id }
-    assert_not_nil item
-    assert_equal "card_assigned", item["action"]
-    assert_equal [ users(:jz).id ], item["particulars"]["assignee_ids"]
-  end
-
-  test "index normalizes particulars for card_unassigned" do
-    card = cards(:logo)
-    event = card.board.events.create!(
-      action: "card_unassigned",
-      creator: users(:david),
-      eventable: card,
-      account: accounts("37s"),
-      particulars: { assignee_ids: [ users(:jz).id ] }
-    )
-
-    get activities_path, as: :json
-    assert_response :success
-
-    item = @response.parsed_body.find { |e| e["id"] == event.id }
-    assert_not_nil item
-    assert_equal [ users(:jz).id ], item["particulars"]["assignee_ids"]
   end
 
   test "index returns empty particulars for actions with no payload" do
@@ -165,25 +136,6 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "In Progress", item["particulars"]["column"]
   end
 
-  test "index filters by creator_ids" do
-    get activities_path(creator_ids: [ users(:kevin).id ]), as: :json
-    assert_response :success
-
-    body = @response.parsed_body
-    assert body.any?
-    assert body.all? { |e| e["creator"]["id"] == users(:kevin).id }
-  end
-
-  test "index filters by multiple creator_ids with OR semantics" do
-    get activities_path(creator_ids: [ users(:david).id, users(:kevin).id ]), as: :json
-    assert_response :success
-
-    body = @response.parsed_body
-    creator_ids = body.map { |e| e["creator"]["id"] }.uniq.sort
-    assert_includes creator_ids, users(:david).id
-    assert_includes creator_ids, users(:kevin).id
-  end
-
   test "index filters by board_ids" do
     get activities_path(board_ids: [ boards(:writebook).id ]), as: :json
     assert_response :success
@@ -193,18 +145,8 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert body.all? { |e| e["board"]["id"] == boards(:writebook).id }
   end
 
-  test "index ANDs creator_ids and board_ids filters" do
-    get activities_path(creator_ids: [ users(:david).id ], board_ids: [ boards(:writebook).id ]), as: :json
-    assert_response :success
-
-    body = @response.parsed_body
-    assert body.any?
-    assert body.all? { |e| e["creator"]["id"] == users(:david).id }
-    assert body.all? { |e| e["board"]["id"] == boards(:writebook).id }
-  end
-
-  test "index ignores empty creator_ids and board_ids filters" do
-    get activities_path(creator_ids: [], board_ids: []), as: :json
+  test "index ignores empty board_ids filter" do
+    get activities_path(board_ids: []), as: :json
     assert_response :success
 
     assert_predicate @response.parsed_body, :any?

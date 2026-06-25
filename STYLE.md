@@ -159,9 +159,9 @@ In general, we favor a [vanilla Rails](https://dev.37signals.com/vanilla-rails-i
 Invoking plain Active Record operations is totally fine:
 
 ```ruby
-class Cards::CommentsController < ApplicationController
+class Cards::NotesController < ApplicationController
   def create
-    @comment = @card.comments.create!(comment_params)
+    @note = @card.notes.create!(note_params)
   end
 end
 ```

@@ -4,7 +4,7 @@ module User::Configurable
   included do
     has_one :settings, class_name: "User::Settings", dependent: :destroy
 
-    after_create :create_settings, unless: :system?
+    after_create :create_settings
 
     delegate :timezone, to: :settings, allow_nil: true
   end

@@ -160,9 +160,7 @@
 
   .card-perma__notch,
   .card-perma__actions,
-  .comment--new,
-  .comments__subscribers,
-  .card__meta-avatars--assignees > div > div:last-child,
+  .note--new,
   .steps > .step:last-child,
   .card__board-name .icon,
   .delete-card,
@@ -189,38 +187,38 @@
     padding: 0;
   }
 
-  .comments {
+  .notes {
     --row-gap: 0;
-    --comment-padding-inline: 1.4lh;
+    --note-padding-inline: 1.4lh;
 
     padding-inline: 0;
   }
 
-  .comment {
-    --comment-max: none;
+  .note {
+    --note-max: none;
 
     border-block-end: var(--border-light);
   }
 
-  .comment__content {
+  .note__content {
     background: none;
   }
 
-  .comment__avatar {
+  .note__avatar {
     --btn-size: 2lh;
 
     margin-inline-start: 0;
   }
 
-  .comment__author h3 {
+  .note__author h3 {
     margin-inline: 0;
   }
 
-  .comment__edit {
+  .note__edit {
     display: none;
   }
 
-  .comment__body {
+  .note__body {
     text-align: start;
   }
 

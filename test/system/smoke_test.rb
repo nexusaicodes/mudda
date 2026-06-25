@@ -1,27 +1,6 @@
 require "application_system_test_case"
 
 class SmokeTest < ApplicationSystemTestCase
-  test "joining an account" do
-    account = accounts("37s")
-
-    visit join_url(code: account.join_code.code, script_name: account.slug)
-    fill_in "Email address", with: "newbie@example.com"
-    click_on "Continue"
-
-    assert_selector "h1", text: "Check your email"
-    identity = Identity.find_by!(email_address: "newbie@example.com")
-    code = identity.magic_links.active.first.code
-    fill_in "code", with: code
-    send_keys :enter
-
-    assert_selector "input[id=user_name]"
-    assert account.users.find_by!(identity:).verified?, "User was not properly verified"
-    fill_in "Full name", with: "New Bee"
-    click_on "Continue"
-
-    assert_selector "h1", text: "Writebook"
-  end
-
   test "create a card" do
     sign_in_as(users(:david))
 
@@ -39,7 +18,7 @@ class SmokeTest < ApplicationSystemTestCase
     sign_in_as(users(:david))
 
     visit card_url(cards(:layout))
-    fill_in_lexxy with: "Here is a comment"
+    fill_in_lexxy with: "Here is a note"
     attach_file file_fixture("moon.jpg") do
       click_on "Upload file"
     end
@@ -63,18 +42,6 @@ class SmokeTest < ApplicationSystemTestCase
     within("dialog.lightbox") do
       assert_selector "img.lightbox__image[src*='/rails/active_storage']"
     end
-  end
-
-  test "dismissing notifications" do
-    sign_in_as(users(:david))
-
-    notification = notifications(:logo_mentioned_david)
-
-    assert_selector "div##{dom_id(notification)}"
-
-    within_window(open_new_window) { visit card_url(notification.card) }
-
-    assert_no_selector "div##{dom_id(notification)}"
   end
 
   test "dragging card to a new column" do

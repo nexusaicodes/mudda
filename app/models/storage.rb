@@ -7,7 +7,7 @@ module Storage
   # The no-reuse validation uses this to scope its check.
   #
   # IMPORTANT: Update this constant when adding tracked attachments to new models.
-  # If you add a direct attachment (not via RichText embeds) to Comment, Board, or
+  # If you add a direct attachment (not via RichText embeds) to Note, Board, or
   # another model with Storage::Tracked, you must add its record_type here or the
   # no-reuse validation won't protect it.
   TRACKED_RECORD_TYPES = %w[Card ActionText::RichText].freeze

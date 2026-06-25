@@ -24,16 +24,6 @@ class Account::CancellationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @user, @account.cancellation.initiated_by
   end
 
-  test "non-owner cannot cancel the account" do
-    logout_and_sign_in_as users(:david)
-
-    assert_no_difference -> { Account::Cancellation.count } do
-      post account_cancellation_url
-    end
-
-    assert_response :forbidden
-  end
-
   test "cancelling an account while in single-tenant mode does nothing" do
     with_multi_tenant_mode(false) do
       assert_no_difference -> { Account::Cancellation.count } do

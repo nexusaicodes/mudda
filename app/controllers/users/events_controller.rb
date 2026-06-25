@@ -1,11 +1,10 @@
 class Users::EventsController < ApplicationController
   include FilterScoped
 
-  before_action :set_user, :set_filter, :set_user_filtering
+  before_action :set_user
 
   def show
-    @filter = Current.user.filters.new(creator_ids: [ @user.id ])
-    @day_timeline = Current.user.timeline_for(day_param, filter: @filter)
+    @day_timeline = @user.timeline_for(day_param, filter: @filter)
 
     fresh_when @day_timeline
   end

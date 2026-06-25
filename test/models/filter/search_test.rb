@@ -5,8 +5,8 @@ class Filter::SearchTest < ActiveSupport::TestCase
 
   test "deduplicate multiple results" do
     card = @board.cards.create!(title: "Duplicate results test", description: "Have you had any haggis today?", creator: @user, status: "published")
-    card.comments.create(body: "I hate haggis.", creator: @user)
-    card.comments.create(body: "I love haggis.", creator: @user)
+    card.notes.create(body: "I hate haggis.", creator: @user)
+    card.notes.create(body: "I love haggis.", creator: @user)
 
     filter = @user.filters.new(terms: [ "haggis" ], indexed_by: "all", sorted_by: "latest")
 

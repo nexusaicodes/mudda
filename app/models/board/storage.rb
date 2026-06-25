@@ -2,7 +2,6 @@ module Board::Storage
   extend ActiveSupport::Concern
   include Storage::Totaled
 
-  # Board's own embeds (public_description) count toward itself
   def board_for_storage_tracking
     self
   end
@@ -17,7 +16,7 @@ module Board::Storage
     # Physical storage optimizations (deduplication, compression) don't affect quotas.
     def calculate_real_storage_bytes
       @card_ids = nil  # Clear memoization for fresh calculation
-      card_image_bytes + card_embed_bytes + comment_embed_bytes + board_embed_bytes
+      card_image_bytes + card_embed_bytes + note_embed_bytes
     end
 
     def card_ids
@@ -34,14 +33,10 @@ module Board::Storage
       sum_embed_bytes_for "Card", card_ids
     end
 
-    def comment_embed_bytes
+    def note_embed_bytes
       card_ids.each_slice(BATCH_SIZE).sum do |batch|
-        sum_embed_bytes_for "Comment", Comment.where(card_id: batch).ids
+        sum_embed_bytes_for "Note", Note.where(card_id: batch).ids
       end
-    end
-
-    def board_embed_bytes
-      sum_embed_bytes_for "Board", [ id ]
     end
 
     def sum_embed_bytes_for(record_type, record_ids)

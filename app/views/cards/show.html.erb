@@ -14,7 +14,7 @@
 <%= turbo_stream_from @card %>
 <%= turbo_stream_from @card, :activity %>
 
-<div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_path(@card) %>">
+<div data-controller="lightbox">
   <%= render "cards/container", card: @card %>
   <%= render "cards/messages",  card: @card %>
 

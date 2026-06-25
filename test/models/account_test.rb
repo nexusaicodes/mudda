@@ -2,7 +2,7 @@ require "test_helper"
 
 class AccountTest < ActiveSupport::TestCase
   test "create" do
-    assert_difference "Account::JoinCode.count", +1 do
+    assert_difference "Account.count", +1 do
       Account.create!(name: "ACME corp")
     end
   end
@@ -18,7 +18,7 @@ class AccountTest < ActiveSupport::TestCase
       account = nil
 
       assert_changes -> { Account.count }, +1 do
-        assert_changes -> { User.count }, +2 do
+        assert_changes -> { User.count }, +1 do
           account = Account.create_with_owner(
             account: {
               external_account_id: ActiveRecord::FixtureSet.identify("account-create-with-owner-test"),
@@ -37,29 +37,11 @@ class AccountTest < ActiveSupport::TestCase
       assert_equal ActiveRecord::FixtureSet.identify("account-create-with-owner-test"), account.external_account_id
       assert_equal "Account Create With Owner", account.name
 
-      owner = account.users.find_by(role: "owner")
+      owner = account.users.first
       assert_equal "David", owner.name
       assert_equal "david@37signals.com", owner.identity.email_address
-      assert_equal "owner", owner.role
-      assert owner.admin?, "owner should also be considered an admin"
-
-      assert_predicate account.system_user, :present?
 
       assert owner.verified?, "owner should be verified on account creation"
-    end
-  end
-
-  test "#system_user returns the system user of the account" do
-    system_user = User.find_by!(account: accounts("37s"), role: :system)
-
-    assert_equal system_user, accounts("37s").system_user
-  end
-
-  test "#system_user raises if there is no system user" do
-    account = Account.create!(name: "No System User Account")
-
-    assert_raises ActiveRecord::RecordNotFound do
-      account.system_user
     end
   end
 

@@ -6,7 +6,6 @@ class CardsController < ApplicationController
   before_action :set_board, only: %i[ create ]
   before_action :set_card, only: %i[ show edit update destroy ]
   before_action :redirect_if_drafted, only: :show
-  before_action :ensure_permission_to_administer_card, only: %i[ destroy ]
 
   def index
     set_page_and_extract_portion_from @filter.cards
@@ -61,10 +60,6 @@ class CardsController < ApplicationController
 
     def redirect_if_drafted
       redirect_to card_draft_path(@card) if @card.drafted?
-    end
-
-    def ensure_permission_to_administer_card
-      head :forbidden unless Current.user.can_administer_card?(@card)
     end
 
     def card_params

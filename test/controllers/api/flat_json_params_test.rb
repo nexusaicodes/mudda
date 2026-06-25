@@ -5,30 +5,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "update user role with flat JSON" do
-    put user_role_path(users(:david)), params: { role: "admin" }, as: :json
-
-    assert_response :no_content
-    assert users(:david).reload.admin?
-  end
-
-  test "update notification settings with flat JSON" do
-    logout_and_sign_in_as :david
-
-    assert_changes -> { users(:david).reload.settings.bundle_email_frequency }, from: "never", to: "every_few_hours" do
-      put notifications_settings_path, params: { bundle_email_frequency: "every_few_hours" }, as: :json
-    end
-
-    assert_response :no_content
-  end
-
-  test "update join code with flat JSON" do
-    put account_join_code_path, params: { usage_limit: 5 }, as: :json
-
-    assert_response :no_content
-    assert_equal 5, Current.account.join_code.reload.usage_limit
-  end
-
   test "update account settings with flat JSON" do
     put account_settings_path, params: { name: "New Name" }, as: :json
 
@@ -74,14 +50,11 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
   test "update board with flat JSON" do
     board = boards(:writebook)
 
-    put board_path(board),
-      params: { name: "Flat board", public_description: "<p>Flat public desc</p>" },
-      as: :json
+    put board_path(board), params: { name: "Flat board" }, as: :json
 
     assert_response :success
     board.reload
     assert_equal "Flat board", board.name
-    assert_equal "Flat public desc", board.public_description.to_plain_text
     assert_equal board.id, @response.parsed_body["id"]
     assert_equal "Flat board", @response.parsed_body["name"]
   end
@@ -105,26 +78,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal "Flat updated", step.reload.content
-  end
-
-  test "create card reaction with flat JSON" do
-    card = cards(:logo)
-
-    assert_difference -> { card.reactions.count }, +1 do
-      post card_reactions_path(card), params: { content: "🎉" }, as: :json
-    end
-
-    assert_response :created
-  end
-
-  test "create comment reaction with flat JSON" do
-    comment = comments(:logo_agreement_kevin)
-
-    assert_difference -> { comment.reactions.count }, +1 do
-      post card_comment_reactions_path(comment.card, comment), params: { content: "👍" }, as: :json
-    end
-
-    assert_response :created
   end
 
   test "create access token with flat JSON" do
@@ -170,14 +123,5 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :created
-  end
-
-  test "update user via join with flat JSON" do
-    logout_and_sign_in_as :david
-
-    post users_joins_path, params: { name: "Flat Join" }, as: :json
-
-    assert_response :no_content
-    assert_equal "Flat Join", users(:david).reload.name
   end
 end

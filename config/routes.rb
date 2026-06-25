@@ -3,14 +3,12 @@ Rails.application.routes.draw do
 
   namespace :account do
     resource :cancellation, only: [ :create ]
-    resource :join_code
     resource :settings
   end
 
-  resources :users do
+  resources :users, only: %i[ show edit update ] do
     scope module: :users do
       resource :avatar
-      resource :role
       resource :events
 
       resources :email_addresses, param: :token do
@@ -21,10 +19,6 @@ Rails.application.routes.draw do
 
   resources :boards do
     scope module: :boards do
-      resources :accesses, only: :index
-      resource :subscriptions
-      resource :publication
-
       resources :columns, only: %i[ index show update ] do
         scope module: :columns do
           resources :cards, only: :index
@@ -58,34 +52,9 @@ Rails.application.routes.draw do
       resource :image
       resource :pin
       resource :publish
-      resource :reading
-      resource :watch
-
-      resources :reactions
-
-      resources :assignments
-      resource :self_assignment, only: :create
       resources :steps
 
-      resources :comments do
-        resources :reactions, module: :comments
-      end
-    end
-  end
-
-  namespace :notifications do
-    resource :settings
-    resource :unsubscribe
-  end
-
-  resources :notifications do
-    scope module: :notifications do
-      get "tray", to: "trays#show", on: :collection
-
-      resource :reading
-      collection do
-        resource :bulk_reading, only: :create
-      end
+      resources :notes
     end
   end
 
@@ -113,17 +82,8 @@ Rails.application.routes.draw do
 
   resources :qr_codes
 
-  get "join/:code", to: "join_codes#new", as: :join
-  post "join/:code", to: "join_codes#create"
-
-  namespace :users do
-    resources :joins
-    resources :verifications, only: %i[ new create ]
-  end
-
   resource :session do
     scope module: :sessions do
-      resources :transfers
       resource :magic_link
       resource :menu
       resource :passkey, only: :create
@@ -154,44 +114,11 @@ Rails.application.routes.draw do
 
   namespace :prompts do
     resources :cards
-    resources :users
-
-    resources :boards do
-      scope module: :boards do
-        resources :users
-      end
-    end
   end
 
-  namespace :public do
-    resources :boards do
-      scope module: :boards do
-        resources :columns, only: :show
-      end
-
-      resources :cards, only: :show
-    end
-  end
-
-  direct :published_board do |board, options|
-    route_for :public_board, board.publication.key
-  end
-
-  direct :published_card do |card, options|
-    route_for :public_board_card, card.board.publication.key, card
-  end
-
-  resolve "Comment" do |comment, options|
-    options[:anchor] = ActionView::RecordIdentifier.dom_id(comment)
-    route_for :card, comment.card, options
-  end
-
-  resolve "Mention" do |mention, options|
-    polymorphic_url(mention.source, options)
-  end
-
-  resolve "Notification" do |notification, options|
-    polymorphic_url(notification.notifiable_target, options)
+  resolve "Note" do |note, options|
+    options[:anchor] = ActionView::RecordIdentifier.dom_id(note)
+    route_for :card, note.card, options
   end
 
   resolve "Event" do |event, options|
@@ -201,7 +128,6 @@ Rails.application.routes.draw do
   # Support for legacy URLs
   get "/collections/:collection_id/cards/:id", to: redirect { |params, request| "#{request.script_name}/cards/#{params[:id]}" }
   get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
-  get "/public/collections/:id", to: redirect { |params, request| "#{request.script_name}/public/boards/#{params[:id]}" }
 
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

@@ -62,14 +62,6 @@
     },
     {
       "patterns": [
-        "/notifications/tray$"
-      ],
-      "properties": {
-        "view_controller": "notifications"
-      }
-    },
-    {
-      "patterns": [
         "internal/devtools/enable*"
       ],
       "properties": {

@@ -64,11 +64,11 @@ class Signup
           identity: identity
         }
       )
-      @user = @account.users.find_by!(role: :owner)
+      @user = @account.users.first
     end
 
     def generate_account_name
-      AccountNameGenerator.new(identity: identity, name: full_name).generate
+      "#{full_name.split.first.presence || full_name}'s Mudda"
     end
 
 

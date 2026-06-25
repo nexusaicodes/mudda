@@ -1,7 +1,7 @@
 # Mudda
 
-**Mudda** is a Kanban tool for tracking issues and ideas — boards, cards, and a simple
-fixed workflow (Triage → Backlog → Todo → Doing → Done) for teams that want to move work
+**Mudda** is a personal Kanban tool for tracking your own issues and ideas — boards, cards,
+notes, and a simple fixed workflow (Triage → Backlog → Todo → Doing → Done) to move work
 without ceremony.
 
 Mudda is built and maintained by **Nexus AI**. It is a fork of
@@ -9,9 +9,11 @@ Mudda is built and maintained by **Nexus AI**. It is a fork of
 We're grateful to 37signals for releasing Fizzy as open source; Mudda continues that work
 under the same [O'Saasy License](LICENSE.md).
 
-> **Heads up:** This is a trimmed standalone build — a single-tenant app on SQLite, run via
-> Docker Compose. The SaaS engine, Kamal deploy tooling, MySQL, S3/object storage, push
-> notifications, and cross-instance import/export have been removed.
+> **Heads up:** This is a trimmed standalone build — a single-tenant, single-person app on
+> SQLite, run via Docker Compose. The SaaS engine, Kamal deploy tooling, MySQL, S3/object
+> storage, cross-instance import/export, and all team-collaboration features (notifications,
+> mentions, assignments, watching, reactions, board sharing, roles, and invites) have been
+> removed.
 
 
 ## Running Mudda

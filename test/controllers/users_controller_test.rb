@@ -19,7 +19,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_equal "New Kevin", users(:kevin).reload.name
   end
 
-  test "update other as admin" do
+  test "update other" do
     sign_in_as :kevin
 
     get edit_user_path(users(:david))
@@ -28,41 +28,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     put user_path(users(:david)), params: { user: { name: "New David" } }
     assert_redirected_to user_path(users(:david))
     assert_equal "New David", users(:david).reload.name
-  end
-
-  test "destroy" do
-    sign_in_as :kevin
-
-    assert_difference -> { User.active.count }, -1 do
-      delete user_path(users(:david))
-    end
-
-    assert_redirected_to account_settings_path
-    assert_nil User.active.find_by(id: users(:david).id)
-  end
-
-  test "admin cannot deactivate the owner" do
-    sign_in_as :kevin
-
-    assert users(:jason).owner?
-    assert users(:jason).active
-
-    assert_no_difference -> { User.active.count } do
-      delete user_path(users(:jason))
-    end
-
-    assert_response :forbidden
-    assert users(:jason).reload.active
-  end
-
-  test "non-admins cannot perform actions" do
-    sign_in_as :jz
-
-    put user_path(users(:david)), params: { user: { role: "admin" } }
-    assert_response :forbidden
-
-    delete user_path(users(:david))
-    assert_response :forbidden
   end
 
   test "update with invalid avatar content type shows validation error" do
@@ -99,14 +64,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_equal "image/png", users(:kevin).avatar.content_type
   end
 
-  test "index as JSON" do
-    sign_in_as :kevin
-
-    get users_path, as: :json
-    assert_response :success
-    assert_equal users(:kevin).account.users.active.count, @response.parsed_body.count
-  end
-
   test "show as JSON" do
     sign_in_as :kevin
 
@@ -139,16 +96,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert @response.parsed_body["avatar"].present?
   end
 
-  test "destroy as JSON" do
-    sign_in_as :kevin
-
-    assert_difference -> { User.active.count }, -1 do
-      delete user_path(users(:david)), as: :json
-    end
-
-    assert_response :no_content
-  end
-
   test "bearer token does not authenticate HTML requests" do
     sign_in_as :jason
     sign_out
@@ -167,17 +114,5 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get user_path(users(:jason)), env: bearer, as: :json
 
     assert_response :success
-  end
-
-  test "index avoids N+1 queries on identity" do
-    sign_in_as :kevin
-
-    assert_queries_match(/FROM [`"]identities[`"].* IN \(/, count: 1) do
-      get users_path, as: :json
-      assert_response :success
-    end
-
-    json = @response.parsed_body
-    assert json.first["email_address"].present?
   end
 end

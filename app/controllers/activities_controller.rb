@@ -1,12 +1,10 @@
 class ActivitiesController < ApplicationController
   ACTIONS = %w[
-    card_assigned
     card_board_changed
     card_published
     card_title_changed
     card_triaged
-    card_unassigned
-    comment_created
+    note_created
   ].freeze
 
   def index
@@ -18,7 +16,6 @@ class ActivitiesController < ApplicationController
       Current.user.accessible_events
         .preloaded
         .where(action: ACTIONS)
-        .for_creators(params[:creator_ids])
         .for_boards(params[:board_ids])
         .reverse_chronologically
     end

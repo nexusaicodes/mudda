@@ -1,6 +1,6 @@
 module Filter::Summarized
   def summary
-    [ index_summary, sort_summary, assignee_summary, creator_summary, terms_summary ].compact.to_sentence
+    [ index_summary, sort_summary, terms_summary ].compact.to_sentence
   end
 
   private
@@ -16,23 +16,9 @@ module Filter::Summarized
       end
     end
 
-    def assignee_summary
-      if assignees.any?
-        "assigned to #{assignees.pluck(:name).to_choice_sentence}"
-      elsif assignment_status.unassigned?
-        "assigned to no one"
-      end
-    end
-
     def terms_summary
       if terms.any?
         "matching #{terms.map { |term| %Q("#{term}") }.to_sentence}"
-      end
-    end
-
-    def creator_summary
-      if creators.any?
-        "added by #{creators.pluck(:name).to_choice_sentence}"
       end
     end
 end

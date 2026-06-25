@@ -6,52 +6,21 @@ class User::SettingsTest < ActiveSupport::TestCase
     @settings = @user.settings
   end
 
-  test "changing the bundle email frequency to never will cancel pending bundles" do
-    @settings.update!(bundle_email_frequency: :every_few_hours)
-    bundle = @user.notification_bundles.create!
-    @settings.update!(bundle_email_frequency: :never)
-    assert_nil Notification::Bundle.find_by(id: bundle.id)
+  test "timezone returns the configured zone" do
+    @settings.update!(timezone_name: "Eastern Time (US & Canada)")
+
+    assert_equal ActiveSupport::TimeZone["Eastern Time (US & Canada)"], @settings.timezone
   end
 
-  test "changing the bundle email frequency will deliver pending bundles" do
-    bundle = @user.notification_bundles.create!
-    assert bundle.pending?
+  test "timezone falls back to UTC when blank" do
+    @settings.update!(timezone_name: nil)
 
-    freeze_time Time.current do
-      perform_enqueued_jobs only: Notification::Bundle::DeliverJob do
-        @settings.update!(bundle_email_frequency: :daily)
-      end
-
-      assert bundle.reload.delivered?
-      assert_equal Time.current, bundle.ends_at
-    end
+    assert_equal ActiveSupport::TimeZone["UTC"], @settings.timezone
   end
 
-  test "changing other settings will not affect pending bundles" do
-    bundle = @user.notification_bundles.create!
+  test "timezone falls back to UTC for an unknown zone name" do
+    @settings.update!(timezone_name: "Not A Real Zone")
 
-    perform_enqueued_jobs only: Notification::Bundle::DeliverJob do
-      @settings.update!(updated_at: 1.hour.from_now)
-    end
-
-    assert bundle.reload.pending?
-  end
-
-  test "bundling_emails?" do
-    @settings.update!(bundle_email_frequency: :never)
-    assert_not @user.settings.bundling_emails?
-
-    @settings.update!(bundle_email_frequency: :every_few_hours)
-    assert @user.settings.bundling_emails?
-
-    @user.update!(role: :system)
-    assert_not @user.settings.bundling_emails?, "System users should not receive bundled emails"
-
-    @user.update!(role: :member, active: false)
-    assert_not @user.settings.bundling_emails?, "Inactive users should not receive bundled emails"
-
-    @user.update!(active: true)
-    @user.update_column(:verified_at, nil)
-    assert_not @user.settings.bundling_emails?, "Unverified users should not receive bundled emails"
+    assert_equal ActiveSupport::TimeZone["UTC"], @settings.timezone
   end
 end

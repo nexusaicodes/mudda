@@ -11,7 +11,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "filtered index" do
-    get cards_path(filters(:jz_assignments).as_params.merge(term: "haggis"))
+    get cards_path(filters(:newest_first).as_params.merge(term: "haggis"))
     assert_response :success
   end
 
@@ -56,15 +56,6 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to card_draft_path(card)
   end
 
-  test "show renders assign-to-me hotkey using self assignment path" do
-    card = cards(:logo)
-
-    get card_path(card)
-    assert_response :success
-
-    assert_select "form[action=?] button[hidden]", card_self_assignment_path(card), text: "Assign to me"
-  end
-
   test "show renders inline code in title" do
     card = cards(:logo)
     card.update_column :title, "Fix the `bug` in production"
@@ -104,66 +95,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Something more in-depth", card.description.to_plain_text.strip
   end
 
-  test "update draft card does not render reactions" do
-    draft = boards(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
-
-    patch card_path(draft), as: :turbo_stream, params: {
-      card: { image: fixture_file_upload("moon.jpg", "image/jpeg") }
-    }
-    assert_response :success
-
-    assert_no_match "reactions", response.body, "Draft card should not show reactions/boost button"
-  end
-
-  test "users can only see cards in boards they have access to" do
-    get card_path(cards(:logo))
-    assert_response :success
-
-    boards(:writebook).update! all_access: false
-    boards(:writebook).accesses.revoke_from users(:kevin)
-
-    get card_path(cards(:logo))
-    assert_response :not_found
-  end
-
-  test "admins can see delete button on any card" do
-    get card_path(cards(:logo))
-    assert_response :success
-
-    assert_match "Delete this card", response.body
-  end
-
-  test "card creators can see delete button on their own cards" do
-    logout_and_sign_in_as :david
-
-    get card_path(cards(:logo))
-    assert_response :success
-
-    assert_match "Delete this card", response.body
-  end
-
-  test "non-admins cannot see delete button on cards they did not create" do
-    logout_and_sign_in_as :jz
-
-    get card_path(cards(:logo))
-    assert_response :success
-
-    assert_no_match "Delete this card", response.body
-  end
-
-  test "non-admins cannot delete cards they did not create" do
-    logout_and_sign_in_as :jz
-
-    assert_no_difference -> { Card.count } do
-      delete card_path(cards(:logo))
-    end
-
-    assert_response :forbidden
-  end
-
-  test "card creators can delete their own cards" do
-    logout_and_sign_in_as :david
-
+  test "delete card" do
     assert_difference -> { Card.count }, -1 do
       delete card_path(cards(:logo))
     end
@@ -171,17 +103,9 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to boards(:writebook)
   end
 
-  test "admins can delete any card" do
-    assert_difference -> { Card.count }, -1 do
-      delete card_path(cards(:logo))
-    end
-
-    assert_redirected_to boards(:writebook)
-  end
-
-  test "show card with comment containing malformed remote image attachment" do
+  test "show card with note containing malformed remote image attachment" do
     card = cards(:logo)
-    card.comments.create! \
+    card.notes.create! \
       creator: users(:kevin),
       body: '<action-text-attachment url="image.png" content-type="image/*" presentation="gallery"></action-text-attachment>'
 
@@ -201,8 +125,6 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal card.closed?, @response.parsed_body["closed"]
     assert_equal card.postponed?, @response.parsed_body["postponed"]
     assert_equal 2, @response.parsed_body["steps"].size
-    assert_equal card_comments_url(card), @response.parsed_body["comments_url"]
-    assert_equal card_reactions_url(card), @response.parsed_body["reactions_url"]
   end
 
   test "create as JSON" do
@@ -275,7 +197,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal custom_time, card.reload.last_active_at
   end
 
-  test "update as JSON can restore last_active_at after comments overwrite it" do
+  test "update as JSON can restore last_active_at after notes overwrite it" do
     created_time = Time.utc(2024, 1, 15, 10, 30, 0)
     last_active_time = Time.utc(2024, 6, 1, 12, 0, 0)
 
@@ -287,8 +209,8 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     card = Card.last
 
-    # Adding a comment overwrites last_active_at (this is expected)
-    card.comments.create!(creator: users(:kevin), body: "Imported comment")
+    # Adding a note overwrites last_active_at (this is expected)
+    card.notes.create!(creator: users(:kevin), body: "Imported note")
     assert_not_equal last_active_time, card.reload.last_active_at
 
     # After import, restore the correct last_active_at

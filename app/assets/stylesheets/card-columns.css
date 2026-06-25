@@ -495,7 +495,7 @@
     }
 
     .card__boosts,
-    .card__comments {
+    .card__notes {
       --icon-size: 1.6em;
 
       align-items: center;
@@ -554,7 +554,7 @@
       .card__content,
       .card__meta,
       .card__boosts,
-      .card__comments,
+      .card__notes,
       .card__column-name:not(.card__column-name--current) {
         opacity: 0;
         transition: opacity 0.2s ease-in-out;
@@ -565,7 +565,7 @@
           .card__content,
           .card__footer,
           .card__boosts,
-          .card__comments,
+          .card__notes,
           .card__column-name:not(.card__column-name--current) {
             opacity: 1;
           }

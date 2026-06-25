@@ -2,14 +2,11 @@ module Filter::Params
   extend ActiveSupport::Concern
 
   PERMITTED_PARAMS = [
-    :assignment_status,
     :indexed_by,
     :sorted_by,
     :creation,
     card_ids: [],
     column_ids: [],
-    assignee_ids: [],
-    creator_ids: [],
     board_ids: [],
     terms: []
   ]
@@ -39,9 +36,8 @@ module Filter::Params
   end
 
   def used?(ignore_boards: false)
-    assignees.any? || creators.any? ||
-      terms.any? || card_ids&.any? || (!ignore_boards && boards.present?) ||
-      assignment_status.unassigned? || !indexed_by.all? || !sorted_by.latest? ||
+    terms.any? || card_ids&.any? || (!ignore_boards && boards.present?) ||
+      !indexed_by.all? || !sorted_by.latest? ||
       column_ids.any?
   end
 
@@ -49,16 +45,13 @@ module Filter::Params
   # because the latter won't work on unpersisted filters.
   def as_params
     @as_params ||= {}.tap do |params|
-      params[:indexed_by]        = indexed_by
-      params[:sorted_by]         = sorted_by
-      params[:creation]          = creation
-      params[:assignment_status] = assignment_status
-      params[:terms]             = terms
-      params[:board_ids]         = boards.ids
-      params[:card_ids]          = card_ids
-      params[:column_ids]        = column_ids
-      params[:assignee_ids]      = assignees.ids
-      params[:creator_ids]       = creators.ids
+      params[:indexed_by] = indexed_by
+      params[:sorted_by]  = sorted_by
+      params[:creation]   = creation
+      params[:terms]      = terms
+      params[:board_ids]  = boards.ids
+      params[:card_ids]   = card_ids
+      params[:column_ids] = column_ids
     end.compact_blank.reject(&method(:default_value?))
   end
 

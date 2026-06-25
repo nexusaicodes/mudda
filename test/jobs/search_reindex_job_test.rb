@@ -1,29 +1,29 @@
 require "test_helper"
 
 class SearchReindexJobTest < ActiveJob::TestCase
-  test "reindexes cards and comments after their search records are nuked" do
+  test "reindexes cards and notes after their search records are nuked" do
     card = cards(:logo)
-    comment = comments(:logo_1)
+    note = notes(:logo_1)
 
     card.reindex
-    comment.reindex
+    note.reindex
 
     card_shard = Search::Record.for(card.account_id)
-    comment_shard = Search::Record.for(comment.account_id)
+    note_shard = Search::Record.for(note.account_id)
 
     assert card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert comment_shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert note_shard.exists?(searchable_type: "Note", searchable_id: note.id)
 
     card_shard.delete_all
-    comment_shard.delete_all unless comment_shard == card_shard
+    note_shard.delete_all unless note_shard == card_shard
 
     assert_not card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert_not comment_shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert_not note_shard.exists?(searchable_type: "Note", searchable_id: note.id)
 
     SearchReindexJob.perform_now
 
     assert card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert comment_shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert note_shard.exists?(searchable_type: "Note", searchable_id: note.id)
   end
 
   test "skips records whose rich text exceeds rich_text_limit" do
@@ -45,7 +45,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
     assert_not shard.exists?(searchable_type: "Card", searchable_id: big_card.id)
   end
 
-  test "does not index drafted cards or their comments" do
+  test "does not index drafted cards or their notes" do
     Current.account = accounts(:"37s")
     Current.session = Session.new(identity: identities(:david))
 
@@ -54,7 +54,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
       title: "will be drafted",
       status: :published
     )
-    comment = card.comments.create!(creator: users(:david), body: "on a card that will be drafted")
+    note = card.notes.create!(creator: users(:david), body: "on a card that will be drafted")
     card.update!(status: :drafted)
 
     nuke_search_records
@@ -63,7 +63,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
 
     shard = Search::Record.for(card.account_id)
     assert_not shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert_not shard.exists?(searchable_type: "Comment", searchable_id: comment.id)
+    assert_not shard.exists?(searchable_type: "Note", searchable_id: note.id)
   end
 
   private

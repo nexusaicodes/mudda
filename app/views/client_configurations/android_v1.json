@@ -21,9 +21,7 @@
         "/edit$",
         "/edit\\?.+$",
         "/cards/[0-9]+/draft",
-        "/notifications/settings",
-        "/account/settings",
-        "/account/join_code"
+        "/account/settings"
       ],
       "properties": {
         "context": "modal",
@@ -86,14 +84,6 @@
       ],
       "properties": {
         "uri": "hotwire://fragment/pins"
-      }
-    },
-    {
-      "patterns": [
-        "/notifications$"
-      ],
-      "properties": {
-        "uri": "hotwire://fragment/notifications"
       }
     }
   ]

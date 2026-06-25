@@ -19,13 +19,11 @@ module CardsHelper
   end
 
   def card_title_tag(card)
-    title = [
+    [
       card.title,
       "added by #{card.creator.name}",
       "in #{card.board.name}"
-    ]
-    title << "assigned to #{card.assignees.map(&:name).to_sentence}" if card.assignees.any?
-    title.join(" ")
+    ].join(" ")
   end
 
   def card_drafted_or_added(card)

@@ -7,7 +7,7 @@
   </div>
 <% end %>
 
-<div data-controller="beacon lightbox" data-beacon-url-value="<%= card_reading_path(@card) %>">
+<div data-controller="lightbox">
   <%= render "cards/drafts/container", card: @card %>
 
   <%= render "layouts/lightbox" do %>

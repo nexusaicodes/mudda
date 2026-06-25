@@ -5,10 +5,10 @@
         # <%= result.card.number %> <%= result.card_title %>
       </h3>
 
-      <% if result.comment.present? %>
-        <div class="search__excerpt search__excerpt--comment">
+      <% if result.note.present? %>
+        <div class="search__excerpt search__excerpt--note">
           <%= avatar_preview_tag result.card.creator %>
-          <div><%= result.comment_body %></div>
+          <div><%= result.note_body %></div>
         </div>
       <% elsif result.card_id.present? %>
         <div class="search__excerpt"><%= result.card_description %></div>

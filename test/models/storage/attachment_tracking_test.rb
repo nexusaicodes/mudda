@@ -154,16 +154,16 @@ class Storage::AttachmentTrackingTest < ActiveSupport::TestCase
     assert_equal @card.id, entry.recordable_id
   end
 
-  test "comment embed creates storage entry via rich text body" do
+  test "note embed creates storage entry via rich text body" do
     blob = ActiveStorage::Blob.create_and_upload! \
       io: file_fixture("moon.jpg").open,
-      filename: "comment_image.jpg",
+      filename: "note_image.jpg",
       content_type: "image/jpeg"
 
     attachment_html = ActionText::Attachment.from_attachable(blob).to_html
 
     assert_difference "Storage::Entry.count", +1 do
-      @card.comments.create!(body: "<p>Comment with image: #{attachment_html}</p>")
+      @card.notes.create!(body: "<p>Note with image: #{attachment_html}</p>")
     end
 
     entry = Storage::Entry.last
@@ -171,73 +171,51 @@ class Storage::AttachmentTrackingTest < ActiveSupport::TestCase
     assert_equal "attach", entry.operation
     assert_equal @account.id, entry.account_id
     assert_equal @board.id, entry.board_id
-    assert_equal "Comment", entry.recordable_type
+    assert_equal "Note", entry.recordable_type
   end
 
-  test "comment embed uses card's board for tracking" do
+  test "note embed uses card's board for tracking" do
     blob = ActiveStorage::Blob.create_and_upload! \
       io: file_fixture("moon.jpg").open,
       filename: "test.jpg",
       content_type: "image/jpeg"
 
     attachment_html = ActionText::Attachment.from_attachable(blob).to_html
-    comment = @card.comments.create!(body: "<p>Comment: #{attachment_html}</p>")
+    note = @card.notes.create!(body: "<p>Note: #{attachment_html}</p>")
 
     entry = Storage::Entry.last
     assert_equal @card.board_id, entry.board_id
-    assert_equal comment.id, entry.recordable_id
+    assert_equal note.id, entry.recordable_id
   end
-
-  test "board public_description embed creates storage entry" do
-    blob = ActiveStorage::Blob.create_and_upload! \
-      io: file_fixture("moon.jpg").open,
-      filename: "board_image.jpg",
-      content_type: "image/jpeg"
-
-    attachment_html = ActionText::Attachment.from_attachable(blob).to_html
-
-    assert_difference "Storage::Entry.count", +1 do
-      @board.update!(public_description: "<p>Board description: #{attachment_html}</p>")
-    end
-
-    entry = Storage::Entry.last
-    assert_equal blob.byte_size, entry.delta
-    assert_equal "attach", entry.operation
-    assert_equal @account.id, entry.account_id
-    assert_equal @board.id, entry.board_id
-    assert_equal "Board", entry.recordable_type
-    assert_equal @board.id, entry.recordable_id
-  end
-
 
   # Reconciliation includes all attachment types
 
-  test "board calculate_real_storage_bytes includes comment embeds" do
+  test "board calculate_real_storage_bytes includes note embeds" do
     blob = ActiveStorage::Blob.create_and_upload! \
       io: file_fixture("moon.jpg").open,
-      filename: "comment_embed.jpg",
+      filename: "note_embed.jpg",
       content_type: "image/jpeg"
 
     attachment_html = ActionText::Attachment.from_attachable(blob).to_html
-    @card.comments.create!(body: "<p>Comment: #{attachment_html}</p>")
+    @card.notes.create!(body: "<p>Note: #{attachment_html}</p>")
 
     board_bytes = @board.send(:calculate_real_storage_bytes)
 
-    assert board_bytes >= blob.byte_size, "board bytes should include comment embed bytes"
+    assert board_bytes >= blob.byte_size, "board bytes should include note embed bytes"
   end
 
-  test "account calculate_real_storage_bytes includes comment embeds via boards" do
+  test "account calculate_real_storage_bytes includes note embeds via boards" do
     blob = ActiveStorage::Blob.create_and_upload! \
       io: file_fixture("moon.jpg").open,
-      filename: "comment_embed.jpg",
+      filename: "note_embed.jpg",
       content_type: "image/jpeg"
 
     attachment_html = ActionText::Attachment.from_attachable(blob).to_html
-    @card.comments.create!(body: "<p>Comment: #{attachment_html}</p>")
+    @card.notes.create!(body: "<p>Note: #{attachment_html}</p>")
 
     account_bytes = @account.send(:calculate_real_storage_bytes)
 
-    assert account_bytes >= blob.byte_size, "account bytes should include comment embed bytes"
+    assert account_bytes >= blob.byte_size, "account bytes should include note embed bytes"
   end
 
 

@@ -6,15 +6,13 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "cards" do
-    @new_board = Board.create! name: "Inaccessible Board", creator: users(:david)
+    @new_board = Board.create! name: "Another Board", creator: users(:david)
     @new_card = @new_board.cards.create!(status: "published")
 
-    cards(:layout).comments.create!(body: "I hate haggis")
-    cards(:logo).comments.create!(body: "I love haggis")
+    cards(:layout).notes.create!(body: "I hate haggis")
+    cards(:logo).notes.create!(body: "I love haggis")
 
-    assert_not_includes users(:kevin).filters.new.cards, @new_card
-
-    filter = users(:david).filters.new assignment_status: "unassigned", board_ids: [ @new_board.id ]
+    filter = users(:david).filters.new board_ids: [ @new_board.id ]
     assert_equal [ @new_card ], filter.cards
 
     filter = users(:david).filters.new column_ids: [ columns(:writebook_doing).id ]
@@ -24,45 +22,31 @@ class FilterTest < ActiveSupport::TestCase
     assert_equal [ cards(:logo), cards(:layout) ], filter.cards
   end
 
-  test "can't see cards in boards that aren't accessible" do
-    boards(:writebook).update! all_access: false
-    boards(:writebook).accesses.revoke_from users(:david)
-
-    assert_empty users(:david).filters.new(board_ids: [ boards(:writebook).id ]).cards
-  end
-
-  test "can't see boards that aren't accessible" do
-    boards(:writebook).update! all_access: false
-    boards(:writebook).accesses.revoke_from users(:david)
-
-    assert_empty users(:david).filters.new(board_ids: [ boards(:writebook).id ]).boards
-  end
-
   test "remembering equivalent filters" do
     assert_difference "Filter.count", +1 do
-      filter = users(:david).filters.remember(sorted_by: "latest", assignment_status: "unassigned", assignee_ids: [ users(:jz).id ])
+      filter = users(:david).filters.remember(sorted_by: "newest", terms: [ "haggis" ])
 
       assert_changes "filter.reload.updated_at" do
-        assert_equal filter, users(:david).filters.remember(assignee_ids: [ users(:jz).id ], assignment_status: "unassigned")
+        assert_equal filter, users(:david).filters.remember(terms: [ "haggis" ], sorted_by: "newest")
       end
     end
   end
 
   test "remembering equivalent filters for different users" do
     assert_difference "Filter.count", +2 do
-      users(:david).filters.remember(assignment_status: "unassigned", assignee_ids: [ users(:jz).id ])
-      users(:kevin).filters.remember(assignment_status: "unassigned", assignee_ids: [ users(:jz).id ])
+      users(:david).filters.remember(terms: [ "haggis" ])
+      users(:kevin).filters.remember(terms: [ "haggis" ])
     end
   end
 
   test "turning into params" do
-    filter = users(:david).filters.new sorted_by: "latest", assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ]
-    expected = { assignee_ids: [ users(:jz).id ], board_ids: [ boards(:writebook).id ] }
+    filter = users(:david).filters.new sorted_by: "newest", board_ids: [ boards(:writebook).id ]
+    expected = { sorted_by: "newest", board_ids: [ boards(:writebook).id ] }
     assert_equal expected, filter.as_params
   end
 
   test "cacheability" do
-    assert_not filters(:jz_assignments).cacheable?
+    assert_not filters(:newest_first).cacheable?
     assert users(:david).filters.create!(board_ids: [ boards(:writebook).id ]).cacheable?
   end
 
@@ -99,10 +83,10 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "summary" do
-    assert_equal "Newest and assigned to JZ", filters(:jz_assignments).summary
+    assert_equal "Newest", filters(:newest_first).summary
 
-    filters(:jz_assignments).update!(assignees: [], boards: [ boards(:writebook) ])
-    assert_equal "Newest", filters(:jz_assignments).summary
+    filters(:newest_first).update!(terms: [ "haggis" ])
+    assert_equal "Newest and matching \"haggis\"", filters(:newest_first).summary
   end
 
   test "get a clone with some changed params" do
@@ -124,7 +108,7 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "check if a filter is used" do
-    assert users(:david).filters.new(creator_ids: [ users(:david).id ]).used?
+    assert users(:david).filters.new(terms: [ "haggis" ]).used?
     assert_not users(:david).filters.new.used?
 
     assert users(:david).filters.new(board_ids: [ boards(:writebook).id ]).used?
@@ -143,8 +127,7 @@ class FilterTest < ActiveSupport::TestCase
   end
 
   test "board titles are scoped to creator's account" do
-    # Give mike (initech) access to the board in his account
-    boards(:miltons_wish_list).accesses.grant_to(users(:mike))
+    # Mike (initech) sees the single board in his account
     assert_equal 1, users(:mike).boards.count
 
     # Filter with no boards selected should show the single board name from mike's account

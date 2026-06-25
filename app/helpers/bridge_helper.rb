@@ -25,8 +25,7 @@ module BridgeHelper
     date_added = card.created_at.strftime("%b %e")
     date_updated = card.last_active_at.strftime("%b %e")
     author = card.creator.familiar_name
-    assignees = card.assignees.any? ? "assigned to #{card.assignees.map { |assignee| h assignee.familiar_name }.to_sentence}" : "not assigned"
-    "Added #{date_added} by #{author} and #{assignees}. Updated #{date_updated}"
+    "Added #{date_added} by #{author}. Updated #{date_updated}"
   end
 
   def bridge_share_board_description(board)

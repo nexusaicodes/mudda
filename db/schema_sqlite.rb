@@ -10,20 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
-  create_table "accesses", id: :uuid, force: :cascade do |t|
-    t.datetime "accessed_at"
-    t.uuid "account_id", null: false
-    t.uuid "board_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id", "accessed_at"], name: "index_accesses_on_account_id_and_accessed_at"
-    t.index ["board_id", "user_id"], name: "index_accesses_on_board_id_and_user_id", unique: true
-    t.index ["board_id"], name: "index_accesses_on_board_id"
-    t.index ["user_id"], name: "index_accesses_on_user_id"
-  end
-
+ActiveRecord::Schema[8.2].define(version: 2026_06_26_000001) do
   create_table "account_cancellations", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -47,16 +34,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_account_imports_on_account_id"
     t.index ["identity_id"], name: "index_account_imports_on_identity_id"
-  end
-
-  create_table "account_join_codes", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.string "code", limit: 255, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "usage_count", default: 0, null: false
-    t.bigint "usage_limit", default: 10, null: false
-    t.index ["account_id", "code"], name: "index_account_join_codes_on_account_id_and_code", unique: true
   end
 
   create_table "accounts", id: :uuid, force: :cascade do |t|
@@ -130,46 +107,8 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "assignees_filters", id: false, force: :cascade do |t|
-    t.uuid "assignee_id", null: false
-    t.uuid "filter_id", null: false
-    t.index ["assignee_id"], name: "index_assignees_filters_on_assignee_id"
-    t.index ["filter_id"], name: "index_assignees_filters_on_filter_id"
-  end
-
-  create_table "assigners_filters", id: false, force: :cascade do |t|
-    t.uuid "assigner_id", null: false
-    t.uuid "filter_id", null: false
-    t.index ["assigner_id"], name: "index_assigners_filters_on_assigner_id"
-    t.index ["filter_id"], name: "index_assigners_filters_on_filter_id"
-  end
-
-  create_table "assignments", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "assignee_id", null: false
-    t.uuid "assigner_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_assignments_on_account_id"
-    t.index ["assignee_id", "card_id"], name: "index_assignments_on_assignee_id_and_card_id", unique: true
-    t.index ["card_id"], name: "index_assignments_on_card_id"
-  end
-
-  create_table "board_publications", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "board_id", null: false
-    t.datetime "created_at", null: false
-    t.string "key", limit: 255
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_board_publications_on_account_id"
-    t.index ["board_id"], name: "index_board_publications_on_board_id"
-    t.index ["key"], name: "index_board_publications_on_key", unique: true
-  end
-
   create_table "boards", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
-    t.boolean "all_access", default: false, null: false
     t.datetime "created_at", null: false
     t.uuid "creator_id", null: false
     t.string "name", limit: 255, null: false
@@ -223,23 +162,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.index ["account_id"], name: "index_columns_on_account_id"
     t.index ["board_id", "position"], name: "index_columns_on_board_id_and_position"
     t.index ["board_id"], name: "index_columns_on_board_id"
-  end
-
-  create_table "comments", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.uuid "creator_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_comments_on_account_id"
-    t.index ["card_id"], name: "index_comments_on_card_id"
-  end
-
-  create_table "creators_filters", id: false, force: :cascade do |t|
-    t.uuid "creator_id", null: false
-    t.uuid "filter_id", null: false
-    t.index ["creator_id"], name: "index_creators_filters_on_creator_id"
-    t.index ["filter_id"], name: "index_creators_filters_on_filter_id"
   end
 
   create_table "events", id: :uuid, force: :cascade do |t|
@@ -313,51 +235,14 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.index ["identity_id"], name: "index_magic_links_on_identity_id"
   end
 
-  create_table "mentions", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "created_at", null: false
-    t.uuid "mentionee_id", null: false
-    t.uuid "mentioner_id", null: false
-    t.uuid "source_id", null: false
-    t.string "source_type", limit: 255, null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_mentions_on_account_id"
-    t.index ["mentionee_id"], name: "index_mentions_on_mentionee_id"
-    t.index ["mentioner_id"], name: "index_mentions_on_mentioner_id"
-    t.index ["source_type", "source_id"], name: "index_mentions_on_source"
-  end
-
-  create_table "notification_bundles", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "ends_at", null: false
-    t.datetime "starts_at", null: false
-    t.integer "status", default: 0, null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_notification_bundles_on_account_id"
-    t.index ["ends_at", "status"], name: "index_notification_bundles_on_ends_at_and_status"
-    t.index ["user_id", "starts_at", "ends_at"], name: "idx_on_user_id_starts_at_ends_at_7eae5d3ac5"
-    t.index ["user_id", "status"], name: "index_notification_bundles_on_user_id_and_status"
-  end
-
-  create_table "notifications", id: :uuid, force: :cascade do |t|
+  create_table "notes", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.uuid "card_id", null: false
     t.datetime "created_at", null: false
-    t.uuid "creator_id"
-    t.datetime "read_at"
-    t.uuid "source_id", null: false
-    t.string "source_type", limit: 255, null: false
-    t.integer "unread_count", default: 0, null: false
+    t.uuid "creator_id", null: false
     t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_notifications_on_account_id"
-    t.index ["creator_id"], name: "index_notifications_on_creator_id"
-    t.index ["source_type", "source_id"], name: "index_notifications_on_source"
-    t.index ["user_id", "card_id"], name: "index_notifications_on_user_id_and_card_id", unique: true
-    t.index ["user_id", "read_at", "updated_at"], name: "index_notifications_on_user_id_and_read_at_and_updated_at", order: { read_at: :desc, updated_at: :desc }
-    t.index ["user_id"], name: "index_notifications_on_user_id"
+    t.index ["account_id"], name: "index_notes_on_account_id"
+    t.index ["card_id"], name: "index_notes_on_card_id"
   end
 
   create_table "pins", id: :uuid, force: :cascade do |t|
@@ -370,32 +255,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.index ["card_id", "user_id"], name: "index_pins_on_card_id_and_user_id", unique: true
     t.index ["card_id"], name: "index_pins_on_card_id"
     t.index ["user_id"], name: "index_pins_on_user_id"
-  end
-
-  create_table "push_subscriptions", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.string "auth_key", limit: 255
-    t.datetime "created_at", null: false
-    t.text "endpoint", limit: 65535
-    t.string "p256dh_key", limit: 255
-    t.datetime "updated_at", null: false
-    t.string "user_agent", limit: 4096
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_push_subscriptions_on_account_id"
-    t.index ["user_id", "endpoint"], name: "index_push_subscriptions_on_user_id_and_endpoint", unique: true
-  end
-
-  create_table "reactions", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.string "content", limit: 16, null: false
-    t.datetime "created_at", null: false
-    t.uuid "reactable_id", null: false
-    t.string "reactable_type", limit: 255, null: false
-    t.uuid "reacter_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_reactions_on_account_id"
-    t.index ["reactable_type", "reactable_id"], name: "index_reactions_on_reactable_type_and_reactable_id"
-    t.index ["reacter_id"], name: "index_reactions_on_reacter_id"
   end
 
   create_table "search_queries", id: :uuid, force: :cascade do |t|
@@ -475,14 +334,13 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
 
   create_table "user_settings", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
-    t.integer "bundle_email_frequency", default: 0, null: false
     t.datetime "created_at", null: false
     t.string "timezone_name", limit: 255
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["account_id"], name: "index_user_settings_on_account_id"
-    t.index ["user_id", "bundle_email_frequency"], name: "index_user_settings_on_user_id_and_bundle_email_frequency"
     t.index ["user_id"], name: "index_user_settings_on_user_id"
+    t.index ["user_id"], name: "index_user_settings_on_user_id_and_bundle_email_frequency"
   end
 
   create_table "users", id: :uuid, force: :cascade do |t|
@@ -491,25 +349,11 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.datetime "created_at", null: false
     t.uuid "identity_id"
     t.string "name", limit: 255, null: false
-    t.string "role", limit: 255, default: "member", null: false
     t.datetime "updated_at", null: false
     t.datetime "verified_at"
     t.index ["account_id", "identity_id"], name: "index_users_on_account_id_and_identity_id", unique: true
-    t.index ["account_id", "role"], name: "index_users_on_account_id_and_role"
+    t.index ["account_id"], name: "index_users_on_account_id_and_role"
     t.index ["identity_id"], name: "index_users_on_identity_id"
-  end
-
-  create_table "watches", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.boolean "watching", default: true, null: false
-    t.index ["account_id"], name: "index_watches_on_account_id"
-    t.index ["card_id"], name: "index_watches_on_card_id"
-    t.index ["user_id", "card_id"], name: "index_watches_on_user_id_and_card_id"
-    t.index ["user_id"], name: "index_watches_on_user_id"
   end
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 

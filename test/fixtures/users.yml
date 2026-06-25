@@ -1,7 +1,6 @@
 david:
   id: <%= ActiveRecord::FixtureSet.identify("david", :uuid) %>
   name: David
-  role: member
   identity: david
   account: 37s_uuid
   verified_at: <%= Time.current.to_fs(:db) %>
@@ -9,7 +8,6 @@ david:
 jz:
   id: <%= ActiveRecord::FixtureSet.identify("jz", :uuid) %>
   name: JZ
-  role: member
   identity: jz
   account: 37s_uuid
   verified_at: <%= Time.current.to_fs(:db) %>
@@ -17,7 +15,6 @@ jz:
 jason:
   id: <%= ActiveRecord::FixtureSet.identify("jason", :uuid) %>
   name: Jason
-  role: owner
   identity: jason
   account: 37s_uuid
   verified_at: <%= Time.current.to_fs(:db) %>
@@ -25,7 +22,6 @@ jason:
 kevin:
   id: <%= ActiveRecord::FixtureSet.identify("kevin", :uuid) %>
   name: Kevin
-  role: admin
   identity: kevin
   account: 37s_uuid
   verified_at: <%= Time.current.to_fs(:db) %>
@@ -33,13 +29,11 @@ kevin:
 system:
   id: <%= ActiveRecord::FixtureSet.identify("system", :uuid) %>
   name: System
-  role: system
   account: 37s_uuid
 
 mike:
   id: <%= ActiveRecord::FixtureSet.identify("mike", :uuid) %>
   name: Mike
-  role: admin
   identity: mike
   account: initech_uuid
   verified_at: <%= Time.current.to_fs(:db) %>
@@ -47,5 +41,4 @@ mike:
 system_initech:
   id: <%= ActiveRecord::FixtureSet.identify("system_initech", :uuid) %>
   name: System
-  role: system
   account: initech_uuid

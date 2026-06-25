@@ -1,1 +1,1 @@
-json.array! @page.records, partial: "cards/comments/comment", as: :comment
+json.array! @page.records, partial: "cards/notes/note", as: :note

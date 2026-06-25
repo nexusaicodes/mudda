@@ -1,4 +1,4 @@
-# Repair task — reindexes every searchable Card and Comment in the database.
+# Repair task — reindexes every searchable Card and Note in the database.
 # Intended to be invoked manually after a search-index loss event. Not a recurring job.
 #
 # Idempotent: Searchable#reindex upserts by (searchable_type, searchable_id).
@@ -32,17 +32,17 @@ class SearchReindexJob < ApplicationJob
       end
     end
 
-    step :comments do |step|
+    step :notes do |step|
       processed = 0
-      Comment.joins(:card).merge(Card.published)
+      Note.joins(:card).merge(Card.published)
              .left_joins(:rich_text_body)
              .where("action_text_rich_texts.body IS NULL OR OCTET_LENGTH(action_text_rich_texts.body) <= ?", rich_text_limit)
              .includes(:rich_text_body, :card)
-             .find_each(start: step.cursor, batch_size: batch_size) do |comment|
-        safely_reindex(comment)
+             .find_each(start: step.cursor, batch_size: batch_size) do |note|
+        safely_reindex(note)
         processed += 1
-        log_progress(:comments, processed, comment.id) if (processed % log_every).zero?
-        step.advance! from: comment.id
+        log_progress(:notes, processed, note.id) if (processed % log_every).zero?
+        step.advance! from: note.id
       end
     end
   end

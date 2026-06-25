@@ -1,0 +1,7 @@
+<% notes_count = card.notes.count %>
+<% if notes_count.positive? %>
+  <div class="card__notes">
+    <%= icon_tag "comment" %>
+    <span><%= notes_count %></span>
+  </div>
+<% end %>

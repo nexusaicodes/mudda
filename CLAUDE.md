@@ -7,14 +7,20 @@ The authoritative architecture and conventions live in two files you should trea
 - **[AGENTS.md](AGENTS.md)** — what Mudda is, dev/test commands, and the big-picture architecture (URL-based multi-tenancy, passwordless auth + passkeys, core domain models, the fixed-column card lifecycle, due dates, UUIDv7 keys, Solid Queue jobs, SQLite full-text search).
 - **[STYLE.md](STYLE.md)** — house style (conditional returns over guard clauses, method/invocation ordering, bang conventions, CRUD-only controllers, vanilla Rails, `_later`/`_now` job naming).
 
-## This is a standalone build
+## This is a standalone, single-person build
 
 Mudda began as a fork of **Fizzy** (37signals), which shipped as a dual OSS + hosted-SaaS
-product. This repository has been **trimmed to a single-tenant, standalone app** run only
-through Docker Compose ([DOCKER.md](DOCKER.md)). Removed: the `saas/` engine and second
-Gemfile, Kamal deploy tooling, MySQL/Trilogy (now SQLite-only), S3/object storage (local
-disk only), web push notifications, cross-instance import/export, the Mission Control jobs
-dashboard, and the CI/security wrapper scripts.
+**team** product. This repository has been **trimmed to a single-tenant, single-person,
+standalone app** run only through Docker Compose ([DOCKER.md](DOCKER.md)).
+
+Removed infrastructure: the `saas/` engine and second Gemfile, Kamal deploy tooling,
+MySQL/Trilogy (now SQLite-only), S3/object storage (local disk only), cross-instance
+import/export, and the CI/security wrapper scripts.
+
+Removed team-collaboration features: notifications and mentions, assignments, watching,
+reactions, board access control (`Access`) and roles, membership/invites/join codes, and
+public board sharing (`Board::Publication`). `Comment` is now `Note`. The single user can
+reach every board and card in their account, and the activity log is first-person ("You …").
 
 `Mudda.saas?` (`lib/mudda.rb`) is hardcoded `false`; the predicate remains only because a
 handful of view/job branches still reference it.

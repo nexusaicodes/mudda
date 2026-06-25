@@ -1,36 +1,36 @@
 require "test_helper"
 
-class CommentTest < ActiveSupport::TestCase
+class NoteTest < ActiveSupport::TestCase
   setup do
     Current.session = sessions(:david)
   end
 
-  test "cannot create comment on a draft card" do
+  test "cannot create note on a draft card" do
     draft_card = cards(:unfinished_thoughts)
 
-    comment = draft_card.comments.build(body: "This should fail")
+    note = draft_card.notes.build(body: "This should fail")
 
-    assert_not comment.valid?
-    assert_includes comment.errors[:card], "does not allow comments"
+    assert_not note.valid?
+    assert_includes note.errors[:card], "does not allow notes"
 
     assert_raises(ActiveRecord::RecordInvalid) do
-      draft_card.comments.create!(body: "This should raise")
+      draft_card.notes.create!(body: "This should raise")
     end
   end
 
   test "rich text embed variants are processed immediately on attachment" do
-    comment = cards(:logo).comments.create!(body: "Check this out")
-    comment.body.body.attachables # force load
+    note = cards(:logo).notes.create!(body: "Check this out")
+    note.body.body.attachables # force load
 
     blob = ActiveStorage::Blob.create_and_upload! \
       io: File.open(file_fixture("moon.jpg")),
       filename: "moon.jpg",
       content_type: "image/jpeg"
 
-    comment.body.body = ActionText::Content.new(comment.body.body.to_html).append_attachables(blob)
-    comment.save!
+    note.body.body = ActionText::Content.new(note.body.body.to_html).append_attachables(blob)
+    note.save!
 
-    embed = comment.body.embeds.sole
+    embed = note.body.embeds.sole
 
     Attachments::VARIANTS.each_key do |variant_name|
       variant = embed.variant(variant_name)

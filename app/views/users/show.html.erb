@@ -1,5 +1,4 @@
 <% @page_title = @user.name %>
-<% me_or_you = Current.user == @user ? "me" : @user.first_name %>
 
 <div class="settings settings--profile">
   <div class="settings__panel panel shadow txt-align-center">
@@ -29,15 +28,6 @@
         </div>
       </div>
 
-      <% if @user.verified? %>
-        <div class="flex-inline center justify-center flex-wrap gap">
-          <%= link_to "Which cards are assigned to #{me_or_you}?",
-                cards_path(assignee_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
-          <%= link_to "Which cards were added by #{me_or_you}?",
-                cards_path(creator_ids: [ @user.id ], sorted_by: "newest"), class: "btn btn--link", data: { turbo_frame: "_top" } %>
-        </div>
-      <% end %>
-
       <% if Current.user == @user %>
         <div class="flex-inline justify-center flex-wrap gap full-width hide-on-native">
           <hr class="separator--horizontal full-width margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
@@ -58,7 +48,6 @@
   <% if Current.user == @user %>
     <div class="settings__panel panel shadow hide-on-native">
       <%= render "users/theme" %>
-      <%= render "users/transfer", user: @user %>
       <%= render "users/access_tokens" %>
     </div>
   <% end %>

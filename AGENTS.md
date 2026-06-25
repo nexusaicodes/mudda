@@ -4,14 +4,13 @@ This file provides guidance to AI coding agents working with this repository.
 
 ## What is Mudda?
 
-Mudda is a collaborative project management and issue-tracking app: a Kanban-style tool for
-teams to create and manage **cards** (tasks/issues) on **boards**, move them through a
-**fixed set of columns** (the workflow), and collaborate via comments, mentions, reactions,
-and assignments.
+Mudda is a personal project management and issue-tracking app: a single-person Kanban tool
+to create and manage **cards** (tasks/issues) on **boards**, move them through a **fixed set
+of columns** (the workflow), capture progress with **notes**, and review everything in a
+first-person **activity log**.
 
 Mudda is maintained by **Nexus AI** and is a fork of **Fizzy**, originally created by
-**37signals**. It ships as open source and is also run as a hosted product via a private
-SaaS engine layered on top (see `CLAUDE.md`).
+**37signals**. This repository is the standalone, single-person build (see `CLAUDE.md`).
 
 ## Development Commands
 
@@ -67,54 +66,57 @@ Mudda uses **URL path-based multi-tenancy** (`config/initializers/tenanting/acco
 **Key insight:** multi-tenancy without subdomains or separate databases, which keeps local
 development and testing simple.
 
-### Authentication & Authorization
+### Authentication
 
 **Passwordless magic-link authentication, plus passkeys:**
-- A global `Identity` (email-based) can have `Users` in multiple Accounts.
+- A global `Identity` (email-based) owns the single `User` in the account.
 - `Identity#send_magic_link` creates a `MagicLink` and mails it (`MagicLinkMailer`).
 - Passkeys (WebAuthn) via `Identity has_passkeys` + `lib/action_pack/passkey/` and the
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
 - `Session belongs_to :identity`; `Current` resolves session → identity → user (scoped to
   `Current.account`) → account.
-- Users have roles: `owner`, `admin`, `member`, `system`.
-- Board-level access control via `Access` records (board ↔ user join).
+- **No roles, no per-board access control.** The single user can reach every board and card
+  in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 
 ### Core Domain Models
 
-**Account** → the tenant/organization. Concerns: `Storage`, `Cancellable`,
-`Incineratable`, `MultiTenantable`, `Searchable`. Has users, boards, cards,
-columns, exports, imports. `create_with_owner` provisions a `system` user plus an
-`owner`.
+**Account** → the tenant/organization. Concerns: `Account::Storage`, `Cancellable`,
+`Incineratable`, `MultiTenantable`, `Searchable`. Has users, boards, cards, columns.
+`create_with_owner` provisions the single account user.
 
 **Identity** → global, email-based principal. `has_passkeys`, `has_many :magic_links,
 :sessions, :users, :accounts (through users), :access_tokens`.
 
-**User** → account membership (`belongs_to :account, :identity`). Carries role, board
-accesses, watches, assignments. `deactivate` nulls the identity and destroys accesses.
+**User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
+`Avatar`, `Configurable`, `EmailAddressChangeable`, `Named`, `Searcher`, `Timelined`. Owns
+filters, pins, and notes. `deactivate` nulls the identity.
 
-**Board** → primary organizational unit. Concerns: `Accessible`, `Board::Storage`,
-`Broadcastable`, `Cards`, `Filterable`, `Publishable`, `Storage::Tracked`, `Triageable`.
-Can be "all access" or selective; can be published publicly with a shareable key
-(`Board::Publication`). **Every board has the same five fixed columns** (see below).
+**Board** → primary organizational unit. Concerns: `Board::Storage`, `Broadcastable`,
+`Cards`, `Filterable`, `Storage::Tracked`, `Triageable`. **Every board has the same five
+fixed columns** (see below). All of the account's boards are visible to the user.
 
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
 fixed; only color is editable.
 
 **Card** → the main work item. Sequential per-account `number` (via
-`account.increment!(:cards_count)`), rich-text description, image attachment, steps,
-comments, reactions. Status enum is `drafted` / `published` (`Card::Statuses`); a card is
-published via `publish` (which also requires a due date). Key concerns include `Triageable`,
-`Due`, `Statuses`, `Golden`, `Pinnable`, `Multistep`, `Watchable`, `Assignable`,
-`Commentable`, `Searchable`.
+`account.increment!(:cards_count)`), rich-text description, image attachment, steps, and
+**notes**. Status enum is `drafted` / `published` (`Card::Statuses`); a card is published via
+`publish` (which also requires a due date). Concerns: `Attachments`, `Broadcastable`,
+`Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Pinnable`, `Promptable`,
+`Searchable`, `Statuses`, `Storage::Tracked`, `Triageable`.
+
+**Note** → a timestamped, rich-text entry on a published card (`Card::Notable`). Created via
+`card.notes.create!`; only the creator can edit or delete it.
 
 **Event** → records significant actions. Polymorphic `eventable`, JSON `particulars`
-(`Event::Particulars`). Drives the activity timeline and notifications.
+(`Event::Particulars`). Drives the first-person activity timeline (`Event::Description`
+renders sentences as "You added …").
 
-**Access** → board ↔ user join controlling visibility.
-
-> **Removed in this fork's refactor:** `Tag`/`Tagging` (tagging removed entirely; see
-> `db/migrate/*_drop_tags.rb`) and the `Entropy` model / auto-postpone system (replaced by
-> due dates; see below).
+> **Removed in this fork's refactor (vs. upstream Fizzy):** team collaboration entirely —
+> notifications, mentions, assignments, watching, reactions, board access control (`Access`),
+> roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
+> Also gone: `Tag`/`Tagging` (see `db/migrate/*_drop_tags.rb`) and the `Entropy`
+> auto-postpone system (replaced by due dates; see below). `Comment` was renamed to `Note`.
 
 ### Card Lifecycle — Fixed Columns
 
@@ -153,13 +155,11 @@ which has been removed along with the `entropies` table and the hourly auto-post
 
 ### Web endpoints (REST resources)
 
-Routes (`config/routes.rb`) model behavior as CRUD on resources. Notable nested resources on
-`cards`: `draft`, `board`, `column`, `goldness`, `image`, `pin`, `publish`, `reading`,
-`watch`, plus `reactions`, `assignments`, `self_assignment`, `steps`, and `comments`
-(with nested `reactions`). Boards expose `accesses`, `subscriptions`,
-`publication`, and read-only `columns` (`index`/`show`/`update` only — columns are fixed, so
-there is no create/destroy/reorder). A `public/` namespace mirrors read-only board/card
-views for published boards. Admin tooling (Mission Control Jobs) mounts at `/admin/jobs`.
+Routes (`config/routes.rb`) model behavior as CRUD on resources. Nested resources on `cards`:
+`draft`, `board`, `column`, `goldness`, `image`, `pin`, `publish`, `steps`, and `notes`.
+Boards expose read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there
+is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index. Admin tooling
+(Mission Control Jobs) mounts at `/admin/jobs`.
 
 ### UUID Primary Keys
 
@@ -179,16 +179,16 @@ adapter (Solid Queue itself is configured but not the active dev adapter).
   (see `STYLE.md`).
 
 Recurring jobs (`config/recurring.yml`):
-- `deliver_bundled_notifications` — every 30 min
 - `clear_solid_queue_finished_jobs` — hourly at :12
 - `cleanup_magic_links` — every 4 hours
 - `incineration` (`Account::IncinerateDueJob`) — every 8 hours at :16
 
 ### Full-Text Search
 
-`app/models/search/` denormalizes searchable content into `Search::Record`, which uses a
-single SQLite FTS5 virtual table (`search_records_fts`). Stemming, highlighting, and query
-sanitizing live in `Search::Stemmer`, `Search::Highlighter`, and `Search::Query`.
+`app/models/search/` denormalizes searchable content (cards and notes) into `Search::Record`,
+which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spans every board
+in the account. Stemming, highlighting, and query sanitizing live in `Search::Stemmer`,
+`Search::Highlighter`, and `Search::Query`.
 
 ## Tools
 

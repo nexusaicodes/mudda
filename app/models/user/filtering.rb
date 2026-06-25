@@ -8,7 +8,7 @@ class User::Filtering
   end
 
   def boards
-    @boards ||= user.boards.ordered_by_recently_accessed
+    @boards ||= user.boards.ordered_by_recent_activity
   end
 
   def selected_board_titles
@@ -17,10 +17,6 @@ class User::Filtering
 
   def selected_boards_label
     filter.boards_label
-  end
-
-  def users
-    @users ||= account.users.active.alphabetically
   end
 
   def filters
@@ -43,14 +39,6 @@ class User::Filtering
     !filter.sorted_by.latest?
   end
 
-  def show_assignees?
-    filter.assignees.any?
-  end
-
-  def show_creators?
-    filter.creators.any?
-  end
-
   def show_boards?
     filter.boards.any?
   end
@@ -61,11 +49,6 @@ class User::Filtering
   end
 
   def cache_key
-    ActiveSupport::Cache.expand_cache_key([ user, filter, expanded?, boards, users, filters ], "user-filtering")
+    ActiveSupport::Cache.expand_cache_key([ user, filter, expanded?, boards, filters ], "user-filtering")
   end
-
-  private
-    def account
-      user.account
-    end
 end

@@ -5,14 +5,14 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
     travel_to Time.utc(2025, 1, 22, 17, 30, 0)
 
-    events(:layout_assignment_jz).update!(created_at: Time.current.beginning_of_day + 8.hours)
+    events(:layout_published).update!(created_at: Time.current.beginning_of_day + 8.hours)
   end
 
   test "index" do
     get events_path
 
-    assert_select "div.events__time-block[style='grid-area: 17/2']" do
-      assert_select "strong", text: /assigned JZ to Layout is broken/
+    assert_select "div.events__time-block[style='grid-area: 17/1']" do
+      assert_select "strong", text: /added Layout is broken/
     end
   end
 
@@ -21,8 +21,8 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
 
     get events_path
 
-    assert_select "div.events__time-block[style='grid-area: 22/2']" do
-      assert_select "strong", text: /assigned JZ to Layout is broken/
+    assert_select "div.events__time-block[style='grid-area: 22/1']" do
+      assert_select "strong", text: /added Layout is broken/
     end
   end
 

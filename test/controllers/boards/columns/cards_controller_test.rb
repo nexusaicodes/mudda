@@ -15,15 +15,4 @@ class Boards::Columns::CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ cards(:text).number ], @response.parsed_body.pluck("number")
     assert_equal "1", response.headers["X-Total-Count"]
   end
-
-  test "cannot access cards on board without access as JSON" do
-    board = boards(:private)
-    column = board.columns.create!(name: "Secret")
-
-    logout_and_sign_in_as :jason
-
-    get board_column_cards_path(board, column), as: :json
-
-    assert_response :not_found
-  end
 end

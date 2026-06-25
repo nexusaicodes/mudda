@@ -1,4 +1,4 @@
-<% if Current.account.cancellable? && Current.user.owner? %>
+<% if Current.account.cancellable? %>
   <section class="settings__section settings__section--negative">
     <header>
       <h2 class="divider">Danger zone</h2>
@@ -14,7 +14,7 @@
           <h3 class="margin-block-start margin-block-end-half txt-normal">What happens next:</h3>
           <ul class="list-unindented margin-block-start-half margin-block-end">
             <li>Your <strong><%= Current.account.name %></strong> account will be closed immediately.</li>
-            <li>All users, including you, will lose access.</li>
+            <li>You will lose access.</li>
             <% if Current.account.try(:active_subscription) %>
               <li>Your subscription will be canceled.</li>
             <% end %>

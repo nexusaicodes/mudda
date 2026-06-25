@@ -1,7 +1,6 @@
 class Account < ApplicationRecord
   include Account::Storage, Cancellable, Incineratable, MultiTenantable, Searchable
 
-  has_one :join_code, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :boards, dependent: :destroy
   has_many :cards, dependent: :destroy
@@ -10,15 +9,13 @@ class Account < ApplicationRecord
   scope :active, -> { where.missing(:cancellation) }
 
   before_create :assign_external_account_id
-  after_create :create_join_code
 
   validates :name, presence: true
 
   class << self
     def create_with_owner(account:, owner:)
       create!(**account).tap do |account|
-        account.users.create!(role: :system, name: "System")
-        account.users.create!(**owner.with_defaults(role: :owner, verified_at: Time.current))
+        account.users.create!(**owner.with_defaults(verified_at: Time.current))
       end
     end
   end
@@ -29,10 +26,6 @@ class Account < ApplicationRecord
 
   def account
     self
-  end
-
-  def system_user
-    users.find_by!(role: :system)
   end
 
   def active?
