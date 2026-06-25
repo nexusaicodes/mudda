@@ -76,9 +76,10 @@
 
   .tray__toggle {
     align-self: stretch;
+    align-items: center;
     background: none;
     border: 0;
-    display: block;
+    display: flex;
     padding: 0;
     transition: opacity 100ms ease-out;
 
@@ -511,67 +512,6 @@
   }
 
   ::view-transition-group(tray-pins) {
-    z-index: 100;
-  }
-
-  /* Notification-specific styles
-  /* ------------------------------------------------------------------------ */
-
-  .tray--notifications {
-    inset-inline: auto var(--tray-margin);
-    view-transition-name: tray-notifications;
-
-    #footer:has(.bar__placeholder[hidden]) & {
-      inset-inline-end: -100%;
-    }
-
-    .tray__item,
-    [data-navigable-list-target~=item] {
-      [open] &[aria-selected] {
-        outline: 0;
-        z-index: calc(var(--tray-item-z) + 2);
-
-        .card,
-        .tray__item--hat & .btn {
-          border-radius: 0.25ch;
-          outline: var(--focus-ring-size) solid var(--focus-ring-color);
-          outline-offset: var(--focus-ring-offset);
-        }
-      }
-
-      &:nth-child(1n + 7) {
-        display: none;
-        pointer-events: none;
-        visibility: hidden;
-      }
-
-      &:not([aria-selected]) .card:focus-visible,
-      .tray__dialog:not([open]) & .card:focus-visible {
-        --focus-ring-size: 0;
-      }
-
-      .btn:focus-visible {
-        outline: 0;
-      }
-    }
-
-    &:not(:has(.card--notification)) {
-      .tray__notification-read-action {
-        visibility: hidden;
-      }
-    }
-
-    /* On mobile… */
-    @media (max-width: 799px) {
-      /* …add a border */
-      .tray__dialog:not([open]) ~ .tray__toggle {
-        border-inline-start: 1px dashed var(--color-ink-light);
-        translate: var(--tray-margin) 0;
-      }
-    }
-  }
-
-  ::view-transition-group(tray-notifications) {
     z-index: 100;
   }
 }

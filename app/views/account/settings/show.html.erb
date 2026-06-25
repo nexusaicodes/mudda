@@ -11,7 +11,9 @@
     <%= render "account/settings/name", account: @account %>
   </div>
 
-  <div class="settings__panel panel shadow center">
-    <%= render "account/settings/cancellation" %>
-  </div>
+  <% if Current.account.cancellable? %>
+    <div class="settings__panel panel shadow center">
+      <%= render "account/settings/cancellation" %>
+    </div>
+  <% end %>
 </div>
