@@ -17,15 +17,6 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     assert_match %r{rails/active_storage}, response.location
   end
 
-  test "bearer token can view blob" do
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
-
-    get rails_blob_path(@blob, disposition: :inline), env: bearer_token
-
-    assert_response :redirect
-    assert_match %r{rails/active_storage}, response.location
-  end
-
   test "user from another account cannot view blob" do
     sign_in_as :mike
 
@@ -43,15 +34,6 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     sign_in_as :david
 
     get rails_representation_path(@blob.representation(resize_to_limit: [ 100, 100 ]))
-    assert_response :redirect
-    assert_match %r{rails/active_storage/}, response.location
-  end
-
-  test "bearer token can view representation" do
-    bearer_token = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:davids_api_token).token}" }
-
-    get rails_representation_path(@blob.representation(resize_to_limit: [ 100, 100 ])), env: bearer_token
-
     assert_response :redirect
     assert_match %r{rails/active_storage/}, response.location
   end

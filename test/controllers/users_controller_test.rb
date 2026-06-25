@@ -95,24 +95,4 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert @response.parsed_body["avatar"].present?
   end
-
-  test "bearer token does not authenticate HTML requests" do
-    sign_in_as :jason
-    sign_out
-
-    bearer = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
-    get user_path(users(:jason)), env: bearer
-
-    assert_response :unauthorized
-  end
-
-  test "bearer token authenticates JSON requests" do
-    sign_in_as :jason
-    sign_out
-
-    bearer = { "HTTP_AUTHORIZATION" => "Bearer #{identity_access_tokens(:jasons_api_token).token}" }
-    get user_path(users(:jason)), env: bearer, as: :json
-
-    assert_response :success
-  end
 end

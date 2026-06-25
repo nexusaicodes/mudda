@@ -105,7 +105,6 @@ Rails.application.routes.draw do
   namespace :my do
     resource :passkey_challenge, only: :create
     resource :identity, only: :show
-    resources :access_tokens
     resources :passkeys, except: %i[ show new ]
     resources :pins
     resource :timezone

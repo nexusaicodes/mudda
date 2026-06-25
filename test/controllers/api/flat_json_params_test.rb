@@ -80,15 +80,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal "Flat updated", step.reload.content
   end
 
-  test "create access token with flat JSON" do
-    assert_difference -> { identities(:kevin).access_tokens.count }, +1 do
-      post my_access_tokens_path, params: { description: "Flat token", permission: "read" }, as: :json
-    end
-
-    assert_response :created
-    assert_equal "Flat token", @response.parsed_body["description"]
-  end
-
   test "update user with flat JSON" do
     put user_path(users(:david)), params: { name: "Flat Name" }, as: :json
 
