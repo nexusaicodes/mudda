@@ -18,12 +18,11 @@ module Card::Promptable
 
       * Id: #{id}
       * Created by: #{creator.name}}
-      * Assigned to: #{assignees.map(&:name).join(", ")}
       * Column: #{column_prompt_label}
       * Created at: #{created_at}}
       * Board id: #{board_id}
       * Board name: #{board.name}
-      * Number of comments: #{comments.count}
+      * Number of notes: #{notes.count}
       * Path: #{card_path(self, script_name: account.slug)}
 
       END OF CARD #{id}

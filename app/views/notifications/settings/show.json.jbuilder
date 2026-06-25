@@ -1,1 +1,0 @@
-json.bundle_email_frequency Current.user.settings.bundle_email_frequency
