@@ -6,9 +6,9 @@ class Boards::AccessesController < ApplicationController
   end
 
   private
-    def involvement_by_user
-      @involvement_by_user ||= @board.accesses.where(user_id: @page.records.map(&:id)).pluck(:user_id, :involvement).to_h
+    def accessed_user_ids
+      @accessed_user_ids ||= @board.accesses.where(user_id: @page.records.map(&:id)).pluck(:user_id).to_set
     end
 
-    helper_method :involvement_by_user
+    helper_method :accessed_user_ids
 end

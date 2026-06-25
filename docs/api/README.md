@@ -29,7 +29,6 @@ a bot to perform various actions for you.
 - [Notifications](sections/notifications.md)
 - [Rich Text](sections/rich_text.md)
 - [Exports](sections/exports.md)
-- [Webhooks](sections/webhooks.md)
 
 ## Authentication
 

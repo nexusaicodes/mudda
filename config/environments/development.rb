@@ -81,7 +81,7 @@ Rails.application.configure do
 
   config.hosts = [
     "app.mudda.localhost",
-    "mudda.localhost", # here for backwards compat, but will have CORS errors when using minio
+    "mudda.localhost", # here for backwards compat
     "localhost",
     "127.0.0.1",
     /mudda-\d+/,   # review apps: mudda-123, mudda-456:3000

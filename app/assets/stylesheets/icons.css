@@ -98,10 +98,6 @@
   .icon--monitor { --svg: url("monitor.svg "); }
   .icon--moon { --svg: url("moon.svg "); }
   .icon--move { --svg: url("move.svg "); }
-  .icon--notification-bell-access-only { --svg: url("bell.svg "); }
-  .icon--notification-bell-watching { --svg: url("bell-off.svg "); }
-  .icon--notification-bell-reverse-access-only { --svg: url("bell-off.svg "); }
-  .icon--notification-bell-reverse-watching { --svg: url("bell.svg "); }
   .icon--password { --svg: url("password.svg "); }
   .icon--pencil { --svg: url("pencil.svg "); }
   .icon--person { --svg: url("person.svg "); }

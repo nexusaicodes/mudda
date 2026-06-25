@@ -42,12 +42,7 @@ class Account::IncineratableTest < ActiveSupport::TestCase
 
     # Via Board
     publication = Board::Publication.create!(board: board)
-    webhook = Webhook.create!(board: board, name: "Test", url: "https://example.com/webhook")
     event = Event.create!(board: board, creator: user, eventable: card, action: "card_published")
-
-    # Via Webhook
-    delivery = Webhook::Delivery.create!(webhook: webhook, event: event)
-    # DelinquencyTracker is auto-created with Webhook
 
     # Via Card
     comment = card.comments.create!(body: "Test comment")
@@ -75,15 +70,12 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert Board.where(account_id: account_id).exists?
     assert Card.where(account_id: account_id).exists?
     assert Column.where(account_id: account_id).exists?
-    assert Webhook.where(account_id: account_id).exists?
     assert Access.where(account_id: account_id).exists?
     assert Account::JoinCode.where(account_id: account_id).exists?
     assert Search::Query.where(account_id: account_id).exists?
     assert Storage::Entry.where(account_id: account_id).exists?
     assert Board::Publication.where(account_id: account_id).exists?
     assert Event.where(account_id: account_id).exists?
-    assert Webhook::Delivery.where(account_id: account_id).exists?
-    assert Webhook::DelinquencyTracker.where(account_id: account_id).exists?
     assert Comment.where(account_id: account_id).exists?
     assert Step.where(account_id: account_id).exists?
     assert Assignment.where(account_id: account_id).exists?
@@ -113,7 +105,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty User.where(account_id: account_id)
     assert_empty Board.where(account_id: account_id)
     assert_empty Card.where(account_id: account_id)
-    assert_empty Webhook.where(account_id: account_id)
     assert_empty Column.where(account_id: account_id)
     assert_empty Account::JoinCode.where(account_id: account_id)
     assert_empty Search::Query.where(account_id: account_id)
@@ -122,10 +113,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert_empty Board::Publication.where(account_id: account_id)
     assert_empty Access.where(account_id: account_id)
     assert_empty Event.where(account_id: account_id)
-
-    # Via Webhook
-    assert_empty Webhook::Delivery.where(account_id: account_id)
-    assert_empty Webhook::DelinquencyTracker.where(account_id: account_id)
 
     # Via Card
     assert_empty Comment.where(account_id: account_id)

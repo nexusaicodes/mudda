@@ -21,18 +21,16 @@ class Boards::AccessesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "index includes has_access and involvement for users with access" do
+  test "index includes has_access for users with access" do
     board = boards(:writebook)
-    board.access_for(users(:kevin)).update!(involvement: :watching)
 
     get board_accesses_path(board), as: :json
 
     kevin_entry = @response.parsed_body["users"].find { |u| u["id"] == users(:kevin).id }
     assert kevin_entry["has_access"]
-    assert_equal "watching", kevin_entry["involvement"]
   end
 
-  test "index shows has_access false and nil involvement for users without access" do
+  test "index shows has_access false for users without access" do
     board = boards(:private)
 
     get board_accesses_path(board), as: :json
@@ -40,7 +38,6 @@ class Boards::AccessesControllerTest < ActionDispatch::IntegrationTest
 
     david_entry = @response.parsed_body["users"].find { |u| u["id"] == users(:david).id }
     assert_not david_entry["has_access"]
-    assert_nil david_entry["involvement"]
   end
 
   test "index includes standard user fields" do

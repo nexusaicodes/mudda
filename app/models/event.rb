@@ -6,8 +6,6 @@ class Event < ApplicationRecord
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true
 
-  has_many :webhook_deliveries, class_name: "Webhook::Delivery", dependent: :delete_all
-
   scope :chronologically, -> { order created_at: :asc, id: :desc }
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
   scope :for_creators, ->(ids) { where(creator_id: ids) if ids.present? }
@@ -24,7 +22,6 @@ class Event < ApplicationRecord
   }
 
   after_create -> { eventable.event_was_created(self) }
-  after_create_commit :dispatch_webhooks
 
   delegate :card, to: :eventable
 
@@ -39,9 +36,4 @@ class Event < ApplicationRecord
   def description_for(user)
     Event::Description.new(self, user)
   end
-
-  private
-    def dispatch_webhooks
-      Event::WebhookDispatchJob.perform_later(self)
-    end
 end

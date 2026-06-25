@@ -14,7 +14,6 @@ class Card::CommentableTest < ActiveSupport::TestCase
   end
 
   test "creating a comment on a card makes the creator watch the card" do
-    boards(:writebook).access_for(users(:kevin)).access_only!
     assert_not cards(:text).watched_by?(users(:kevin))
 
     with_current_user(:kevin) do

@@ -77,13 +77,13 @@ development and testing simple.
 - `Session belongs_to :identity`; `Current` resolves session → identity → user (scoped to
   `Current.account`) → account.
 - Users have roles: `owner`, `admin`, `member`, `system`.
-- Board-level access control via `Access` records (`involvement`: `access_only` / `watching`).
+- Board-level access control via `Access` records (board ↔ user join).
 
 ### Core Domain Models
 
 **Account** → the tenant/organization. Concerns: `Storage`, `Cancellable`,
-`Incineratable`, `MultiTenantable`, `Searchable`, `Seedeable`. Has users, boards, cards,
-columns, webhooks, exports, imports. `create_with_owner` provisions a `system` user plus an
+`Incineratable`, `MultiTenantable`, `Searchable`. Has users, boards, cards,
+columns, exports, imports. `create_with_owner` provisions a `system` user plus an
 `owner`.
 
 **Identity** → global, email-based principal. `has_passkeys`, `has_many :magic_links,
@@ -108,10 +108,9 @@ published via `publish` (which also requires a due date). Key concerns include `
 `Commentable`, `Searchable`.
 
 **Event** → records significant actions. Polymorphic `eventable`, JSON `particulars`
-(`Event::Particulars`). Drives the activity timeline, notifications, and webhooks
-(`after_create_commit` → `Event::WebhookDispatchJob`).
+(`Event::Particulars`). Drives the activity timeline and notifications.
 
-**Access** → board ↔ user join controlling visibility and watching.
+**Access** → board ↔ user join controlling visibility.
 
 > **Removed in this fork's refactor:** `Tag`/`Tagging` (tagging removed entirely; see
 > `db/migrate/*_drop_tags.rb`) and the `Entropy` model / auto-postpone system (replaced by
@@ -157,7 +156,7 @@ which has been removed along with the `entropies` table and the hourly auto-post
 Routes (`config/routes.rb`) model behavior as CRUD on resources. Notable nested resources on
 `cards`: `draft`, `board`, `column`, `goldness`, `image`, `pin`, `publish`, `reading`,
 `watch`, plus `reactions`, `assignments`, `self_assignment`, `steps`, and `comments`
-(with nested `reactions`). Boards expose `accesses`, `subscriptions`, `involvement`,
+(with nested `reactions`). Boards expose `accesses`, `subscriptions`,
 `publication`, and read-only `columns` (`index`/`show`/`update` only — columns are fixed, so
 there is no create/destroy/reorder). A `public/` namespace mirrors read-only board/card
 views for published boards. Admin tooling (Mission Control Jobs) mounts at `/admin/jobs`.
@@ -182,7 +181,6 @@ adapter (Solid Queue itself is configured but not the active dev adapter).
 Recurring jobs (`config/recurring.yml`):
 - `deliver_bundled_notifications` — every 30 min
 - `clear_solid_queue_finished_jobs` — hourly at :12
-- `cleanup_webhook_deliveries` — every 15 min
 - `cleanup_magic_links` — every 4 hours
 - `incineration` (`Account::IncinerateDueJob`) — every 8 hours at :16
 

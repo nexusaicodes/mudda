@@ -23,7 +23,6 @@ Rails.application.routes.draw do
     scope module: :boards do
       resources :accesses, only: :index
       resource :subscriptions
-      resource :involvement
       resource :publication
 
       resources :columns, only: %i[ index show update ] do
@@ -34,13 +33,6 @@ Rails.application.routes.draw do
     end
 
     resources :cards, only: :create
-
-    resources :webhooks do
-      scope module: :webhooks do
-        resource :activation, only: :create
-        resources :deliveries, only: :index, defaults: { format: :json }
-      end
-    end
   end
 
   namespace :columns do
@@ -204,10 +196,6 @@ Rails.application.routes.draw do
 
   resolve "Event" do |event, options|
     polymorphic_url(event.eventable, options)
-  end
-
-  resolve "Webhook" do |webhook, options|
-    route_for :board_webhook, webhook.board, webhook, options
   end
 
   # Support for legacy URLs

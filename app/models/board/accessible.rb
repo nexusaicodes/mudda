@@ -20,7 +20,6 @@ module Board::Accessible
     end
 
     has_many :users, through: :accesses
-    has_many :access_only_users, -> { merge(Access.access_only) }, through: :accesses, source: :user
 
     scope :all_access, -> { where(all_access: true) }
 
@@ -49,13 +48,9 @@ module Board::Accessible
     pins_for(user).destroy_all
   end
 
-  def watchers
-    users.active.where(accesses: { involvement: :watching })
-  end
-
   private
     def grant_access_to_creator
-      accesses.create(user: creator, involvement: :watching)
+      accesses.create(user: creator)
     end
 
     def grant_access_to_everyone

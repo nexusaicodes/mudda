@@ -3,7 +3,6 @@ require "test_helper"
 class Card::WatchableTest < ActiveSupport::TestCase
   setup do
     Watch.destroy_all
-    Access.all.update!(involvement: :access_only)
   end
 
   test "watched_by?" do
@@ -23,9 +22,6 @@ class Card::WatchableTest < ActiveSupport::TestCase
   end
 
   test "watchers" do
-    boards(:writebook).access_for(users(:kevin)).watching!
-    boards(:writebook).access_for(users(:jz)).watching!
-
     cards(:logo).watch_by users(:kevin)
     cards(:logo).unwatch_by users(:jz)
     cards(:logo).watch_by users(:david)

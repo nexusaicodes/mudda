@@ -31,13 +31,5 @@ class Board::AccessibleTest < ActiveSupport::TestCase
     assert_equal accounts("37s").users.active.sort, board.users.reload.sort
   end
 
-  test "board watchers" do
-    boards(:writebook).access_for(users(:kevin)).watching!
-    assert_includes boards(:writebook).watchers, users(:kevin)
-
-    boards(:writebook).access_for(users(:kevin)).access_only!
-    assert_not_includes boards(:writebook).reload.watchers, users(:kevin)
-  end
-
   # NOTE: The tests for clearing inaccessible data are in +AccessTest+
 end

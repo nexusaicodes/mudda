@@ -39,11 +39,9 @@ RuboCop + the test suite, both run locally.
 - Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`. Run via
   `make lint`.
 - The `:bc` git_source (`github.com/basecamp/...`) in the `Gemfile` resolves real forked
-  upstream gems — do **not** repoint it. `Integration::Basecamp` / `for_basecamp?` webhook
-  code is a genuine Basecamp integration feature, not branding.
+  upstream gems — do **not** repoint it.
 
 ## Branding placeholders
 
-Some fork placeholders may still need real values: onboarding media URLs in
-`app/models/account/seeder.rb` (`videos.37signals.com/...`), the `https://nexus.ai` colophon
+Some fork placeholders may still need real values: the `https://nexus.ai` colophon
 link, `support@mudda.do`, the `mudda.do` domain, and the `nexus-ai/mudda` GitHub org.

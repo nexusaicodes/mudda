@@ -35,7 +35,6 @@ class Import
         ActiveRecord::Base.no_touching do
           Current.with(account: account) do
             begin
-              Webhook.skip_callback(:create, :after, :create_delinquency_tracker!)
               Comment.skip_callback(:commit, :after, :watch_card_by_creator)
               Comment.skip_callback(:commit, :after, :track_creation)
               Mention.skip_callback(:commit, :after, :watch_source_by_mentionee)
@@ -72,7 +71,6 @@ class Import
             copy_events
 
             Event.suppress do
-              copy_webhooks
               copy_push_subscriptions
               copy_filters
               copy_entropies
@@ -84,8 +82,6 @@ class Import
             fix_links
 
             unless Rails.env.production?
-              # Don't spam real webhooks
-              Webhook.all.update_all(active: false)
               # Don't send emails to real users
               User::Settings.all.update_all(bundle_email_frequency: :never)
             end
@@ -842,58 +838,6 @@ class Import
       end
     end
 
-    def copy_webhooks
-      step("Copying webhooks", "Copied %{webhooks} webhooks and %{deliveries} deliveries in %{duration}") do
-        mapping[:webhooks] ||= {}
-        mapping[:webhook_deliveries] ||= {}
-
-        import.webhooks.find_each do |old_webhook|
-          subscribed_actions = old_webhook.subscribed_actions
-          subscribed_actions = JSON.parse(subscribed_actions) if subscribed_actions.is_a?(String)
-
-          new_webhook = Webhook.create!(
-            account_id: account.id,
-            board_id: mapping[:boards][old_webhook.board_id],
-            name: old_webhook.name.truncate(255, omission: ""),
-            url: old_webhook.url,
-            signing_secret: old_webhook.signing_secret,
-            subscribed_actions: subscribed_actions,
-            active: old_webhook.active,
-            created_at: old_webhook.created_at,
-            updated_at: old_webhook.updated_at
-          )
-
-          mapping[:webhooks][old_webhook.id] = new_webhook.id
-
-          old_tracker = import.webhook_delinquency_trackers.find_by(webhook_id: old_webhook.id)
-          if old_tracker
-            Webhook::DelinquencyTracker.find_or_create_by!(webhook_id: new_webhook.id) do |tracker|
-              tracker.consecutive_failures_count = old_tracker.consecutive_failures_count
-              tracker.first_failure_at = old_tracker.first_failure_at
-              tracker.created_at = old_tracker.created_at
-              tracker.updated_at = old_tracker.updated_at
-            end
-          end
-        end
-
-        import.webhook_deliveries.find_each do |old_delivery|
-          new_delivery = Webhook::Delivery.create!(
-            webhook_id: mapping[:webhooks][old_delivery.webhook_id],
-            event_id: mapping[:events][old_delivery.event_id],
-            state: old_delivery.state,
-            request: old_delivery.request,
-            response: old_delivery.response,
-            created_at: old_delivery.created_at,
-            updated_at: old_delivery.updated_at
-          )
-
-          mapping[:webhook_deliveries][old_delivery.id] = new_delivery.id
-        end
-
-        { webhooks: mapping[:webhooks].size, deliveries: mapping[:webhook_deliveries].size }
-      end
-    end
-
     def copy_push_subscriptions
       step("Copying push subscriptions", "Copied %{count} push subscriptions in %{duration}") do
         mapping[:push_subscriptions] ||= {}
@@ -1127,24 +1071,6 @@ class Models
   def pins
     @pins ||= Class.new(application_record) do
       self.table_name = "pins"
-    end
-  end
-
-  def webhooks
-    @webhooks ||= Class.new(application_record) do
-      self.table_name = "webhooks"
-    end
-  end
-
-  def webhook_deliveries
-    @webhook_deliveries ||= Class.new(application_record) do
-      self.table_name = "webhook_deliveries"
-    end
-  end
-
-  def webhook_delinquency_trackers
-    @webhook_delinquency_trackers ||= Class.new(application_record) do
-      self.table_name = "webhook_delinquency_trackers"
     end
   end
 

@@ -164,7 +164,7 @@ Returns `204 No Content` on success.
 
 ## Board Accesses
 
-Board accesses let you see who has access to a board and their involvement level (watching or access only). Any board member can view this information.
+Board accesses let you see who has access to a board. Any board member can view this information.
 
 ### `GET /:account_slug/boards/:board_id/accesses`
 
@@ -186,8 +186,7 @@ __Response:__
       "created_at": "2025-12-05T19:36:35.401Z",
       "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
       "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar",
-      "has_access": true,
-      "involvement": "watching"
+      "has_access": true
     },
     {
       "id": "03f5v9zppzlksuj4mxba2nbzn",
@@ -198,15 +197,13 @@ __Response:__
       "created_at": "2025-12-05T19:36:35.401Z",
       "url": "http://mudda.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn",
       "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zppzlksuj4mxba2nbzn/avatar",
-      "has_access": false,
-      "involvement": null
+      "has_access": false
     }
   ]
 }
 ```
 
 - `has_access` indicates whether the user has access to the board
-- `involvement` is `"watching"`, `"access_only"`, or `null` (when the user does not have access)
 - When `all_access` is `true`, all active account users have access to the board
 - The `users` array contains the current page of results; if there are more users, follow the `Link` response header with `rel="next"`
 

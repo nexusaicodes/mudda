@@ -10,13 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_06_22_010000) do
+ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
   create_table "accesses", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "accessed_at"
     t.uuid "account_id", null: false
     t.uuid "board_id", null: false
     t.datetime "created_at", null: false
-    t.string "involvement", default: "access_only", null: false
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["account_id", "accessed_at"], name: "index_accesses_on_account_id_and_accessed_at"
@@ -738,45 +737,5 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_22_010000) do
     t.index ["card_id"], name: "index_watches_on_card_id"
     t.index ["user_id", "card_id"], name: "index_watches_on_user_id_and_card_id"
     t.index ["user_id"], name: "index_watches_on_user_id"
-  end
-
-  create_table "webhook_delinquency_trackers", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.integer "consecutive_failures_count", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "first_failure_at"
-    t.datetime "updated_at", null: false
-    t.uuid "webhook_id", null: false
-    t.index ["account_id"], name: "index_webhook_delinquency_trackers_on_account_id"
-    t.index ["webhook_id"], name: "index_webhook_delinquency_trackers_on_webhook_id"
-  end
-
-  create_table "webhook_deliveries", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "created_at", null: false
-    t.uuid "event_id", null: false
-    t.text "request"
-    t.text "response"
-    t.string "state", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "webhook_id", null: false
-    t.index ["account_id"], name: "index_webhook_deliveries_on_account_id"
-    t.index ["created_at"], name: "index_webhook_deliveries_on_created_at"
-    t.index ["event_id"], name: "index_webhook_deliveries_on_event_id"
-    t.index ["webhook_id"], name: "index_webhook_deliveries_on_webhook_id"
-  end
-
-  create_table "webhooks", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.boolean "active", default: true, null: false
-    t.uuid "board_id", null: false
-    t.datetime "created_at", null: false
-    t.string "name"
-    t.string "signing_secret", null: false
-    t.text "subscribed_actions"
-    t.datetime "updated_at", null: false
-    t.text "url", null: false
-    t.index ["account_id"], name: "index_webhooks_on_account_id"
-    t.index ["board_id", "subscribed_actions"], name: "index_webhooks_on_board_id_and_subscribed_actions", length: { subscribed_actions: 255 }
   end
 end

@@ -145,30 +145,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal "Flat Name", @response.parsed_body["name"]
   end
 
-  test "create webhook with flat JSON" do
-    board = boards(:writebook)
-
-    assert_difference -> { Webhook.count }, +1 do
-      post board_webhooks_path(board),
-        params: { name: "Flat Webhook", url: "https://example.com/flat", subscribed_actions: [ "card_published" ] },
-        as: :json
-    end
-
-    assert_response :created
-    assert_equal "Flat Webhook", Webhook.last.name
-  end
-
-  test "update webhook with flat JSON" do
-    webhook = webhooks(:active)
-
-    patch board_webhook_path(webhook.board, webhook),
-      params: { name: "Flat Updated", subscribed_actions: [ "card_published" ] },
-      as: :json
-
-    assert_response :success
-    assert_equal "Flat Updated", webhook.reload.name
-  end
-
   test "create signup with flat JSON" do
     sign_out
     email = "flatjson-#{SecureRandom.hex(6)}@example.com"
