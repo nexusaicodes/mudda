@@ -1,10 +1,1 @@
-<%# FIXME: Let's move this aside outside of the card container section so these frames don't reload/flicker when card is replaced %>
-<div class="card-perma__actions card-perma__actions--right">
-  <%= turbo_frame_tag card, :pin, src: card_pin_path(card), refresh: :morph do %>
-    <%= button_to card_pin_path(card), class: "btn", data: { controller: "tooltip" } do %>
-      <%= icon_tag "unpinned" %> <span class="for-screen-reader">Pin this card</span>
-    <% end %>
-  <% end %>
-</div>
-
 <%= render "cards/container/closure", card: card %>

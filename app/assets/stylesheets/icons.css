@@ -106,7 +106,6 @@
   .icon--picture-double { --svg: url("picture-double.svg "); }
   .icon--picture-remove { --svg: url("picture-remove.svg "); }
   .icon--picture-zoom { --svg: url("picture-zoom.svg "); }
-  .icon--pinned { --svg: url("pinned.svg "); }
   .icon--qr-code { --svg: url("qr-code.svg "); }
   .icon--reaction { --svg: url("reaction.svg "); }
   .icon--refresh { --svg: url("refresh.svg "); }
@@ -121,7 +120,6 @@
   .icon--switch { --svg: url("switch.svg "); }
   .icon--thumb-up { --svg: url("thumb-up.svg "); }
   .icon--trash { --svg: url("trash.svg "); }
-  .icon--unpinned { --svg: url("unpinned.svg"); }
   .icon--unseen { --svg: url("unseen.svg"); }
   .icon--world { --svg: url("world.svg"); }
   .icon--youtube { --svg: url("youtube.svg"); }

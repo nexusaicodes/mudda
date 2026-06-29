@@ -77,14 +77,6 @@
       "properties": {
         "uri": "hotwire://fragment/settings"
       }
-    },
-    {
-      "patterns": [
-        "/my/pins"
-      ],
-      "properties": {
-        "uri": "hotwire://fragment/pins"
-      }
     }
   ]
 }

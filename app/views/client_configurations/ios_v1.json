@@ -54,14 +54,6 @@
     },
     {
       "patterns": [
-        "/my/pins$"
-      ],
-      "properties": {
-        "view_controller": "pinned"
-      }
-    },
-    {
-      "patterns": [
         "internal/devtools/enable*"
       ],
       "properties": {

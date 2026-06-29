@@ -50,7 +50,6 @@ Rails.application.routes.draw do
       resource :column
       resource :goldness
       resource :image
-      resource :pin
       resource :publish
       resources :steps
 
@@ -106,7 +105,6 @@ Rails.application.routes.draw do
     resource :passkey_challenge, only: :create
     resource :identity, only: :show
     resources :passkeys, except: %i[ show new ]
-    resources :pins
     resource :timezone
     resource :menu
   end

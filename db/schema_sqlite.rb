@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_06_26_000002) do
+ActiveRecord::Schema[8.2].define(version: 2026_06_29_000001) do
   create_table "account_cancellations", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -233,18 +233,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_26_000002) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_notes_on_account_id"
     t.index ["card_id"], name: "index_notes_on_card_id"
-  end
-
-  create_table "pins", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_pins_on_account_id"
-    t.index ["card_id", "user_id"], name: "index_pins_on_card_id_and_user_id", unique: true
-    t.index ["card_id"], name: "index_pins_on_card_id"
-    t.index ["user_id"], name: "index_pins_on_user_id"
   end
 
   create_table "search_queries", id: :uuid, force: :cascade do |t|

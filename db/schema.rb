@@ -350,18 +350,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_25_000000) do
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
-  create_table "pins", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.uuid "card_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_pins_on_account_id"
-    t.index ["card_id", "user_id"], name: "index_pins_on_card_id_and_user_id", unique: true
-    t.index ["card_id"], name: "index_pins_on_card_id"
-    t.index ["user_id"], name: "index_pins_on_user_id"
-  end
-
   create_table "push_subscriptions", id: :uuid, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.uuid "account_id", null: false
     t.string "auth_key"

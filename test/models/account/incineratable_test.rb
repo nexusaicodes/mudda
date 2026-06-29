@@ -46,7 +46,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     # Via Card
     note = card.notes.create!(body: "Test note")
     step = Step.create!(card: card, content: "Test step")
-    pin = Pin.create!(card: card, user: user)
     goldness = Card::Goldness.create!(card: card)
 
     # Via User
@@ -68,7 +67,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert Event.where(account_id: account_id).exists?
     assert Note.where(account_id: account_id).exists?
     assert Step.where(account_id: account_id).exists?
-    assert Pin.where(account_id: account_id).exists?
     assert Card::Goldness.where(account_id: account_id).exists?
     assert Filter.where(account_id: account_id).exists?
     assert User::Settings.where(user_id: user.id).exists?
@@ -98,7 +96,6 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     # Via Card
     assert_empty Note.where(account_id: account_id)
     assert_empty Step.where(account_id: account_id)
-    assert_empty Pin.where(account_id: account_id)
     assert_empty Card::Goldness.where(account_id: account_id)
 
     # Via User
