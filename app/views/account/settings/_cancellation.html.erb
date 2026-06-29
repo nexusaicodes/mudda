@@ -14,9 +14,6 @@
         <ul class="list-unindented margin-block-start-half margin-block-end">
           <li>Your <strong><%= Current.account.name %></strong> account will be closed immediately.</li>
           <li>You will lose access.</li>
-          <% if Current.account.try(:active_subscription) %>
-            <li>Your subscription will be canceled.</li>
-          <% end %>
           <li>All your data will be permanently deleted within 30&nbsp;days.</li>
         </ul>
       </div>

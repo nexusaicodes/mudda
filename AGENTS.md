@@ -85,7 +85,7 @@ development and testing simple.
 `create_with_owner` provisions the single account user.
 
 **Identity** → global, email-based principal. `has_passkeys`, `has_many :magic_links,
-:sessions, :users, :accounts (through users), :access_tokens`.
+:sessions, :users, :accounts (through users)`.
 
 **User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
 `Avatar`, `Configurable`, `EmailAddressChangeable`, `Named`, `Searcher`, `Timelined`. Owns
@@ -102,7 +102,7 @@ fixed; only color is editable.
 `account.increment!(:cards_count)`), rich-text description, image attachment, steps, and
 **notes**. Status enum is `drafted` / `published` (`Card::Statuses`); a card is published via
 `publish` (which also requires a due date). Concerns: `Attachments`, `Broadcastable`,
-`Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Pinnable`, `Promptable`,
+`Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
 `Searchable`, `Statuses`, `Storage::Tracked`, `Triageable`.
 
 **Note** → a timestamped, rich-text entry on a published card (`Card::Notable`). Created via
@@ -156,7 +156,7 @@ which has been removed along with the `entropies` table and the hourly auto-post
 ### Web endpoints (REST resources)
 
 Routes (`config/routes.rb`) model behavior as CRUD on resources. Nested resources on `cards`:
-`draft`, `board`, `column`, `goldness`, `image`, `pin`, `publish`, `steps`, and `notes`.
+`draft`, `board`, `column`, `goldness`, `image`, `publish`, `steps`, and `notes`.
 Boards expose read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there
 is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index. Admin tooling
 (Mission Control Jobs) mounts at `/admin/jobs`.

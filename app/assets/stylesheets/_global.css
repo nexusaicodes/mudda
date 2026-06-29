@@ -52,7 +52,6 @@
   /* Components */
   --btn-size: 2.65em;
   --footer-height: 2.65rem;
-  --tray-size: clamp(12rem, 25dvw, 24rem);
 
   /* Focus rings for keyboard navigation */
   --focus-ring-color: var(--color-link);
@@ -68,10 +67,6 @@
   --ease-out-overshoot: cubic-bezier(0.25, 1.75, 0.5, 1);
   --ease-out-overshoot-subtle: cubic-bezier(0.25, 1.25, 0.5, 1);
 
-  @media (max-width: 799px) {
-    --tray-size: var(--footer-height);
-  }
-
   /* Layout */
   --main-padding: clamp(var(--inline-space), 3vw, calc(var(--inline-space) * 3));
   --main-width: 1400px;
@@ -84,7 +79,6 @@
   --z-flash: 30;
   --z-tooltip: 40;
   --z-bar: 50;
-  --z-tray: 51;
   --z-welcome: 52;
   --z-nav-open: 100;
 

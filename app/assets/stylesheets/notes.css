@@ -12,10 +12,6 @@
     place-items: center;
     text-align: center;
 
-    @media (min-width: 160ch) {
-      padding-inline: var(--tray-size);
-    }
-
     @media (min-width: 640px) {
       --note-action-size: 1.6875rem;
     }
