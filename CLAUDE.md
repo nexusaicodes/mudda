@@ -33,6 +33,8 @@ Everything goes through Docker Compose — run `make` to list targets:
 - `make test` — unit/integration tests; `make lint` — RuboCop
 - `docker compose run --rm web bin/rails test PATH` — a single test file
 - `docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test` — serial run
+- `docker compose run --rm web bin/rails test:system` — system tests (`test/system/`), which
+  `make test` does **not** run; they drive headless Chrome via Capybara/Selenium
 
 There is no `bin/ci`, no GitHub Actions, and no production `Dockerfile` — quality is just
 RuboCop + the test suite, both run locally.
@@ -51,3 +53,8 @@ RuboCop + the test suite, both run locally.
 
 Some fork placeholders may still need real values: the `https://nexus.ai` colophon
 link, `support@mudda.do`, the `mudda.do` domain, and the `nexus-ai/mudda` GitHub org.
+
+Also stale: the `Makefile` (`make setup`/`make logs`) and `docker-compose.yml` still print
+and name the app `fizzy` (e.g. `http://app.fizzy.localhost:3006`). The only permitted dev
+host is `app.mudda.localhost` (`config/environments/development.rb`), so use
+**http://app.mudda.localhost:3006** (or `http://localhost:3006`) — the Fizzy URL won't resolve.
