@@ -11,6 +11,7 @@ module Card::Triageable
   # therefore matches the predicate but not the scope.
   TRIAGE_COLUMN   = "Triage"
   BACKLOG_COLUMN  = "Backlog"
+  DOING_COLUMN    = "Doing"
   DONE_COLUMN     = "Done"
 
   included do

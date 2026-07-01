@@ -125,8 +125,7 @@
   .filters,
   .card--new,
   .cards__decoration,
-  .card-columns:before,
-  .cards--maybe:before {
+  .card-columns:before {
     display: none;
   }
 
@@ -139,20 +138,6 @@
   .cards--on-deck,
   .cards--doing {
     padding-inline: 0;
-  }
-
-  .cards--maybe {
-    background: none;
-    margin: 0;
-    padding-inline: 1ch;
-
-    .card__header {
-      margin-inline: calc(-1 * var(--card-padding-inline));
-    }
-
-    .card__body {
-      padding-block-start: calc(var(--card-padding-block) / 2);
-    }
   }
 
   /* Card perma

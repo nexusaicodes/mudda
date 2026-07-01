@@ -4,7 +4,7 @@ import { isNative } from "helpers/platform_helpers";
 
 export default class extends Controller {
   static classes = [ "collapsed", "expanded", "noTransitions", "titleNotVisible" ]
-  static targets = [ "column", "button", "title", "maybeColumn" ]
+  static targets = [ "column", "button", "title", "defaultColumn" ]
   static values = {
     board: String,
     desktopBreakpoint: { type: String, default: "(min-width: 640px)" }
@@ -88,9 +88,7 @@ export default class extends Controller {
   }
 
   #collapseAllExcept(clickedColumn) {
-    const columns = this.#isDesktop ? this.columnTargets.filter(c => c !== this.maybeColumnTarget) : this.columnTargets
-
-    columns.forEach(column => {
+    this.columnTargets.forEach(column => {
       if (column !== clickedColumn) {
         this.#collapse(column)
       }
@@ -170,29 +168,13 @@ export default class extends Controller {
     return this.mediaQuery?.matches
   }
 
+  // Land on the default column (marked in the view) when nothing else is open —
+  // e.g. a first visit with no saved state. A restored column always wins.
   #handlePlatform() {
-    this.#isDesktop ? this.#handleDesktopMode() : this.#handleMobileMode()
-  }
+    if (!this.hasDefaultColumnTarget) return
+    if (this.columnTargets.some(column => !this.#isCollapsed(column))) return
 
-  async #handleDesktopMode() {
-    this.#expand({ column: this.maybeColumnTarget, saveState: false })
-    this.#maybeButton.setAttribute("disabled", true)
-  }
-
-  #handleMobileMode() {
-    this.#maybeButton.removeAttribute("disabled")
-
-    const expandedColumn = this.columnTargets.find(column => column !== this.maybeColumnTarget && !this.#isCollapsed(column))
-
-    if (expandedColumn) {
-      this.#collapseAllExcept(expandedColumn)
-    } else {
-      this.#collapseAllExcept(this.maybeColumnTarget)
-      this.#expand({ column: this.maybeColumnTarget, saveState: false })
-    }
-  }
-
-  get #maybeButton() {
-    return this.maybeColumnTarget.querySelector('[data-collapsible-columns-target="button"]')
+    this.#collapseAllExcept(this.defaultColumnTarget)
+    this.#expand({ column: this.defaultColumnTarget, saveState: false })
   }
 }
