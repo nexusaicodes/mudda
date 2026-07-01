@@ -36,7 +36,7 @@ class Sessions::MenusControllerTest < ActionDispatch::IntegrationTest
   test "show with multiple accounts" do
     sign_in_as @identity
     @identity.users.delete_all
-    account1 = Account.create!(external_account_id: 9999992, name: "37signals")
+    account1 = Account.create!(external_account_id: 9999992, name: "Mudda")
     account2 = Account.create!(external_account_id: 9999993, name: "Acme")
     @identity.users.create!(account: account1, name: "Kevin")
     @identity.users.create!(account: account2, name: "Kevin")

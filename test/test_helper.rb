@@ -75,7 +75,7 @@ end
 
 class ActionDispatch::IntegrationTest
   setup do
-    integration_session.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("37signals")}"
+    integration_session.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("mudda")}"
   end
 
   private
@@ -92,7 +92,7 @@ end
 
 class ActionDispatch::SystemTestCase
   setup do
-    self.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("37signals")}"
+    self.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("mudda")}"
   end
 end
 

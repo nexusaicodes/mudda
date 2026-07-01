@@ -29,7 +29,7 @@ class ApplicationHelperTest < ActionView::TestCase
     other_account = Account.create!(external_account_id: "dangling-tenant", name: "Other Account")
     identities(:david).users.create!(account: other_account, name: "David")
 
-    assert_select parse(page_title_tag), "title", text: "37signals | Mudda"
+    assert_select parse(page_title_tag), "title", text: "Mudda | Mudda"
   end
 
   test "page_title_tag on tenanted page with a page title when user has a single account" do
@@ -45,6 +45,6 @@ class ApplicationHelperTest < ActionView::TestCase
     identities(:david).users.create!(account: other_account, name: "David")
     @page_title = "Holodeck"
 
-    assert_select parse(page_title_tag), "title", text: "Holodeck | 37signals | Mudda"
+    assert_select parse(page_title_tag), "title", text: "Holodeck | Mudda | Mudda"
   end
 end

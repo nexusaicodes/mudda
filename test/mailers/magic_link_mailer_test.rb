@@ -9,7 +9,7 @@ class MagicLinkMailerTest < ActionMailer::TestCase
       email.deliver_now
     end
 
-    assert_equal [ "kevin@37signals.com" ], email.to
+    assert_equal [ "kevin@example.com" ], email.to
     assert_equal "Your Mudda code is #{ magic_link.code }", email.subject
     assert_match magic_link.code, email.body.encoded
   end

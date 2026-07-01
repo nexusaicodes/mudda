@@ -39,7 +39,7 @@ class AccountTest < ActiveSupport::TestCase
 
       owner = account.users.first
       assert_equal "David", owner.name
-      assert_equal "david@37signals.com", owner.identity.email_address
+      assert_equal "david@example.com", owner.identity.email_address
 
       assert owner.verified?, "owner should be verified on account creation"
     end
