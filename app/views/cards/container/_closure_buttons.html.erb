@@ -3,8 +3,6 @@
         data: {
           controller: "hotkey",
           action: "keydown.e@document->hotkey#click",
-          bridge__overflow_menu_target: "item",
-          bridge_title: "Edit",
           turbo_frame: dom_id(card, :edit)
         } do %>
     <%= icon_tag "pencil", class: "icon--mobile-only" %>
@@ -14,15 +12,11 @@
 
   <% if (done_column = card.board.done_column) && !card.closed? %>
     <%= button_to card_column_path(card, column_id: done_column.id), method: :patch,
-          class: "btn btn--circle-mobile borderless hide-on-native",
+          class: "btn btn--circle-mobile borderless",
           data: {
             controller: "hotkey",
             form_target: "submit",
             turbo_frame: "_top",
-            bridge__buttons_target: "button",
-            bridge_title: "Mark done",
-            bridge_display_as_primary_action: true,
-            bridge_display_title: true, bridge_icon_url: bridge_icon("check"),
             action: "keydown.d@document->hotkey#click"
           },
           form: { data: { controller: "form" } } do %>
@@ -31,6 +25,4 @@
       <kbd class="txt-x-small hide-on-touch">d</kbd>
     <% end %>
   <% end %>
-
-  <%= bridged_button_to_board(card.board) %>
 </div>

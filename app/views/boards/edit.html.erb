@@ -5,7 +5,7 @@
     <%= link_back_to_board(@board) %>
   </div>
 
-  <h1 class="header__title" data-bridge--title-target="header">
+  <h1 class="header__title">
     <div><%= @page_title %></div>
   </h1>
 <% end %>
@@ -13,10 +13,10 @@
 <section class="settings">
   <div class="settings__panel settings__panel--users panel shadow">
     <%= form_with model: @board, class: "display-contents", data: {
-          controller: "form bridge--form" } do |form| %>
+          controller: "form" } do |form| %>
       <%= render "boards/edit/name", form: form, board: @board %>
 
-      <button type="submit" id="log_in" class="btn btn--link center txt-normal" data-bridge--form-target="submit">
+      <button type="submit" id="log_in" class="btn btn--link center txt-normal">
         <span>Save changes</span>
       </button>
 

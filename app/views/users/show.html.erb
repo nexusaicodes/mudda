@@ -29,7 +29,7 @@
       </div>
 
       <% if Current.user == @user %>
-        <div class="flex-inline justify-center flex-wrap gap full-width hide-on-native">
+        <div class="flex-inline justify-center flex-wrap gap full-width">
           <hr class="separator--horizontal full-width margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
 
           <%= link_to my_passkeys_path, class: "btn txt-x-small" do %>
@@ -46,7 +46,7 @@
   </div>
 
   <% if Current.user == @user %>
-    <div class="settings__panel panel shadow hide-on-native">
+    <div class="settings__panel panel shadow">
       <%= render "users/theme" %>
     </div>
   <% end %>

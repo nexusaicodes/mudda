@@ -1,4 +1,4 @@
-@layer reset, base, components, modules, utilities, native, platform;
+@layer reset, base, components, modules, utilities;
 
 :root {
   /* Insets - The mobile apps may inject their own custom insets based on native elements on screen, like a floating navigation */

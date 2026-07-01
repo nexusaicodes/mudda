@@ -5,11 +5,11 @@
 <%= turbo_stream_from @board %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width" data-bridge--title-target="header">
+  <h1 class="header__title divider divider--fade full-width">
     <span class="overflow-ellipsis"><%= @board.name %></span>
   </h1>
 
-  <div class="header__actions header__actions--end hide-on-native">
+  <div class="header__actions header__actions--end">
     <%= link_to_edit_board @board %>
   </div>
 <% end %>
@@ -26,5 +26,3 @@
     <%= render "boards/show/columns", page: @page, board: @board %>
   <% end %>
 <% end %>
-
-<%= bridged_share_url_button(bridge_share_board_description(@board)) %>
