@@ -20,12 +20,12 @@
     z-index: var(--z-bar);
 
     html[data-theme="dark"] & {
-      border-block: 1px solid var(--color-ink-lighter);
+      border-block-start: 1px solid oklch(var(--lch-ink-lighter) / 0.35);
     }
 
     @media (prefers-color-scheme: dark) {
       html:not([data-theme]) & {
-        border-block: 1px solid var(--color-ink-lighter);
+        border-block-start: 1px solid oklch(var(--lch-ink-lighter) / 0.35);
       }
     }
 

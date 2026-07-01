@@ -391,9 +391,10 @@
       justify-content: start;
       letter-spacing: 0.05em;
 
-      /* Guitar string */
+      /* Guitar string: glows out of the bead in the column color and fades
+       * downward, so it reads as an intentional thread rather than a stray rule. */
       &:before {
-        background-color: var(--column-color);
+        background: linear-gradient(to bottom, color-mix(in srgb, var(--card-color) 45%, var(--color-canvas)), transparent 85%);
         block-size: 100%;
         content: "";
         inline-size: 1px;
@@ -403,8 +404,13 @@
       }
 
       /* A fixed circular bead for every column, whatever its card count — the
-       * number inside carries the count. */
+       * number inside carries the count. A top-lit radial fill holds full chroma
+       * so the bead glows as an orb instead of fading toward the canvas. */
       &:after {
+        background: radial-gradient(circle at 50% 32%,
+          color-mix(in srgb, var(--card-color) 78%, white) 0%,
+          var(--card-color) 48%,
+          color-mix(in srgb, var(--card-color) 80%, black) 100%);
         block-size: var(--column-width-collapsed);
         max-block-size: none;
         opacity: 1;

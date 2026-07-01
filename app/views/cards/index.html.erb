@@ -4,7 +4,11 @@
 <%= render "cards/broadcasts", filter: @filter %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width">
+  <div class="header__actions header__actions--start">
+    <%= render "filters/settings", filter_url: cards_path, user_filtering: @user_filtering, no_filtering_url: cards_path %>
+  </div>
+
+  <h1 class="header__title">
     <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @user_filtering.selected_boards_label %></span>
   </h1>
 
@@ -14,8 +18,6 @@
     <% end %>
   </div>
 <% end %>
-
-<%= render "filters/settings", filter_url: cards_path, user_filtering: @user_filtering, no_filtering_url: cards_path %>
 
 <%= turbo_frame_tag :cards_container do %>
   <section class="cards cards--grid">

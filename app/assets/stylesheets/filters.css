@@ -6,22 +6,34 @@
   .filters {
     align-items: center;
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--inline-space-half);
-    justify-content: center;
-    padding-block-start: 2px; /* prevents input focus-ring clipping on mobile */
     position: relative;
     view-transition-name: filters;
-    z-index: 1;
-
-    .btn {
-      --btn-border-color: var(--color-ink-medium);
-      --input-background: var(--color-canvas);
-    }
 
     &:has(dialog[open]),
     &:has([data-controller~="tooltip"]:hover) {
       z-index: calc(var(--z-nav) + 1);
+    }
+  }
+
+  /* Header trigger: a plain funnel; its icon lights up when a filter is active. */
+  .filters__trigger {
+    --btn-background: transparent;
+  }
+
+  .filters--has-filters-set .filters__trigger {
+    color: var(--color-link);
+  }
+
+  /* Popover holding the search field and the advanced filter controls; drops
+   * just below the header trigger. */
+  .filters__popover.popup {
+    flex-direction: column;
+    gap: var(--block-space-half);
+    inset-block-start: calc(100% + var(--inline-space-half));
+    text-align: start;
+
+    .btn {
+      --input-background: var(--color-canvas);
     }
   }
 
@@ -113,29 +125,16 @@
     --input-background: var(--color-canvas);
     --input-border-radius: 5em;
     --input-padding: 0.5em 1.3em;
-    --input-width: 16em;
-    --collapsed-filter-space: calc(var(--btn-size) + var(--inline-space-half) + 0.25em);
 
-    inline-size: var(--input-width);
-    min-inline-size: var(--input-width);
-
-    .filters:not(.filters--expanded, .filters--has-filters-set) & {
-      --input-padding: 0.5em 2.7em 0.5em 1.3em;
-
-      inline-size: calc(var(--input-width) + (0.25 * var(--collapsed-filter-space)));
-      margin-inline-end: calc((var(--btn-size) + var(--inline-space-half) + 0.25em) * -1);
-      min-inline-size: calc(var(--input-width) + (0.25 * var(--collapsed-filter-space)));
-    }
+    inline-size: 100%;
+    min-inline-size: 0;
   }
 
+  /* Toggle that expands the advanced filter controls within the popover. */
   .filter-toggle {
-    .filters:not(.filters--expanded, .filters--has-filters-set) & {
-      --btn-background: transparent;
-      --btn-border-size: 0;
+    --btn-background: transparent;
 
-      transform: translateX(calc(var(--inline-space-half) * -1));
-      position: relative;
-    }
+    align-self: center;
   }
 
   .quick-filter {

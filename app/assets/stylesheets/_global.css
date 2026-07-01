@@ -208,14 +208,18 @@
   --color-terminal-text-light: var(--color-ink-lighter);
   --color-golden: oklch(89.1% 0.178 95.7);
 
-  /* Colors: Cards */
+  /* Colors: Cards
+   * The Aurora palette: vivid, harmonious hues tuned to glow on the near-black
+   * canvas. 1–5 are the default column colors (see Board::Triageable), ordered
+   * cool → warm so the hue itself reads as workflow state; the active Doing lane
+   * is the warm one. Lightness stays ≤ ~72% so the white bead count stays legible. */
   --color-card-default: oklch(var(--lch-blue-dark));
   --color-card-complete: var(--color-ink-darker);
-  --color-card-1: oklch(var(--lch-ink-medium));
-  --color-card-2: oklch(var(--lch-uncolor-medium));
-  --color-card-3: oklch(var(--lch-yellow-medium));
-  --color-card-4: oklch(var(--lch-lime-medium));
-  --color-card-5: oklch(var(--lch-aqua-medium));
+  --color-card-1: oklch(71% 0.12 280);  /* Triage · Periwinkle */
+  --color-card-2: oklch(62% 0.16 268);  /* Backlog · Indigo */
+  --color-card-3: oklch(70% 0.14 233);  /* Todo · Azure */
+  --color-card-4: oklch(70% 0.15 160);  /* Done · Emerald */
+  --color-card-5: oklch(72% 0.155 80);  /* Doing · Amber */
   --color-card-6: oklch(var(--lch-violet-medium));
   --color-card-7: oklch(var(--lch-purple-medium));
   --color-card-8: oklch(var(--lch-pink-medium));

@@ -88,7 +88,7 @@ __Response:__
         "id": "03f6done999",
         "name": "Done",
         "color": {
-          "name": "Lime",
+          "name": "Emerald",
           "value": "var(--color-card-4)"
         },
         "created_at": "2026-03-01T10:00:00.000Z",

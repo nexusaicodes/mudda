@@ -61,7 +61,7 @@ __Response:__
       "id": "03f5v9zkft4hj9qq0lsn9ohcn",
       "name": "Doing",
       "color": {
-        "name": "Aqua",
+        "name": "Amber",
         "value": "var(--color-card-5)"
       },
       "created_at": "2025-12-05T19:36:35.534Z",
@@ -122,7 +122,7 @@ __Response:__
     "id": "03f5v9zkft4hj9qq0lsn9ohcn",
     "name": "Doing",
     "color": {
-      "name": "Aqua",
+      "name": "Amber",
       "value": "var(--color-card-5)"
     },
     "created_at": "2025-12-05T19:36:35.534Z",

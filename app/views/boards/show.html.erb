@@ -5,17 +5,19 @@
 <%= turbo_stream_from @board %>
 
 <% content_for :header do %>
-  <h1 class="header__title divider divider--fade full-width">
+  <div class="header__actions header__actions--start">
+    <%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board) do |form| %>
+      <%= hidden_field_tag "board_ids[]", @board.id %>
+    <% end %>
+  </div>
+
+  <h1 class="header__title">
     <span class="overflow-ellipsis"><%= @board.name %></span>
   </h1>
 
   <div class="header__actions header__actions--end">
     <%= link_to_edit_board @board %>
   </div>
-<% end %>
-
-<%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board) do |form| %>
-  <%= hidden_field_tag "board_ids[]", @board.id %>
 <% end %>
 
 <%= turbo_frame_tag :cards_container do %>

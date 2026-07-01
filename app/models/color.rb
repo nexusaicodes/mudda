@@ -27,11 +27,11 @@ class Color
 
   COLORS = {
     "Blue" => "var(--color-card-default)",
-    "Gray" => "var(--color-card-1)",
-    "Tan" => "var(--color-card-2)",
-    "Yellow" => "var(--color-card-3)",
-    "Lime" => "var(--color-card-4)",
-    "Aqua" => "var(--color-card-5)",
+    "Periwinkle" => "var(--color-card-1)",
+    "Indigo" => "var(--color-card-2)",
+    "Azure" => "var(--color-card-3)",
+    "Emerald" => "var(--color-card-4)",
+    "Amber" => "var(--color-card-5)",
     "Violet" => "var(--color-card-6)",
     "Purple" => "var(--color-card-7)",
     "Pink" => "var(--color-card-8)"
