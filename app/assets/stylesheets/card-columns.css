@@ -397,13 +397,15 @@
         block-size: 100%;
         content: "";
         inline-size: 1px;
-        inset-block: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment)) 0;
+        inset-block: var(--column-width-collapsed) 0;
         position: absolute;
         z-index: -2;
       }
 
+      /* A fixed circular bead for every column, whatever its card count — the
+       * number inside carries the count. */
       &:after {
-        block-size: calc(var(--column-width-collapsed) + var(--card-count) * var(--progress-increment));
+        block-size: var(--column-width-collapsed);
         max-block-size: none;
         opacity: 1;
         inline-size: var(--column-width-collapsed);
@@ -588,11 +590,9 @@
   /* -------------------------------------------------------------------------- */
 
   .board-tools.card {
-    --border-color: var(--color-selected-dark);
-    --border-size: 1px;
     --card-padding-block: var(--block-space);
 
-    border: 1px solid var(--border-color);
+    border: none;
     inline-size: auto;
     text-align: center;
 
