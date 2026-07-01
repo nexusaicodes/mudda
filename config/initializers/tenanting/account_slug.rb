@@ -21,7 +21,7 @@ module AccountSlug
         request.engine_script_name = request.script_name = $1
         request.path_info   = $'.empty? ? "/" : $'
 
-        # Stash the account's Queenbee ID.
+        # Stash the account's external ID for tenant resolution.
         env["mudda.external_account_id"] = AccountSlug.decode($2)
       end
 

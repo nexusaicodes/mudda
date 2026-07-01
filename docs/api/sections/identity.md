@@ -13,7 +13,7 @@ __Response:__
   "accounts": [
     {
       "id": "03f5v9zjskhcii2r45ih3u1rq",
-      "name": "37signals",
+      "name": "Mudda",
       "slug": "/897362094",
       "created_at": "2025-12-05T19:36:35.377Z",
       "user": {

@@ -9,7 +9,7 @@ __Response:__
 ```json
 {
   "id": "03f5v9zjvypwh0t0e2rfh0h7k",
-  "name": "37signals",
+  "name": "Mudda",
   "cards_count": 5,
   "created_at": "2025-12-05T19:36:35.401Z",
   "auto_postpone_period_in_days": 30
@@ -87,7 +87,7 @@ Returns the account object:
 ```json
 {
   "id": "03f5v9zjvypwh0t0e2rfh0h7k",
-  "name": "37signals",
+  "name": "Mudda",
   "cards_count": 5,
   "created_at": "2025-12-05T19:36:35.401Z",
   "auto_postpone_period_in_days": 30

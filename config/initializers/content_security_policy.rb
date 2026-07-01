@@ -4,8 +4,8 @@
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
 #
 # Directives are configurable via environment variables with fallback to config.x
-# settings. This allows mudda-saas (or other deployments) to extend the base policy
-# without duplicating it.
+# settings. This allows other deployments to extend the base policy without
+# duplicating it.
 #
 # ENV vars (space-separated sources):
 #   CSP_DEFAULT_SRC, CSP_SCRIPT_SRC, CSP_STYLE_SRC, CSP_CONNECT_SRC, CSP_FRAME_SRC,
