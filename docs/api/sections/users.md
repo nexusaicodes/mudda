@@ -1,53 +1,7 @@
 # Users
 
-Users represent people who have access to an account.
-
-## `GET /:account_slug/users`
-
-Returns a list of active users in the account.
-
-__Response:__
-
-```json
-[
-  {
-    "id": "03f5v9zjw7pz8717a4no1h8a7",
-    "name": "David Heinemeier Hansson",
-    "role": "owner",
-    "active": true,
-    "email_address": "david@example.com",
-    "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
-  },
-  {
-    "id": "03f5v9zjysoy0fqs9yg0ei3hq",
-    "name": "Jason Fried",
-    "role": "member",
-    "active": true,
-    "email_address": "jason@example.com",
-    "created_at": "2025-12-05T19:36:35.419Z",
-    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjysoy0fqs9yg0ei3hq"
-  },
-  {
-    "id": "03f5v9zk1dtqduod5bkhv3k8m",
-    "name": "Jason Zimdars",
-    "role": "member",
-    "active": true,
-    "email_address": "jz@example.com",
-    "created_at": "2025-12-05T19:36:35.435Z",
-    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zk1dtqduod5bkhv3k8m"
-  },
-  {
-    "id": "03f5v9zk3nw9ja92e7s4h2wbe",
-    "name": "Kevin Mcconnell",
-    "role": "member",
-    "active": true,
-    "email_address": "kevin@example.com",
-    "created_at": "2025-12-05T19:36:35.451Z",
-    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zk3nw9ja92e7s4h2wbe"
-  }
-]
-```
+The user record represents the person who owns this Mudda account. Mudda runs as a
+single-person app, so there is one user per account and no role model.
 
 ## `GET /:account_slug/users/:user_id`
 
@@ -59,17 +13,17 @@ __Response:__
 {
   "id": "03f5v9zjw7pz8717a4no1h8a7",
   "name": "David Heinemeier Hansson",
-  "role": "owner",
   "active": true,
   "email_address": "david@example.com",
   "created_at": "2025-12-05T19:36:35.401Z",
-  "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+  "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+  "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
 }
 ```
 
 ## `PUT /:account_slug/users/:user_id`
 
-Updates a user. You can only update users you have permission to change.
+Updates a user.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -92,7 +46,7 @@ Returns `200 OK` with the updated user in the same shape as `GET /:account_slug/
 
 ## `DELETE /:account_slug/users/:user_id/avatar`
 
-Removes the user's avatar image. You can only remove avatars for users you have permission to change.
+Removes the user's avatar image.
 
 __Response:__
 
@@ -100,7 +54,7 @@ Returns `204 No Content` on success.
 
 ## `POST /:account_slug/users/:user_id/email_addresses`
 
-Initiates an email address change for the user. A confirmation email is sent to the new address with a token link. You can only change your own email address.
+Initiates an email address change for the user. A confirmation email is sent to the new address with a token link.
 
 This is a two-step process, similar to magic link authentication:
 
@@ -140,11 +94,3 @@ __Error responses:__
 |--------|-------------|
 | `422 Unprocessable Entity` | Token is invalid or has expired |
 | `429 Too Many Requests` | Rate limit exceeded (5 per hour) |
-
-## `DELETE /:account_slug/users/:user_id`
-
-Deactivates a user. You can only deactivate users you have permission to change.
-
-__Response:__
-
-Returns `204 No Content` on success.

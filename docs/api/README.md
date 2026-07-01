@@ -3,11 +3,14 @@
 Mudda has an API that allows you to integrate your application with it or to create
 a bot to perform various actions for you.
 
-> **⚠️ Accuracy notice (Mudda fork).** This API reference predates Mudda's fixed-column
-> refactor and has **not yet been fully revised**. Known stale areas: the **Tags** endpoints
-> were removed (tagging no longer exists); card `tag_ids`, `auto_postpone_period_in_days`,
-> the `not_now` endpoint, and the old `indexed_by` buckets (`maybe`, `closed`, `not_now`,
-> `stalled`, `postponing_soon`) no longer apply. Cards now carry a `due_on` date and a card's
+> **⚠️ Accuracy notice (Mudda fork).** This reference predates Mudda's single-person,
+> fixed-column trim and has **not yet been fully revised**. Removed features whose endpoints
+> and fields no longer exist: **Tags**, **Pins**, **Reactions**, **Notifications**,
+> **Exports**, board **accesses/roles/`all_access`**, board **publications / public sharing**,
+> and the entropy **auto-postpone** system (`auto_postpone_period_in_days`, the `not_now`
+> endpoint, and the old `indexed_by` buckets such as `maybe`, `closed`, `not_now`, `stalled`,
+> `postponing_soon`). **Comments** are now **Notes**, and Mudda runs as a **single-person**
+> app, so there is no user list or role model. Cards carry a `due_on` date and a card's
 > lifecycle is determined entirely by its **column** (Triage / Backlog / Todo / Doing /
 > Done). Treat [`AGENTS.md`](../../AGENTS.md) as the source of truth until each section here
 > is updated.
@@ -20,15 +23,10 @@ a bot to perform various actions for you.
 - [Boards](sections/boards.md)
 - [Columns](sections/columns.md)
 - [Cards](sections/cards.md)
-- [Pins](sections/pins.md)
 - [Steps](sections/steps.md)
-- [Comments](sections/comments.md)
-- [Reactions](sections/reactions.md)
 - [Users](sections/users.md)
 - [Activities](sections/activities.md)
-- [Notifications](sections/notifications.md)
 - [Rich Text](sections/rich_text.md)
-- [Exports](sections/exports.md)
 
 ## Authentication
 
@@ -128,7 +126,7 @@ curl -H "Authorization: Bearer put-your-access-token-here" -H "Accept: applicati
 When an endpoint accepts a list of values as a parameter, you can provide multiple values by repeating the parameter name:
 
 ```
-?tag_ids[]=tag1&tag_ids[]=tag2&tag_ids[]=tag3
+?ids[]=id1&ids[]=id2&ids[]=id3
 ```
 
 List parameters always end with `[]`.
