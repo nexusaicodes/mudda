@@ -1,8 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Development image for Fizzy. The root Dockerfile targets production (Thruster,
-# precompiled assets, a master key); this one runs RAILS_ENV=development with all
-# gem groups and live code reloading via a bind mount from docker-compose.yml.
+# Development image for Mudda. Runs RAILS_ENV=development with all gem groups and
+# live code reloading via a bind mount from docker-compose.yml.
 
 ARG RUBY_VERSION=3.4.8
 FROM docker.io/library/ruby:${RUBY_VERSION}-slim

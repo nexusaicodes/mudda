@@ -13,15 +13,4 @@
     inset: var(--block-space) var(--block-space) auto auto;
     position: absolute;
   }
-
-  .welcome-letter__signature {
-    background-color: currentColor;
-    block-size: 3em;
-    display: inline-block;
-    inline-size: 8em;
-    mask-image: url("jf-signature.svg");
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 8em 3em;
-  }
 }

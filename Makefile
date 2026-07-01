@@ -1,4 +1,4 @@
-# Docker-based development for Fizzy. See DOCKER.md for details.
+# Docker-based development for Mudda. See DOCKER.md for details.
 # Run `make` or `make help` to list targets.
 
 COMPOSE := docker compose
@@ -16,7 +16,7 @@ EXEC    := $(COMPOSE) exec $(SERVICE)
 setup: ## Build the image and start the app in the background (first run)
 	$(COMPOSE) up --build -d
 	@echo
-	@echo "  Fizzy is starting at http://app.fizzy.localhost:3006 (or http://localhost:3006)"
+	@echo "  Mudda is starting at http://app.mudda.localhost:3006 (or http://localhost:3006)"
 	@echo "  Log in as david@example.com — grab the magic link with: make logs"
 
 .PHONY: up
