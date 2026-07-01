@@ -12,6 +12,4 @@ default: &default
 
 development: *default
 test: *default_options
-beta: *default
-staging: *default
 production: *default

@@ -75,8 +75,7 @@ class AutoLinkScrubber < Loofah::Scrubber
       end
 
       links
-    rescue Regexp::TimeoutError => error
-      Sentry.capture_exception error if Mudda.saas?
+    rescue Regexp::TimeoutError
       []
     end
 

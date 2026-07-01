@@ -7,9 +7,3 @@ Mudda.configure_bundle
 require_relative "../config/boot"
 
 require "rails/commands"
-
-if Mudda.saas? && ENV["RAILS_ENV"] == "test"
-  # the app is not loaded by rails/commands if there are additional arguments to "rails test"
-  require APP_PATH
-  Mudda::Saas.append_test_paths
-end

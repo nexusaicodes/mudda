@@ -161,7 +161,6 @@
     text-decoration: underline;
   }
 
-  /* Custom attachments such as mentions, etc. */
   action-text-attachment[content-type^='application/vnd.actiontext'] {
     --attachment-bg-color: transparent;
     --attachment-image-size: 1em;
@@ -195,12 +194,6 @@
     &.node--selected {
       --attachment-bg-color: oklch(var(--lch-blue-dark));
       --attachment-text-color: var(--color-ink-inverted);
-    }
-  }
-
-  action-text-attachment[content-type^='application/vnd.actiontext.mention'] {
-    img {
-      object-fit: cover;
     }
   }
 }

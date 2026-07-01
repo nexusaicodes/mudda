@@ -19,11 +19,10 @@ ActiveSupport.on_load(:action_text_content) do
   end
 end
 
-# ApplicationRecord calls `configure_replica_connections` to set up connection pools for the
-# application models. We want ActiveStorage::Record to use the same pools for transactional
-# integrity, proper callback invocation, joins, etc., however ActiveStorage::Record inherits from
-# ActiveRecord::Base, not ApplicationRecord. This is how we make Active Storage always use the
-# ApplicationRecord connection pool.
+# ActiveStorage::Record inherits from ActiveRecord::Base, not ApplicationRecord, so by default it
+# gets its own connection pool. We want it to share ApplicationRecord's pool for transactional
+# integrity, proper callback invocation, joins, etc. This delegates its connection pool to
+# ApplicationRecord.
 ActiveSupport.on_load(:active_storage_record) do
   class << self
     delegate :connection_pool, to: "ApplicationRecord"

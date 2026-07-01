@@ -22,9 +22,6 @@ reactions, board access control (`Access`) and roles, membership/invites/join co
 public board sharing (`Board::Publication`). `Comment` is now `Note`. The single user can
 reach every board and card in their account, and the activity log is first-person ("You …").
 
-`Mudda.saas?` (`lib/mudda.rb`) is hardcoded `false`; the predicate remains only because a
-handful of view/job branches still reference it.
-
 ## Running and testing
 
 Everything goes through Docker Compose — run `make` to list targets:

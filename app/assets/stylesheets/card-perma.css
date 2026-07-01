@@ -177,41 +177,6 @@
           order: 4;
           padding-block-start: var(--meta-spacer-block);
         }
-
-        .card__meta-text--assignees {
-          margin-block-start: calc(var(--meta-spacer-block) * 3);
-          order: 6;
-          white-space: unset !important;
-        }
-
-        .card__meta-avatars--assignees {
-          margin-inline: 0 var(--meta-spacer-inline);
-          margin-block-start: calc(var(--meta-spacer-block) * 3);
-          order: 5;
-
-          .avatar {
-            display: grid;
-          }
-        }
-
-        &:has(.card__meta-avatars--assignees .avatar) {
-          .card__meta-text--assignees {
-            order: 5;
-          }
-
-          .card__meta-avatars--assignees {
-            margin-block-start: var(--meta-spacer-block);
-            order: 6;
-          }
-        }
-      }
-    }
-
-    &:has(.card__closed) .card__meta {
-      @media (max-width: 639px) {
-        .card__meta-avatars--assignees {
-          display: none;
-        }
       }
     }
 
@@ -262,16 +227,6 @@
       inline-size: 100%;
       text-align: start;
 
-      /* Switch to grid layout so that the bg zoom button can stay next to the
-       * meta element, and the reactions can sit below */
-      &:has(.reaction) {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        grid-template-areas:
-          "meta bg-zoom"
-          "reactions reactions";
-      }
-
       @media (max-width: 639px) {
         display: grid;
         font-size: var(--text-x-small);
@@ -296,26 +251,6 @@
       gap: 0.5ch;
       grid-area: reactions;
       margin-inline-start: auto;
-
-      &:has(.reaction) {
-        --padding: calc(var(--card-padding-block) / 2);
-        --reaction-size: 1.6875rem;
-
-        margin-block: var(--padding) calc(-1 * var(--padding));
-        padding-block-start: var(--padding);
-        position: relative;
-
-        &:before {
-          border-block-start: 1px dashed color-mix(in srgb, transparent, var(--card-color) 33%);
-          content: "";
-          inset: 0 calc(-1 * var(--card-padding-inline)) auto;
-          position: absolute;
-        }
-
-        @media (any-hover: none) {
-          --reaction-size: 2.25rem;
-        }
-      }
 
       &:not(:has(.reaction)) {
         margin: 0;

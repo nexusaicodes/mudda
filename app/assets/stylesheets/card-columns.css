@@ -21,7 +21,7 @@
         padding: 0;
       }
 
-      /* Adapt the grid to public views (no filters or watchers sections) */
+      /* Adapt the grid to public views (no filters section) */
       &.public #main {
         grid-template-rows: 1fr;
       }
@@ -640,7 +640,7 @@
     inline-size: auto;
     text-align: center;
 
-    /* The add-card / watching card sits above the columns at every width. */
+    /* The add-card sits above the columns at every width. */
     @media (max-width: 639px) {
       #cards_container > & {
         margin: 0 3ch 1ch;

@@ -79,21 +79,4 @@ class Signup
       @account = nil
       @tenant = nil
     end
-
-    def subscription_attributes
-      subscription = FreeV1Subscription
-
-      {}.tap do |attributes|
-        attributes[:name]  = subscription.to_param
-        attributes[:price] = subscription.price
-      end
-    end
-
-    def request_attributes
-      {}.tap do |attributes|
-        attributes[:remote_address] = Current.ip_address
-        attributes[:user_agent]     = Current.user_agent
-        attributes[:referrer]       = Current.referrer
-      end
-    end
 end
