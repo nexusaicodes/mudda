@@ -1,3 +1,0 @@
-<% if filter.card_ids.present? %>
-  <%= filter_chip_tag "Cards #{filter.card_ids.join(", ")}", filter.as_params.without(:card_ids) %>
-<% end %>
