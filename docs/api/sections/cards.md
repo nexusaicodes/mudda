@@ -1,33 +1,27 @@
 # Cards
 
-Cards are tasks or items of work on a board. They can be organized into columns, tagged, assigned to users, and have comments.
+Cards are tasks or items of work on a board. They live in columns, can be marked golden, carry a rich-text description, an optional header image, steps, and notes.
 
 ## `GET /:account_slug/cards`
 
-Returns a paginated list of cards you have access to. Results can be filtered using query parameters.
+Returns a paginated list of published cards you have access to. Results can be filtered using query parameters.
 
 __Query Parameters:__
 
 | Parameter | Description |
 |-----------|-------------|
 | `board_ids[]` | Filter by board ID(s) |
-| `tag_ids[]` | Filter by tag ID(s) |
-| `assignee_ids[]` | Filter by assignee user ID(s) |
-| `creator_ids[]` | Filter by card creator ID(s) |
-| `closer_ids[]` | Filter by user ID(s) who closed the cards |
 | `card_ids[]` | Filter to specific card ID(s) |
-| `column_ids[]` | Filter by workflow column ID(s) |
-| `indexed_by` | Filter by: `all` (default), `maybe`, `closed`, `not_now`, `stalled`, `postponing_soon`, `golden` |
+| `column_ids[]` | Filter by column ID(s) |
+| `indexed_by` | Filter by: `all` (default), `golden` |
 | `sorted_by` | Sort order: `latest` (default), `newest`, `oldest` |
-| `assignment_status` | Filter by assignment status: `unassigned` |
 | `creation` | Filter by creation date: `today`, `yesterday`, `thisweek`, `lastweek`, `thismonth`, `lastmonth`, `thisyear`, `lastyear` |
-| `closure` | Filter by closure date: `today`, `yesterday`, `thisweek`, `lastweek`, `thismonth`, `lastmonth`, `thisyear`, `lastyear` |
 | `terms[]` | Search terms to filter cards |
 
-Repeated `column_ids[]` values are ORed together. Other filters combine with AND.
+Repeated `column_ids[]` (and `board_ids[]`, `card_ids[]`) values are ORed together. Different filters combine with AND.
 
 Example:
-- `column_ids[]=03f...` — cards in a workflow column by ID
+- `column_ids[]=03f...` — cards in a column by ID
 
 __Response:__
 
@@ -42,46 +36,54 @@ __Response:__
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
     "has_attachments": false,
-    "tags": ["programming"],
+    "closed": false,
+    "postponed": false,
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
     "created_at": "2025-12-05T19:38:48.540Z",
-    "url": "http://app.mudda.localhost:3006/897362094/cards/4",
+    "url": "http://app.mudda.localhost:3006/897362094/cards/1",
     "board": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcm",
       "name": "Mudda",
-      "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
-      "auto_postpone_period_in_days": 30,
       "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
         "name": "David Heinemeier Hansson",
-        "role": "owner",
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+        "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+        "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
       }
+    },
+    "column": {
+      "id": "03f5v9zkft4hj9qq0lsn9ohcn",
+      "name": "Doing",
+      "color": {
+        "name": "Aqua",
+        "value": "var(--color-card-5)"
+      },
+      "created_at": "2025-12-05T19:36:35.534Z",
+      "cards_url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
     },
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
       "name": "David Heinemeier Hansson",
-      "role": "owner",
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+      "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
     },
-    "comments_url": "http://app.mudda.localhost:3006/897362094/cards/4/comments",
-    "reactions_url": "http://app.mudda.localhost:3006/897362094/cards/4/reactions"
+    "notes_url": "http://app.mudda.localhost:3006/897362094/cards/1/notes"
   }
 ]
 ```
 
 ## `GET /:account_slug/cards/:card_number`
 
-Returns a specific card by its number.
+Returns a specific card by its number. Same shape as the list items above, plus a `steps` array.
 
 __Response:__
 
@@ -95,49 +97,47 @@ __Response:__
   "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
   "image_url": null,
   "has_attachments": false,
-  "tags": ["programming"],
   "closed": false,
+  "postponed": false,
   "golden": false,
   "last_active_at": "2025-12-05T19:38:48.553Z",
   "created_at": "2025-12-05T19:38:48.540Z",
-  "url": "http://app.mudda.localhost:3006/897362094/cards/4",
+  "url": "http://app.mudda.localhost:3006/897362094/cards/1",
   "board": {
     "id": "03f5v9zkft4hj9qq0lsn9ohcm",
     "name": "Mudda",
-    "all_access": true,
     "created_at": "2025-12-05T19:36:35.534Z",
-    "auto_postpone_period_in_days": 30,
     "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
       "name": "David Heinemeier Hansson",
-      "role": "owner",
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+      "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+      "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
     }
   },
   "column": {
     "id": "03f5v9zkft4hj9qq0lsn9ohcn",
-    "name": "In Progress",
+    "name": "Doing",
     "color": {
-      "name": "Lime",
-      "value": "var(--color-card-4)"
+      "name": "Aqua",
+      "value": "var(--color-card-5)"
     },
-    "created_at": "2025-12-05T19:36:35.534Z"
+    "created_at": "2025-12-05T19:36:35.534Z",
+    "cards_url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
   },
   "creator": {
     "id": "03f5v9zjw7pz8717a4no1h8a7",
     "name": "David Heinemeier Hansson",
-    "role": "owner",
     "active": true,
     "email_address": "david@example.com",
     "created_at": "2025-12-05T19:36:35.401Z",
-    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7"
+    "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+    "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
   },
-  "comments_url": "http://app.mudda.localhost:3006/897362094/cards/4/comments",
-  "reactions_url": "http://app.mudda.localhost:3006/897362094/cards/4/reactions",
+  "notes_url": "http://app.mudda.localhost:3006/897362094/cards/1/notes",
   "steps": [
     {
       "id": "03f8huu0sog76g3s975963b5e",
@@ -153,19 +153,18 @@ __Response:__
 }
 ```
 
-> **Note:** The `closed` field indicates whether the card is in the "Done" state. The `column` field is only present when the card has been triaged into a column; cards in "Maybe?", "Not Now" or "Done" will not have this field.
+> **Note:** Every card always lives in exactly one column, so `column` is always present. A board has five fixed lanes: Triage, Backlog, Todo, Doing, Done. `closed` is `true` when the card is in **Done**; `postponed` is `true` when it is in **Backlog**.
 
 ## `POST /:account_slug/boards/:board_id/cards`
 
-Creates a new card in a board.
+Creates a new, published card in a board.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `title` | string | Yes | The title of the card |
+| `title` | string | No | The title of the card (defaults to "Untitled") |
 | `description` | string | No | Rich text description of the card |
-| `status` | string | No | Initial status: `published` (default), `drafted` |
 | `image` | file | No | Header image for the card |
-| `tag_ids` | array | No | Array of tag IDs to apply to the card |
+| `due_on` | date | No | Due date (ISO 8601 `YYYY-MM-DD`) |
 | `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
 | `last_active_at` | datetime | No | Override last activity timestamp (ISO 8601 format) |
 
@@ -192,9 +191,9 @@ Updates a card.
 |-----------|------|----------|-------------|
 | `title` | string | No | The title of the card |
 | `description` | string | No | Rich text description of the card |
-| `status` | string | No | Card status: `drafted`, `published` |
 | `image` | file | No | Header image for the card |
-| `tag_ids` | array | No | Array of tag IDs to apply to the card |
+| `due_on` | date | No | Due date (ISO 8601 `YYYY-MM-DD`) |
+| `created_at` | datetime | No | Override creation timestamp (ISO 8601 format) |
 | `last_active_at` | datetime | No | Override last activity timestamp (ISO 8601 format) |
 
 __Request:__
@@ -213,7 +212,7 @@ Returns the updated card.
 
 ## `DELETE /:account_slug/cards/:card_number`
 
-Deletes a card. Only the card creator or board administrators can delete cards.
+Deletes a card.
 
 __Response:__
 
@@ -227,33 +226,9 @@ __Response:__
 
 Returns `204 No Content` on success.
 
-## `POST /:account_slug/cards/:card_number/closure`
-
-Closes a card.
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `DELETE /:account_slug/cards/:card_number/closure`
-
-Reopens a closed card.
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `POST /:account_slug/cards/:card_number/not_now`
-
-Moves a card to "Not Now" status.
-
-__Response:__
-
-Returns `204 No Content` on success.
-
 ## `PUT /:account_slug/cards/:card_number/board`
 
-Moves a card to a different board.
+Moves a card to a different board. The card is dropped into the destination board's Triage lane.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -270,66 +245,6 @@ __Request:__
 __Response:__
 
 Returns `200 OK` with the moved card in the same shape as `GET /:account_slug/cards/:card_number`. The `board` field reflects the new board.
-
-## `POST /:account_slug/cards/:card_number/triage`
-
-Moves a card into a column.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `column_id` | string | Yes | The ID of the column to move the card into |
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `DELETE /:account_slug/cards/:card_number/triage`
-
-Sends a card back to triage.
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `POST /:account_slug/cards/:card_number/taggings`
-
-Toggles a tag on or off for a card. If the tag doesn't exist, it will be created.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `tag_title` | string | Yes | The title of the tag (leading `#` is stripped) |
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `POST /:account_slug/cards/:card_number/assignments`
-
-Toggles assignment of a user to/from a card.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `assignee_id` | string | Yes | The ID of the user to assign/unassign |
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `POST /:account_slug/cards/:card_number/watch`
-
-Subscribes the current user to notifications for this card.
-
-__Response:__
-
-Returns `204 No Content` on success.
-
-## `DELETE /:account_slug/cards/:card_number/watch`
-
-Unsubscribes the current user from notifications for this card.
-
-__Response:__
-
-Returns `204 No Content` on success.
 
 ## `POST /:account_slug/cards/:card_number/goldness`
 

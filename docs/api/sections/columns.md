@@ -1,10 +1,10 @@
 # Columns
 
-Columns represent stages in a workflow on a board. Cards move through columns as they progress.
+Columns are the fixed workflow lanes on a board. Every board has the same five lanes, in order: **Triage**, **Backlog**, **Todo**, **Doing**, **Done**. A card always lives in exactly one column. Column names and positions are fixed — only a column's color is editable, so there is no create, reorder, or delete.
 
 ## `GET /:account_slug/boards/:board_id/columns`
 
-Returns a list of columns on a board, sorted by position.
+Returns the board's columns, sorted by position.
 
 __Response:__
 
@@ -12,46 +12,51 @@ __Response:__
 [
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-    "name": "Recording",
-    "color": "var(--color-card-default)",
+    "name": "Triage",
+    "color": {
+      "name": "Gray",
+      "value": "var(--color-card-1)"
+    },
     "created_at": "2025-12-05T19:36:35.534Z",
-    "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
+    "cards_url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
   },
   {
     "id": "03f5v9zkft4hj9qq0lsn9ohcn",
-    "name": "Published",
-    "color": "var(--color-card-4)",
+    "name": "Doing",
+    "color": {
+      "name": "Aqua",
+      "value": "var(--color-card-5)"
+    },
     "created_at": "2025-12-05T19:36:35.534Z",
-    "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
+    "cards_url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
   }
 ]
 ```
 
 ## `GET /:account_slug/boards/:board_id/columns/:column_id`
 
-Returns the specified column metadata.
+Returns the specified column's metadata.
 
 __Response:__
 
 ```json
 {
   "id": "03f5v9zkft4hj9qq0lsn9ohcm",
-  "name": "In Progress",
-  "color": "var(--color-card-default)",
+  "name": "Doing",
+  "color": {
+    "name": "Aqua",
+    "value": "var(--color-card-5)"
+  },
   "created_at": "2025-12-05T19:36:35.534Z",
-  "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
+  "cards_url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcm/cards"
 }
 ```
 
 ## `GET /:account_slug/boards/:board_id/columns/:column_id/cards`
 
-Returns a paginated list of open cards in the specified workflow column.
-This only includes cards triaged into that column. Cards in "Maybe?", "Not Now", and "Done"
-are not included.
+Returns a paginated list of the published cards in the specified column, most recently active first, with golden cards listed first.
 
 The response items have the same shape as `GET /:account_slug/cards`.
-
-__Response:__
 
 ```json
 [
@@ -64,82 +69,64 @@ __Response:__
     "description_html": "<div class=\"action-text-content\"><p>Hello, World!</p></div>",
     "image_url": null,
     "has_attachments": false,
-    "tags": ["programming"],
     "closed": false,
     "postponed": false,
     "golden": false,
     "last_active_at": "2025-12-05T19:38:48.553Z",
     "created_at": "2025-12-05T19:38:48.540Z",
-    "url": "http://mudda.localhost:3006/897362094/cards/4",
+    "url": "http://app.mudda.localhost:3006/897362094/cards/1",
     "board": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcm",
       "name": "Mudda",
-      "all_access": true,
       "created_at": "2025-12-05T19:36:35.534Z",
-      "auto_postpone_period_in_days": 30,
-      "url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
+      "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
         "name": "David Heinemeier Hansson",
-        "role": "owner",
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-        "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
+        "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+        "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
       }
     },
     "column": {
       "id": "03f5v9zkft4hj9qq0lsn9ohcn",
-      "name": "In Progress",
-      "color": "var(--color-card-4)",
+      "name": "Doing",
+      "color": {
+        "name": "Aqua",
+        "value": "var(--color-card-5)"
+      },
       "created_at": "2025-12-05T19:36:35.534Z",
-      "cards_url": "http://mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
+      "cards_url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm/columns/03f5v9zkft4hj9qq0lsn9ohcn/cards"
     },
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
       "name": "David Heinemeier Hansson",
-      "role": "owner",
       "active": true,
       "email_address": "david@example.com",
       "created_at": "2025-12-05T19:36:35.401Z",
-      "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-      "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
+      "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
+      "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
     },
-    "assignees": [
-      {
-        "id": "03f5v9zjw7pz8717a4no1h8a7",
-        "name": "David Heinemeier Hansson",
-        "role": "owner",
-        "active": true,
-        "email_address": "david@example.com",
-        "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
-        "avatar_url": "http://mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
-      }
-    ],
-    "has_more_assignees": false,
-    "comments_url": "http://mudda.localhost:3006/897362094/cards/4/comments",
-    "reactions_url": "http://mudda.localhost:3006/897362094/cards/4/reactions"
+    "notes_url": "http://app.mudda.localhost:3006/897362094/cards/1/notes"
   }
 ]
 ```
 
-## `POST /:account_slug/boards/:board_id/columns`
+## `PUT /:account_slug/boards/:board_id/columns/:column_id`
 
-Creates a new column on the board.
+Updates a column's color. Only `color` is editable — column names and positions are fixed.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `name` | string | Yes | The name of the column |
-| `color` | string | No | The column color. One of: `var(--color-card-default)` (Blue), `var(--color-card-1)` (Gray), `var(--color-card-2)` (Tan), `var(--color-card-3)` (Yellow), `var(--color-card-4)` (Lime), `var(--color-card-5)` (Aqua), `var(--color-card-6)` (Violet), `var(--color-card-7)` (Purple), `var(--color-card-8)` (Pink) |
+| `color` | string | Yes | One of: `var(--color-card-default)` (Blue), `var(--color-card-1)` (Gray), `var(--color-card-2)` (Tan), `var(--color-card-3)` (Yellow), `var(--color-card-4)` (Lime), `var(--color-card-5)` (Aqua), `var(--color-card-6)` (Violet), `var(--color-card-7)` (Purple), `var(--color-card-8)` (Pink) |
 
 __Request:__
 
 ```json
 {
   "column": {
-    "name": "In Progress",
     "color": "var(--color-card-4)"
   }
 }
@@ -147,35 +134,4 @@ __Request:__
 
 __Response:__
 
-Returns `201 Created` with a `Location` header pointing to the new column.
-
-## `PUT /:account_slug/boards/:board_id/columns/:column_id`
-
-Updates a column.
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | string | No | The name of the column |
-| `color` | string | No | The column color |
-
-__Request:__
-
-```json
-{
-  "column": {
-    "name": "Done"
-  }
-}
-```
-
-__Response:__
-
 Returns `200 OK` with the updated column in the same shape as `GET /:account_slug/boards/:board_id/columns/:column_id`.
-
-## `DELETE /:account_slug/boards/:board_id/columns/:column_id`
-
-Deletes a column.
-
-__Response:__
-
-Returns `204 No Content` on success.

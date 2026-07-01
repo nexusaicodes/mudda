@@ -19,11 +19,11 @@ __Response:__
       "user": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
         "name": "David Heinemeier Hansson",
-        "role": "owner",
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:35.401Z",
-        "url": "http://app.mudda.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7"
+        "url": "http://app.mudda.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7",
+        "avatar_url": "http://app.mudda.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
       }
     },
     {
@@ -34,11 +34,11 @@ __Response:__
       "user": {
         "id": "03f5v9zppzlksuj4mxba2nbzn",
         "name": "David Heinemeier Hansson",
-        "role": "owner",
         "active": true,
         "email_address": "david@example.com",
         "created_at": "2025-12-05T19:36:36.783Z",
-        "url": "http://app.mudda.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn"
+        "url": "http://app.mudda.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn",
+        "avatar_url": "http://app.mudda.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn/avatar"
       }
     }
   ]
@@ -47,7 +47,7 @@ __Response:__
 
 ## `PATCH /:account_slug/my/timezone`
 
-Updates the current user's timezone. This affects how times are displayed in notification emails.
+Updates the current user's timezone. This sets the IANA time zone used when displaying dates and times for the current user.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
