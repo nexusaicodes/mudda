@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_06_29_000001) do
+ActiveRecord::Schema[8.2].define(version: 2026_07_01_000000) do
   create_table "account_cancellations", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -24,17 +24,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_29_000001) do
     t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true
   end
 
-  create_table "account_imports", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id"
-    t.datetime "completed_at"
-    t.datetime "created_at", null: false
-    t.string "failure_reason", limit: 255
-    t.uuid "identity_id", null: false
-    t.string "status", limit: 255, default: "pending", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_account_imports_on_account_id"
-    t.index ["identity_id"], name: "index_account_imports_on_identity_id"
-  end
 
   create_table "accounts", id: :uuid, force: :cascade do |t|
     t.bigint "cards_count", default: 0, null: false
@@ -181,18 +170,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_06_29_000001) do
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
   end
 
-  create_table "exports", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "completed_at"
-    t.datetime "created_at", null: false
-    t.string "status", limit: 255, default: "pending", null: false
-    t.string "type", limit: 255
-    t.datetime "updated_at", null: false
-    t.uuid "user_id", null: false
-    t.index ["account_id"], name: "index_exports_on_account_id"
-    t.index ["type"], name: "index_exports_on_type"
-    t.index ["user_id"], name: "index_exports_on_user_id"
-  end
 
   create_table "filters", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
