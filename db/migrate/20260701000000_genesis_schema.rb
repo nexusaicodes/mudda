@@ -174,7 +174,6 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
     create_table "identities", id: :uuid, force: :cascade do |t|
       t.datetime "created_at", null: false
       t.string "email_address", limit: 255, null: false
-      t.boolean "staff", default: false, null: false
       t.datetime "updated_at", null: false
       t.index ["email_address"], name: "index_identities_on_email_address", unique: true
     end
@@ -284,7 +283,6 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
       t.uuid "user_id", null: false
       t.index ["account_id"], name: "index_user_settings_on_account_id"
       t.index ["user_id"], name: "index_user_settings_on_user_id"
-      t.index ["user_id"], name: "index_user_settings_on_user_id_and_bundle_email_frequency"
     end
 
     create_table "users", id: :uuid, force: :cascade do |t|
@@ -296,7 +294,6 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
       t.datetime "updated_at", null: false
       t.datetime "verified_at"
       t.index ["account_id", "identity_id"], name: "index_users_on_account_id_and_identity_id", unique: true
-      t.index ["account_id"], name: "index_users_on_account_id_and_role"
       t.index ["identity_id"], name: "index_users_on_identity_id"
     end
     execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"

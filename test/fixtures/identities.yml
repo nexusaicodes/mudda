@@ -1,17 +1,14 @@
 david:
   email_address: david@example.com
-  staff: true
 
 jz:
   email_address: jz@example.com
 
 jason:
   email_address: jason@example.com
-  staff: true
 
 kevin:
   email_address: kevin@example.com
-  staff: true
 
 mike:
   email_address: mike@example.com

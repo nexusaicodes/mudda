@@ -12,7 +12,7 @@ class Color
 
     private
       # Broken exports serialized Color structs instead of raw CSS values,
-      # producing JSON like {"name":"Lime","value":"var(--color-card-4)"}.
+      # producing JSON like {"name":"Emerald","value":"var(--color-card-4)"}.
       # Parse it and extract the value.
       def extract_from_legacy_export(value)
         parsed = value.is_a?(String) && JSON.parse(value)
