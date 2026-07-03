@@ -16,8 +16,8 @@ layout_published:
   created_at: <%= 1.week.ago %>
   account: 37s_uuid
 
-layout_commented:
-  id: <%= ActiveRecord::FixtureSet.identify("layout_commented", :uuid) %>
+layout_noted:
+  id: <%= ActiveRecord::FixtureSet.identify("layout_noted", :uuid) %>
   creator: david_uuid
   board: writebook_uuid
   eventable: layout_overflowing_david_uuid (Note)

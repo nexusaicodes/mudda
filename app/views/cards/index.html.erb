@@ -1,8 +1,6 @@
 <% @page_title = @user_filtering.selected_boards_label %>
 <% turbo_exempts_page_from_cache %>
 
-<%= render "cards/broadcasts", filter: @filter %>
-
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
     <%= render "filters/settings", filter_url: cards_path, user_filtering: @user_filtering, no_filtering_url: cards_path %>

@@ -11,9 +11,6 @@
   </div>
 <% end %>
 
-<%= turbo_stream_from @card %>
-<%= turbo_stream_from @card, :activity %>
-
 <div data-controller="lightbox">
   <%= render "cards/container", card: @card %>
   <%= render "cards/messages",  card: @card %>

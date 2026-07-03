@@ -2,8 +2,6 @@
 <% @body_class = "contained-scrolling" %>
 <% turbo_exempts_page_from_cache %>
 
-<%= turbo_stream_from @board %>
-
 <% content_for :header do %>
   <div class="header__actions header__actions--start">
     <%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board) do |form| %>

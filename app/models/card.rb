@@ -1,5 +1,5 @@
 class Card < ApplicationRecord
-  include Attachments, Broadcastable, Colored, Notable,
+  include Attachments, Colored, Notable,
     Due, Eventable, Golden, Multistep, Promptable,
     Searchable, Statuses, Storage::Tracked, Triageable
 

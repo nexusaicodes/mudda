@@ -1,5 +1,22 @@
 require_relative "boot"
-require "rails/all"
+
+# Load every Rails framework except Action Cable — this app has no real-time
+# broadcasting, so the cable framework (and its config) is intentionally absent.
+require "rails"
+%w[
+  active_record/railtie
+  active_storage/engine
+  action_controller/railtie
+  action_view/railtie
+  action_mailer/railtie
+  active_job/railtie
+  action_mailbox/engine
+  action_text/engine
+  rails/test_unit/railtie
+].each do |railtie|
+  require railtie
+end
+
 require_relative "../lib/mudda"
 require_relative "../lib/action_pack/railtie"
 

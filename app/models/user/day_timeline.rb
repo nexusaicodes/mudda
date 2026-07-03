@@ -48,7 +48,6 @@ class User::DayTimeline
   private
     TIMELINEABLE_ACTIONS = %w[
       card_published
-      card_collection_changed
       card_board_changed
       card_triaged
       note_created

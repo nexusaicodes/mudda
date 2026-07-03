@@ -28,7 +28,7 @@ class Event::DescriptionTest < ActiveSupport::TestCase
   end
 
   test "generates description for note event" do
-    description = events(:layout_commented).description_for(users(:jz))
+    description = events(:layout_noted).description_for(users(:jz))
 
     assert_includes description.to_plain_text, "David added a note to"
   end

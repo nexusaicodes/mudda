@@ -74,7 +74,7 @@ class Account::IncineratableTest < ActiveSupport::TestCase
     assert ActiveStorage::Blob.where(account_id: account_id).exists?
     assert ActionText::RichText.where(account_id: account_id).exists?
 
-    # Flush jobs enqueued during setup (Turbo broadcasts, etc.) while records still exist
+    # Flush jobs enqueued during setup while the records they reference still exist
     perform_enqueued_jobs
 
     account.incinerate

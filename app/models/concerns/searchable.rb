@@ -57,7 +57,7 @@ module Searchable
   # - account_id: returns the account id
   # - search_title: returns title string or nil
   # - search_content: returns content string
-  # - search_card_id: returns the card id (self.id for cards, card_id for comments)
+  # - search_card_id: returns the card id (self.id for cards, card_id for notes)
   # - search_board_id: returns the board id
   # - searchable?: returns whether this record should be indexed
 end

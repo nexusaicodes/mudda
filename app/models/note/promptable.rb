@@ -7,7 +7,7 @@ module Note::Promptable
 
   def to_prompt
     <<~PROMPT
-        BEGIN OF COMMENT #{id}
+        BEGIN OF NOTE #{id}
 
         **Content:**
 
@@ -18,10 +18,10 @@ module Note::Promptable
         * Id: #{id}
         * Card id: #{card.number}
         * Card title: #{card.title}
-        * Created by: #{creator.name}}
-        * Created at: #{created_at}}
+        * Created by: #{creator.name}
+        * Created at: #{created_at}
         * Path: #{card_path(card, anchor: ActionView::RecordIdentifier.dom_id(self), script_name: account.slug)}
-        END OF COMMENT #{id}
+        END OF NOTE #{id}
       PROMPT
   end
 end

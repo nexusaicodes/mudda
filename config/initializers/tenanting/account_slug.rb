@@ -14,7 +14,8 @@ module AccountSlug
 
       # $1, $2, $' == script_name, slug, path_info
       if request.script_name && request.script_name =~ PATH_INFO_MATCH
-        # Likely due to restarting the action cable connection after upgrade
+        # script_name already carries the account slug prefix (e.g. an internally
+        # mounted render), so decode the external id straight from it.
         env["mudda.external_account_id"] = AccountSlug.decode($2)
       elsif request.path_info =~ PATH_INFO_MATCH
         # Yanks the prefix off PATH_INFO and move it to SCRIPT_NAME

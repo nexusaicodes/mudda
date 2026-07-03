@@ -59,7 +59,7 @@ class Event::Description
         "#{creator} added #{card_title}"
       when "card_title_changed"
         renamed_sentence(creator, card_title)
-      when "card_board_changed", "card_collection_changed"
+      when "card_board_changed"
         moved_sentence(creator, card_title)
       when "card_triaged"
         triaged_sentence(creator, card_title)
@@ -83,7 +83,7 @@ class Event::Description
     end
 
     def new_location
-      h(event.particulars.dig("particulars", "new_board") || event.particulars.dig("particulars", "new_collection"))
+      h event.particulars.dig("particulars", "new_board")
     end
 
     def column

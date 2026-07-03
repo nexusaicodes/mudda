@@ -19,10 +19,7 @@ class UserTest < ActiveSupport::TestCase
 
   test "deactivate" do
     assert_changes -> { users(:jz).active? }, from: true, to: false do
-      users(:jz).tap do |user|
-        user.stubs(:close_remote_connections).once
-        user.deactivate
-      end
+      users(:jz).deactivate
     end
   end
 

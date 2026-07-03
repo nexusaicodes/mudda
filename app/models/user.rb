@@ -15,10 +15,7 @@ class User < ApplicationRecord
   has_many :filters, foreign_key: :creator_id, inverse_of: :creator, dependent: :destroy
 
   def deactivate
-    transaction do
-      update! active: false, identity: nil
-      close_remote_connections
-    end
+    update! active: false, identity: nil
   end
 
   def setup?
@@ -32,9 +29,4 @@ class User < ApplicationRecord
   def verify
     update!(verified_at: Time.current) unless verified?
   end
-
-  private
-    def close_remote_connections
-      ActionCable.server.remote_connections.where(current_user: self).disconnect(reconnect: false)
-    end
 end

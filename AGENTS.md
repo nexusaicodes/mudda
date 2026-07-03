@@ -91,7 +91,7 @@ development and testing simple.
 `Avatar`, `Configurable`, `EmailAddressChangeable`, `Named`, `Searcher`, `Timelined`. Owns
 filters, pins, and notes. `deactivate` nulls the identity.
 
-**Board** → primary organizational unit. Concerns: `Board::Storage`, `Broadcastable`,
+**Board** → primary organizational unit. Concerns: `Board::Storage`,
 `Cards`, `Filterable`, `Storage::Tracked`, `Triageable`. **Every board has the same five
 fixed columns** (see below). All of the account's boards are visible to the user.
 
@@ -101,7 +101,7 @@ fixed; only color is editable.
 **Card** → the main work item. Sequential per-account `number` (via
 `account.increment!(:cards_count)`), rich-text description, image attachment, steps, and
 **notes**. Status enum is `drafted` / `published` (`Card::Statuses`); a card is published via
-`publish` (which also requires a due date). Concerns: `Attachments`, `Broadcastable`,
+`publish` (which also requires a due date). Concerns: `Attachments`,
 `Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
 `Searchable`, `Statuses`, `Storage::Tracked`, `Triageable`.
 

@@ -7,9 +7,3 @@ end
 ActiveSupport.on_load(:action_mailer) do
   ActionMailer::MailDeliveryJob.prepend AccountTenanted
 end
-
-Rails.application.config.after_initialize do
-  Turbo::Streams::ActionBroadcastJob.prepend AccountTenanted
-  Turbo::Streams::BroadcastJob.prepend AccountTenanted
-  Turbo::Streams::BroadcastStreamJob.prepend AccountTenanted
-end

@@ -48,7 +48,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index includes note eventable" do
-    event = events(:layout_commented)
+    event = events(:layout_noted)
     get activities_path, as: :json
     assert_response :success
 
