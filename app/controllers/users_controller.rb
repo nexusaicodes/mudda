@@ -25,7 +25,7 @@ class UsersController < ApplicationController
 
   private
     def set_user
-      @user = Current.account.users.active.find(params[:id])
+      @user = Current.user
     end
 
     def user_params

@@ -4,8 +4,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "show" do
     sign_in_as :kevin
 
-    get user_path(users(:david))
-    assert_in_body users(:david).name
+    get user_path(users(:kevin))
+    assert_in_body users(:kevin).name
   end
 
   test "update oneself" do
@@ -17,17 +17,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     put user_path(users(:kevin)), params: { user: { name: "New Kevin" } }
     assert_redirected_to user_path(users(:kevin))
     assert_equal "New Kevin", users(:kevin).reload.name
-  end
-
-  test "update other" do
-    sign_in_as :kevin
-
-    get edit_user_path(users(:david))
-    assert_response :ok
-
-    put user_path(users(:david)), params: { user: { name: "New David" } }
-    assert_redirected_to user_path(users(:david))
-    assert_equal "New David", users(:david).reload.name
   end
 
   test "update with invalid avatar content type shows validation error" do
@@ -67,22 +56,22 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "show as JSON" do
     sign_in_as :kevin
 
-    get user_path(users(:david)), as: :json
+    get user_path(users(:kevin)), as: :json
     assert_response :success
-    assert_equal users(:david).name, @response.parsed_body["name"]
+    assert_equal users(:kevin).name, @response.parsed_body["name"]
   end
 
   test "update as JSON" do
     sign_in_as :kevin
 
-    put user_path(users(:david)), params: { user: { name: "New David" } }, as: :json
+    put user_path(users(:kevin)), params: { user: { name: "New Kevin" } }, as: :json
 
     assert_response :success
-    assert_equal "New David", users(:david).reload.name
+    assert_equal "New Kevin", users(:kevin).reload.name
 
     json = @response.parsed_body
-    assert_equal users(:david).id, json["id"]
-    assert_equal "New David", json["name"]
+    assert_equal users(:kevin).id, json["id"]
+    assert_equal "New Kevin", json["name"]
   end
 
   test "update as JSON with invalid avatar returns errors" do

@@ -11,7 +11,7 @@ class Users::EventsController < ApplicationController
 
   private
     def set_user
-      @user = Current.account.users.active.find(params[:user_id])
+      @user = Current.user
     end
 
     def day_param

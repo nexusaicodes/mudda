@@ -3,11 +3,9 @@
 <div class="settings settings--profile">
   <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
-      <% if Current.user == @user %>
-        <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
-          <%= icon_tag "pencil" %>
-          <span class="for-screen-reader">Edit profile</span>
-        <% end %>
+      <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
+        <%= icon_tag "pencil" %>
+        <span class="for-screen-reader">Edit profile</span>
       <% end %>
 
       <div class="avatar txt-xx-large center fill-white btn--circle hide-focus-ring">
@@ -17,41 +15,28 @@
       <div class="flex flex-column gap-half margin-block-end">
         <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
         <div class="txt-medium">
-          <% if !@user.active? %>
-            <%= @user.name %> is no longer on this account
-          <% elsif !@user.verified? %>
-            Unverified
-            <div class="txt-small txt-tinted">A sign-in code has been sent to this email address, but the user has not yet logged in to confirm their identity.</div>
-          <% else %>
-            <%= mail_to @user.identity.email_address %>
-          <% end %>
+          <%= mail_to @user.identity.email_address %>
         </div>
       </div>
 
-      <% if Current.user == @user %>
-        <div class="flex-inline justify-center flex-wrap gap full-width">
-          <hr class="separator--horizontal full-width margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
+      <div class="flex-inline justify-center flex-wrap gap full-width">
+        <hr class="separator--horizontal full-width margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
 
-          <%= link_to my_passkeys_path, class: "btn txt-x-small" do %>
-            <%= icon_tag "authentication" %>
-            <span>Manage passkeys</span>
-          <% end %>
+        <%= link_to my_passkeys_path, class: "btn txt-x-small" do %>
+          <%= icon_tag "authentication" %>
+          <span>Manage passkeys</span>
+        <% end %>
 
-          <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
-            <span>Sign out of Mudda on this device</span>
-          <% end %>
-        </div>
-      <% end %>
+        <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
+          <span>Sign out of Mudda on this device</span>
+        <% end %>
+      </div>
     </div>
   </div>
 
-  <% if Current.user == @user %>
-    <div class="settings__panel panel shadow">
-      <%= render "users/theme" %>
-    </div>
-  <% end %>
+  <div class="settings__panel panel shadow">
+    <%= render "users/theme" %>
+  </div>
 </div>
 
-<% if @user.verified? %>
-  <%= turbo_frame_tag "user_events", src: user_events_path(@user) %>
-<% end %>
+<%= turbo_frame_tag "user_events", src: user_events_path(@user) %>

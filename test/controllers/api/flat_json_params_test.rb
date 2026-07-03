@@ -81,11 +81,11 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
   end
 
   test "update user with flat JSON" do
-    put user_path(users(:david)), params: { name: "Flat Name" }, as: :json
+    put user_path(users(:kevin)), params: { name: "Flat Name" }, as: :json
 
     assert_response :success
-    assert_equal "Flat Name", users(:david).reload.name
-    assert_equal users(:david).id, @response.parsed_body["id"]
+    assert_equal "Flat Name", users(:kevin).reload.name
+    assert_equal users(:kevin).id, @response.parsed_body["id"]
     assert_equal "Flat Name", @response.parsed_body["name"]
   end
 
