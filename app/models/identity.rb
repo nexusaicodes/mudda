@@ -1,7 +1,6 @@
 class Identity < ApplicationRecord
   has_passkeys name: :email_address, display_name: -> { Current.user&.name || email_address }
 
-  has_many :magic_links, dependent: :destroy
   has_many :sessions, dependent: :destroy
   has_many :users, dependent: :nullify
   has_many :accounts, through: :users
@@ -12,12 +11,6 @@ class Identity < ApplicationRecord
 
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
-
-  def send_magic_link(**attributes)
-    attributes[:purpose] = attributes.delete(:for) if attributes.key?(:for)
-
-    magic_links.create!(attributes)
-  end
 
   def users_with_active_accounts
     users.joins(:account).merge(Account.active).includes(:account)

@@ -1,6 +1,7 @@
 class My::PasskeysController < ApplicationController
   include ActionPack::Passkey::Request
 
+  skip_passkey_enrollment
   before_action :set_passkey, only: %i[ edit update destroy ]
 
   def index
@@ -9,9 +10,16 @@ class My::PasskeysController < ApplicationController
   end
 
   def create
+    first_passkey = Current.identity.passkeys.none?
     passkey = Current.identity.passkeys.register(passkey_registration_params)
 
-    redirect_to edit_my_passkey_path(passkey, created: true)
+    if first_passkey
+      # Onboarding complete: the day-0 password gives way to passkey sign-in from here on.
+      flash[:welcome_letter] = true
+      redirect_to landing_path
+    else
+      redirect_to edit_my_passkey_path(passkey, created: true)
+    end
   end
 
   def edit
@@ -23,8 +31,12 @@ class My::PasskeysController < ApplicationController
   end
 
   def destroy
-    @passkey.destroy!
-    redirect_to my_passkeys_path
+    if Current.identity.passkeys.many?
+      @passkey.destroy!
+      redirect_to my_passkeys_path
+    else
+      redirect_to my_passkeys_path, alert: "You can't remove your only passkey. Run bin/rails auth:reset to start over."
+    end
   end
 
   private

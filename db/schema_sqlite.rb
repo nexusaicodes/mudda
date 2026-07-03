@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_07_01_000000) do
+ActiveRecord::Schema[8.2].define(version: 2026_07_03_000001) do
   create_table "account_cancellations", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -23,7 +23,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_01_000000) do
     t.bigint "value", default: 0, null: false
     t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true
   end
-
 
   create_table "accounts", id: :uuid, force: :cascade do |t|
     t.bigint "cards_count", default: 0, null: false
@@ -170,7 +169,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_01_000000) do
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
   end
 
-
   create_table "filters", id: :uuid, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.datetime "created_at", null: false
@@ -188,18 +186,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_07_01_000000) do
     t.boolean "staff", default: false, null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_identities_on_email_address", unique: true
-  end
-
-  create_table "magic_links", id: :uuid, force: :cascade do |t|
-    t.string "code", limit: 255, null: false
-    t.datetime "created_at", null: false
-    t.datetime "expires_at", null: false
-    t.uuid "identity_id"
-    t.integer "purpose", null: false
-    t.datetime "updated_at", null: false
-    t.index ["code"], name: "index_magic_links_on_code", unique: true
-    t.index ["expires_at"], name: "index_magic_links_on_expires_at"
-    t.index ["identity_id"], name: "index_magic_links_on_identity_id"
   end
 
   create_table "notes", id: :uuid, force: :cascade do |t|

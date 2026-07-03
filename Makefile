@@ -17,7 +17,7 @@ setup: ## Build the image and start the app in the background (first run)
 	$(COMPOSE) up --build -d
 	@echo
 	@echo "  Mudda is starting at http://app.mudda.localhost:3006 (or http://localhost:3006)"
-	@echo "  Log in as david@example.com — grab the magic link with: make logs"
+	@echo "  Day 0: sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD, then enroll a passkey."
 
 .PHONY: up
 up: ## Start the app in the foreground (Ctrl-C to stop)
@@ -43,7 +43,7 @@ fresh: ## Wipe all data and rebuild from scratch (no customer data)
 ##@ Day to day
 
 .PHONY: logs
-logs: ## Tail the server log (magic login links appear here)
+logs: ## Tail the server log
 	$(COMPOSE) logs -f $(SERVICE)
 
 .PHONY: ps
@@ -69,12 +69,16 @@ migrate: ## Run pending migrations
 	$(EXEC) bin/rails db:migrate
 
 .PHONY: seed
-seed: ## Load development seed data (david@example.com account)
+seed: ## Provision the owner account from MUDDA_OWNER_* env vars
 	$(EXEC) bin/rails db:seed
 
 .PHONY: reset-db
 reset-db: ## Drop, recreate, and reseed the database
 	$(EXEC) bin/rails db:reset
+
+.PHONY: reset-auth
+reset-auth: ## Reset auth to day 0 (delete passkeys+sessions, re-enable password login)
+	$(RUN) bin/rails auth:reset
 
 ##@ Quality
 

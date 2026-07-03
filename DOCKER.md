@@ -30,10 +30,28 @@ the schema, and seeds the development account. When it's up, open:
 Both `app.mudda.localhost` and `localhost` are in the dev host allowlist, and the
 `*.localhost` TLD resolves to `127.0.0.1` automatically in modern browsers.
 
-## Logging in
+## The owner and logging in
 
-Sign in as **david@example.com** (seeded). Auth is passwordless and sends no email —
-enter the email address and the sign-in code is shown on the code-entry screen.
+Each deployment has exactly one owner, provisioned by `db/seeds.rb` from three env vars
+(defaulted in `docker-compose.yml` for local dev):
+
+| Variable               | Purpose                                  | Dev default          |
+| ---------------------- | ---------------------------------------- | -------------------- |
+| `MUDDA_OWNER_EMAIL`    | The owner identity's email               | `david@example.com`  |
+| `MUDDA_OWNER_NAME`     | Display name                             | `David`              |
+| `MUDDA_OWNER_PASSWORD` | Day-0 sign-in secret (never stored in DB) | `mudda-dev-password` |
+
+**Before exposing the app, change these** — set a strong `MUDDA_OWNER_PASSWORD` (it is the only
+credential guarding day-0 access) and reseed with `make seed`.
+
+**Day 0** (no passkey yet): sign in with `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD`. You are then
+required to enroll a passkey before you can use the app. **Once a passkey exists, password sign-in
+is permanently disabled** (enforced in both the controller and a Rack middleware) and passkey is the
+only way in. The password is verified at runtime against the env var with a constant-time compare;
+there is no password column in the database.
+
+Lost or broken passkeys? `make reset-auth` deletes all passkeys and sessions, returning the
+deployment to day-0 password sign-in so you can enroll a fresh passkey.
 
 ## Everyday commands
 

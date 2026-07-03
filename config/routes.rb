@@ -75,21 +75,11 @@ Rails.application.routes.draw do
     end
   end
 
-  resource :session do
+  resource :session, only: %i[ new destroy ] do
     scope module: :sessions do
-      resource :magic_link
+      resource :password, only: :create
       resource :menu
       resource :passkey, only: :create
-    end
-  end
-
-  get "/signup", to: redirect("/signup/new")
-
-  resource :signup, only: %i[ new create ] do
-    collection do
-      scope module: :signups, as: :signup do
-        resource :completion, only: %i[ new create ]
-      end
     end
   end
 

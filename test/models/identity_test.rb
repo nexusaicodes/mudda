@@ -1,14 +1,6 @@
 require "test_helper"
 
 class IdentityTest < ActiveSupport::TestCase
-  test "send_magic_link" do
-    identity = identities(:david)
-
-    magic_link = identity.send_magic_link
-    assert_not_nil magic_link
-    assert_equal identity, magic_link.identity
-  end
-
   test "email address format validation" do
     invalid_emails = [
       "sam smith@example.com",       # space in local part

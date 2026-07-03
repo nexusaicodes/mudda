@@ -24,9 +24,10 @@ Everything runs through Docker Compose. With Docker installed:
 make setup    # build the image and start the app
 ```
 
-Then open http://app.mudda.localhost:3006 and log in as `david@example.com` (no email is
-sent — the sign-in code is shown on the code-entry screen). See [DOCKER.md](DOCKER.md) for
-the full reference, and run `make` for all targets.
+Then open http://app.mudda.localhost:3006 and sign in with the owner credentials —
+`MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD` (dev defaults `david@example.com` /
+`mudda-dev-password`). You'll be asked to enroll a passkey; after that, passkey is the only
+way in. See [DOCKER.md](DOCKER.md) for the full reference, and run `make` for all targets.
 
 
 ## Development

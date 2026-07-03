@@ -26,8 +26,10 @@ make fresh    # Wipe all data and rebuild from scratch
 ```
 
 Development URL: http://app.mudda.localhost:3006 (or http://localhost:3006)
-Login with: david@example.com (development fixtures); enter the email, then the sign-in code
-is shown on the code-entry screen (no email is sent).
+Login (day 0): the owner email + password come from `MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD`
+(dev defaults `david@example.com` / `mudda-dev-password` in `docker-compose.yml`). After signing
+in you must enroll a passkey; from then on passkey is the only way in. `make reset-auth` returns
+to day 0.
 
 ### Testing
 ```bash
@@ -69,12 +71,20 @@ development and testing simple.
 
 ### Authentication
 
-**Passwordless code-based sign-in, plus passkeys:**
+**Password bootstrap → forced passkey → passkey-only:**
 - A global `Identity` (email-based) owns the single `User` in the account.
-- `Identity#send_magic_link` creates a `MagicLink` (a short-lived sign-in code). **The app
-  sends no email** — in development the code is shown on the code-entry screen; the code is
-  consumed by `sessions/magic_links`. (This interim mechanism will be replaced when auth is
-  redesigned.)
+- **Day 0** (no passkey yet): the owner signs in with their email + a deployment secret held in
+  `ENV["MUDDA_OWNER_PASSWORD"]`. `BootstrapPassword` (`app/models/bootstrap_password.rb`) is the
+  gate — it verifies the secret with `secure_compare` and is `enabled?` only while
+  `MUDDA_OWNER_PASSWORD` is set **and** no passkey exists. `Sessions::PasswordsController` handles
+  `POST /session/password`. There is **no password column** — the secret lives only in the env.
+- **Forced enrollment:** `PasskeyEnrollment` (controller concern) redirects every account-scoped
+  request to `my/passkeys` until a passkey is registered.
+- **Steady state:** once any passkey exists, `BootstrapPassword.enabled?` is false and password
+  sign-in is closed — enforced both in the controller and in the `PasswordLockdown` Rack middleware
+  (`config/initializers/bootstrap_password.rb`), which 403s `POST /session/password` before routing.
+- **Recovery:** `bin/rails auth:reset` (`make reset-auth`) deletes all passkeys + sessions, reopening
+  day-0 password login. The seed (`db/seeds.rb`) is the source of truth for the owner identity/account.
 - Passkeys (WebAuthn) via `Identity has_passkeys` + `lib/action_pack/passkey/` and the
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
 - `Session belongs_to :identity`; `Current` resolves session → identity → user (scoped to
@@ -88,8 +98,8 @@ development and testing simple.
 `Incineratable`, `MultiTenantable`, `Searchable`. Has users, boards, cards, columns.
 `create_with_owner` provisions the single account user.
 
-**Identity** → global, email-based principal. `has_passkeys`, `has_many :magic_links,
-:sessions, :users, :accounts (through users)`.
+**Identity** → global, email-based principal. `has_passkeys`, `has_many :sessions, :users,
+:accounts (through users)`.
 
 **User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
 `Avatar`, `Configurable`, `Named`, `Searcher`, `Timelined`. Owns filters, pins, and notes.
@@ -121,8 +131,9 @@ renders sentences as "You added …").
 > roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
 > Also gone: `Tag`/`Tagging` (see `db/migrate/*_drop_tags.rb`) and the `Entropy`
 > auto-postpone system (replaced by due dates; see below). `Comment` was renamed to `Note`.
-> All email/mailers (Action Mailer + Action Mailbox, SMTP, magic-link/cancellation/
-> email-change mail) are removed — the app sends no email; sign-in codes surface in-app.
+> All email/mailers (Action Mailer + Action Mailbox, SMTP) are removed — the app sends no email.
+> The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the password
+> bootstrap → forced passkey model (see Authentication); the owner is provisioned by `db/seeds.rb`.
 
 ### Card Lifecycle — Fixed Columns
 
@@ -186,7 +197,6 @@ adapter (Solid Queue itself is configured but not the active dev adapter).
 
 Recurring jobs (`config/recurring.yml`):
 - `clear_solid_queue_finished_jobs` — hourly at :12
-- `cleanup_magic_links` — every 4 hours
 - `incineration` (`Account::IncinerateDueJob`) — every 8 hours at :16
 
 ### Full-Text Search
@@ -201,7 +211,8 @@ in the account. Stemming, highlighting, and query sanitizing live in `Search::St
 ### Chrome MCP (Local Dev)
 
 URL: `http://app.mudda.localhost:3006`
-Login: david@example.com (passwordless code sign-in — the code is shown on the code-entry screen)
+Login: `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD` (dev: `david@example.com` / `mudda-dev-password`),
+then enroll a passkey. Use a WebAuthn virtual authenticator to drive the passkey ceremony.
 
 Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.
 

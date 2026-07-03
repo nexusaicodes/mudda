@@ -5,11 +5,10 @@ module Authentication
     before_action :require_account # Checking and setting account must happen first
     before_action :require_authentication
     helper_method :authenticated?
-    helper_method :email_address_pending_authentication
 
     etag { Current.identity.id if authenticated? }
 
-    include Authentication::ViaMagicLink, LoginHelper
+    include LoginHelper
   end
 
   class_methods do

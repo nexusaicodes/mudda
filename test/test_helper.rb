@@ -1,4 +1,5 @@
 ENV["RAILS_ENV"] ||= "test"
+ENV["MUDDA_OWNER_PASSWORD"] ||= "test-owner-password"
 require_relative "../config/environment"
 
 require "rails/test_help"

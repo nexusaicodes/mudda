@@ -88,31 +88,4 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal users(:kevin).id, @response.parsed_body["id"]
     assert_equal "Flat Name", @response.parsed_body["name"]
   end
-
-  test "create signup with flat JSON" do
-    sign_out
-    email = "flatjson-#{SecureRandom.hex(6)}@example.com"
-
-    untenanted do
-      assert_difference -> { Identity.count }, +1 do
-        post signup_path, params: { email_address: email }, as: :json
-      end
-    end
-
-    assert_response :created
-  end
-
-  test "complete signup with flat JSON" do
-    signup = Signup.new(email_address: "flatjson-#{SecureRandom.hex(6)}@example.com", full_name: "Flat User")
-    signup.create_identity || raise("Failed to create identity")
-    logout_and_sign_in_as signup.identity
-
-    untenanted do
-      assert_difference -> { Account.count }, +1 do
-        post signup_completion_path, params: { full_name: "Flat JSON User" }, as: :json
-      end
-    end
-
-    assert_response :created
-  end
 end
