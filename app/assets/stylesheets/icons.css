@@ -53,6 +53,7 @@
   .icon--gear { --svg: url("gear.svg "); }
   .icon--grid { --svg: url("grid.svg "); }
   .icon--filter { --svg: url("filter.svg "); }
+  .icon--funnel { --svg: url("funnel.svg "); }
   .icon--mudda {
     --svg: url("mudda.svg");
     top: -0.1em;
