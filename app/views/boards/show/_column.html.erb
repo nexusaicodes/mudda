@@ -1,7 +1,6 @@
 <%= column_tag id: dom_id(column), name: column.name, drop_url: columns_card_drops_column_path("__id__", column_id: column.id), card_color: column.color.to_s,
       class: "cards--doing", style: "--card-color: #{column.color};",
   data: {
-    drag_and_strum_target: "container",
     collapsible_columns_target: column.name == Card::Triageable::DOING_COLUMN ? "column defaultColumn" : "column",
     controller: "clicker",
     action: "turbo:before-stream-render@document->collapsible-columns#restoreState focus->collapsible-columns#focusOnColumn dialog:show->collapsible-columns#frameColumnOnMobile"
