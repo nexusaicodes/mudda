@@ -3,7 +3,5 @@
 <%= turbo_stream.append params[:target] do %>
   <%= render partial: "cards/display/preview", collection: @page.records, as: :card, cached: true %>
 
-  <% unless @page.last? %>
-    <%= cards_next_page_link params[:target], page: @page, filter: @filter, fetch_on_visible: @filter.indexed_by.closed? %>
-  <% end %>
+  <%= link_to_next_page params[:target], @page, activate_when_observed: @filter.indexed_by.closed? %>
 <% end %>

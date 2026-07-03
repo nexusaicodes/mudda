@@ -16,7 +16,6 @@ require "rails"
   require railtie
 end
 
-require_relative "../lib/mudda"
 require_relative "../lib/action_pack/railtie"
 
 Bundler.require(*Rails.groups)
