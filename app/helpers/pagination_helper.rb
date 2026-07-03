@@ -28,15 +28,6 @@ module PaginationHelper
     "#{namespace}-pagination-contents-#{page_number}"
   end
 
-  def with_manual_pagination(name, page, **properties)
-    pagination_list name, **properties do
-      concat(pagination_frame_tag(name, page) do
-        yield
-        concat link_to_next_page(name, page)
-      end)
-    end
-  end
-
   def with_automatic_pagination(name, page, **properties)
     pagination_list name, paginate_on_scroll: true, **properties do
       concat(pagination_frame_tag(name, page) do

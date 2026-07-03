@@ -41,28 +41,6 @@ class Account::CancellableTest < ActiveSupport::TestCase
     assert @account.cancelled?
   end
 
-  test "reactivate" do
-    @account.cancel(initiated_by: @user)
-
-    assert @account.cancelled?
-
-    @account.reactivate
-    @account.reload
-
-    assert_not @account.cancelled?
-    assert_nil @account.cancellation
-  end
-
-  test "reactivate does nothing if not cancelled" do
-    assert_not @account.cancelled?
-
-    assert_nothing_raised do
-      @account.reactivate
-    end
-
-    assert_not @account.cancelled?
-  end
-
   test "active scope excludes cancelled accounts" do
     account2 = accounts(:initech)
 

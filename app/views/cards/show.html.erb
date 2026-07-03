@@ -13,7 +13,7 @@
 
 <div data-controller="lightbox">
   <%= render "cards/container", card: @card %>
-  <%= render "cards/messages",  card: @card %>
+  <%= render "cards/notes", card: @card %>
 
   <%= render "layouts/lightbox" do %>
     <%= button_to_remove_card_image(@card) if @card.image.attached? %>

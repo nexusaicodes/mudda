@@ -24,17 +24,6 @@ module My::MenuHelper
     end
   end
 
-  def my_menu_filter_item(filter)
-    my_menu_item("bookmark", filter) do
-      link_to(cards_path(filter_id: filter.id), class: "popup__btn btn") do
-        tag.div(class: "txt-tight-lines min-width txt-small overflow-ellipsis") do
-          tag.div(tag.strong(filter.boards_label)) +
-          tag.div(filter.summary, class: "txt-capitalize")
-        end
-      end
-    end
-  end
-
   def my_menu_item(item, record)
     tag.li(class: "popup__item", data: { filter_target: "item", navigable_list_target: "item", id: "filter-#{item}-#{record.id}" }) do
       icon_tag(item, class: "popup__icon") + yield

@@ -1,4 +1,4 @@
-<%= messages_tag(card) do %>
+<%= notes_tag(card) do %>
   <% if card.published? %>
     <%= render partial: "cards/notes/note", collection: card.notes.preloaded.chronologically, cached: true %>
     <%= render "cards/notes/new", card: card %>

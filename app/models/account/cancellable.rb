@@ -5,7 +5,6 @@ module Account::Cancellable
     has_one :cancellation, dependent: :destroy
 
     define_callbacks :cancel
-    define_callbacks :reactivate
   end
 
   def cancel(initiated_by: Current.user)
@@ -13,16 +12,6 @@ module Account::Cancellable
       if cancellable? && active?
         run_callbacks :cancel do
           create_cancellation!(initiated_by: initiated_by)
-        end
-      end
-    end
-  end
-
-  def reactivate
-    with_lock do
-      if cancelled?
-        run_callbacks :reactivate do
-          cancellation.destroy
         end
       end
     end
