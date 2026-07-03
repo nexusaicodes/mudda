@@ -50,7 +50,7 @@ __Response:__
     "id": "03faevt004",
     "action": "card_triaged",
     "created_at": "2026-03-25T15:11:04.000Z",
-    "description": "David Heinemeier Hansson moved \"Fix mobile login\" to \"Done\"",
+    "description": "Saksham Saxena moved \"Fix mobile login\" to \"Done\"",
     "particulars": { "column": "Done" },
     "url": "http://app.mudda.localhost:3006/897362094/cards/42",
     "eventable_type": "Card",
@@ -76,9 +76,9 @@ __Response:__
         "url": "http://app.mudda.localhost:3006/897362094/boards/03f6abc123",
         "creator": {
           "id": "03f5user123",
-          "name": "David Heinemeier Hansson",
+          "name": "Saksham Saxena",
           "active": true,
-          "email_address": "david@example.com",
+          "email_address": "saksham@nexusai.world",
           "created_at": "2026-03-01T09:00:00.000Z",
           "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
           "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
@@ -96,9 +96,9 @@ __Response:__
       },
       "creator": {
         "id": "03f5user123",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2026-03-01T09:00:00.000Z",
         "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
         "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
@@ -112,9 +112,9 @@ __Response:__
       "url": "http://app.mudda.localhost:3006/897362094/boards/03f6abc123",
       "creator": {
         "id": "03f5user123",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2026-03-01T09:00:00.000Z",
         "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
         "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
@@ -122,9 +122,9 @@ __Response:__
     },
     "creator": {
       "id": "03f5user123",
-      "name": "David Heinemeier Hansson",
+      "name": "Saksham Saxena",
       "active": true,
-      "email_address": "david@example.com",
+      "email_address": "saksham@nexusai.world",
       "created_at": "2026-03-01T09:00:00.000Z",
       "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
       "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
@@ -134,7 +134,7 @@ __Response:__
     "id": "03faevt003",
     "action": "note_created",
     "created_at": "2026-03-25T14:17:22.000Z",
-    "description": "David Heinemeier Hansson added a note to \"Fix mobile login\"",
+    "description": "Saksham Saxena added a note to \"Fix mobile login\"",
     "particulars": {},
     "url": "http://app.mudda.localhost:3006/897362094/cards/42#note_03fanote9",
     "eventable_type": "Note",
@@ -148,9 +148,9 @@ __Response:__
       },
       "creator": {
         "id": "03f5user123",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2026-03-01T09:00:00.000Z",
         "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
         "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
@@ -168,9 +168,9 @@ __Response:__
       "url": "http://app.mudda.localhost:3006/897362094/boards/03f6abc123",
       "creator": {
         "id": "03f5user123",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2026-03-01T09:00:00.000Z",
         "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
         "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"
@@ -178,9 +178,9 @@ __Response:__
     },
     "creator": {
       "id": "03f5user123",
-      "name": "David Heinemeier Hansson",
+      "name": "Saksham Saxena",
       "active": true,
-      "email_address": "david@example.com",
+      "email_address": "saksham@nexusai.world",
       "created_at": "2026-03-01T09:00:00.000Z",
       "url": "http://app.mudda.localhost:3006/897362094/users/03f5user123",
       "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5user123/avatar"

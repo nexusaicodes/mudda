@@ -82,9 +82,9 @@ The response items have the same shape as `GET /:account_slug/cards`.
       "url": "http://app.mudda.localhost:3006/897362094/boards/03f5v9zkft4hj9qq0lsn9ohcm",
       "creator": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2025-12-05T19:36:35.401Z",
         "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
         "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
@@ -102,9 +102,9 @@ The response items have the same shape as `GET /:account_slug/cards`.
     },
     "creator": {
       "id": "03f5v9zjw7pz8717a4no1h8a7",
-      "name": "David Heinemeier Hansson",
+      "name": "Saksham Saxena",
       "active": true,
-      "email_address": "david@example.com",
+      "email_address": "saksham@nexusai.world",
       "created_at": "2025-12-05T19:36:35.401Z",
       "url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7",
       "avatar_url": "http://app.mudda.localhost:3006/897362094/users/03f5v9zjw7pz8717a4no1h8a7/avatar"

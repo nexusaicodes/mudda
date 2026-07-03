@@ -18,8 +18,8 @@ services:
       SOLID_QUEUE_IN_PUMA: "false"
       # The single owner of this deployment. Day-0 sign-in uses MUDDA_OWNER_EMAIL +
       # MUDDA_OWNER_PASSWORD; change these before exposing the app. See DOCKER.md.
-      MUDDA_OWNER_EMAIL: "${MUDDA_OWNER_EMAIL:-david@example.com}"
-      MUDDA_OWNER_NAME: "${MUDDA_OWNER_NAME:-David}"
+      MUDDA_OWNER_EMAIL: "${MUDDA_OWNER_EMAIL:-saksham@nexusai.world}"
+      MUDDA_OWNER_NAME: "${MUDDA_OWNER_NAME:-Saksham Saxena}"
       MUDDA_OWNER_PASSWORD: "${MUDDA_OWNER_PASSWORD:-mudda-dev-password}"
     volumes:
       # Live code reload: the host checkout is the source of truth at /rails.

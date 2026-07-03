@@ -27,7 +27,7 @@ make fresh    # Wipe all data and rebuild from scratch
 
 Development URL: http://app.mudda.localhost:3006 (or http://localhost:3006)
 Login (day 0): the owner email + password come from `MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD`
-(dev defaults `david@example.com` / `mudda-dev-password` in `docker-compose.yml`). After signing
+(dev defaults `saksham@nexusai.world` / `mudda-dev-password` in `docker-compose.yml`). After signing
 in you must enroll a passkey; from then on passkey is the only way in. `make reset-auth` returns
 to day 0.
 
@@ -211,7 +211,7 @@ in the account. Stemming, highlighting, and query sanitizing live in `Search::St
 ### Chrome MCP (Local Dev)
 
 URL: `http://app.mudda.localhost:3006`
-Login: `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD` (dev: `david@example.com` / `mudda-dev-password`),
+Login: `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD` (dev: `saksham@nexusai.world` / `mudda-dev-password`),
 then enroll a passkey. Use a WebAuthn virtual authenticator to drive the passkey ceremony.
 
 Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.

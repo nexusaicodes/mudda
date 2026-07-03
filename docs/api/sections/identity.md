@@ -18,9 +18,9 @@ __Response:__
       "created_at": "2025-12-05T19:36:35.377Z",
       "user": {
         "id": "03f5v9zjw7pz8717a4no1h8a7",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2025-12-05T19:36:35.401Z",
         "url": "http://app.mudda.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7",
         "avatar_url": "http://app.mudda.localhost:3006/users/03f5v9zjw7pz8717a4no1h8a7/avatar"
@@ -33,9 +33,9 @@ __Response:__
       "created_at": "2025-12-05T19:36:36.746Z",
       "user": {
         "id": "03f5v9zppzlksuj4mxba2nbzn",
-        "name": "David Heinemeier Hansson",
+        "name": "Saksham Saxena",
         "active": true,
-        "email_address": "david@example.com",
+        "email_address": "saksham@nexusai.world",
         "created_at": "2025-12-05T19:36:36.783Z",
         "url": "http://app.mudda.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn",
         "avatar_url": "http://app.mudda.localhost:3006/users/03f5v9zppzlksuj4mxba2nbzn/avatar"

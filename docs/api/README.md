@@ -141,7 +141,7 @@ __Example using curl:__
 ```bash
 curl -X PUT \
   -H "Authorization: Bearer put-your-access-token-here" \
-  -F "user[name]=David H. Hansson" \
+  -F "user[name]=Saksham Saxena" \
   -F "user[avatar]=@/path/to/avatar.jpg" \
   http://app.mudda.localhost:3006/686465299/users/03f5v9zjw7pz8717a4no1h8a7
 ```

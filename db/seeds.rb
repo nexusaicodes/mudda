@@ -2,7 +2,7 @@
 # belongs to; the sign-in secret is MUDDA_OWNER_PASSWORD (see DOCKER.md). Idempotent — safe to
 # rerun. Day 0: sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD, then enroll a passkey.
 email_address = ENV.fetch("MUDDA_OWNER_EMAIL") do
-  Rails.env.local? ? "david@example.com" : abort("Set MUDDA_OWNER_EMAIL to provision the owner.")
+  Rails.env.local? ? "saksham@nexusai.world" : abort("Set MUDDA_OWNER_EMAIL to provision the owner.")
 end
 owner_name = ENV.fetch("MUDDA_OWNER_NAME", email_address.split("@").first.capitalize)
 account_name = ENV.fetch("MUDDA_OWNER_ACCOUNT", "Mudda")
