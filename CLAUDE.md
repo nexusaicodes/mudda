@@ -50,9 +50,8 @@ RuboCop + the test suite, both run locally.
 ## Branding placeholders
 
 Some fork placeholders may still need real values: the `https://nexus.ai` colophon
-link, `support@mudda.do`, the `mudda.do` domain, and the `nexus-ai/mudda` GitHub org.
+link, `support@mudda.do` (footer + welcome letter), the `mudda.do` domain, and the
+`nexus-ai/mudda` GitHub org.
 
-Also stale: the `Makefile` (`make setup`/`make logs`) and `docker-compose.yml` still print
-and name the app `fizzy` (e.g. `http://app.fizzy.localhost:3006`). The only permitted dev
-host is `app.mudda.localhost` (`config/environments/development.rb`), so use
-**http://app.mudda.localhost:3006** (or `http://localhost:3006`) — the Fizzy URL won't resolve.
+The permitted dev host is `app.mudda.localhost` (`config/environments/development.rb`), so
+use **http://app.mudda.localhost:3006** (or `http://localhost:3006`).

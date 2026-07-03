@@ -152,15 +152,19 @@ The rest below (**Tiers 3–5**) is investigated but **not yet applied** — it 
 
 ## Recommended next actions (prioritized)
 
-| # | Action | Risk | Effort |
-|---|--------|------|--------|
-| 1 | Remove `fetch_on_visible_controller.js` + fix the broken `cards/previews` line (3.1) | Low | S |
-| 2 | Remove `lib/mudda.rb` + `bin/rails` shim (3.3) | Low | S |
-| 3 | Remove `@hotwired/turbo/offline` pin (3.2), then offline smoke-test | Low–Med | S |
-| 4 | Remove the "only-visible-to-you/others" mechanism (4.A) | Low | M |
-| 5 | Strip dead other-user branches (4.C) | Low | M |
-| 6 | Collapse `multi_tenant` flag → `Account.none?` (4.D) | Low | M |
-| 7 | Fix stale branding notes in CLAUDE.md (Tier 5) | Low | S |
-| — | Keep `table_definition_column_limits.rb` (3.4) — LIVE | — | — |
-| — | Author attribution (4.B) — product call, defer | — | — |
-| — | Real branding values (Tier 5) — needs you | — | — |
+| # | Action | Risk | Effort | Status |
+|---|--------|------|--------|--------|
+| 1 | Remove `fetch_on_visible_controller.js` + fix the broken `cards/previews` line (3.1) | Low | S | **Done** |
+| 2 | Remove `lib/mudda.rb` + `bin/rails` shim (3.3) | Low | S | **Done** |
+| 3 | Remove `@hotwired/turbo/offline` pin (3.2), then offline smoke-test | Low–Med | S | **Done** |
+| 4 | Remove the "only-visible-to-you/others" mechanism (4.A) | Low | M | **Done** |
+| 5 | Strip dead other-user branches (4.C) | Low | M | **Partial** — `notes_helper` simplified; the `users/show` + `users/events` third-person branches are **deferred**: they are still exercised by passing tests (`show other`, `update other`, `show as JSON`) because the fixtures seed multiple users per account. Stripping them means a separate single-user-fixtures refactor. |
+| 6 | Collapse `multi_tenant` flag → `Account.none?` (4.D) | Low | M | **Deferred** — the flag is **not** dead: `config/environments/test.rb` sets `multi_tenant.enabled = true` to keep signups open so signup/session/cancellation flows can be tested against fixtures that already contain accounts. Collapsing it fails ~22 tests. Not the low-risk simplify the audit assumed. |
+| 7 | Fix stale branding notes in CLAUDE.md (Tier 5) | Low | S | **Done** |
+| — | Keep `table_definition_column_limits.rb` (3.4) — LIVE | — | — | Kept |
+| — | Author attribution (4.B) — product call, defer | — | — | Deferred (avatars kept) |
+| — | Real branding values (Tier 5) — needs you | — | — | Placeholders kept |
+
+> **Not in the original audit but done alongside:** all email/mailer infrastructure was
+> purged (Action Mailer + Action Mailbox, SMTP, magic-link/cancellation/email-change mail).
+> Magic-link *login* stays as an email-free code mechanism until auth is redesigned.
