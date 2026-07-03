@@ -4,12 +4,6 @@ class Account::IncinerateDueJobTest < ActiveJob::TestCase
   setup do
     @account = accounts(:"37s")
     @user = users(:david)
-
-    # Stub Stripe methods only in SaaS mode
-    if defined?(Stripe::Subscription)
-      Stripe::Subscription.stubs(:update).returns(true)
-      Stripe::Subscription.stubs(:cancel).returns(true)
-    end
   end
 
   test "finds accounts up for incineration" do

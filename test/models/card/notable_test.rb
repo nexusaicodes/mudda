@@ -5,6 +5,12 @@ class Card::NotableTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
   end
 
+  test "a new card has no notes" do
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "New"
+
+    assert_empty card.notes
+  end
+
   test "capturing notes" do
     assert_difference -> { cards(:logo).notes.count }, +1 do
       cards(:logo).notes.create!(body: "Agreed.")

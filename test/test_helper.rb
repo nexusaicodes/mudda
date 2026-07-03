@@ -2,43 +2,11 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 
 require "rails/test_help"
-require "webmock/minitest"
-require_relative "webmock_ipaddr_extension"
-require "vcr"
 require "mocha/minitest"
 
 unless [ "0", "false" ].include?(ENV["CI_PROGRESS_BAR"])
   require "minitest/reporters"
   Minitest::Reporters.use! Minitest::Reporters::ProgressReporter.new(detailed_skip: false)
-end
-
-WebMock.allow_net_connect!
-
-VCR.configure do |config|
-  config.allow_http_connections_when_no_cassette = true
-  config.cassette_library_dir = "test/vcr_cassettes"
-  config.hook_into :webmock
-  config.filter_sensitive_data("<OPEN_AI_KEY>") { Rails.application.credentials.openai_api_key || ENV["OPEN_AI_API_KEY"] }
-  config.default_cassette_options = {
-    match_requests_on: [ :method, :uri, :body ]
-  }
-
-  # Ignore timestamps in request bodies
-  config.before_record do |i|
-    if i.request&.body
-      i.request.body.gsub!(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC/, "<TIME>")
-    end
-  end
-
-  config.register_request_matcher :body_without_times do |r1, r2|
-    b1 = (r1.body || "").gsub(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC/, "<TIME>")
-    b2 = (r2.body || "").gsub(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC/, "<TIME>")
-    b1 == b2
-  end
-
-  config.default_cassette_options = {
-    match_requests_on: [ :method, :uri, :body_without_times ]
-  }
 end
 
 module ActiveSupport
@@ -49,7 +17,7 @@ module ActiveSupport
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, DnsTestHelper, SessionTestHelper
+    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, SessionTestHelper
 
     # Jobs must carry their own account context via AccountTenanted,
     # not rely on Current.account leaking from the test setup.
