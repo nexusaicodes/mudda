@@ -35,7 +35,6 @@ gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so her
 group :development, :test do
   gem "debug"
   gem "faker"
-  gem "letter_opener"
   gem "rack-mini-profiler"
   gem "rubocop-rails-omakase", require: false
 end

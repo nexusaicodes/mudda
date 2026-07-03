@@ -3,25 +3,7 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
-  # Email provider Settings
-  #
-  # SMTP setting can be configured via environment variables.
-  # For other configuration options, consult the Action Mailer documentation.
-  if smtp_address = ENV["SMTP_ADDRESS"].presence
-    config.action_mailer.delivery_method = :smtp
-    config.action_mailer.smtp_settings = {
-      address: smtp_address,
-      port: ENV.fetch("SMTP_PORT", ENV["SMTP_TLS"] == "true" ? "465" : "587").to_i,
-      domain: ENV.fetch("SMTP_DOMAIN", nil),
-      user_name: ENV.fetch("SMTP_USERNAME", nil),
-      password: ENV.fetch("SMTP_PASSWORD", nil),
-      authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain"),
-      tls: ENV["SMTP_TLS"] == "true",
-      openssl_verify_mode: ENV["SMTP_SSL_VERIFY_MODE"]
-    }
-  end
-
-  # Base URL for links in emails and other external references.
+  # Base URL for links generated outside a request (jobs, etc.).
   # Set BASE_URL to your instance's public URL (e.g., https://mudda.example.com)
   if base_url = ENV["BASE_URL"].presence
     uri = URI.parse(base_url)
@@ -29,7 +11,6 @@ Rails.application.configure do
     url_options[:port] = uri.port if uri.port != uri.default_port
 
     routes.default_url_options = url_options
-    config.action_mailer.default_url_options = url_options
   end
 
   # Code is not reloaded between requests.
@@ -97,12 +78,6 @@ Rails.application.configure do
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = { database: { writing: :queue, reading: :queue } }
   # config.active_job.queue_name_prefix = "mudda_production"
-
-  config.action_mailer.perform_caching = false
-
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

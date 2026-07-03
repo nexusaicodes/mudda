@@ -3,7 +3,3 @@
 ActiveSupport.on_load(:active_job) do
   self.enqueue_after_transaction_commit = true
 end
-
-ActiveSupport.on_load(:action_mailer) do
-  ActionMailer::MailDeliveryJob.prepend AccountTenanted
-end

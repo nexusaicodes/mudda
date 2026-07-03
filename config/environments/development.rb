@@ -34,11 +34,6 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
-
-  config.action_mailer.perform_caching = false
-
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
@@ -69,13 +64,6 @@ Rails.application.configure do
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
 
-  if Rails.root.join("tmp/email-dev.txt").exist?
-    config.action_mailer.delivery_method = :letter_opener
-    config.action_mailer.perform_deliveries = true
-  else
-    config.action_mailer.raise_delivery_errors = false
-  end
-
   config.hosts = [
     "app.mudda.localhost",
     "mudda.localhost", # here for backwards compat
@@ -85,7 +73,4 @@ Rails.application.configure do
     /.*\.ts\.net/, # tailscale serve: hostname.tail1234.ts.net
     /.*\.nip\.io/  # nip.io for mobile apps
   ]
-
-  # Canonical host for mailer URLs (emails always link here, not personal Tailscale URLs)
-  config.action_mailer.default_url_options = { host: "#{config.hosts.first}:3006" }
 end

@@ -20,13 +20,14 @@ See [DOCKER.md](DOCKER.md) for the full reference; `make` lists every target.
 ### Setup and Server
 ```bash
 make setup    # Build the image and start the app (first run)
-make logs     # Tail the server log (magic login links appear here)
+make logs     # Tail the server log
 make down     # Stop, keeping data
 make fresh    # Wipe all data and rebuild from scratch
 ```
 
 Development URL: http://app.mudda.localhost:3006 (or http://localhost:3006)
-Login with: david@example.com (development fixtures); the magic link appears in `make logs`.
+Login with: david@example.com (development fixtures); enter the email, then the sign-in code
+is shown on the code-entry screen (no email is sent).
 
 ### Testing
 ```bash
@@ -68,9 +69,12 @@ development and testing simple.
 
 ### Authentication
 
-**Passwordless magic-link authentication, plus passkeys:**
+**Passwordless code-based sign-in, plus passkeys:**
 - A global `Identity` (email-based) owns the single `User` in the account.
-- `Identity#send_magic_link` creates a `MagicLink` and mails it (`MagicLinkMailer`).
+- `Identity#send_magic_link` creates a `MagicLink` (a short-lived sign-in code). **The app
+  sends no email** — in development the code is shown on the code-entry screen; the code is
+  consumed by `sessions/magic_links`. (This interim mechanism will be replaced when auth is
+  redesigned.)
 - Passkeys (WebAuthn) via `Identity has_passkeys` + `lib/action_pack/passkey/` and the
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
 - `Session belongs_to :identity`; `Current` resolves session → identity → user (scoped to
@@ -88,8 +92,8 @@ development and testing simple.
 :sessions, :users, :accounts (through users)`.
 
 **User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
-`Avatar`, `Configurable`, `EmailAddressChangeable`, `Named`, `Searcher`, `Timelined`. Owns
-filters, pins, and notes. `deactivate` nulls the identity.
+`Avatar`, `Configurable`, `Named`, `Searcher`, `Timelined`. Owns filters, pins, and notes.
+`deactivate` nulls the identity.
 
 **Board** → primary organizational unit. Concerns: `Board::Storage`,
 `Cards`, `Filterable`, `Storage::Tracked`, `Triageable`. **Every board has the same five
@@ -117,6 +121,8 @@ renders sentences as "You added …").
 > roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
 > Also gone: `Tag`/`Tagging` (see `db/migrate/*_drop_tags.rb`) and the `Entropy`
 > auto-postpone system (replaced by due dates; see below). `Comment` was renamed to `Note`.
+> All email/mailers (Action Mailer + Action Mailbox, SMTP, magic-link/cancellation/
+> email-change mail) are removed — the app sends no email; sign-in codes surface in-app.
 
 ### Card Lifecycle — Fixed Columns
 
@@ -195,7 +201,7 @@ in the account. Stemming, highlighting, and query sanitizing live in `Search::St
 ### Chrome MCP (Local Dev)
 
 URL: `http://app.mudda.localhost:3006`
-Login: david@example.com (passwordless magic-link auth — check the Rails console for the link)
+Login: david@example.com (passwordless code sign-in — the code is shown on the code-entry screen)
 
 Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.
 

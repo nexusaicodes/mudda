@@ -13,9 +13,7 @@ class Account::CancellationsControllerTest < ActionDispatch::IntegrationTest
 
   test "an owner can cancel the account" do
     assert_difference -> { Account::Cancellation.count }, 1 do
-      assert_enqueued_emails 1 do
-        post account_cancellation_url
-      end
+      post account_cancellation_url
     end
 
     assert_redirected_to session_menu_path(script_name: nil)

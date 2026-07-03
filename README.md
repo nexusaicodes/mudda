@@ -24,9 +24,9 @@ Everything runs through Docker Compose. With Docker installed:
 make setup    # build the image and start the app
 ```
 
-Then open http://app.mudda.localhost:3006 and log in as `david@example.com` (the magic link
-is printed by `make logs`). See [DOCKER.md](DOCKER.md) for the full reference, and run `make`
-for all targets.
+Then open http://app.mudda.localhost:3006 and log in as `david@example.com` (no email is
+sent — the sign-in code is shown on the code-entry screen). See [DOCKER.md](DOCKER.md) for
+the full reference, and run `make` for all targets.
 
 
 ## Development

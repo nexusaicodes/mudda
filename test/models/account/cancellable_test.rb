@@ -8,9 +8,7 @@ class Account::CancellableTest < ActiveSupport::TestCase
 
   test "cancel" do
     assert_difference -> { Account::Cancellation.count }, 1 do
-      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
-        @account.cancel(initiated_by: @user)
-      end
+      @account.cancel(initiated_by: @user)
     end
 
     assert @account.cancelled?

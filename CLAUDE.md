@@ -15,7 +15,8 @@ standalone app** run only through Docker Compose ([DOCKER.md](DOCKER.md)).
 
 Removed infrastructure: the `saas/` engine and second Gemfile, Kamal deploy tooling,
 MySQL/Trilogy (now SQLite-only), S3/object storage (local disk only), cross-instance
-import/export, and the CI/security wrapper scripts.
+import/export, the CI/security wrapper scripts, and all email/mailers (Action Mailer +
+Action Mailbox, SMTP — the app sends no email; sign-in codes surface in-app).
 
 Removed team-collaboration features: notifications and mentions, assignments, watching,
 reactions, board access control (`Access`) and roles, membership/invites/join codes, and

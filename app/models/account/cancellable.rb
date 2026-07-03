@@ -14,8 +14,6 @@ module Account::Cancellable
         run_callbacks :cancel do
           create_cancellation!(initiated_by: initiated_by)
         end
-
-        AccountMailer.cancellation(cancellation).deliver_later
       end
     end
   end

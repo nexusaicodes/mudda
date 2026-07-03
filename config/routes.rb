@@ -10,10 +10,6 @@ Rails.application.routes.draw do
     scope module: :users do
       resource :avatar
       resource :events
-
-      resources :email_addresses, param: :token do
-        resource :confirmation, module: :email_addresses
-      end
     end
   end
 

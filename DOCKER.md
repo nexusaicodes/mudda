@@ -24,7 +24,7 @@ make setup
 First boot builds the image, installs gems, creates the SQLite databases, loads
 the schema, and seeds the development account. When it's up, open:
 
-- http://app.mudda.localhost:3006  (preferred — matches mailer/link URLs)
+- http://app.mudda.localhost:3006  (preferred)
 - http://localhost:3006            (fallback, also allowed)
 
 Both `app.mudda.localhost` and `localhost` are in the dev host allowlist, and the
@@ -32,19 +32,15 @@ Both `app.mudda.localhost` and `localhost` are in the dev host allowlist, and th
 
 ## Logging in
 
-Sign in as **david@example.com** (seeded). Auth is passwordless — the magic link
-is printed to the server log:
-
-```bash
-make logs
-```
+Sign in as **david@example.com** (seeded). Auth is passwordless and sends no email —
+enter the email address and the sign-in code is shown on the code-entry screen.
 
 ## Everyday commands
 
 ```bash
 make up           # start in the foreground (Ctrl-C to stop)
 make start        # start in the background
-make logs         # tail logs (and grab magic links)
+make logs         # tail logs
 make console      # Rails console
 make shell        # bash shell in the container
 make test         # run the unit tests
