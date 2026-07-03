@@ -27,10 +27,7 @@ class Event::Description
     end
 
     def creator_tag
-      tag.span data: { creator_id: event.creator.id } do
-        tag.span("You", data: { only_visible_to_you: true }) +
-        tag.span(event.creator.name, data: { only_visible_to_others: true })
-      end
+      tag.span("You")
     end
 
     def card_title_tag

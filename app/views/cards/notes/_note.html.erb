@@ -1,6 +1,6 @@
 <% cache note do %>
   <%= turbo_frame_tag note, :container do %>
-    <div id="<%= dom_id(note) %>" data-creator-id="<%= note.creator_id %>" class="note align-start full-width">
+    <div id="<%= dom_id(note) %>" class="note align-start full-width">
       <figure class="note__avatar flex-item-no-shrink" aria-hidden="true">
         <%= avatar_tag note.creator, hidden_for_screen_reader: true %>
       </figure>
@@ -19,7 +19,7 @@
           </h3>
 
           <%= link_to edit_card_note_path(note.card, note),
-                class: "note__edit btn btn--circle borderless translucent", data: { only_visible_to_you: true } do %>
+                class: "note__edit btn btn--circle borderless translucent" do %>
             <%= icon_tag "menu-dots-horizontal" %>
             <span class="for-screen-reader">Edit this note</span>
           <% end %>
