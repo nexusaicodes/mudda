@@ -63,19 +63,29 @@
 
   .card__due {
     align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4ch;
+    padding: 0.2em 0.6ch;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+    border-radius: var(--border-radius);
+    background-color: color-mix(in srgb, var(--color-ink) 5%, transparent);
+    color: var(--color-ink-medium);
     font-size: var(--text-x-small);
     font-weight: 600;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     white-space: nowrap;
   }
 
   .card__due--overdue {
+    border-color: color-mix(in srgb, var(--color-negative) 30%, transparent);
+    background-color: color-mix(in srgb, var(--color-negative) 12%, transparent);
     color: var(--color-negative);
 
     .icon {
       --icon-size: 0.9em;
 
-      margin-inline-end: 0.25ch;
       vertical-align: middle;
     }
   }
