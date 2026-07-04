@@ -7,12 +7,6 @@ pidfile ENV.fetch("PIDFILE", "tmp/pids/server.pid")
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
-# Run Solid Queue with Puma by default.
-# Disabled via SOLID_QUEUE_IN_PUMA=false.
-unless ENV["SOLID_QUEUE_IN_PUMA"] == "false"
-  plugin :solid_queue
-end
-
 unless Rails.env.local?
   # Because we expect fewer I/O waits than Rails apps that connect to the
   # database over the network, let's start with a baseline config of 1

@@ -13,9 +13,6 @@ services:
       - "${PORT:-3006}:3006"
     environment:
       RAILS_ENV: development
-      # No queue database in SQLite dev; jobs run on the in-process async adapter,
-      # so don't start Solid Queue inside Puma.
-      SOLID_QUEUE_IN_PUMA: "false"
       # The single owner of this deployment. Day-0 sign-in uses MUDDA_OWNER_EMAIL +
       # MUDDA_OWNER_PASSWORD; change these before exposing the app. See DOCKER.md.
       MUDDA_OWNER_EMAIL: "${MUDDA_OWNER_EMAIL:-saksham@nexusai.world}"
