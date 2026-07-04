@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The authoritative architecture and conventions live in two files you should treat as primary:
 
-- **[AGENTS.md](AGENTS.md)** — what Mudda is, dev/test commands, and the big-picture architecture (URL-based multi-tenancy, passwordless auth + passkeys, core domain models, the fixed-column card lifecycle, due dates, UUIDv7 keys, Solid Queue jobs, SQLite full-text search).
+- **[AGENTS.md](AGENTS.md)** — what Mudda is, dev/test commands, and the big-picture architecture (URL-based multi-tenancy, passwordless auth + passkeys, core domain models, the fixed-column card lifecycle, due dates, UUIDv7 keys, in-process background jobs, SQLite full-text search).
 - **[STYLE.md](STYLE.md)** — house style (conditional returns over guard clauses, method/invocation ordering, bang conventions, CRUD-only controllers, vanilla Rails, `_later`/`_now` job naming).
 
 ## This is a standalone, single-person build
@@ -18,9 +18,11 @@ MySQL/Trilogy (now SQLite-only), S3/object storage (local disk only), cross-inst
 import/export, the CI/security wrapper scripts, all email/mailers (Action Mailer +
 Action Mailbox, SMTP — the app sends no email), and the hosted-SaaS account lifecycle
 (the multi-tenant signup toggle, account cancellation, and the scheduled incineration of
-cancelled accounts). Auth is a day-0 password bootstrap (`MUDDA_OWNER_PASSWORD`) that forces
-passkey enrollment, then goes passkey-only; the old email magic-link OTP and web signup are
-gone (see AGENTS.md → Authentication).
+cancelled accounts). Also gone: Solid Queue and Solid Cache (jobs now run in-process on the
+`:async` adapter; caching uses memory/null stores) and the per-account storage
+byte-accounting/quota ledger. Auth is a day-0 password bootstrap (`MUDDA_OWNER_PASSWORD`) that
+forces passkey enrollment, then goes passkey-only; the old email magic-link OTP and web signup
+are gone (see AGENTS.md → Authentication).
 
 Removed team-collaboration features: notifications and mentions, assignments, watching,
 reactions, board access control (`Access`) and roles, membership/invites/join codes, and

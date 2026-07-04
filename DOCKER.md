@@ -1,9 +1,8 @@
 # Running Mudda with Docker Compose (local development)
 
-A single-container development setup: SQLite for the database and cable (no Redis,
-MySQL, or object store needed). Background jobs run on Rails' in-process async
-adapter; Solid Queue is configured but not the active dev adapter. Tuned for a
-fresh box with no customer data.
+A single-container development setup: SQLite for the database (no Redis, MySQL, or
+object store needed). Background jobs run in-process on Rails' `:async` Active Job
+adapter. Tuned for a fresh box with no customer data.
 
 > Local dev uses `Dockerfile.dev` plus `docker-compose.yml`, running
 > `RAILS_ENV=development` with your source bind-mounted for live reload.
@@ -87,7 +86,6 @@ bind-mounted in.
 | ------------------ | --------- | ---------------------------------------------------- |
 | `PORT`             | `3006`    | Host port published for the web server.              |
 | `RUBY_VERSION`     | `3.4.8`   | Build arg; keep in sync with `.ruby-version`.        |
-| `DATABASE_ADAPTER` | `sqlite`  | Set in compose. `mysql` would need a DB service.     |
 
 Override per-invocation, e.g. `PORT=4000 make up`, or drop a `.env` file next to
 `docker-compose.yml` (it is gitignored).
@@ -107,6 +105,3 @@ make start
   `127.0.0.1 app.mudda.localhost` to your hosts file.
 - **Port already in use** — start with `PORT=4000 make up`.
 - **Stuck/odd state** — `make fresh`.
-- **`db/cable_schema.rb` shows as modified after first boot** — harmless. SQLite
-  dev re-dumps that committed (MySQL-format) file; `git checkout -- db/cable_schema.rb`
-  to discard.

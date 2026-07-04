@@ -94,18 +94,18 @@ development and testing simple.
 
 ### Core Domain Models
 
-**Account** → the tenant/organization. Concerns: `Account::Storage`, `Searchable`.
+**Account** → the tenant/organization. Concerns: `Searchable`.
 Has users, boards, cards, columns. `create_with_owner` provisions the single account user.
 
 **Identity** → global, email-based principal. `has_passkeys`, `has_many :sessions, :users,
 :accounts (through users)`.
 
 **User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
-`Avatar`, `Configurable`, `Named`, `Searcher`, `Timelined`. Owns filters, pins, and notes.
+`Avatar`, `Configurable`, `Named`, `Searcher`, `Timelined`. Owns filters and notes.
 `deactivate` nulls the identity.
 
-**Board** → primary organizational unit. Concerns: `Board::Storage`,
-`Cards`, `Filterable`, `Storage::Tracked`, `Triageable`. **Every board has the same five
+**Board** → primary organizational unit. Concerns: `Cards`, `Filterable`,
+`Triageable`. **Every board has the same five
 fixed columns** (see below). All of the account's boards are visible to the user.
 
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
@@ -116,7 +116,7 @@ fixed; only color is editable.
 **notes**. Status enum is `drafted` / `published` (`Card::Statuses`); a card is published via
 `publish` (which also requires a due date). Concerns: `Attachments`,
 `Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
-`Searchable`, `Statuses`, `Storage::Tracked`, `Triageable`.
+`Searchable`, `Statuses`, `Triageable`.
 
 **Note** → a timestamped, rich-text entry on a published card (`Card::Notable`). Created via
 `card.notes.create!`; only the creator can edit or delete it.
@@ -175,28 +175,30 @@ which has been removed along with the `entropies` table and the hourly auto-post
 Routes (`config/routes.rb`) model behavior as CRUD on resources. Nested resources on `cards`:
 `draft`, `board`, `column`, `goldness`, `image`, `publish`, `steps`, and `notes`.
 Boards expose read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there
-is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index. Admin tooling
-(Mission Control Jobs) mounts at `/admin/jobs`.
+is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
+
+Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI.
+There is **no separate/token-based API**: JSON requests authenticate with the same session
+cookie as the browser, so scripting the app means reusing a signed-in session.
 
 ### UUID Primary Keys
 
 Primary keys are UUIDs (`lib/rails_ext/active_record_uuid_type.rb`): UUIDv7 generated, then
-hex → base36, left-padded to a fixed **25-char** string (`36^25 > 2^128`), stored as MySQL
-binary / SQLite blob. Note that `Account#external_account_id` (the URL slug) and
+hex → base36, left-padded to a fixed **25-char** string (`36^25 > 2^128`), stored as a
+SQLite blob. Note that `Account#external_account_id` (the URL slug) and
 `Card#number` are **separate integer sequences**, not UUIDs.
 
-### Background Jobs (Solid Queue)
+### Background Jobs
 
-Database-backed job queue (no Redis). In development jobs run on the in-process async
-adapter (Solid Queue itself is configured but not the active dev adapter).
+Jobs run on Rails' in-process `:async` Active Job adapter in every environment — no Solid
+Queue, no Redis, no separate worker process.
 - The `AccountTenanted` concern (`app/jobs/concerns/account_tenanted.rb`) is `prepend`ed in
   `ApplicationJob`. It serializes `Current.account` as a GID and restores it via
   `around_perform`, so jobs run in the correct tenant context.
 - We write shallow jobs that delegate to domain models, using `_later` / `_now` naming
   (see `STYLE.md`).
-
-Recurring jobs (`config/recurring.yml`):
-- `clear_solid_queue_finished_jobs` — hourly at :12
+- The only job today is `SearchReindexJob`, a manual full-text-index repair run via
+  `bin/rails search:reindex`.
 
 ### Full-Text Search
 
