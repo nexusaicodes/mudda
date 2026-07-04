@@ -1,7 +1,7 @@
 class Card < ApplicationRecord
   include Attachments, Colored, Notable,
     Due, Eventable, Golden, Multistep, Promptable,
-    Searchable, Statuses, Storage::Tracked, Triageable
+    Searchable, Statuses, Triageable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board

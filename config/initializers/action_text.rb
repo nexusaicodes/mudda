@@ -12,11 +12,6 @@ module ActionText
         end
       end
 
-      # Delegate storage tracking to the parent record (Card, Comment, Board, etc.)
-      def storage_tracked_record
-        record.try(:storage_tracked_record)
-      end
-
       def accessible_to?(user)
         record.try(:accessible_to?, user) || record.try(:publicly_accessible?)
       end

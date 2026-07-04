@@ -1,7 +1,7 @@
-# Mudda-specific override: ActiveStorage's default purge path uses `delete`,
-# which skips attachment callbacks. We need `destroy` so storage ledger detaches
-# are recorded and reused blobs (ActionText embeds) aren't purged until the
-# last attachment is gone. Keep this local to Mudda; it's not a Rails default.
+# Mudda-specific override: ActiveStorage's default purge path uses `delete`, which
+# skips attachment callbacks. We use `destroy` so a blob shared by multiple attachments
+# (e.g. an ActionText embed copy-pasted between cards) isn't purged until its last
+# attachment is gone. Keep this local to Mudda; it's not a Rails default.
 module ActiveStorage
   module PurgeOnLastAttachment
     def purge
