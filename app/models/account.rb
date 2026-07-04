@@ -1,12 +1,10 @@
 class Account < ApplicationRecord
-  include Account::Storage, Cancellable, Incineratable, MultiTenantable, Searchable
+  include Account::Storage, Searchable
 
   has_many :users, dependent: :destroy
   has_many :boards, dependent: :destroy
   has_many :cards, dependent: :destroy
   has_many :columns, dependent: :destroy
-
-  scope :active, -> { where.missing(:cancellation) }
 
   before_create :assign_external_account_id
 
@@ -26,10 +24,6 @@ class Account < ApplicationRecord
 
   def account
     self
-  end
-
-  def active?
-    !cancelled?
   end
 
   private

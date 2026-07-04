@@ -15,10 +15,12 @@ standalone app** run only through Docker Compose ([DOCKER.md](DOCKER.md)).
 
 Removed infrastructure: the `saas/` engine and second Gemfile, Kamal deploy tooling,
 MySQL/Trilogy (now SQLite-only), S3/object storage (local disk only), cross-instance
-import/export, the CI/security wrapper scripts, and all email/mailers (Action Mailer +
-Action Mailbox, SMTP — the app sends no email). Auth is a day-0 password bootstrap
-(`MUDDA_OWNER_PASSWORD`) that forces passkey enrollment, then goes passkey-only; the old
-email magic-link OTP and web signup are gone (see AGENTS.md → Authentication).
+import/export, the CI/security wrapper scripts, all email/mailers (Action Mailer +
+Action Mailbox, SMTP — the app sends no email), and the hosted-SaaS account lifecycle
+(the multi-tenant signup toggle, account cancellation, and the scheduled incineration of
+cancelled accounts). Auth is a day-0 password bootstrap (`MUDDA_OWNER_PASSWORD`) that forces
+passkey enrollment, then goes passkey-only; the old email magic-link OTP and web signup are
+gone (see AGENTS.md → Authentication).
 
 Removed team-collaboration features: notifications and mentions, assignments, watching,
 reactions, board access control (`Access`) and roles, membership/invites/join codes, and

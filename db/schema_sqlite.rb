@@ -10,15 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_07_03_000001) do
-  create_table "account_cancellations", id: :uuid, force: :cascade do |t|
-    t.uuid "account_id", null: false
-    t.datetime "created_at", null: false
-    t.uuid "initiated_by_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_account_cancellations_on_account_id", unique: true
-  end
-
+ActiveRecord::Schema[8.2].define(version: 2026_07_04_000000) do
   create_table "account_external_id_sequences", id: :uuid, force: :cascade do |t|
     t.bigint "value", default: 0, null: false
     t.index ["value"], name: "index_account_external_id_sequences_on_value", unique: true

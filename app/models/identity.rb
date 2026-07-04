@@ -12,8 +12,8 @@ class Identity < ApplicationRecord
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
 
-  def users_with_active_accounts
-    users.joins(:account).merge(Account.active).includes(:account)
+  def users_with_accounts
+    users.joins(:account).includes(:account)
   end
 
   private

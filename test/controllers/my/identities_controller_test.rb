@@ -7,7 +7,7 @@ class My::IdentitiesControllerTest < ActionDispatch::IntegrationTest
 
   test "show as JSON" do
     identity = identities(:kevin)
-    expected_count = identity.users_with_active_accounts.count
+    expected_count = identity.users_with_accounts.count
 
     untenanted do
       get my_identity_path, as: :json
@@ -17,16 +17,13 @@ class My::IdentitiesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "show as JSON includes users from active accounts only" do
+  test "show as JSON lists every account the identity belongs to" do
     identity = identities(:kevin)
 
-    active_account = Account.create!(external_account_id: 9999981, name: "Active Account")
-    cancelled_account = Account.create!(external_account_id: 9999982, name: "Cancelled Account")
-
-    identity.users.create!(account: active_account, name: "Kevin")
-
-    cancelling_user = identity.users.create!(account: cancelled_account, name: "Kevin")
-    cancelled_account.cancel(initiated_by: cancelling_user)
+    first_account = Account.create!(external_account_id: 9999981, name: "First Account")
+    second_account = Account.create!(external_account_id: 9999982, name: "Second Account")
+    identity.users.create!(account: first_account, name: "Kevin")
+    identity.users.create!(account: second_account, name: "Kevin")
 
     untenanted do
       get my_identity_path, as: :json
@@ -34,8 +31,8 @@ class My::IdentitiesControllerTest < ActionDispatch::IntegrationTest
 
       account_ids = @response.parsed_body["accounts"].map { |account| account["id"] }
 
-      assert_includes account_ids, active_account.id
-      assert_not_includes account_ids, cancelled_account.id
+      assert_includes account_ids, first_account.id
+      assert_includes account_ids, second_account.id
     end
   end
 end

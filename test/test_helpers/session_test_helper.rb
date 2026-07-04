@@ -53,14 +53,6 @@ module SessionTestHelper
     integration_session.default_url_options[:script_name] = original_script_name
   end
 
-  def with_multi_tenant_mode(enabled)
-    previous = Account.multi_tenant
-    Account.multi_tenant = enabled
-    yield
-  ensure
-    Account.multi_tenant = previous
-  end
-
   private
     def password_sign_in(identity)
       cookies.delete :session_token

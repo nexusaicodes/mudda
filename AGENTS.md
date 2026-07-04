@@ -94,9 +94,8 @@ development and testing simple.
 
 ### Core Domain Models
 
-**Account** → the tenant/organization. Concerns: `Account::Storage`, `Cancellable`,
-`Incineratable`, `MultiTenantable`, `Searchable`. Has users, boards, cards, columns.
-`create_with_owner` provisions the single account user.
+**Account** → the tenant/organization. Concerns: `Account::Storage`, `Searchable`.
+Has users, boards, cards, columns. `create_with_owner` provisions the single account user.
 
 **Identity** → global, email-based principal. `has_passkeys`, `has_many :sessions, :users,
 :accounts (through users)`.
@@ -198,7 +197,6 @@ adapter (Solid Queue itself is configured but not the active dev adapter).
 
 Recurring jobs (`config/recurring.yml`):
 - `clear_solid_queue_finished_jobs` — hourly at :12
-- `incineration` (`Account::IncinerateDueJob`) — every 8 hours at :16
 
 ### Full-Text Search
 
