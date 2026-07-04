@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+# Clear a stale Puma pidfile left by an unclean shutdown. Database preparation and
+# migrations run as an explicit deploy step (deploy/remote-deploy.sh), not here, so
+# container restarts don't race on the schema.
+rm -f tmp/pids/server.pid
+
+exec "${@}"

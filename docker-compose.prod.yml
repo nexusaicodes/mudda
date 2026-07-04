@@ -1,0 +1,44 @@
+# Production stack for a single EC2 box: the Rails app behind Caddy, which
+# terminates TLS (auto-HTTPS via Let's Encrypt for APP_HOST, an *.sslip.io name).
+# Only Caddy is published; the app is reachable solely over the compose network.
+#
+# Variable interpolation (${IMAGE}, ${APP_HOST}) and the container environment both
+# come from /srv/mudda/.env, which the deploy renders at runtime — see
+# deploy/remote-deploy.sh. This file is invoked as:
+#   docker compose -f docker-compose.prod.yml --env-file /srv/mudda/.env ...
+name: mudda
+
+services:
+  web:
+    image: ${IMAGE}
+    restart: unless-stopped
+    env_file:
+      - /srv/mudda/.env
+    volumes:
+      # All persistent state (SQLite DB + Active Storage uploads) on the EBS volume.
+      - /srv/mudda/storage:/rails/storage
+    expose:
+      - "3006"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3006/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_HOST: ${APP_HOST}
+    volumes:
+      - /srv/mudda/deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Persist issued certs + ACME account so redeploys don't re-request them.
+      - /srv/mudda/caddy/data:/data
+      - /srv/mudda/caddy/config:/config

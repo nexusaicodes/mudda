@@ -1,0 +1,10 @@
+# Caddy terminates TLS and reverse-proxies to the Rails app. APP_HOST is the
+# instance's sslip.io name (e.g. 54-1-2-3.sslip.io); Caddy provisions and renews
+# a Let's Encrypt certificate for it automatically. To receive Let's Encrypt expiry
+# notices, add a global `{ email you@example.com }` block above.
+{$APP_HOST} {
+	encode zstd gzip
+	# Caddy adds X-Forwarded-Proto: https, which Rails honours via ASSUME_SSL,
+	# so secure cookies and HSTS work without a redirect loop.
+	reverse_proxy web:3006
+}

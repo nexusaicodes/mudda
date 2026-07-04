@@ -40,8 +40,9 @@ Everything goes through Docker Compose — run `make` to list targets:
 - `docker compose run --rm web bin/rails test:system` — system tests (`test/system/`), which
   `make test` does **not** run; they drive headless Chrome via Capybara/Selenium
 
-There is no `bin/ci`, no GitHub Actions, and no production `Dockerfile` — quality is just
-RuboCop + the test suite, both run locally.
+There is no `bin/ci` and no CI test workflow — quality is just RuboCop + the test suite,
+both run locally. The one GitHub Actions workflow, `.github/workflows/deploy.yml`, only
+builds and deploys (production `Dockerfile` → GHCR → EC2 over SSM); see [DEPLOY.md](DEPLOY.md).
 
 ## Toolchain
 

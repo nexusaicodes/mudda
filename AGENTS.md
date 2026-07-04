@@ -47,9 +47,11 @@ make reset-db                                  # Drop, recreate, and reseed
 
 ## Deploy
 
-This is a standalone build with no deploy tooling: the production `Dockerfile`, Kamal
-configs, and the SaaS engine have all been removed. Run it locally — or on any Docker
-host — with the Compose setup in [DOCKER.md](DOCKER.md).
+Runs on a **single EC2 box** via Docker: a production `Dockerfile`, `docker-compose.prod.yml`
+(app behind Caddy for auto-HTTPS over an `*.sslip.io` name), and a GitHub Actions workflow
+(`.github/workflows/deploy.yml`) that builds/pushes to GHCR and deploys over AWS SSM. See
+[DEPLOY.md](DEPLOY.md). Kamal and the SaaS engine remain removed. For local runs, use the
+Compose setup in [DOCKER.md](DOCKER.md).
 
 ## Architecture Overview
 
