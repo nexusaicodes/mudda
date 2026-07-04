@@ -3,10 +3,11 @@
 # one exists. Once a passkey is enrolled the gate opens and password sign-in closes for good (see
 # BootstrapPassword). Controllers opt out with +skip_passkey_enrollment+.
 #
-# Only full-page navigations are redirected. Background requests — Turbo Stream/Frame updates,
-# prefetches, fetch/XHR, and non-HTML API calls — pass through untouched: redirecting them would
-# discard their response or, for anything the layout auto-submits on load (such as the timezone
-# sync), trap the page reloading against the gate.
+# Only full-page HTML navigations are redirected: a GET whose negotiated format is HTML that is
+# not a Turbo Frame request or a prefetch. Everything else passes through untouched — non-GET
+# requests, non-HTML formats (Turbo Streams, JSON/API calls), Turbo Frame updates, and prefetches
+# — because redirecting them would discard their response or, for anything the layout auto-submits
+# on load (such as the timezone sync), trap the page reloading against the gate.
 module PasskeyEnrollment
   extend ActiveSupport::Concern
 

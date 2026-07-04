@@ -45,6 +45,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".search__blank-slate", text: "No matches"
   end
 
+  test "a full-text query that merely starts with a digit does not hijack to a card number" do
+    get search_path(q: "#{@card.number} is broken", script_name: "/#{@account.external_account_id}")
+    assert_select "form[data-controller='auto-submit']", count: 0
+  end
+
   test "search as JSON" do
     get search_path(q: "broken", script_name: "/#{@account.external_account_id}"), as: :json
     assert_response :success

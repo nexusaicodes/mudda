@@ -4,7 +4,7 @@ class SearchesController < ApplicationController
   def show
     @query = params[:q].blank? ? nil : params[:q]
 
-    if card = Current.user.accessible_cards.find_by(number: @query)
+    if card = card_matching_number
       respond_to do |format|
         format.html { @card = card }
         format.json { set_page_and_extract_portion_from Current.user.accessible_cards.where(id: card.id) }
@@ -23,4 +23,11 @@ class SearchesController < ApplicationController
       end
     end
   end
+
+  private
+    # Jump straight to a card only when the query is exactly a card number; a looser
+    # match would hijack any full-text query that merely starts with a digit.
+    def card_matching_number
+      Current.user.accessible_cards.find_by(number: @query) if @query&.match?(/\A\d+\z/)
+    end
 end

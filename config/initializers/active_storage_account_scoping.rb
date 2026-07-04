@@ -1,8 +1,10 @@
 # Multi-tenant safety: an attached blob must belong to the same account as the record
 # it is attached to, so one account can never reference another's blob.
 #
-# Global/unaccounted attachments (Identity/User avatars) attach to records that have no
-# account; `record.try(:account)` returns nil for them, so they are exempt.
+# The check only runs when the record has an account. Identity avatars are exempt — Identity
+# has no account, so `record.try(:account)` is nil. User avatars do run it (User belongs_to
+# :account) and pass because the blob's account defaults to Current.account
+# (see uuid_framework_models.rb), which matches the user's account.
 ActiveSupport.on_load(:active_storage_attachment) do
   validate :blob_account_matches_record, on: :create
 
