@@ -130,7 +130,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "create as JSON" do
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),
-        params: { card: { title: "My new card", description: "Big if true" } },
+        params: { card: { title: "My new card", description: "Big if true", due_on: 1.week.from_now } },
         as: :json
       assert_response :created
     end
@@ -143,12 +143,32 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Big if true", card.description.to_plain_text
   end
 
+  test "create as JSON without a due date is rejected" do
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)),
+        params: { card: { title: "No due date" } },
+        as: :json
+      assert_response :unprocessable_entity
+    end
+
+    assert_includes @response.parsed_body["errors"].keys, "due_on"
+  end
+
+  test "update as JSON cannot blank out a published card's due date" do
+    card = cards(:logo)
+
+    put card_path(card, format: :json), params: { card: { due_on: "" } }
+    assert_response :unprocessable_entity
+
+    assert_predicate card.reload.due_on, :present?
+  end
+
   test "create as JSON with custom created_at" do
     custom_time = Time.utc(2024, 1, 15, 10, 30, 0)
 
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),
-        params: { card: { title: "Backdated card", created_at: custom_time } },
+        params: { card: { title: "Backdated card", created_at: custom_time, due_on: 1.week.from_now } },
         as: :json
       assert_response :created
     end
@@ -162,7 +182,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),
-        params: { card: { title: "Card with activity", created_at: created_time, last_active_at: last_active_time } },
+        params: { card: { title: "Card with activity", created_at: created_time, last_active_at: last_active_time, due_on: 1.week.from_now } },
         as: :json
       assert_response :created
     end
@@ -177,7 +197,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),
-        params: { card: { title: "Backdated card without last_active_at", created_at: created_time } },
+        params: { card: { title: "Backdated card without last_active_at", created_at: created_time, due_on: 1.week.from_now } },
         as: :json
       assert_response :created
     end
@@ -203,7 +223,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     # Create a card with custom timestamps (simulating import)
     post board_cards_path(boards(:writebook)),
-      params: { card: { title: "Imported card", created_at: created_time, last_active_at: last_active_time } },
+      params: { card: { title: "Imported card", created_at: created_time, last_active_at: last_active_time, due_on: 1.week.from_now } },
       as: :json
     assert_response :created
 

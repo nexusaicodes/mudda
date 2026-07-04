@@ -5,8 +5,8 @@ class SearchTest < ActiveSupport::TestCase
 
   test "search" do
     # Search cards and notes
-    card = @board.cards.create!(title: "layout design", creator: @user, status: "published")
-    note_card = @board.cards.create!(title: "Some card", creator: @user, status: "published")
+    card = @board.cards.create!(title: "layout design", creator: @user, status: "published", due_on: 1.week.from_now)
+    note_card = @board.cards.create!(title: "Some card", creator: @user, status: "published", due_on: 1.week.from_now)
     note_card.notes.create!(body: "overflowing text", creator: @user)
 
     results = Search::Record.for(@user.account_id).search("layout", user: @user)
@@ -22,7 +22,7 @@ class SearchTest < ActiveSupport::TestCase
   end
 
   test "search for hyphenated strings" do
-    card = @board.cards.create!(title: "BC3-IOS-1D8B", creator: @user, status: "published")
+    card = @board.cards.create!(title: "BC3-IOS-1D8B", creator: @user, status: "published", due_on: 1.week.from_now)
 
     results = Search::Record.for(@user.account_id).search("BC3-IOS-1D8B", user: @user)
     assert results.find { |it| it.card_id == card.id }

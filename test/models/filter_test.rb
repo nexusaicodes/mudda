@@ -7,7 +7,7 @@ class FilterTest < ActiveSupport::TestCase
 
   test "cards" do
     @new_board = Board.create! name: "Another Board", creator: users(:david)
-    @new_card = @new_board.cards.create!(status: "published")
+    @new_card = @new_board.cards.create!(status: "published", due_on: 1.week.from_now)
 
     cards(:layout).notes.create!(body: "I hate haggis")
     cards(:logo).notes.create!(body: "I love haggis")

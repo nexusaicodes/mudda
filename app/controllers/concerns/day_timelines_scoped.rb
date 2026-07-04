@@ -9,7 +9,11 @@ module DayTimelinesScoped
 
   private
     def set_day_timeline
-      @day_timeline = Current.user.timeline_for(day, filter: @filter)
+      if timeline_day = day
+        @day_timeline = Current.user.timeline_for(timeline_day, filter: @filter)
+      else
+        head :not_found
+      end
     end
 
     def day
@@ -18,7 +22,7 @@ module DayTimelinesScoped
       else
         Time.current
       end
-    rescue ArgumentError
-      head :not_found
+    rescue ArgumentError, TypeError
+      nil
     end
 end

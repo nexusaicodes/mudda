@@ -26,7 +26,6 @@ gem "jbuilder"
 gem "lexxy", "0.9.14.beta"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
-gem "mittens"
 gem "useragent", bc: "useragent"
 
 # Operations

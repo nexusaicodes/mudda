@@ -148,7 +148,9 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_byte_string
       if indefinite_length?
-        String.new(encoding: Encoding::ASCII_8BIT).tap { |str| str << decode_byte_string until break_code? }
+        guarding_depth do
+          String.new(encoding: Encoding::ASCII_8BIT).tap { |str| str << decode_byte_string until break_code? }
+        end
       else
         read_bytes(read_argument).pack("C*")
       end
@@ -156,7 +158,9 @@ class ActionPack::WebAuthn::CborDecoder
 
     def decode_text_string
       if indefinite_length?
-        String.new(encoding: Encoding::UTF_8).tap { |str| str << decode_text_string until break_code? }
+        guarding_depth do
+          String.new(encoding: Encoding::UTF_8).tap { |str| str << decode_text_string until break_code? }
+        end
       else
         read_bytes(read_argument).pack("C*").force_encoding(Encoding::UTF_8)
       end
@@ -166,7 +170,7 @@ class ActionPack::WebAuthn::CborDecoder
       if indefinite_length?
         Array.new.tap { |arr| arr << decode until break_code? }
       else
-        Array.new(read_argument) { decode }
+        Array.new(read_count) { decode }
       end
     end
 
@@ -175,7 +179,7 @@ class ActionPack::WebAuthn::CborDecoder
         Hash.new.tap { |hash| hash[decode] = decode until break_code? }
       else
         Hash.new.tap do |hash|
-          read_argument.times do
+          read_count.times do
             hash[decode] = decode
           end
         end
@@ -236,6 +240,24 @@ class ActionPack::WebAuthn::CborDecoder
       else
         raise ActionPack::WebAuthn::InvalidCborError, "Invalid additional info: #{info}"
       end
+    end
+
+    # Reads an element count for a definite-length array or map. Each element
+    # consumes at least one more byte, so a count larger than the remaining
+    # input is malformed and would otherwise over-allocate.
+    def read_count
+      read_argument.tap do |count|
+        raise ActionPack::WebAuthn::InvalidCborError, "Declared length exceeds remaining input" if count > @bytes.length - @position
+      end
+    end
+
+    def guarding_depth
+      raise ActionPack::WebAuthn::InvalidCborError, "Maximum nesting depth exceeded" if @depth >= @max_depth
+
+      @depth += 1
+      yield
+    ensure
+      @depth -= 1
     end
 
     def additional_info(consume: true)

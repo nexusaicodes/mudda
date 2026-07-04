@@ -18,6 +18,21 @@ class CardTest < ActiveSupport::TestCase
     assert_equal account.reload.cards_count, card.number
   end
 
+  test "assigns distinct numbers when the account counter is stale in memory" do
+    board = boards(:writebook)
+
+    # Two in-memory copies of the same account row, both holding the same
+    # cards_count — the state two concurrent card creates would race from.
+    board_a = Account.find(board.account_id).boards.find(board.id)
+    board_b = Account.find(board.account_id).boards.find(board.id)
+
+    card_a = board_a.cards.create!(title: "A", creator: users(:kevin))
+    card_b = board_b.cards.create!(title: "B", creator: users(:kevin))
+
+    assert_not_equal card_a.number, card_b.number
+    assert_equal card_a.number + 1, card_b.number
+  end
+
   test "closed" do
     assert_equal [ cards(:shipping) ], Card.closed
   end

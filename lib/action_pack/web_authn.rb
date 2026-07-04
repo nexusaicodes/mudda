@@ -30,11 +30,12 @@
 #   ActionPack::WebAuthn.register_attestation_verifier("packed", MyPackedVerifier.new)
 #
 module ActionPack::WebAuthn
-  class InvalidResponseError < StandardError; end
-  class InvalidCborError < StandardError; end
-  class InvalidKeyError < StandardError; end
-  class UnsupportedKeyTypeError < StandardError; end
-  class InvalidOptionsError < StandardError; end
+  class Error < StandardError; end
+  class InvalidResponseError < Error; end
+  class InvalidCborError < Error; end
+  class InvalidKeyError < Error; end
+  class UnsupportedKeyTypeError < Error; end
+  class InvalidOptionsError < Error; end
 
   class << self
     # Returns a new RelyingParty configured from the current request context.

@@ -24,6 +24,21 @@ class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "internal" ], passkey.transports
   end
 
+  test "a malformed attestation is rejected with an alert instead of a 500" do
+    challenge = request_webauthn_challenge(purpose: "registration")
+    params = build_attestation_params(challenge: challenge)
+    # A CBOR array header declaring a 2**64-1 length — decoding raises InvalidCborError.
+    params[:passkey][:attestation_object] =
+      Base64.urlsafe_encode64([ 0x9b, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff ].pack("C*"), padding: false)
+
+    assert_no_difference -> { identities(:kevin).passkeys.count } do
+      post my_passkeys_path, params: params
+    end
+
+    assert_redirected_to my_passkeys_path
+    assert_equal "That passkey couldn't be registered. Try again.", flash[:alert]
+  end
+
   test "deleting a passkey is allowed while another remains" do
     extra = identities(:kevin).passkeys.create!(
       credential_id: SecureRandom.base64(32),

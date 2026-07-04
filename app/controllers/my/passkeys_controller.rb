@@ -20,6 +20,8 @@ class My::PasskeysController < ApplicationController
     else
       redirect_to edit_my_passkey_path(passkey, created: true)
     end
+  rescue ActionPack::WebAuthn::Error
+    redirect_to my_passkeys_path, alert: "That passkey couldn't be registered. Try again."
   end
 
   def edit

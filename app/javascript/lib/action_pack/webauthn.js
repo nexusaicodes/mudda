@@ -78,6 +78,13 @@ function base64urlToBuffer(base64url) {
 
 function bufferToBase64url(buffer) {
   const bytes = new Uint8Array(buffer)
-  const binary = String.fromCharCode(...bytes)
+
+  // Build the binary string in chunks so large attestations don't blow the
+  // argument limit of String.fromCharCode(...).
+  let binary = ""
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
+  }
+
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
 }

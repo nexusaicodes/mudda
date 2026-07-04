@@ -4,7 +4,7 @@ class Note::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
   setup do
-    @card = @board.cards.create!(title: "Test Card", status: "published", creator: @user)
+    @card = @board.cards.create!(title: "Test Card", status: "published", due_on: 1.week.from_now, creator: @user)
   end
 
   test "searchable? returns true for notes on published cards" do
@@ -51,9 +51,9 @@ class Note::SearchableTest < ActiveSupport::TestCase
     end
 
     # Finding cards via note search
-    card_with_note = @board.cards.create!(title: "Card One", status: "published", creator: @user)
+    card_with_note = @board.cards.create!(title: "Card One", status: "published", due_on: 1.week.from_now, creator: @user)
     card_with_note.notes.create!(body: "unique searchable phrase", creator: @user)
-    card_without_note = @board.cards.create!(title: "Card Two", status: "published", creator: @user)
+    card_without_note = @board.cards.create!(title: "Card Two", status: "published", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_with_note
     assert_not_includes results, card_without_note

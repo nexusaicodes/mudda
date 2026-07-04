@@ -44,6 +44,18 @@ class AccountSlugExtractorTest < ActiveSupport::TestCase
     assert_nil captured.fetch(:current_account)
   end
 
+  test "does not treat digits glued to more characters as an account prefix" do
+    account = accounts(:initech)
+    slug = AccountSlug.encode(account.external_account_id)
+
+    captured = call_with_env "/#{slug}x"
+
+    assert_equal "", captured.fetch(:script_name)
+    assert_equal "/#{slug}x", captured.fetch(:path_info)
+    assert_nil captured.fetch(:external_account_id)
+    assert_nil captured.fetch(:current_account)
+  end
+
   test "encodes account IDs without zero-padding" do
     assert_equal "1", AccountSlug.encode(1)
   end

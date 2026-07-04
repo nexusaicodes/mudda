@@ -15,7 +15,7 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
   test "create card with flat JSON" do
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),
-        params: { title: "Flat card", description: "<p>Flat description</p>" },
+        params: { title: "Flat card", description: "<p>Flat description</p>", due_on: 1.week.from_now },
         as: :json
     end
 

@@ -4,7 +4,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
   test "searchable? returns true for published cards" do
-    card = @board.cards.create!(title: "Published Card", status: "published", creator: @user)
+    card = @board.cards.create!(title: "Published Card", status: "published", due_on: 1.week.from_now, creator: @user)
     assert card.searchable?
   end
 
@@ -15,18 +15,18 @@ class Card::SearchableTest < ActiveSupport::TestCase
 
   test "card search" do
     # Searching by title
-    card = @board.cards.create!(title: "layout is broken", status: "published", creator: @user)
+    card = @board.cards.create!(title: "layout is broken", status: "published", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("layout", user: @user)
     assert_includes results, card
 
     # Searching by note
-    card_with_note = @board.cards.create!(title: "Some card", status: "published", creator: @user)
+    card_with_note = @board.cards.create!(title: "Some card", status: "published", due_on: 1.week.from_now, creator: @user)
     card_with_note.notes.create!(body: "overflowing text", creator: @user)
     results = Card.mentioning("overflowing", user: @user)
     assert_includes results, card_with_note
 
     # Sanitizing search query
-    card_broken = @board.cards.create!(title: "broken layout", status: "published", creator: @user)
+    card_broken = @board.cards.create!(title: "broken layout", status: "published", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("broken \"", user: @user)
     assert_includes results, card_broken
 
@@ -35,8 +35,8 @@ class Card::SearchableTest < ActiveSupport::TestCase
 
     # Searching spans every board in the account
     other_board = Board.create!(name: "Other Board", account: @account, creator: @user)
-    card_in_board = @board.cards.create!(title: "searchable content", status: "published", creator: @user)
-    card_in_other_board = other_board.cards.create!(title: "searchable content", status: "published", creator: @user)
+    card_in_board = @board.cards.create!(title: "searchable content", status: "published", due_on: 1.week.from_now, creator: @user)
+    card_in_other_board = other_board.cards.create!(title: "searchable content", status: "published", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_in_board
     assert_includes results, card_in_other_board
@@ -47,7 +47,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
 
     # Create a card with unreasonably long content
     long_content = "asdf " * Searchable::SEARCH_CONTENT_LIMIT
-    card = @board.cards.create!(title: "Card with long description", status: "published", creator: @user)
+    card = @board.cards.create!(title: "Card with long description", status: "published", due_on: 1.week.from_now, creator: @user)
     card.description = ActionText::Content.new(long_content)
     card.save!
 
@@ -62,7 +62,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
 
   test "deleting card removes search record and FTS entry" do
     search_record_class = Search::Record.for(@user.account_id)
-    card = @board.cards.create!(title: "Card to delete", status: "published", creator: @user)
+    card = @board.cards.create!(title: "Card to delete", status: "published", due_on: 1.week.from_now, creator: @user)
 
     # Verify search record exists
     search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
@@ -121,7 +121,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   test "unpublishing a draft card removes it from the search index" do
     search_record_class = Search::Record.for(@user.account_id)
 
-    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "published")
+    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "published", due_on: 1.week.from_now)
     assert_not_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
 
     card.update!(status: "drafted")

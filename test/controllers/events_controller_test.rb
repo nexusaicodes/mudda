@@ -37,4 +37,19 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
       assert_includes event.text, boards(:writebook).name
     end
   end
+
+  test "index with a valid day" do
+    get events_path(day: "2025-01-15")
+    assert_response :success
+  end
+
+  test "index with an out-of-range day returns not found" do
+    get events_path(day: "2020-99-99")
+    assert_response :not_found
+  end
+
+  test "index with an unparseable day returns not found" do
+    get events_path(day: "hello")
+    assert_response :not_found
+  end
 end

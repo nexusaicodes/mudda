@@ -33,7 +33,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
     big_card = boards(:writebook).cards.create!(
       creator: users(:david),
       title: "too big to index",
-      status: :published,
+      status: :published, due_on: 1.week.from_now,
       description: "x" * 5_000
     )
 
@@ -52,7 +52,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
     card = boards(:writebook).cards.create!(
       creator: users(:david),
       title: "will be drafted",
-      status: :published
+      status: :published, due_on: 1.week.from_now
     )
     note = card.notes.create!(creator: users(:david), body: "on a card that will be drafted")
     card.update!(status: :drafted)

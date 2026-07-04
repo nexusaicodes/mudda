@@ -293,6 +293,48 @@ class ActionPack::WebAuthn::CborDecoderTest < ActiveSupport::TestCase
     assert_equal "Input exceeds maximum size", error.message
   end
 
+  test "raises error for array whose 8-byte length exceeds the input" do
+    # 0x9b = array with an 8-byte length, followed by 0xFF * 8 (2**64 - 1)
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("9bffffffffffffffff")
+    end
+
+    assert_equal "Declared length exceeds remaining input", error.message
+  end
+
+  test "raises error for array whose 4-byte length exceeds the input" do
+    # 0x9a = array with a 4-byte length, followed by 0xFF * 4 (~4 billion)
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("9affffffff")
+    end
+  end
+
+  test "raises error for map whose 8-byte length exceeds the input" do
+    # 0xbb = map with an 8-byte length, followed by 0xFF * 8
+    assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("bbffffffffffffffff")
+    end
+  end
+
+  test "raises error for deeply nested indefinite-length byte strings" do
+    # A run of 0x5F (indefinite-length byte-string headers) must hit the depth
+    # guard rather than recursing until the stack overflows.
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("5f" * 40)
+    end
+
+    assert_equal "Maximum nesting depth exceeded", error.message
+  end
+
+  test "raises error for deeply nested indefinite-length text strings" do
+    # Same for 0x7F (indefinite-length text-string headers).
+    error = assert_raises(ActionPack::WebAuthn::InvalidCborError) do
+      decode("7f" * 40)
+    end
+
+    assert_equal "Maximum nesting depth exceeded", error.message
+  end
+
   private
     def decode(hex)
       bytes = [ hex ].pack("H*").bytes

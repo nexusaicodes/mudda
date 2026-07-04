@@ -227,7 +227,6 @@ GEM
       builder
       minitest (>= 5.0, < 7)
       ruby-progressbar
-    mittens (0.3.1)
     mocha (3.1.0)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.8.1)
@@ -418,7 +417,6 @@ DEPENDENCIES
   jbuilder
   lexxy (= 0.9.14.beta)
   minitest-reporters
-  mittens
   mocha
   platform_agent
   propshaft

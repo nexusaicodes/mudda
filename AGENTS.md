@@ -164,7 +164,8 @@ into the destination board's Triage column. Cards are dropped between columns th
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
 Cards carry an explicit **`due_on`** date (`Card::Due`):
-- `due_on` is required when a card is published (`validates :due_on, presence: true, on: :publish`).
+- `due_on` is required whenever a card is published (`validates :due_on, presence: true, if: :published?`),
+  so no save path — including the JSON create/update — can persist a published card without one.
 - `overdue?` is true for a published card whose `due_on` is in the past.
 
 This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),
@@ -203,8 +204,8 @@ Recurring jobs (`config/recurring.yml`):
 
 `app/models/search/` denormalizes searchable content (cards and notes) into `Search::Record`,
 which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spans every board
-in the account. Stemming, highlighting, and query sanitizing live in `Search::Stemmer`,
-`Search::Highlighter`, and `Search::Query`.
+in the account. Stemming is handled by the FTS5 `porter` tokenizer; highlighting and query
+sanitizing live in `Search::Highlighter` and `Search::Query`.
 
 ## Tools
 

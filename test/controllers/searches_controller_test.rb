@@ -4,10 +4,10 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   include SearchTestHelper
 
   setup do
-    @card = @board.cards.create!(title: "Layout is broken", description: "Look at this mess.", status: "published", creator: @user)
-    @note_card = @board.cards.create!(title: "Some card", status: "published", creator: @user)
+    @card = @board.cards.create!(title: "Layout is broken", description: "Look at this mess.", status: "published", due_on: 1.week.from_now, creator: @user)
+    @note_card = @board.cards.create!(title: "Some card", status: "published", due_on: 1.week.from_now, creator: @user)
     @note_card.notes.create!(body: "overflowing text issue", creator: @user)
-    @note2_card = @board.cards.create!(title: "Just haggis", description: "More haggis", status: "published", creator: @user)
+    @note2_card = @board.cards.create!(title: "Just haggis", description: "More haggis", status: "published", due_on: 1.week.from_now, creator: @user)
     @note2_card.notes.create!(body: "I love haggis", creator: @user)
 
     untenanted { sign_in_as @user }
@@ -35,11 +35,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__excerpt--note", text: /I love haggis/ # one entry for the note
     assert_match(/<mark class="circled-text"><span><\/span>haggis<\/mark>/, response.body)
 
-    # Searching by card id
-    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}")
+    # Searching by card number jumps straight to the card
+    get search_path(q: @card.number, script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']"
 
-    # Searching with non-existent card id
+    # Searching with a non-existent card number
     get search_path(q: "999999", script_name: "/#{@account.external_account_id}")
     assert_select "form[data-controller='auto-submit']", count: 0
     assert_select ".search__blank-slate", text: "No matches"
@@ -55,8 +55,8 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Layout is broken", body.first["title"]
   end
 
-  test "search by card ID as JSON returns array" do
-    get search_path(q: @card.id, script_name: "/#{@account.external_account_id}"), as: :json
+  test "search by card number as JSON returns array" do
+    get search_path(q: @card.number, script_name: "/#{@account.external_account_id}"), as: :json
     assert_response :success
 
     body = @response.parsed_body
@@ -76,7 +76,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "search highlights matched terms with proper HTML marks" do
-    @board.cards.create!(title: "Testing search highlighting", status: "published", creator: @user)
+    @board.cards.create!(title: "Testing search highlighting", status: "published", due_on: 1.week.from_now, creator: @user)
 
     get search_path(q: "highlighting", script_name: "/#{@account.external_account_id}")
     assert_response :success
@@ -85,7 +85,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
   test "search preserves highlight marks but escapes surrounding HTML" do
     @board.cards.create!(
       title: "<b>Bold</b> testing content",
-      status: "published",
+      status: "published", due_on: 1.week.from_now,
       creator: @user
     )
 

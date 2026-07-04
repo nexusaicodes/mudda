@@ -19,8 +19,13 @@ class CardsController < ApplicationController
       end
 
       format.json do
-        @card = @board.cards.create! card_params.merge(creator: Current.user, status: "published")
-        render :show, status: :created, location: card_path(@card, format: :json)
+        @card = @board.cards.new card_params.merge(creator: Current.user, status: "published")
+
+        if @card.save
+          render :show, status: :created, location: card_path(@card, format: :json)
+        else
+          render json: { errors: @card.errors }, status: :unprocessable_entity
+        end
       end
     end
   end
@@ -32,11 +37,15 @@ class CardsController < ApplicationController
   end
 
   def update
-    @card.update! card_params
-
     respond_to do |format|
-      format.turbo_stream
-      format.json { render :show }
+      format.turbo_stream { @card.update! card_params }
+      format.json do
+        if @card.update card_params
+          render :show
+        else
+          render json: { errors: @card.errors }, status: :unprocessable_entity
+        end
+      end
     end
   end
 

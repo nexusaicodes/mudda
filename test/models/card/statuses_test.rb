@@ -17,7 +17,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
     end
 
     assert_difference(-> { Event.count } => +1) do
-      @card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card", status: :published
+      @card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card", status: :published, due_on: 1.week.from_now
     end
 
     event = Event.last
@@ -63,7 +63,7 @@ class Card::StatusesTest < ActiveSupport::TestCase
   end
 
   test "detect cards that were created and published" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card", status: :published
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Published Card", status: :published, due_on: 1.week.from_now
     assert card.was_just_published?
 
     assert_not Card.find(card.id).was_just_published?

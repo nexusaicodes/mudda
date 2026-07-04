@@ -41,7 +41,7 @@ class Card::EventableTest < ActiveSupport::TestCase
     card = boards(:writebook).cards.create! \
       title: "Published card",
       creator: users(:david),
-      status: :published,
+      status: :published, due_on: 1.week.from_now,
       created_at: created_time,
       last_active_at: last_active_time
 

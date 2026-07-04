@@ -1,6 +1,8 @@
 module AccountSlug
   PATTERN = /(\d+)/
-  PATH_INFO_MATCH = /\A(\/#{AccountSlug::PATTERN})/
+  # Anchor the slug to a whole path segment (followed by "/" or end of path) so
+  # a path like "/5x" isn't mistaken for account 5 with a slashless remainder.
+  PATH_INFO_MATCH = /\A(\/#{AccountSlug::PATTERN})(?=\/|\z)/
 
   class Extractor
     def initialize(app)

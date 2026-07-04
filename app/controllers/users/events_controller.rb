@@ -4,9 +4,12 @@ class Users::EventsController < ApplicationController
   before_action :set_user
 
   def show
-    @day_timeline = @user.timeline_for(day_param, filter: @filter)
-
-    fresh_when @day_timeline
+    if day = day_param
+      @day_timeline = @user.timeline_for(day, filter: @filter)
+      fresh_when @day_timeline
+    else
+      head :not_found
+    end
   end
 
   private
@@ -20,5 +23,7 @@ class Users::EventsController < ApplicationController
       else
         Time.current
       end
+    rescue ArgumentError, TypeError
+      nil
     end
 end
