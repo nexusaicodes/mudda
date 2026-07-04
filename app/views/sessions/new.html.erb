@@ -1,11 +1,12 @@
 <% @page_title = "Sign in" %>
 
 <% passkeys_exist = ActionPack::Passkey.exists? %>
+<% password_enabled = OwnerPassword.enabled? %>
 
 <div class="panel panel--centered flex flex-column gap-half">
   <h1 class="txt-x-large font-weight-black margin-block-end">Get into Mudda</h1>
 
-  <% if BootstrapPassword.configured? && !passkeys_exist %>
+  <% if password_enabled %>
     <%= form_with url: session_password_path, class: "flex flex-column gap-half txt-medium" do |form| %>
       <label class="flex align-center gap input input--actor">
         <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username webauthn", placeholder: "Enter your email address…" %>
@@ -19,8 +20,12 @@
         <%= icon_tag "arrow-right" %>
       </button>
     <% end %>
-  <% elsif passkeys_exist %>
-    <p class="txt-medium txt-balance">Sign in with your passkey.</p>
+  <% end %>
+
+  <% if passkeys_exist %>
+    <% if password_enabled %>
+      <p class="txt-subtle center txt-medium">— or —</p>
+    <% end %>
 
     <%= passkey_sign_in_button "Sign in with a passkey", session_passkey_path,
           options: @authentication_options,
@@ -28,8 +33,10 @@
           error: { class: "txt-negative margin-block-half" },
           cancellation: { class: "txt-subtle margin-block-half" },
           class: "btn btn--link center txt-medium" %>
-  <% else %>
-    <p class="txt-medium txt-balance">No sign-in method is configured. Set <code>MUDDA_OWNER_PASSWORD</code> and reseed to enable day-0 sign-in.</p>
+  <% end %>
+
+  <% unless password_enabled || passkeys_exist %>
+    <p class="txt-medium txt-balance">No sign-in method is configured. Set <code>MUDDA_OWNER_PASSWORD</code> and reseed to enable sign-in.</p>
   <% end %>
 </div>
 

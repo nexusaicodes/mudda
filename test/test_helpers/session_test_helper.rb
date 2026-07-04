@@ -1,24 +1,17 @@
 module SessionTestHelper
-  # A throwaway EC public key so passkeys injected by the helper look real enough to satisfy the
-  # enrollment gate. These passkeys are never used for an actual WebAuthn assertion in tests.
+  # A throwaway EC public key so passkeys injected by tests look real enough. These passkeys are
+  # never used for an actual WebAuthn assertion in tests.
   DUMMY_PASSKEY_PUBLIC_KEY = OpenSSL::PKey::EC.generate("prime256v1").public_to_der
 
   def parsed_cookies
     ActionDispatch::Cookies::CookieJar.build(request, cookies.to_hash)
   end
 
-  # Signs in via the day-0 password flow, then enrolls a passkey so the forced-enrollment gate is
-  # satisfied for the rest of the test. Accepts an Identity, a User, or a fixture label.
+  # Signs in via the owner password. Accepts an Identity, a User, or a fixture label.
   def sign_in_as(identity)
     identity = resolve_identity(identity)
     password_sign_in identity
-    enroll_passkey_for identity
     identity
-  end
-
-  # Signs in without enrolling a passkey — for exercising the passkey-enrollment gate itself.
-  def sign_in_without_passkey(identity)
-    password_sign_in resolve_identity(identity)
   end
 
   def logout_and_sign_in_as(identity)
@@ -56,7 +49,6 @@ module SessionTestHelper
   private
     def password_sign_in(identity)
       cookies.delete :session_token
-      ActionPack::Passkey.delete_all # ensure day-0 so bootstrap password login is enabled
 
       untenanted do
         post session_password_path, params: { email_address: identity.email_address, password: owner_password }
@@ -64,15 +56,6 @@ module SessionTestHelper
 
       assert_response :redirect, "Posting the owner password should grant access"
       assert_not_nil cookies.get_cookie("session_token"), "Expected session_token cookie to be set after sign in"
-    end
-
-    def enroll_passkey_for(identity)
-      identity.passkeys.create!(
-        credential_id: SecureRandom.base64(32),
-        public_key: DUMMY_PASSKEY_PUBLIC_KEY,
-        sign_count: 0,
-        transports: [ "internal" ]
-      )
     end
 
     def resolve_identity(identity)

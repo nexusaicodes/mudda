@@ -1,6 +1,6 @@
 # The single owner of this deployment. This file is the source of truth for who the account
-# belongs to; the sign-in secret is MUDDA_OWNER_PASSWORD (see DOCKER.md). Idempotent — safe to
-# rerun. Day 0: sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD, then enroll a passkey.
+# belongs to; the standing sign-in secret is MUDDA_OWNER_PASSWORD (see DOCKER.md). Idempotent —
+# safe to rerun. Sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD; a passkey is optional.
 email_address = ENV.fetch("MUDDA_OWNER_EMAIL") do
   Rails.env.local? ? "saksham@nexusai.world" : abort("Set MUDDA_OWNER_EMAIL to provision the owner.")
 end
@@ -22,5 +22,5 @@ puts %(Seeded account ##{account.external_account_id} "#{account.name}" — owne
 # real deployment; only tolerate it locally, where the secret is usually supplied at runtime.
 if ENV["MUDDA_OWNER_PASSWORD"].blank? && !ActionPack::Passkey.exists?
   message = "MUDDA_OWNER_PASSWORD is not set and no passkey exists — there is no way to sign in."
-  Rails.env.local? ? warn("WARNING: #{message} Day-0 sign-in is unavailable until you set it.") : abort(message)
+  Rails.env.local? ? warn("WARNING: #{message} Sign-in is unavailable until you set it.") : abort(message)
 end

@@ -77,7 +77,7 @@ reset-db: ## Drop, recreate, and reseed the database
 	$(EXEC) bin/rails db:reset
 
 .PHONY: reset-auth
-reset-auth: ## Reset auth to day 0 (delete passkeys+sessions, re-enable password login)
+reset-auth: ## Remove all passkeys and sign out every session (passkey recovery)
 	$(RUN) bin/rails auth:reset
 
 ##@ Quality

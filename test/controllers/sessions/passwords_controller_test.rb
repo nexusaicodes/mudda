@@ -1,10 +1,6 @@
 require "test_helper"
 
 class Sessions::PasswordsControllerTest < ActionDispatch::IntegrationTest
-  setup do
-    ActionPack::Passkey.delete_all
-  end
-
   test "sign in with the owner password" do
     identity = identities(:david)
 
@@ -25,8 +21,7 @@ class Sessions::PasswordsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # Defense-in-depth: the PasswordLockdown middleware blocks the endpoint before routing.
-  test "password sign-in is locked out once a passkey exists" do
+  test "password sign-in still works once a passkey exists" do
     create_passkey_for identities(:david)
 
     untenanted do
@@ -34,18 +29,7 @@ class Sessions::PasswordsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :redirect
-    assert_not cookies[:session_token].present?
-  end
-
-  test "password sign-in returns 403 for JSON once a passkey exists" do
-    create_passkey_for identities(:david)
-
-    untenanted do
-      post session_password_path(format: :json),
-        params: { email_address: identities(:david).email_address, password: owner_password }
-    end
-
-    assert_response :forbidden
+    assert cookies[:session_token].present?
   end
 
   private

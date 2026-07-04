@@ -6,7 +6,7 @@ class Sessions::PasswordsController < ApplicationController
   layout "public"
 
   def create
-    if identity = BootstrapPassword.authenticate(email_address, password)
+    if identity = OwnerPassword.authenticate(email_address, password)
       start_new_session_for identity
 
       respond_to do |format|

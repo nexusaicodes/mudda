@@ -26,8 +26,8 @@ make setup    # build the image and start the app
 
 Then open http://app.mudda.localhost:3006 and sign in with the owner credentials —
 `MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD` (dev defaults `saksham@nexusai.world` /
-`mudda-dev-password`). You'll be asked to enroll a passkey; after that, passkey is the only
-way in. See [DOCKER.md](DOCKER.md) for the full reference, and run `make` for all targets.
+`mudda-dev-password`). You can optionally enroll a passkey for biometric/device sign-in, but the
+password always works. See [DOCKER.md](DOCKER.md) for the full reference, and run `make` for all targets.
 
 
 ## Development

@@ -20,8 +20,8 @@ Action Mailbox, SMTP — the app sends no email), and the hosted-SaaS account li
 (the multi-tenant signup toggle, account cancellation, and the scheduled incineration of
 cancelled accounts). Also gone: Solid Queue and Solid Cache (jobs now run in-process on the
 `:async` adapter; caching uses memory/null stores) and the per-account storage
-byte-accounting/quota ledger. Auth is a day-0 password bootstrap (`MUDDA_OWNER_PASSWORD`) that
-forces passkey enrollment, then goes passkey-only; the old email magic-link OTP and web signup
+byte-accounting/quota ledger. Auth is a standing owner password (`MUDDA_OWNER_PASSWORD`) with
+optional passkeys layered on top (never required); the old email magic-link OTP and web signup
 are gone (see AGENTS.md → Authentication).
 
 Removed team-collaboration features: notifications and mentions, assignments, watching,

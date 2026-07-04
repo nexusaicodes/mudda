@@ -26,10 +26,10 @@ make fresh    # Wipe all data and rebuild from scratch
 ```
 
 Development URL: http://app.mudda.localhost:3006 (or http://localhost:3006)
-Login (day 0): the owner email + password come from `MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD`
-(dev defaults `saksham@nexusai.world` / `mudda-dev-password` in `docker-compose.yml`). After signing
-in you must enroll a passkey; from then on passkey is the only way in. `make reset-auth` returns
-to day 0.
+Login: the owner email + password come from `MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD`
+(dev defaults `saksham@nexusai.world` / `mudda-dev-password` in `docker-compose.yml`). The password
+is the standing sign-in method; enrolling a passkey (under `my/passkeys`) is optional. `make
+reset-auth` removes all passkeys and signs out every session.
 
 ### Testing
 ```bash
@@ -71,20 +71,19 @@ development and testing simple.
 
 ### Authentication
 
-**Password bootstrap → forced passkey → passkey-only:**
+**Owner password (standing) + optional passkeys:**
 - A global `Identity` (email-based) owns the single `User` in the account.
-- **Day 0** (no passkey yet): the owner signs in with their email + a deployment secret held in
-  `ENV["MUDDA_OWNER_PASSWORD"]`. `BootstrapPassword` (`app/models/bootstrap_password.rb`) is the
-  gate — it verifies the secret with `secure_compare` and is `enabled?` only while
-  `MUDDA_OWNER_PASSWORD` is set **and** no passkey exists. `Sessions::PasswordsController` handles
-  `POST /session/password`. There is **no password column** — the secret lives only in the env.
-- **Forced enrollment:** `PasskeyEnrollment` (controller concern) redirects every account-scoped
-  request to `my/passkeys` until a passkey is registered.
-- **Steady state:** once any passkey exists, `BootstrapPassword.enabled?` is false and password
-  sign-in is closed — enforced both in the controller and in the `PasswordLockdown` Rack middleware
-  (`config/initializers/bootstrap_password.rb`), which 403s `POST /session/password` before routing.
-- **Recovery:** `bin/rails auth:reset` (`make reset-auth`) deletes all passkeys + sessions, reopening
-  day-0 password login. The seed (`db/seeds.rb`) is the source of truth for the owner identity/account.
+- **Password sign-in:** the owner signs in with their email + a deployment secret held in
+  `ENV["MUDDA_OWNER_PASSWORD"]`. `OwnerPassword` (`app/models/owner_password.rb`) verifies the
+  secret with `secure_compare` and is `enabled?` whenever the secret is configured.
+  `Sessions::PasswordsController` handles `POST /session/password`. There is **no password
+  column** — the secret lives only in the env. Password stays available regardless of passkeys.
+- **Passkeys are optional:** enrolling a passkey (WebAuthn) is a convenience for biometric/device
+  sign-in, never required. The owner can add or remove any/all passkeys under `my/passkeys`; doing
+  so never disables password sign-in.
+- **Recovery:** `bin/rails auth:reset` (`make reset-auth`) removes all passkeys and signs out every
+  session. The seed (`db/seeds.rb`) is the source of truth for the owner identity/account, and warns
+  only when there is neither a password secret nor a passkey (no way to sign in).
 - Passkeys (WebAuthn) via `Identity has_passkeys` + `lib/action_pack/passkey/` and the
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
 - `Session belongs_to :identity`; `Current` resolves session → identity → user (scoped to
@@ -131,8 +130,8 @@ renders sentences as "You added …").
 > Also gone: `Tag`/`Tagging` (see `db/migrate/*_drop_tags.rb`) and the `Entropy`
 > auto-postpone system (replaced by due dates; see below). `Comment` was renamed to `Note`.
 > All email/mailers (Action Mailer + Action Mailbox, SMTP) are removed — the app sends no email.
-> The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the password
-> bootstrap → forced passkey model (see Authentication); the owner is provisioned by `db/seeds.rb`.
+> The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the standing
+> owner password with optional passkeys (see Authentication); the owner is provisioned by `db/seeds.rb`.
 
 ### Card Lifecycle — Fixed Columns
 
@@ -212,8 +211,9 @@ sanitizing live in `Search::Highlighter` and `Search::Query`.
 ### Chrome MCP (Local Dev)
 
 URL: `http://app.mudda.localhost:3006`
-Login: `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD` (dev: `saksham@nexusai.world` / `mudda-dev-password`),
-then enroll a passkey. Use a WebAuthn virtual authenticator to drive the passkey ceremony.
+Login: `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD` (dev: `saksham@nexusai.world` / `mudda-dev-password`).
+Enrolling a passkey is optional; to exercise that flow, use a WebAuthn virtual authenticator to drive
+the passkey ceremony.
 
 Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.
 

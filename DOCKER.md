@@ -38,19 +38,19 @@ Each deployment has exactly one owner, provisioned by `db/seeds.rb` from three e
 | ---------------------- | ---------------------------------------- | -------------------- |
 | `MUDDA_OWNER_EMAIL`    | The owner identity's email               | `saksham@nexusai.world` |
 | `MUDDA_OWNER_NAME`     | Display name                             | `Saksham Saxena`     |
-| `MUDDA_OWNER_PASSWORD` | Day-0 sign-in secret (never stored in DB) | `mudda-dev-password` |
+| `MUDDA_OWNER_PASSWORD` | Owner sign-in secret (never stored in DB) | `mudda-dev-password` |
 
-**Before exposing the app, change these** — set a strong `MUDDA_OWNER_PASSWORD` (it is the only
-credential guarding day-0 access) and reseed with `make seed`.
+**Before exposing the app, change these** — set a strong `MUDDA_OWNER_PASSWORD` (it is the standing
+credential guarding access) and reseed with `make seed`.
 
-**Day 0** (no passkey yet): sign in with `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD`. You are then
-required to enroll a passkey before you can use the app. **Once a passkey exists, password sign-in
-is permanently disabled** (enforced in both the controller and a Rack middleware) and passkey is the
-only way in. The password is verified at runtime against the env var with a constant-time compare;
-there is no password column in the database.
+Sign in with `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD`. This password is the standing sign-in
+method — it stays available whenever the secret is set. Enrolling a passkey (under `my/passkeys`) is
+optional: a convenience for biometric or device sign-in that never disables password login. The
+password is verified at runtime against the env var with a constant-time compare; there is no
+password column in the database.
 
-Lost or broken passkeys? `make reset-auth` deletes all passkeys and sessions, returning the
-deployment to day-0 password sign-in so you can enroll a fresh passkey.
+Lost or broken passkeys? `make reset-auth` removes all passkeys and signs out every session; sign
+back in with your password.
 
 ## Everyday commands
 
