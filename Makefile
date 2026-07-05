@@ -13,8 +13,10 @@ EXEC    := $(COMPOSE) exec $(SERVICE)
 ##@ Getting started
 
 .PHONY: setup
-setup: ## Build the image and start the app in the background (first run)
-	$(COMPOSE) up --build -d
+setup: ## Build the image, prepare the database, and start the app (first run)
+	$(COMPOSE) build
+	$(MAKE) prepare
+	$(COMPOSE) up -d
 	@echo
 	@echo "  Mudda is starting at http://app.mudda.localhost:3006 (or http://localhost:3006)"
 	@echo "  Day 0: sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD, then enroll a passkey."
@@ -36,9 +38,11 @@ down: ## Stop the app, keeping data
 	$(COMPOSE) down
 
 .PHONY: fresh
-fresh: ## Wipe all data and rebuild from scratch (no customer data)
+fresh: ## Wipe all data, rebuild, prepare the database, and start (no customer data)
 	$(COMPOSE) down -v
-	$(COMPOSE) up --build -d
+	$(COMPOSE) build
+	$(MAKE) prepare
+	$(COMPOSE) up -d
 
 ##@ Day to day
 
@@ -63,6 +67,10 @@ restart: ## Restart the web service
 	$(COMPOSE) restart $(SERVICE)
 
 ##@ Database
+
+.PHONY: prepare
+prepare: ## Create, migrate, and seed the database — the explicit pre-boot step
+	$(RUN) bin/rails db:prepare
 
 .PHONY: migrate
 migrate: ## Run pending migrations

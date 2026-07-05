@@ -1,23 +1,75 @@
 # syntax=docker/dockerfile:1
-# Production image for Mudda. Multi-stage: gems + assets are built in a throwaway
-# stage, then only the runtime artifacts are copied into a slim final image that
-# runs as a non-root user. Secrets are never baked in — they arrive at runtime via
-# the env_file the deploy writes (see deploy/remote-deploy.sh).
+#
+# One multi-stage build with two targets that share a single base, so the Ruby
+# version and bundler path can never drift between development and production:
+#
+#   * `dev`        — development image (build with `--target dev`). The source is
+#                    bind-mounted at runtime (docker-compose.yml) for live reload,
+#                    so only gems are baked in; installs every gem group and runs
+#                    as root for convenience.
+#   * `production` — the default target. Multi-stage: gems + assets build in a
+#                    throwaway stage, then only the runtime artifacts land in a
+#                    slim image that runs as a non-root user. Secrets are never
+#                    baked in — they arrive at runtime via the env_file the deploy
+#                    writes (see deploy/remote-deploy.sh).
 
 ARG RUBY_VERSION=3.4.8
 FROM docker.io/library/ruby:${RUBY_VERSION}-slim AS base
 
 WORKDIR /rails
 
-# Production runtime defaults. Bundler installs only the default gem group.
+# Gems install into BUNDLE_PATH, which lives outside /rails so a source bind
+# mount can't hide them.
+ENV BUNDLE_PATH=/usr/local/bundle
+
+
+# --- Development image ---------------------------------------------------------
+# Only gems are baked in; the source arrives as a runtime bind mount.
+FROM base AS dev
+
+# build-essential/libyaml-dev/pkg-config: compile native gems.
+# libvips: image processing (Active Storage variants).
+# sqlite3: the development database.
+# git: install gems sourced from GitHub (rails, turbo, web-console).
+# curl: container healthcheck.
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      curl \
+      git \
+      libssl-dev \
+      libvips \
+      libyaml-dev \
+      pkg-config \
+      sqlite3 && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+ENV RAILS_ENV=development
+
+# Install gems in their own layer so editing source doesn't trigger a reinstall.
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+# The same dumb entrypoint as production (clears a stale pidfile, then execs). In
+# dev it resolves to the bind-mounted copy, so edits take effect on restart without
+# rebuilding. Database prep is an explicit pre-boot step (make setup/fresh).
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+EXPOSE 3006
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
+
+
+# --- Production base: runtime env shared by the build and final stages ---------
+FROM base AS prod-base
+
+# Bundler installs only the default gem group.
 ENV RAILS_ENV=production \
     BUNDLE_DEPLOYMENT=1 \
-    BUNDLE_PATH=/usr/local/bundle \
     BUNDLE_WITHOUT=development:test
 
 
-# --- Build stage: compile gems and precompile assets ---
-FROM base AS build
+# --- Build stage: compile gems and precompile assets ---------------------------
+FROM prod-base AS build
 
 # build-essential/libyaml-dev/pkg-config/libssl-dev: compile native gems.
 # git: install gems sourced from GitHub (rails edge, turbo, web-console).
@@ -47,8 +99,8 @@ RUN bundle exec bootsnap precompile app/ lib/
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
-# --- Final stage: slim runtime ---
-FROM base
+# --- Final stage: slim production runtime (the default target) -----------------
+FROM prod-base AS production
 
 # curl: container healthcheck. libvips: Active Storage image variants.
 # sqlite3: CLI for on-box backups of the SQLite database.

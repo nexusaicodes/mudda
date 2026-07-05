@@ -4,11 +4,11 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      target: dev
       args:
         RUBY_VERSION: "3.4.8"
     image: mudda-dev
-    command: ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
     ports:
       - "${PORT:-3006}:3006"
     environment:

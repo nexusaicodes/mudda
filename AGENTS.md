@@ -47,7 +47,7 @@ make reset-db                                  # Drop, recreate, and reseed
 
 ## Deploy
 
-Runs on a **single EC2 box** via Docker: a production `Dockerfile`, `docker-compose.prod.yml`
+Runs on a **single EC2 box** via Docker: the `Dockerfile`'s `production` target, `docker-compose.prod.yml`
 (app behind Caddy for auto-HTTPS over an `*.sslip.io` name), and a GitHub Actions workflow
 (`.github/workflows/deploy.yml`) that builds/pushes to GHCR and deploys over AWS SSM. See
 [DEPLOY.md](DEPLOY.md). Kamal and the SaaS engine remain removed. For local runs, use the
