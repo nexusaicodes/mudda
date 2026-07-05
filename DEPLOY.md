@@ -22,7 +22,7 @@ host over TLS, so on a bare IP you'd be password-only.
 
 `.github/workflows/deploy.yml` runs two jobs on push to `main` (or manual dispatch):
 
-1. **build** — builds `Dockerfile`, pushes `ghcr.io/<owner>/<repo>:<sha>` (and `:latest`)
+1. **build** — builds the `Dockerfile`'s `production` target, pushes `ghcr.io/<owner>/<repo>:<sha>` (and `:latest`)
    to GHCR using the automatic `GITHUB_TOKEN`.
 2. **deploy** — assumes an AWS role via GitHub OIDC (no static AWS keys), then uses
    **SSM Run Command** to run `deploy/remote-deploy.sh` on the instance. That script

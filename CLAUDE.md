@@ -42,11 +42,11 @@ Everything goes through Docker Compose — run `make` to list targets:
 
 There is no `bin/ci` and no CI test workflow — quality is just RuboCop + the test suite,
 both run locally. The one GitHub Actions workflow, `.github/workflows/deploy.yml`, only
-builds and deploys (production `Dockerfile` → GHCR → EC2 over SSM); see [DEPLOY.md](DEPLOY.md).
+builds and deploys (the `Dockerfile`'s `production` target → GHCR → EC2 over SSM); see [DEPLOY.md](DEPLOY.md).
 
 ## Toolchain
 
-- Ruby is pinned in `.ruby-version` (3.4.x); the dev image (`Dockerfile.dev`) installs it.
+- Ruby is pinned in `.ruby-version` (3.4.x); the dev image (the `Dockerfile`'s `dev` target) installs it.
 - Rails runs off `main` (edge) plus a couple of forked/branch gems (see `Gemfile`) — expect
   APIs slightly ahead of the latest stable Rails release.
 - Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`. Run via

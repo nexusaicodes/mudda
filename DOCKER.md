@@ -4,8 +4,9 @@ A single-container development setup: SQLite for the database (no Redis, MySQL, 
 object store needed). Background jobs run in-process on Rails' `:async` Active Job
 adapter. Tuned for a fresh box with no customer data.
 
-> Local dev uses `Dockerfile.dev` plus `docker-compose.yml`, running
-> `RAILS_ENV=development` with your source bind-mounted for live reload.
+> Local dev builds the `dev` target of the `Dockerfile` (one multi-stage file
+> shared with production) via `docker-compose.yml`, running `RAILS_ENV=development`
+> with your source bind-mounted for live reload.
 
 ## Prerequisites
 

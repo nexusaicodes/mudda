@@ -4,7 +4,8 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
+      target: dev
       args:
         RUBY_VERSION: "3.4.8"
     image: mudda-dev
