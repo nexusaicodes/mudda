@@ -21,8 +21,12 @@ A `Makefile` wraps everything — run `make` to see all targets.
 make setup
 ```
 
-First boot builds the image, installs gems, creates the SQLite databases, loads
-the schema, and seeds the development account. When it's up, open:
+First boot builds the image, then — as an explicit step *before* the app starts —
+runs `db:prepare` (creates the SQLite databases, loads the schema, runs migrations,
+and seeds the development account), then brings the container up. This mirrors the
+production deploy (`deploy/remote-deploy.sh` prepares the database before booting),
+so dev and prod share **one** container entrypoint that only clears a stale Puma
+pidfile — neither migrates on boot. When it's up, open:
 
 - http://app.mudda.localhost:3006  (preferred)
 - http://localhost:3006            (fallback, also allowed)
@@ -75,7 +79,7 @@ State (SQLite DBs, uploads, logs, caches) lives in named volumes, so a full rese
 is one target:
 
 ```bash
-make fresh        # docker compose down -v && up --build -d
+make fresh        # down -v, rebuild, db:prepare, then up -d
 ```
 
 The host checkout is never written to for this state — only your source code is

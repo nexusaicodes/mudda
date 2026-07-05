@@ -50,12 +50,13 @@ ENV RAILS_ENV=development
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-# The entrypoint is run from the bind-mounted source at runtime, so edits to it
-# take effect on container restart without rebuilding the image.
-ENTRYPOINT ["bin/docker-entrypoint-dev"]
+# The same dumb entrypoint as production (clears a stale pidfile, then execs). In
+# dev it resolves to the bind-mounted copy, so edits take effect on restart without
+# rebuilding. Database prep is an explicit pre-boot step (make setup/fresh).
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 EXPOSE 3006
-CMD ["bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3006"]
 
 
 # --- Production base: runtime env shared by the build and final stages ---------
