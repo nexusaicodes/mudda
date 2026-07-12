@@ -152,6 +152,11 @@ baked into the image). The deploy job renders them into an `env.production` file
 streams it over the encrypted SSH channel into a `0600` `/srv/mudda/.env` on the box, and
 `docker compose` reads it via `env_file`. Values never appear on a command line or in the image.
 
+The owner password is stored base64-encoded (`MUDDA_OWNER_PASSWORD_B64`) so arbitrary characters
+(`$`, `#`, quotes) survive `docker compose`'s env-file parsing intact; the container entrypoint
+(`bin/docker-entrypoint`) decodes it back into `MUDDA_OWNER_PASSWORD` at boot. Set the
+`MUDDA_OWNER_PASSWORD` GitHub secret to the raw password — the pipeline handles the encoding.
+
 Rotate by updating the GitHub secret and redeploying. The rendered `.env` on the box is owned by
 `saksham` and mode `0600`.
 

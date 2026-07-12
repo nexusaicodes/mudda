@@ -6,4 +6,13 @@
 # restarts don't race on the schema. Dev and prod share this one entrypoint.
 rm -f tmp/pids/server.pid
 
+# The production deploy ships the owner password base64-encoded (MUDDA_OWNER_PASSWORD_B64)
+# so arbitrary characters ($, #, quotes) survive docker compose's env-file parsing intact.
+# Decode it into the plain value the app reads. Dev sets MUDDA_OWNER_PASSWORD directly, so
+# this is skipped there.
+if [ -n "${MUDDA_OWNER_PASSWORD_B64:-}" ] && [ -z "${MUDDA_OWNER_PASSWORD:-}" ]; then
+  MUDDA_OWNER_PASSWORD="$(printf %s "$MUDDA_OWNER_PASSWORD_B64" | base64 -d)"
+  export MUDDA_OWNER_PASSWORD
+fi
+
 exec "${@}"

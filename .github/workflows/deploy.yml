@@ -73,6 +73,8 @@ jobs:
           # printf %s writes each value literally, so a secret containing $()
           # or backticks can't be expanded. Values arrive through the step's env
           # block (not inlined into this script), which avoids shell injection.
+          # The owner password is base64-encoded so arbitrary characters survive
+          # docker compose's env-file parsing; the container entrypoint decodes it.
           umask 077
           {
             printf 'RAILS_ENV=production\n'
@@ -81,10 +83,10 @@ jobs:
             printf 'BASE_URL=https://%s\n'     "$APP_HOST"
             printf 'ASSUME_SSL=true\n'
             printf 'FORCE_SSL=true\n'
-            printf 'SECRET_KEY_BASE=%s\n'      "$SECRET_KEY_BASE"
-            printf 'MUDDA_OWNER_EMAIL=%s\n'    "$MUDDA_OWNER_EMAIL"
-            printf 'MUDDA_OWNER_NAME=%s\n'     "$MUDDA_OWNER_NAME"
-            printf 'MUDDA_OWNER_PASSWORD=%s\n' "$MUDDA_OWNER_PASSWORD"
+            printf 'SECRET_KEY_BASE=%s\n'          "$SECRET_KEY_BASE"
+            printf 'MUDDA_OWNER_EMAIL=%s\n'        "$MUDDA_OWNER_EMAIL"
+            printf 'MUDDA_OWNER_NAME=%s\n'         "$MUDDA_OWNER_NAME"
+            printf 'MUDDA_OWNER_PASSWORD_B64=%s\n' "$(printf %s "$MUDDA_OWNER_PASSWORD" | base64 -w0)"
           } > env.production
 
       - name: Set up SSH
