@@ -42,7 +42,7 @@ Everything goes through Docker Compose — run `make` to list targets:
 
 There is no `bin/ci` and no CI test workflow — quality is just RuboCop + the test suite,
 both run locally. The one GitHub Actions workflow, `.github/workflows/deploy.yml`, only
-builds and deploys (the `Dockerfile`'s `production` target → GHCR → EC2 over SSM); see [DEPLOY.md](DEPLOY.md).
+builds and deploys (the `Dockerfile`'s `production` target → GHCR → the box over SSH); see [DEPLOY.md](DEPLOY.md).
 
 ## Toolchain
 
