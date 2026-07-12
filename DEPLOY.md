@@ -8,7 +8,7 @@ orchestrator, and no external datastore.
   push to main ─► GitHub Actions ─► build image ─► GHCR (public)
                         │
                         └─ SSH ─► the box
-                                    ├─ scp: compose file, Caddyfile, rendered .env
+                                    ├─ copy over SSH: compose file, Caddyfile, rendered .env
                                     ├─ remote-deploy.sh: docker compose up -d (web + caddy)
                                     ├─ Caddy: auto-HTTPS for <ip>.sslip.io
                                     └─ /srv/mudda/storage on the host disk (SQLite + uploads)
@@ -25,10 +25,14 @@ TLS, so on a bare IP you'd be password-only.
 
 1. **build** — builds the `Dockerfile`'s `production` target, pushes `ghcr.io/<owner>/<repo>:<sha>`
    (and `:latest`) to GHCR using the automatic `GITHUB_TOKEN`.
-2. **deploy** — renders the runtime `.env` in the runner, then over **SSH**: `scp`s
+2. **deploy** — renders the runtime `.env` in the runner, then over **SSH** copies
    `docker-compose.prod.yml`, `deploy/Caddyfile`, `deploy/remote-deploy.sh`, and the `.env`
-   to `/srv/mudda`, and runs `remote-deploy.sh`. That script pulls the image, runs `db:prepare`,
+   to `/srv/mudda` and runs `remote-deploy.sh`. That script pulls the image, runs `db:prepare`,
    and `docker compose up -d`. The job fails if any SSH step returns non-zero.
+
+   Files are streamed over the SSH **exec channel** (`ssh host 'cat > dest'`), not `scp`,
+   because this box has the SFTP subsystem disabled — `scp`/`sftp` would fail with
+   "Connection closed" while plain `ssh <command>` works.
 
 The `deploy` job targets the **`production` GitHub Environment** — add required reviewers to it
 if you want a manual approval gate before anything ships.
@@ -145,7 +149,7 @@ read-only PAT stored on the box.
 
 Application secrets live in **GitHub Actions secrets** and are injected at **deploy time** (never
 baked into the image). The deploy job renders them into an `env.production` file in the runner,
-`scp`s it over the encrypted SSH channel to a `0600` `/srv/mudda/.env` on the box, and
+streams it over the encrypted SSH channel into a `0600` `/srv/mudda/.env` on the box, and
 `docker compose` reads it via `env_file`. Values never appear on a command line or in the image.
 
 Rotate by updating the GitHub secret and redeploying. The rendered `.env` on the box is owned by

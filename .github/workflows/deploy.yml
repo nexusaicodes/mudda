@@ -107,13 +107,17 @@ jobs:
           ssh_opts="-i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=yes"
           target="$SSH_USER@$SSH_HOST"
 
-          # /srv/mudda is owned by the deploy user, so none of this needs sudo.
+          # Stream each file over the SSH exec channel with `cat > dest`. The box
+          # has the SFTP subsystem disabled, so scp/sftp can't be used; the exec
+          # channel carries the file bytes as stdin. /srv/mudda is owned by the
+          # deploy user, so none of this needs sudo.
+          ship() { ssh $ssh_opts "$target" "cat > $1" < "$2"; }
           ssh $ssh_opts "$target" 'mkdir -p /srv/mudda/deploy'
-          scp $ssh_opts docker-compose.prod.yml "$target:/srv/mudda/docker-compose.prod.yml"
-          scp $ssh_opts deploy/Caddyfile        "$target:/srv/mudda/deploy/Caddyfile"
-          scp $ssh_opts deploy/remote-deploy.sh "$target:/srv/mudda/deploy/remote-deploy.sh"
-          # The rendered env (with secrets) rides the encrypted SSH channel into a
-          # file the next step locks down to 0600.
-          scp $ssh_opts env.production          "$target:/srv/mudda/.env"
+          ship /srv/mudda/docker-compose.prod.yml docker-compose.prod.yml
+          ship /srv/mudda/deploy/Caddyfile        deploy/Caddyfile
+          ship /srv/mudda/deploy/remote-deploy.sh deploy/remote-deploy.sh
+          # The rendered env (with secrets) rides the encrypted channel into a
+          # file the run step then locks down to 0600.
+          ship /srv/mudda/.env                    env.production
           ssh $ssh_opts "$target" \
             'chmod 600 /srv/mudda/.env && chmod +x /srv/mudda/deploy/remote-deploy.sh && bash /srv/mudda/deploy/remote-deploy.sh'

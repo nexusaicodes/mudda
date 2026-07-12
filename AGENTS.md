@@ -49,8 +49,9 @@ make reset-db                                  # Drop, recreate, and reseed
 
 Runs on a **single VPS box** via Docker: the `Dockerfile`'s `production` target, `docker-compose.prod.yml`
 (app behind Caddy for auto-HTTPS over an `*.sslip.io` name), and a GitHub Actions workflow
-(`.github/workflows/deploy.yml`) that builds/pushes to GHCR and deploys over **SSH** (`scp`s the
-compose file, Caddyfile, and a rendered `.env`, then runs `deploy/remote-deploy.sh` on the box). See
+(`.github/workflows/deploy.yml`) that builds/pushes to GHCR and deploys over **SSH** (streams the
+compose file, Caddyfile, and a rendered `.env` over the SSH exec channel, then runs
+`deploy/remote-deploy.sh` on the box). See
 [DEPLOY.md](DEPLOY.md). Kamal and the SaaS engine remain removed. For local runs, use the
 Compose setup in [DOCKER.md](DOCKER.md).
 
