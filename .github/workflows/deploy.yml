@@ -71,8 +71,8 @@ jobs:
           MUDDA_OWNER_PASSWORD: ${{ secrets.MUDDA_OWNER_PASSWORD }}
         run: |
           # printf %s writes each value literally, so a secret containing $()
-          # or backticks can't be expanded. Values come from env: (not inline
-          # ${{ }}) to avoid shell-injection into this script.
+          # or backticks can't be expanded. Values arrive through the step's env
+          # block (not inlined into this script), which avoids shell injection.
           umask 077
           {
             printf 'RAILS_ENV=production\n'
