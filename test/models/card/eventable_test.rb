@@ -54,4 +54,15 @@ class Card::EventableTest < ActiveSupport::TestCase
     cards(:logo).triage_into(columns(:writebook_done))
     assert_equal Time.current, cards(:logo).last_active_at
   end
+
+  test "renaming a card touches its events so the activity feed cache invalidates" do
+    card = cards(:logo)
+    event = card.events.first
+    assert_not_nil event, "expected the published card to have at least one event"
+
+    travel_to 1.hour.from_now do
+      card.update!(title: "Renamed logo")
+      assert_equal Time.current, event.reload.updated_at
+    end
+  end
 end
