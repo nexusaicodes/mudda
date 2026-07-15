@@ -95,6 +95,20 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Something more in-depth", card.description.to_plain_text.strip
   end
 
+  test "edit form renders a due date field" do
+    get edit_card_path(cards(:logo))
+    assert_response :success
+    assert_select "input[type=date][name=?]", "card[due_on]"
+  end
+
+  test "update changes the due date" do
+    patch card_path(cards(:logo)), as: :turbo_stream, params: {
+      card: { due_on: "2030-01-15" } }
+    assert_response :success
+
+    assert_equal Date.new(2030, 1, 15), cards(:logo).reload.due_on
+  end
+
   test "delete card" do
     assert_difference -> { Card.count }, -1 do
       delete card_path(cards(:logo))
