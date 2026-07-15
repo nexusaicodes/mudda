@@ -129,6 +129,40 @@
       text-transform: uppercase;
     }
 
+    .card-field__due-input {
+      --input-padding: 0.4em 0.7em;
+
+      inline-size: auto;
+      min-inline-size: 0;
+      cursor: pointer;
+
+      &::-webkit-datetime-edit {
+        color: var(--color-ink);
+      }
+
+      &::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        margin-inline-start: 0.1em;
+        opacity: 0.55;
+        transition: opacity 150ms ease;
+
+        html[data-theme="dark"] & {
+          filter: invert(1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          html:not([data-theme]) & {
+            filter: invert(1);
+          }
+        }
+      }
+
+      &:hover::-webkit-calendar-picker-indicator,
+      &:focus-visible::-webkit-calendar-picker-indicator {
+        opacity: 1;
+      }
+    }
+
     .card__meta,
     .card__stages {
       @media (min-width: 640px) {
