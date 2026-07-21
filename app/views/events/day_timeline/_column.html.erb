@@ -10,10 +10,10 @@
     <% end %>
   </h3>
   <% column.events_by_hour.each do |hour, events| %>
-    <%= events_at_hour_container(column, hour) do %>
+    <div class="events__time-block">
       <%= render partial: "events/event", collection: events, cached: true %>
       <%= local_datetime_tag events.first.created_at, class: "event__timestamp txt-small translucent" %>
-    <% end %>
+    </div>
   <% end %>
 
   <% if column.has_more_events? %>
