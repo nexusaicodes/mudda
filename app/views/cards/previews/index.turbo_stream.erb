@@ -1,7 +1,7 @@
 <%= turbo_stream.remove "#{params[:target]}-load-page-#{@page.number}" %>
 
 <%= turbo_stream.append params[:target] do %>
-  <%= render partial: "cards/display/preview", collection: @page.records, as: :card, cached: true %>
+  <%= render partial: "cards/display/preview", collection: @page.records, as: :card, cached: ->(card) { [ card, Date.current ] } %>
 
   <%= link_to_next_page params[:target], @page, activate_when_observed: @filter.indexed_by.closed? %>
 <% end %>

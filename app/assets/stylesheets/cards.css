@@ -78,10 +78,16 @@
     white-space: nowrap;
   }
 
-  .card__due--overdue {
-    border-color: color-mix(in srgb, var(--color-negative) 30%, transparent);
-    background-color: color-mix(in srgb, var(--color-negative) 12%, transparent);
-    color: var(--color-negative);
+  .card__due--urgent { --due-color: var(--color-negative); }
+  .card__due--soon   { --due-color: oklch(var(--lch-yellow-dark)); }
+  .card__due--later  { --due-color: var(--color-positive); }
+
+  .card__due--urgent,
+  .card__due--soon,
+  .card__due--later {
+    border-color: color-mix(in srgb, var(--due-color) 30%, transparent);
+    background-color: color-mix(in srgb, var(--due-color) 12%, transparent);
+    color: var(--due-color);
 
     .icon {
       --icon-size: 0.9em;
@@ -263,6 +269,13 @@
     .local-time-value {
       font-weight: 900;
     }
+  }
+
+  /* Due-date footer: profile circle beside a single boxed due date */
+  .card__meta--due {
+    display: flex;
+    grid-template-areas: none;
+    text-transform: none;
   }
 
   /* Assign grid areas */
