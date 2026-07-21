@@ -12,7 +12,7 @@ class Boards::ColumnsController < ApplicationController
 
   def show
     set_page_and_extract_portion_from @column.cards.published.by_due_date.with_golden_first.preloaded
-    fresh_when etag: @page.records
+    fresh_when etag: [ @page.records, Date.current ]
   end
 
   # Columns are fixed; only their color is editable.
