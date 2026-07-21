@@ -50,9 +50,15 @@ authenticated (`gh auth login`, `aws configure`).
 cp deploy/ec2/config.example.env deploy/ec2/config.env   # then fill in your fork + region
 ```
 
-Then just tell Claude Code:
+Then run the skill from Claude Code:
 
-> deploy to EC2
+```
+/deploy-ec2
+```
+
+The `/deploy-ec2` slash command invokes the skill directly, so it's the reliable trigger. Saying
+something like *"deploy to EC2"* in plain language usually works too, but that depends on Claude
+choosing the skill — use the slash command when you want to be sure.
 
 It runs a read-only preflight, collects your owner email/name/password (pushed straight to
 GitHub secrets — never written to disk), shows you a plan to approve, then provisions the
