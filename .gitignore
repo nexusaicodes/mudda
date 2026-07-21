@@ -41,3 +41,7 @@
 
 /config/credentials/*.key
 .DS_Store
+
+# deploy/ec2 local state, generated keys, and filled-in config (secrets/non-secrets)
+deploy/ec2/.state
+deploy/ec2/config.env
