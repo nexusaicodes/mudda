@@ -30,6 +30,18 @@ module CardsHelper
     card.drafted? ? "Drafted" : "Added"
   end
 
+  def card_due_urgency(card)
+    days = (card.due_on - Date.current).to_i
+
+    if days <= 1
+      "urgent"
+    elsif days <= 2
+      "soon"
+    else
+      "later"
+    end
+  end
+
   def card_due_label(card)
     if card.due_on.year == Date.current.year
       card.due_on.strftime("%b %-d")

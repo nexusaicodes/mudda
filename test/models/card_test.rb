@@ -37,6 +37,18 @@ class CardTest < ActiveSupport::TestCase
     assert_equal [ cards(:shipping) ], Card.closed
   end
 
+  test "by_due_date orders upcoming soonest-first with overdue cards at the bottom" do
+    board = boards(:writebook)
+    board.cards.destroy_all
+
+    far      = board.cards.create! title: "Far",      creator: users(:david), due_on: 10.days.from_now, status: :published
+    soon     = board.cards.create! title: "Soon",     creator: users(:david), due_on: 2.days.from_now,  status: :published
+    overdue  = board.cards.create! title: "Overdue",  creator: users(:david), due_on: 3.days.ago,       status: :published
+    later    = board.cards.create! title: "Later",    creator: users(:david), due_on: 5.days.from_now,  status: :published
+
+    assert_equal [ soon, later, far, overdue ], board.cards.by_due_date.to_a
+  end
+
   test "open" do
     assert_equal cards(:logo, :layout, :text, :buy_domain).to_set, accounts("37s").cards.open.to_set
     assert_equal cards(:radio, :paycheck, :unfinished_thoughts).to_set, accounts("initech").cards.open.to_set
