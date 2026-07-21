@@ -11,19 +11,20 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
   test "index" do
     get events_path
 
-    assert_select "div.events__time-block[style='grid-area: 17/1']" do
+    assert_select "div.events__time-block" do
       assert_select "strong", text: /added Layout is broken/
+      assert_select "time[datetime=?]", events(:layout_published).created_at.to_i.to_s
     end
   end
 
-  test "index with a specific timezone" do
+  test "index emits absolute epoch timestamps regardless of the viewer timezone" do
+    # Columns stack top-down and never encode the hour server-side; the <time>
+    # element carries an absolute epoch that local-time localizes in the browser.
     cookies[:timezone] = "America/New_York"
 
     get events_path
 
-    assert_select "div.events__time-block[style='grid-area: 22/1']" do
-      assert_select "strong", text: /added Layout is broken/
-    end
+    assert_select "time[datetime=?]", events(:layout_published).created_at.to_i.to_s
   end
 
   test "only displays events from filtered boards" do
