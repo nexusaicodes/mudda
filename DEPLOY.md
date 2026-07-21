@@ -37,6 +37,29 @@ TLS, so on a bare IP you'd be password-only.
 The `deploy` job targets the **`production` GitHub Environment** — add required reviewers to it
 if you want a manual approval gate before anything ships.
 
+## Automated zero-to-live on AWS EC2 (`deploy/ec2/`)
+
+The manual box setup below is scripted end-to-end for AWS in `deploy/ec2/`, meant to be driven
+by an agentic CLI (Claude Code) via the **`deploy-ec2` skill**, or run by hand. The scripts are
+idempotent (resources are found by the `mudda-box` tag and created only when absent), so any
+phase is safe to re-run:
+
+| Script | Does |
+|---|---|
+| `provision.sh` | Launches the EC2 instance, security group (22/80/443), and a **stable Elastic IP**, then derives `APP_HOST` (`<ip-dashed>.sslip.io`). Needs the AWS CLI + credentials. |
+| `bootstrap-box.sh` | Over SSH: installs Docker, creates `/srv/mudda`, opens `ufw`, and installs CI's deploy key. |
+| `configure-github.sh` | Via `gh`: creates the `production` environment and sets all deploy secrets + variables (and best-effort GHCR-public). |
+| `verify.sh` | Triggers the deploy workflow, watches it, and gates on a real `200` from `https://APP_HOST/up`. |
+| `teardown.sh` | Reverses every AWS resource (tag-guarded, requires confirmation). |
+
+Setup: `cp deploy/ec2/config.example.env deploy/ec2/config.env`, fill it in (your fork, region,
+instance type), then run the scripts in the order above — or just tell Claude Code to "deploy to
+EC2" and let the skill plan, gate on your approval, and run them. Owner email/name/password are
+gathered at run time and pushed straight to GitHub secrets; nothing secret is written to disk.
+The EC2 Ubuntu default user is `ubuntu` (uid 1000), which matches the container, so the storage
+ownership just works — no `saksham` user needed for this path. `config.env` and the discovered
+`.state` are gitignored.
+
 ## One-time box setup
 
 Ubuntu 24.04, a non-root **`saksham`** user with `sudo`, key-only SSH (see the box-hardening
