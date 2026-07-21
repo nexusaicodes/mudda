@@ -387,18 +387,22 @@
     .cards.is-collapsed & {
       block-size: 100%;
       flex-direction: column;
+      gap: 1.25ch;
       inline-size: var(--column-width-collapsed);
       justify-content: start;
       letter-spacing: 0.05em;
 
-      /* Guitar string: glows out of the bead in the column color and fades
-       * downward, so it reads as an intentional thread rather than a stray rule. */
+      /* Thin column track: a slim capsule seated under the bead that gives the
+       * vertical label a defined lane, so the rotated text reads as a titled
+       * column rather than floating against the canvas. */
       &:before {
-        background: linear-gradient(to bottom, color-mix(in srgb, var(--card-color) 45%, var(--color-canvas)), transparent 85%);
-        block-size: 100%;
+        background: color-mix(in srgb, var(--card-color) 8%, var(--color-canvas));
+        border: 1px solid color(from var(--card-color) srgb r g b / 0.22);
+        border-radius: calc(var(--column-width-collapsed) / 2);
         content: "";
-        inline-size: 1px;
-        inset-block: var(--column-width-collapsed) 0;
+        inline-size: var(--column-width-collapsed);
+        inset: 0;
+        margin-inline: auto;
         position: absolute;
         z-index: -2;
       }
