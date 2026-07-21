@@ -16,10 +16,11 @@ main() {
   aws_ sts get-caller-identity >/dev/null || die "aws credentials not working — run 'aws configure'"
 
   ensure_admin_keypair
-  local sg_id ami_id instance_id ip
-  sg_id="$(ensure_security_group)"
+  local vpc_id subnet_opt sg_id ami_id instance_id ip
+  resolve_network                          # sets vpc_id + subnet_opt
+  sg_id="$(ensure_security_group "$vpc_id")"
   ami_id="$(latest_ubuntu_ami)"
-  instance_id="$(ensure_instance "$sg_id" "$ami_id")"
+  instance_id="$(ensure_instance "$sg_id" "$ami_id" "$subnet_opt")"
   ip="$(ensure_elastic_ip "$instance_id")"
 
   local app_host="${ip//./-}.sslip.io"
@@ -44,23 +45,46 @@ ensure_admin_keypair() {
   fi
 }
 
-# Security group with 22/80/443 open. AuthorizeIngress is idempotent-friendly:
-# a duplicate rule errors, which we swallow.
+# Decide where to launch: an explicit SUBNET_ID (for accounts without a default
+# VPC), otherwise the region's default VPC. Sets vpc_id + subnet_opt in the
+# caller's scope (bash dynamic scoping). Fails loudly when neither is available.
+resolve_network() {
+  if [ -n "${SUBNET_ID:-}" ]; then
+    vpc_id="$(aws_ ec2 describe-subnets --subnet-ids "$SUBNET_ID" \
+      --query 'Subnets[0].VpcId' 2>/dev/null || true)"
+    [ -n "$vpc_id" ] && [ "$vpc_id" != "None" ] || die "SUBNET_ID $SUBNET_ID not found in $AWS_REGION"
+    subnet_opt="--subnet-id $SUBNET_ID"
+    log "launching into subnet $SUBNET_ID ($vpc_id)"
+  else
+    vpc_id="$(aws_ ec2 describe-vpcs --filters Name=isDefault,Values=true \
+      --query 'Vpcs[0].VpcId' 2>/dev/null || true)"
+    [ -n "$vpc_id" ] && [ "$vpc_id" != "None" ] \
+      || die "no default VPC in $AWS_REGION — set SUBNET_ID in config.env to a subnet to launch into"
+    subnet_opt=""
+    log "using default VPC $vpc_id"
+  fi
+}
+
+# Security group (in the resolved VPC) with 22/80/443 open. AuthorizeIngress is
+# idempotent-friendly: a duplicate rule errors, which we swallow.
 ensure_security_group() {
-  local sg_id
+  local vpc_id="$1" sg_id
   sg_id="$(aws_ ec2 describe-security-groups \
-    --filters "Name=group-name,Values=$TAG-sg" \
+    --filters "Name=group-name,Values=$TAG-sg" "Name=vpc-id,Values=$vpc_id" \
     --query 'SecurityGroups[0].GroupId' 2>/dev/null || true)"
   if [ -z "$sg_id" ] || [ "$sg_id" = "None" ]; then
-    log "creating security group $TAG-sg"
-    sg_id="$(aws_ ec2 create-security-group --group-name "$TAG-sg" \
+    log "creating security group $TAG-sg in $vpc_id"
+    sg_id="$(aws_ ec2 create-security-group --group-name "$TAG-sg" --vpc-id "$vpc_id" \
       --description "mudda app: ssh + http + https" --query 'GroupId')"
-    local port
-    for port in 22 80 443; do
-      aws_ ec2 authorize-security-group-ingress --group-id "$sg_id" \
-        --protocol tcp --port "$port" --cidr 0.0.0.0/0 >/dev/null 2>&1 || true
-    done
   fi
+  # Reconcile ingress on every run, not just at creation, so a pre-existing or
+  # partially-configured group still ends up with all three ports open. Each
+  # authorize is a no-op once the rule exists (duplicate errors are swallowed).
+  local port
+  for port in 22 80 443; do
+    aws_ ec2 authorize-security-group-ingress --group-id "$sg_id" \
+      --protocol tcp --port "$port" --cidr 0.0.0.0/0 >/dev/null 2>&1 || true
+  done
   printf '%s' "$sg_id"
 }
 
@@ -73,15 +97,17 @@ latest_ubuntu_ami() {
 
 # Find a running/pending instance tagged with $TAG; launch one if none exists.
 ensure_instance() {
-  local sg_id="$1" ami_id="$2" instance_id
+  local sg_id="$1" ami_id="$2" subnet_opt="$3" instance_id
   instance_id="$(aws_ ec2 describe-instances \
     --filters "Name=tag:Name,Values=$TAG" "Name=instance-state-name,Values=pending,running" \
     --query 'Reservations[0].Instances[0].InstanceId' 2>/dev/null || true)"
   if [ -z "$instance_id" ] || [ "$instance_id" = "None" ]; then
     log "launching $INSTANCE_TYPE from $ami_id"
+    # subnet_opt is intentionally unquoted: empty (default VPC) expands to
+    # nothing, "--subnet-id X" splits into two args.
     instance_id="$(aws_ ec2 run-instances \
       --image-id "$ami_id" --instance-type "$INSTANCE_TYPE" \
-      --key-name "$TAG-admin" --security-group-ids "$sg_id" \
+      --key-name "$TAG-admin" --security-group-ids "$sg_id" $subnet_opt \
       --block-device-mappings "DeviceName=/dev/sda1,Ebs={VolumeSize=$VOLUME_SIZE_GB,VolumeType=gp3}" \
       --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$TAG}]" \
       --query 'Instances[0].InstanceId')"

@@ -28,6 +28,9 @@ ensure_ci_deploy_key() {
   fi
 }
 
+# accept-new is deliberate: this runs from the operator's laptop against a box
+# they just provisioned, so trust-on-first-use is acceptable here. (CI is the
+# opposite — it verifies against the pinned SSH_KNOWN_HOSTS set in Phase 3.)
 ssh_box() { ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SSH_USER@$1" "$2"; }
 
 # Runs the one-time box setup from DEPLOY.md as a single idempotent remote script.
@@ -63,12 +66,15 @@ REMOTE
 }
 
 # Append CI's PUBLIC key to the box's authorized_keys, de-duplicated so re-runs
-# don't stack copies.
+# don't stack copies. The key is streamed over stdin and read remotely with
+# `cat`, so nothing is interpolated into the command string — no injection
+# surface regardless of the key's contents.
 install_ci_key() {
-  local pub; pub="$(cat "${CI_DEPLOY_KEY}.pub")"
-  ssh_box "$1" "mkdir -p ~/.ssh && chmod 700 ~/.ssh && \
-    touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && \
-    grep -qxF '$pub' ~/.ssh/authorized_keys || echo '$pub' >> ~/.ssh/authorized_keys"
+  ssh_box "$1" 'mkdir -p ~/.ssh && chmod 700 ~/.ssh &&
+    touch ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys &&
+    key="$(cat)" &&
+    grep -qxF "$key" ~/.ssh/authorized_keys || printf "%s\n" "$key" >> ~/.ssh/authorized_keys' \
+    < "${CI_DEPLOY_KEY}.pub"
   ok "CI deploy key installed"
 }
 

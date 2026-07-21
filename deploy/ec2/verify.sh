@@ -16,16 +16,29 @@ main() {
 }
 
 trigger_and_watch() {
+  # Record the newest run id before dispatch, then wait for a *different* id to
+  # appear — so we never watch (and trust) a stale, already-finished run.
+  local before run_id i
+  before="$(latest_run_id)"
   log "dispatching deploy.yml on $GH_REPO"
   gh workflow run deploy.yml --repo "$GH_REPO" >/dev/null
-  sleep 5
-  local run_id
-  run_id="$(gh run list --repo "$GH_REPO" --workflow deploy.yml \
-    --limit 1 --json databaseId --jq '.[0].databaseId')"
+  log "waiting for the new run to register"
+  for i in $(seq 1 20); do
+    run_id="$(latest_run_id)"
+    [ -n "$run_id" ] && [ "$run_id" != "$before" ] && break
+    sleep 3
+  done
+  [ -n "$run_id" ] && [ "$run_id" != "$before" ] \
+    || die "new deploy run did not appear — check: gh run list --repo $GH_REPO --workflow deploy.yml"
   log "watching run $run_id"
   gh run watch "$run_id" --repo "$GH_REPO" --exit-status \
     || die "deploy workflow failed — inspect: gh run view $run_id --repo $GH_REPO --log-failed"
   ok "workflow succeeded"
+}
+
+latest_run_id() {
+  gh run list --repo "$GH_REPO" --workflow deploy.yml --limit 1 \
+    --json databaseId --jq '.[0].databaseId // ""' 2>/dev/null || true
 }
 
 # Ground truth: the health endpoint returns 200 over a valid TLS cert. Caddy can

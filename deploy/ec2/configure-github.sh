@@ -44,20 +44,31 @@ set_variables() {
 }
 
 set_secrets() {
-  local email name password secret_key_base ci_key
+  local email name password ci_key
   email="${MUDDA_OWNER_EMAIL:-$(prompt 'Owner email')}"
   name="${MUDDA_OWNER_NAME:-$(prompt 'Owner display name')}"
   password="${MUDDA_OWNER_PASSWORD:-$(prompt_secret 'Owner password')}"
   ci_key="$(cat "$CI_DEPLOY_KEY")"
-  secret_key_base="$(openssl rand -hex 64)"   # Rails SECRET_KEY_BASE
 
   log "setting deploy secrets (production environment)"
-  gh secret set SECRET_KEY_BASE      --repo "$GH_REPO" --env production --body "$secret_key_base"
+  # SECRET_KEY_BASE is generated once and left alone on re-runs: rotating it
+  # would invalidate every signed cookie/session on the live app. Values can't
+  # be read back, so a name-presence check is the most we can verify.
+  if secret_exists SECRET_KEY_BASE; then
+    log "SECRET_KEY_BASE already set — leaving it unchanged"
+  else
+    gh secret set SECRET_KEY_BASE --repo "$GH_REPO" --env production --body "$(openssl rand -hex 64)"
+  fi
   gh secret set MUDDA_OWNER_EMAIL    --repo "$GH_REPO" --env production --body "$email"
   gh secret set MUDDA_OWNER_NAME     --repo "$GH_REPO" --env production --body "$name"
   gh secret set MUDDA_OWNER_PASSWORD --repo "$GH_REPO" --env production --body "$password"
   gh secret set SSH_DEPLOY_KEY       --repo "$GH_REPO" --env production --body "$ci_key"
-  ok "secrets set (5)"
+  ok "secrets set"
+}
+
+secret_exists() {
+  gh secret list --repo "$GH_REPO" --env production --json name --jq '.[].name' 2>/dev/null \
+    | grep -qx "$1"
 }
 
 # The box pulls the image anonymously, so the GHCR package must be public. The
