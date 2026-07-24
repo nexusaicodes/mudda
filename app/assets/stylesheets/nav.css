@@ -212,8 +212,9 @@
       }
 
       @media (max-width: 639px) {
+        /* `cqi` here would fall back to the viewport (no ancestor query container),
+           so the tile label wouldn't track zoom. Use the rem type scale instead. */
         font-size: var(--text-x-small);
-        font-size: clamp(var(--text-xx-small), 3.15cqi, var(--text-small));
         font-weight: 500;
       }
     }
