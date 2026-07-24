@@ -5,22 +5,32 @@ class LandingsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "redirects to the timeline when many boards" do
+  test "renders the landing with a redirect map of the account's boards" do
     get landing_path
-    assert_redirected_to root_path
+
+    assert_response :success
+
+    users(:kevin).boards.each do |board|
+      assert_includes response.body, board_path(board)
+    end
   end
 
-  test "redirects to the timeline when no boards" do
+  test "offers the most recently active board by default" do
+    default_board = users(:kevin).boards.ordered_by_recent_activity.first
+
+    get landing_path
+
+    assert_response :success
+    assert_select "a", text: "Open board"
+    assert_includes response.body, board_path(default_board)
+  end
+
+  test "shows an empty state when there are no boards" do
     Board.destroy_all
-    get landing_path
-    assert_redirected_to root_path
-  end
-
-  test "redirects to boards when only one board" do
-    sole_board, *boards_to_delete = users(:kevin).boards.to_a
-    boards_to_delete.each(&:destroy)
 
     get landing_path
-    assert_redirected_to board_path(sole_board)
+
+    assert_response :success
+    assert_select "a", text: "Create a board"
   end
 end

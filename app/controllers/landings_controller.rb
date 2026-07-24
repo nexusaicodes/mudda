@@ -1,9 +1,7 @@
 class LandingsController < ApplicationController
   def show
-    if Current.user.boards.one?
-      redirect_to board_path(Current.user.boards.first)
-    else
-      redirect_to root_path
-    end
+    @boards = Current.user.boards.ordered_by_recent_activity
+    @board_paths = @boards.to_h { |board| [ board.id, board_path(board) ] }
+    @default_board_path = board_path(@boards.first) if @boards.any?
   end
 end

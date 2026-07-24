@@ -18,7 +18,10 @@
   </div>
 <% end %>
 
-<%= turbo_frame_tag :cards_container do %>
+<%= turbo_frame_tag :cards_container, data: {
+      controller: "last-board",
+      last_board_id_value: @board.id,
+      last_board_account_value: Current.account.external_account_id } do %>
   <% if @filter.used?(ignore_boards: true) %>
     <%= render "boards/show/filtered_cards", page: @page %>
   <% else %>

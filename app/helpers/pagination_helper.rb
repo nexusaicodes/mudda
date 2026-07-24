@@ -37,21 +37,6 @@ module PaginationHelper
     end
   end
 
-  def day_timeline_pagination_frame_tag(day_timeline, &)
-    turbo_frame_tag day_timeline_pagination_frame_id_for(day_timeline.day), data: { timeline_target: "frame" }, role: "presentation", refresh: :morph, &
-  end
-
-  def day_timeline_pagination_frame_id_for(day)
-    "day-timeline-pagination-contents-#{day.strftime("%Y-%m-%d")}"
-  end
-
-  def day_timeline_pagination_link(day_timeline, filter)
-    if day_timeline.next_day
-      link_to "Load more…", events_days_path(day: day_timeline.next_day.strftime("%Y-%m-%d"), **filter.as_params),
-        class: "day-timeline-pagination-link", data: { frame: day_timeline_pagination_frame_id_for(day_timeline.next_day), pagination_target: "paginationLink" }
-    end
-  end
-
   private
     def pagination_list(name, tag_element: :div, paginate_on_scroll: false, **properties, &block)
       classes = properties.delete(:class)

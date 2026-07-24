@@ -32,6 +32,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   private
     def sign_in_as(user)
       visit session_transfer_url(user.identity.transfer_id, script_name: nil)
-      assert_current_path root_path
+      # The landing page redirects (client-side) to the last/most-recent board.
+      assert_current_path %r{/boards/}
     end
 end
