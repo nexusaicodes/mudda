@@ -9,9 +9,11 @@
   Stimulus controller's connect() covers Turbo-driven navigations (post-login, the
   "Home" link), where the inline script does not re-execute.
 %>
+<% storage_key = last_board_storage_key %>
+
 <%= javascript_tag nonce: true do %>
   (function() {
-    const key = "mudda:last-board:<%= Current.account.external_account_id %>";
+    const key = <%= raw storage_key.to_json %>;
     const paths = <%= raw @board_paths.to_json %>;
     const fallback = <%= raw((@default_board_path || nil).to_json) %>;
 
@@ -23,10 +25,18 @@
   })();
 <% end %>
 
+<%# No-JS fallback: without localStorage we can't know the last board, so send
+    them to the most-recent one rather than parking on this shell. %>
+<% if @default_board_path %>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=<%= @default_board_path %>">
+  </noscript>
+<% end %>
+
 <%= tag.div class: "landing full-height flex flex-column align-center justify-center gap txt-align-center",
       data: {
         controller: "landing",
-        landing_key_value: "mudda:last-board:#{Current.account.external_account_id}",
+        landing_key_value: storage_key,
         landing_paths_value: @board_paths.to_json,
         landing_fallback_value: @default_board_path } do %>
   <% if @default_board_path %>

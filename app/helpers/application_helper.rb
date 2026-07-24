@@ -10,6 +10,12 @@ module ApplicationHelper
     tag.span class: class_names("icon icon--#{name}", options.delete(:class)), "aria-hidden": true, **options
   end
 
+  # The single source of truth for the browser-local "last opened board" key.
+  # Written by the `last-board` Stimulus controller and read by the landing page.
+  def last_board_storage_key(account = Current.account)
+    "mudda:last-board:#{account.external_account_id}"
+  end
+
   def back_link_to(label, url, action, prefer_referrer: [], **options)
     data = { controller: "hotkey", action: action }
     if prefer_referrer.any?
