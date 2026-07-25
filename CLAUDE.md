@@ -59,9 +59,9 @@ builds and deploys (the `Dockerfile`'s `production` target → GHCR → the box 
 
 ## Branding placeholders
 
-Some fork placeholders may still need real values: the `https://nexus.ai` colophon
-link, `support@mudda.do` (footer), the `mudda.do` domain, and the
-`nexus-ai/mudda` GitHub org.
+One fork placeholder may still need a real value: the `nexus-ai/mudda` GitHub org. The
+public sign-in-page logo links to `root_path`. The app no longer renders a colophon, so the
+old `mudda.do`/`nexus.ai` links and the `support@mudda.do` footer email are gone.
 
 The permitted dev host is `app.mudda.localhost` (`config/environments/development.rb`), so
 use **http://app.mudda.localhost:3006** (or `http://localhost:3006`).

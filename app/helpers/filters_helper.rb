@@ -35,6 +35,15 @@ module FiltersHelper
     tag.strong title, class: "popup__title pad-inline-half", tabindex: "-1", data: { dialog_target: "focusTouch" }
   end
 
+  def nav_section(title, **properties, &block)
+    tag.section class: "nav__section popup__section", **properties do
+      concat tag.div(title, class: "popup__section-title")
+      concat(tag.ul(class: "popup__list") do
+        capture(&block)
+      end)
+    end
+  end
+
   def collapsible_nav_section(title, **properties, &block)
     tag.details class: "nav__section popup__section", data: { action: "toggle->nav-section-expander#toggle", nav_section_expander_target: "section", nav_section_expander_key_value: title.parameterize }, open: true, **properties do
       concat(tag.summary(class: "popup__section-title") do
@@ -44,14 +53,6 @@ module FiltersHelper
       concat(tag.ul(class: "popup__list") do
         capture(&block)
       end)
-    end
-  end
-
-  def filter_hotkey_link(title, path, key, icon)
-    link_to path, class: "popup__item btn borderless", id: "filter-hotkey-#{key}", role: "listitem", data: { filter_target: "item", navigable_list_target: "item", controller: "hotkey", action: "keydown.#{key}@document->hotkey#click keydown.shift+#{key}@document->hotkey#click" } do
-      concat icon_tag(icon)
-      concat tag.span(title.html_safe)
-      concat tag.kbd(key)
     end
   end
 
