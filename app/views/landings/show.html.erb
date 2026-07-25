@@ -1,0 +1,50 @@
+<% @page_title = "Home" %>
+
+<%#
+  Client-side landing: jump to the board you last had open (remembered in
+  localStorage, per account), falling back to your most recently active board.
+
+  Two mechanisms cover both entry paths. The inline script runs before paint on a
+  full page load (cold open / PWA launch), so there is no flash. The `landing`
+  Stimulus controller's connect() covers Turbo-driven navigations (post-login, the
+  "Home" link), where the inline script does not re-execute.
+%>
+<% storage_key = last_board_storage_key %>
+
+<%= javascript_tag nonce: true do %>
+  (function() {
+    const key = <%= raw storage_key.to_json %>;
+    const paths = <%= raw @board_paths.to_json %>;
+    const fallback = <%= raw((@default_board_path || nil).to_json) %>;
+
+    let last = null;
+    try { last = localStorage.getItem(key); } catch (e) {}
+    const target = (last && paths[last]) || fallback;
+
+    if (target) window.location.replace(target);
+  })();
+<% end %>
+
+<%# No-JS fallback: without localStorage we can't know the last board, so send
+    them to the most-recent one rather than parking on this shell. %>
+<% if @default_board_path %>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=<%= @default_board_path %>">
+  </noscript>
+<% end %>
+
+<%= tag.div class: "landing full-height flex flex-column align-center justify-center gap txt-align-center",
+      data: {
+        controller: "landing",
+        landing_key_value: storage_key,
+        landing_paths_value: @board_paths.to_json,
+        landing_fallback_value: @default_board_path } do %>
+  <% if @default_board_path %>
+    <p class="txt-medium color-ink-light">Opening your board…</p>
+    <%= link_to "Open board", @default_board_path, class: "btn" %>
+  <% else %>
+    <h1 class="txt-x-large margin-none">No boards yet</h1>
+    <p class="txt-medium color-ink-light">Create your first board to get started.</p>
+    <%= link_to "Create a board", new_board_path, class: "btn btn--primary" %>
+  <% end %>
+<% end %>

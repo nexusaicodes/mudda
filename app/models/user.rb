@@ -1,6 +1,5 @@
 class User < ApplicationRecord
   include Accessor, Avatar, Configurable, Named, Searcher
-  include Timelined # Depends on Accessor
 
   belongs_to :account
   belongs_to :identity, optional: true

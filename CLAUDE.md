@@ -27,7 +27,10 @@ are gone (see AGENTS.md → Authentication).
 Removed team-collaboration features: notifications and mentions, assignments, watching,
 reactions, board access control (`Access`) and roles, membership/invites/join codes, and
 public board sharing (`Board::Publication`). `Comment` is now `Note`. The single user can
-reach every board and card in their account, and the activity log is first-person ("You …").
+reach every board and card in their account. The recent-activity/timeline page has also been
+removed: `Event` rows are still written as an audit trail, but the app now lands on the board
+you last had open (remembered in the browser via `localStorage`; see the `LandingsController`
+and the `last-board` Stimulus controller).
 
 ## Running and testing
 

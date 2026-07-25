@@ -6,8 +6,8 @@ This file provides guidance to AI coding agents working with this repository.
 
 Mudda is a personal project management and issue-tracking app: a single-person Kanban tool
 to create and manage **cards** (tasks/issues) on **boards**, move them through a **fixed set
-of columns** (the workflow), capture progress with **notes**, and review everything in a
-first-person **activity log**.
+of columns** (the workflow), and capture progress with **notes**. Opening the app lands you
+on the **board you last had open** (remembered in the browser).
 
 Mudda is maintained by **Nexus AI** and is a fork of **Fizzy**, originally created by
 **37signals**. This repository is the standalone, single-person build (see `CLAUDE.md`).
@@ -104,7 +104,7 @@ Has users, boards, cards, columns. `create_with_owner` provisions the single acc
 :accounts (through users)`.
 
 **User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
-`Avatar`, `Configurable`, `Named`, `Searcher`, `Timelined`. Owns filters and notes.
+`Avatar`, `Configurable`, `Named`, `Searcher`. Owns filters and notes.
 `deactivate` nulls the identity.
 
 **Board** → primary organizational unit. Concerns: `Cards`, `Filterable`,
@@ -124,9 +124,10 @@ fixed; only color is editable.
 **Note** → a timestamped, rich-text entry on a published card (`Card::Notable`). Created via
 `card.notes.create!`; only the creator can edit or delete it.
 
-**Event** → records significant actions. Polymorphic `eventable`, JSON `particulars`
-(`Event::Particulars`). Drives the first-person activity timeline (`Event::Description`
-renders sentences as "You added …").
+**Event** → records significant actions (card triage/publish/board-change, note creation).
+Polymorphic `eventable`, JSON `particulars`. Kept as an audit trail written via the
+`Eventable` concern; there is **no activity/timeline page** that renders it (removed — the
+app lands on your last-opened board instead).
 
 > **Removed in this fork's refactor (vs. upstream Fizzy):** team collaboration entirely —
 > notifications, mentions, assignments, watching, reactions, board access control (`Access`),

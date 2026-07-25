@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  include Particulars, Promptable
+  include Promptable
 
   belongs_to :account, default: -> { board.account }
   belongs_to :board
@@ -26,9 +26,5 @@ class Event < ApplicationRecord
 
   def action
     super.inquiry
-  end
-
-  def description_for(user)
-    Event::Description.new(self, user)
   end
 end

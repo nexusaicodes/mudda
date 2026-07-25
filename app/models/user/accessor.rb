@@ -9,10 +9,6 @@ module User::Accessor
     account.cards
   end
 
-  def accessible_events
-    Event.where(account_id: account_id)
-  end
-
   def draft_new_card_in(board)
     board.cards.find_or_initialize_by(creator: self, status: "drafted").tap do |card|
       card.update!(created_at: Time.current, updated_at: Time.current, last_active_at: Time.current)

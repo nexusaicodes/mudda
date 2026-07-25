@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "events#index"
+  root "landings#show"
 
   namespace :account do
     resource :settings
@@ -8,7 +8,6 @@ Rails.application.routes.draw do
   resources :users, only: %i[ show edit update ] do
     scope module: :users do
       resource :avatar
-      resource :events
     end
   end
 
@@ -62,15 +61,6 @@ Rails.application.routes.draw do
       collection do
         resource :settings_refresh, only: :create
       end
-    end
-  end
-
-  resources :activities, only: :index
-  resources :events, only: :index
-  namespace :events do
-    resources :days
-    namespace :day_timeline do
-      resources :columns, only: :show
     end
   end
 

@@ -602,6 +602,12 @@
   .board-tools.card {
     --card-padding-block: var(--block-space);
 
+    /* Cards inherit a `cqi`-based font-size from the column container. The add-card
+       tool sits outside that container, so its `cqi` falls back to the viewport —
+       drifting out of proportion with the cards and not tracking browser zoom like
+       the rest of the rem-based chrome. Anchor it to the rem type scale instead. */
+    font-size: var(--text-normal);
+
     border: none;
     inline-size: auto;
     text-align: center;
@@ -626,7 +632,7 @@
     }
 
     .btn--link {
-      font-size: 1.2em;
+      font-size: 1.15em;
     }
 
     .btn:not(.btn--link, .btn--circle) {
