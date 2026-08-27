@@ -88,6 +88,18 @@ reset-db: ## Drop, recreate, and reseed the database
 reset-auth: ## Remove all passkeys and sign out every session (passkey recovery)
 	$(RUN) bin/rails auth:reset
 
+.PHONY: token
+token: ## Mint an API token for a script or agent (make token LABEL=claude)
+	$(COMPOSE) run --rm -e LABEL="$(LABEL)" $(SERVICE) bin/rails auth:token
+
+.PHONY: tokens
+tokens: ## List the API tokens that have been minted
+	$(RUN) bin/rails auth:tokens
+
+.PHONY: revoke
+revoke: ## Revoke the API tokens carrying a label (make revoke LABEL=claude)
+	$(COMPOSE) run --rm -e LABEL="$(LABEL)" $(SERVICE) bin/rails auth:revoke
+
 ##@ Quality
 
 .PHONY: test

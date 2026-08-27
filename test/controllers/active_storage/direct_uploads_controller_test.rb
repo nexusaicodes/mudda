@@ -54,7 +54,7 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
       params: @blob_params,
       as: :json
 
-    assert_response :redirect
+    assert_response :unauthorized
   end
 
   # The account follows the signed-in identity, so the guard on an upload is that the

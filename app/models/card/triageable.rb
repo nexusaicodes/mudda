@@ -9,6 +9,7 @@ module Card::Triageable
   # its draft/published status. The scopes additionally filter to published cards,
   # since they back lists and counts that exclude drafts; a draft sitting in a lane
   # therefore matches the predicate but not the scope.
+
   TRIAGE_COLUMN   = "Triage"
   BACKLOG_COLUMN  = "Backlog"
   DOING_COLUMN    = "Doing"
@@ -55,8 +56,6 @@ module Card::Triageable
   end
 
   def triage_into(column)
-    raise "The column must belong to the card board" unless board == column.board
-
     transaction do
       update! column: column
       track_event "triaged", particulars: { column: column.name }

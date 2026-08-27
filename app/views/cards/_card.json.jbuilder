@@ -1,4 +1,4 @@
-json.cache! card do
+json.cache! [ card, card.overdue? ] do
   json.(card, :id, :number, :title, :status)
   json.description card.description.to_plain_text
   json.description_html card.description.to_s
@@ -8,6 +8,9 @@ json.cache! card do
   json.closed card.closed?
   json.postponed card.postponed?
   json.golden card.golden?
+  json.overdue card.overdue?
+  json.color card.color
+  json.due_on card.due_on
   json.last_active_at card.last_active_at.utc
   json.created_at card.created_at.utc
 

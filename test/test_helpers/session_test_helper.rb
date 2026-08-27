@@ -20,6 +20,15 @@ module SessionTestHelper
     sign_in_as identity
   end
 
+  # The credential a non-browser client presents. Mirrors what POST /session/password.json
+  # hands back and what bin/rails auth:token prints.
+  def bearer_headers_for(identity, label: "test")
+    identity = resolve_identity(identity)
+    session = identity.sessions.create!(label: label)
+
+    { "Authorization" => "Bearer #{session.signed_id}" }
+  end
+
   def sign_out
     delete session_path
 
