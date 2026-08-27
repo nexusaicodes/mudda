@@ -2,7 +2,7 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
-    before_action :ensure_can_access_account, if: :authenticated_account_access?
+    before_action :ensure_can_access_account, if: :authenticated?
   end
 
   class_methods do
@@ -12,15 +12,16 @@ module Authorization
   end
 
   private
-    def authenticated_account_access?
-      Current.account.present? && authenticated?
-    end
-
+    # An identity with no active user has no account to enter. Signing the browser out is what
+    # keeps the login page from bouncing it back to root forever; a token keeps working.
     def ensure_can_access_account
       unless Current.user&.active?
-        respond_to do |format|
-          format.html { redirect_to session_menu_path(script_name: nil) }
-          format.json { head :forbidden }
+        if request.format.json?
+          head :forbidden
+        else
+          terminate_session
+
+          redirect_to login_url
         end
       end
     end

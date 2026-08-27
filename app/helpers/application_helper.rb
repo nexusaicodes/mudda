@@ -1,9 +1,6 @@
 module ApplicationHelper
   def page_title_tag
-    account_name = if Current.account && Current.session&.identity&.users&.many?
-      Current.account&.name
-    end
-    tag.title [ @page_title, account_name, "Mudda" ].compact.join(" | ")
+    tag.title [ @page_title, "Mudda" ].compact.join(" | ")
   end
 
   def icon_tag(name, **options)

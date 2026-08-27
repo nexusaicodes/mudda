@@ -7,32 +7,21 @@ class My::IdentitiesControllerTest < ActionDispatch::IntegrationTest
 
   test "show as JSON" do
     identity = identities(:kevin)
-    expected_count = identity.users_with_accounts.count
 
-    untenanted do
-      get my_identity_path, as: :json
-      assert_response :success
-      assert_equal identity.id, @response.parsed_body["id"]
-      assert_equal expected_count, @response.parsed_body["accounts"].count
-    end
+    get my_identity_path, as: :json
+
+    assert_response :success
+    assert_equal identity.id, @response.parsed_body["id"]
   end
 
-  test "show as JSON lists every account the identity belongs to" do
-    identity = identities(:kevin)
+  test "show as JSON reports the signed-in account and user" do
+    get my_identity_path, as: :json
 
-    first_account = Account.create!(external_account_id: 9999981, name: "First Account")
-    second_account = Account.create!(external_account_id: 9999982, name: "Second Account")
-    identity.users.create!(account: first_account, name: "Kevin")
-    identity.users.create!(account: second_account, name: "Kevin")
+    assert_response :success
 
-    untenanted do
-      get my_identity_path, as: :json
-      assert_response :success
-
-      account_ids = @response.parsed_body["accounts"].map { |account| account["id"] }
-
-      assert_includes account_ids, first_account.id
-      assert_includes account_ids, second_account.id
-    end
+    account = @response.parsed_body["account"]
+    assert_equal accounts("37s").id, account["id"]
+    assert_equal users(:kevin).id, account["user"]["id"]
+    assert_not account.key?("slug"), "The account slug is gone with URL tenancy"
   end
 end

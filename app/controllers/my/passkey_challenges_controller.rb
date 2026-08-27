@@ -3,5 +3,4 @@ class My::PasskeyChallengesController < ActionPack::Passkey::ChallengesControlle
   include Authorization
 
   allow_unauthenticated_access
-  disallow_account_scope
 end

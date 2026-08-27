@@ -41,10 +41,6 @@ module ActiveSupport
 end
 
 class ActionDispatch::IntegrationTest
-  setup do
-    integration_session.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("mudda")}"
-  end
-
   private
     def without_action_dispatch_exception_handling
       original = Rails.application.config.action_dispatch.show_exceptions
@@ -55,12 +51,6 @@ class ActionDispatch::IntegrationTest
       Rails.application.config.action_dispatch.show_exceptions = original
       Rails.application.instance_variable_set(:@app_env_config, nil) # Reset env_config
     end
-end
-
-class ActionDispatch::SystemTestCase
-  setup do
-    self.default_url_options[:script_name] = "/#{ActiveRecord::FixtureSet.identify("mudda")}"
-  end
 end
 
 module FixturesTestHelper

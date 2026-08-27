@@ -57,12 +57,13 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
     assert_response :redirect
   end
 
-  test "create in another account is forbidden" do
+  # The account follows the signed-in identity, so the guard on an upload is that the
+  # identity still has an active user behind it.
+  test "create as a deactivated user is forbidden" do
     sign_in_as :david
+    users(:david).update!(active: false)
 
-    post rails_direct_uploads_path(script_name: "/#{ActiveRecord::FixtureSet.identify("initech")}"),
-      params: @blob_params,
-      as: :json
+    post rails_direct_uploads_path, params: @blob_params, as: :json
 
     assert_response :forbidden
   end

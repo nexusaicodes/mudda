@@ -28,6 +28,14 @@ Rails.application.config.to_prepare do
       # Ensure require_authentication runs after set_blob.
       skip_before_action :require_authentication
       before_action :require_authentication, :ensure_accessible, unless: :publicly_accessible_blob?
+
+      # set_representation generates the variant and saves it as a new blob, so it has to run
+      # after the checks above: an unauthorized request shouldn't do image processing, and the
+      # new blob needs Current.account, which only exists once the request is authenticated.
+      if private_method_defined?(:set_representation)
+        skip_before_action :set_representation
+        before_action :set_representation
+      end
     end
 
     private

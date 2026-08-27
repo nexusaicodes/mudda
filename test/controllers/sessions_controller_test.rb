@@ -2,9 +2,7 @@ require "test_helper"
 
 class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "new" do
-    untenanted do
-      get new_session_path
-    end
+    get new_session_path
 
     assert_response :success
   end
@@ -12,31 +10,25 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "new redirects authenticated users" do
     sign_in_as :kevin
 
-    untenanted do
-      get new_session_path
-      assert_redirected_to root_url
-    end
+    get new_session_path
+    assert_redirected_to root_url
   end
 
   test "destroy" do
     sign_in_as :kevin
 
-    untenanted do
-      delete session_path
+    delete session_path
 
-      assert_redirected_to new_session_path
-      assert_not cookies[:session_token].present?
-    end
+    assert_redirected_to new_session_path
+    assert_not cookies[:session_token].present?
   end
 
   test "destroy via JSON" do
     sign_in_as :kevin
 
-    untenanted do
-      delete session_path(format: :json)
+    delete session_path(format: :json)
 
-      assert_response :no_content
-      assert_not cookies[:session_token].present?
-    end
+    assert_response :no_content
+    assert_not cookies[:session_token].present?
   end
 end

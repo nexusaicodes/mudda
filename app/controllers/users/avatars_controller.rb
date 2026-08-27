@@ -21,8 +21,9 @@ class Users::AvatarsController < ApplicationController
   end
 
   private
+    # Unscoped: the unauthenticated show has no Current.account, and the UUID is unguessable.
     def set_user
-      @user = Current.account.users.find(params[:user_id])
+      @user = User.find(params[:user_id])
     end
 
     def cache_control

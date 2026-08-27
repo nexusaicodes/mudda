@@ -67,7 +67,6 @@ Rails.application.routes.draw do
   resource :session, only: %i[ new destroy ] do
     scope module: :sessions do
       resource :password, only: :create
-      resource :menu
       resource :passkey, only: :create
     end
   end
@@ -94,10 +93,6 @@ Rails.application.routes.draw do
   resolve "Event" do |event, options|
     polymorphic_url(event.eventable, options)
   end
-
-  # Support for legacy URLs
-  get "/collections/:collection_id/cards/:id", to: redirect { |params, request| "#{request.script_name}/cards/#{params[:id]}" }
-  get "/collections/:id", to: redirect { |params, request| "#{request.script_name}/boards/#{params[:id]}" }
 
   get "up", to: "rails/health#show", as: :rails_health_check
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

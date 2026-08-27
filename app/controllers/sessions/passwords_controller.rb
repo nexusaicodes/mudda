@@ -1,5 +1,4 @@
 class Sessions::PasswordsController < ApplicationController
-  disallow_account_scope
   require_unauthenticated_access
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 
@@ -10,7 +9,7 @@ class Sessions::PasswordsController < ApplicationController
       start_new_session_for identity
 
       respond_to do |format|
-        format.html { redirect_to session_menu_path(script_name: nil) }
+        format.html { redirect_to after_authentication_url }
         format.json { render json: { session_token: session_token } }
       end
     else

@@ -12,10 +12,6 @@ class Identity < ApplicationRecord
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }
   normalizes :email_address, with: ->(value) { value.strip.downcase.presence }
 
-  def users_with_accounts
-    users.joins(:account).includes(:account)
-  end
-
   private
     def deactivate_users
       users.find_each(&:deactivate)
