@@ -98,10 +98,9 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
     t.boolean "golden", default: false, null: false
     t.datetime "last_active_at", null: false
     t.bigint "number", null: false
-    t.string "status", limit: 255, default: "drafted", null: false
     t.string "title", limit: 255
     t.datetime "updated_at", null: false
-    t.index ["board_id", "last_active_at", "status"], name: "index_cards_on_board_id_and_last_active_at_and_status"
+    t.index ["board_id", "last_active_at"], name: "index_cards_on_board_id_and_last_active_at"
     t.index ["board_id", "number"], name: "index_cards_on_board_id_and_number", unique: true
     t.index ["column_id"], name: "index_cards_on_column_id"
     t.index ["creator_id"], name: "index_cards_on_creator_id"

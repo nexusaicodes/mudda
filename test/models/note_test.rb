@@ -5,16 +5,10 @@ class NoteTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
   end
 
-  test "cannot create note on a draft card" do
-    draft_card = cards(:unfinished_thoughts)
-
-    note = draft_card.notes.build(body: "This should fail")
-
-    assert_not note.valid?
-    assert_includes note.errors[:card], "does not allow notes"
-
-    assert_raises(ActiveRecord::RecordInvalid) do
-      draft_card.notes.create!(body: "This should raise")
+  # Every card takes notes: there is no state a card can be in that refuses them.
+  test "any card takes notes" do
+    assert_difference -> { cards(:unfinished_thoughts).notes.count }, +1 do
+      cards(:unfinished_thoughts).notes.create!(body: "Perfectly allowed")
     end
   end
 

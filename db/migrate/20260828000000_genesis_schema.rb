@@ -80,14 +80,13 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
       t.bigint "creator_id", null: false
       t.bigint "number", null: false
       t.string "title", limit: 255
-      t.string "status", limit: 255, default: "drafted", null: false
       t.date "due_on"
       t.boolean "golden", default: false, null: false
       t.datetime "last_active_at", null: false
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
       t.index ["board_id", "number"], name: "index_cards_on_board_id_and_number", unique: true
-      t.index ["board_id", "last_active_at", "status"], name: "index_cards_on_board_id_and_last_active_at_and_status"
+      t.index ["board_id", "last_active_at"], name: "index_cards_on_board_id_and_last_active_at"
       t.index ["column_id"], name: "index_cards_on_column_id"
       t.index ["creator_id"], name: "index_cards_on_creator_id"
     end

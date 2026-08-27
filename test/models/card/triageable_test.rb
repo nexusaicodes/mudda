@@ -17,7 +17,7 @@ class Card::TriageableTest < ActiveSupport::TestCase
   end
 
   test "new cards default to the Triage column" do
-    card = boards(:writebook).cards.create!(creator: users(:david))
+    card = boards(:writebook).cards.create!(creator: users(:david), due_on: 1.week.from_now)
 
     assert_equal "Triage", card.column.name
     assert card.awaiting_triage?

@@ -131,8 +131,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   test "showing a filtered board lists only that board's cards" do
     Current.user = users(:kevin)
     cards(:logo).gild
-    boards(:private).cards.create!(title: "Golden elsewhere", due_on: 1.week.from_now,
-      status: "published", creator: users(:kevin), last_active_at: Time.current).gild
+    boards(:private).cards.create!(title: "Golden elsewhere", due_on: 1.week.from_now, creator: users(:kevin), last_active_at: Time.current).gild
 
     get board_path(boards(:writebook), indexed_by: "golden")
 

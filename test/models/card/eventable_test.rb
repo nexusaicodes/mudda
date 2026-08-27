@@ -8,14 +8,14 @@ class Card::EventableTest < ActiveSupport::TestCase
   test "new cards default last_active_at to created_at" do
     freeze_time
 
-    card = boards(:writebook).cards.create!(title: "Some card", creator: users(:david))
+    card = boards(:writebook).cards.create!(title: "Some card", creator: users(:david), due_on: 1.week.from_now)
     assert_equal card.created_at, card.last_active_at
   end
 
   test "new cards with custom created_at default last_active_at to that time" do
     custom_time = 1.week.ago.change(usec: 0)
 
-    card = boards(:writebook).cards.create!(title: "Backdated card", creator: users(:david), created_at: custom_time)
+    card = boards(:writebook).cards.create!(title: "Backdated card", creator: users(:david), due_on: 1.week.from_now, created_at: custom_time)
     assert_equal custom_time, card.created_at
     assert_equal custom_time, card.last_active_at
   end
@@ -27,6 +27,7 @@ class Card::EventableTest < ActiveSupport::TestCase
     card = boards(:writebook).cards.create! \
       title: "Card with explicit timestamps",
       creator: users(:david),
+      due_on: 1.week.from_now,
       created_at: created_time,
       last_active_at: last_active_time
 
@@ -34,18 +35,20 @@ class Card::EventableTest < ActiveSupport::TestCase
     assert_equal last_active_time, card.last_active_at
   end
 
-  test "publishing a card does not overwrite last_active_at" do
-    created_time = 2.weeks.ago.change(usec: 0)
+  # Creating a card records an event, and an event is normally activity — but the card's own
+  # creation is not, or a backdated card would be dragged to the present by its first event.
+  test "the creation event does not overwrite last_active_at" do
     last_active_time = 1.week.ago.change(usec: 0)
 
     card = boards(:writebook).cards.create! \
-      title: "Published card",
+      title: "Backdated on arrival",
       creator: users(:david),
-      status: :published, due_on: 1.week.from_now,
-      created_at: created_time,
+      due_on: 1.week.from_now,
+      created_at: 2.weeks.ago.change(usec: 0),
       last_active_at: last_active_time
 
-    assert_equal last_active_time, card.last_active_at
+    assert_equal [ "card_created" ], card.events.pluck(:action)
+    assert_equal last_active_time, card.reload.last_active_at
   end
 
   test "tracking events update the last activity time" do
@@ -73,7 +76,7 @@ class Card::EventableTest < ActiveSupport::TestCase
   test "renaming a card touches its events so the activity feed cache invalidates" do
     card = cards(:logo)
     event = card.events.first
-    assert_not_nil event, "expected the published card to have at least one event"
+    assert_not_nil event, "expected the card to have at least one event"
 
     travel_to 1.hour.from_now do
       card.update!(title: "Renamed logo")

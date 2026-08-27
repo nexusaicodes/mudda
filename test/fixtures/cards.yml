@@ -7,7 +7,6 @@ logo:
   golden: true
   due_on: <%= 3.days.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 layout:
@@ -18,7 +17,6 @@ layout:
   title: Layout is broken
   due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 text:
@@ -29,7 +27,6 @@ text:
   title: The text is too small
   due_on: <%= 2.weeks.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 shipping:
@@ -40,7 +37,6 @@ shipping:
   title: We need to ship the app
   due_on: <%= 3.days.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 buy_domain:
@@ -51,7 +47,6 @@ buy_domain:
   title: Buy domain
   due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 radio:
@@ -62,7 +57,6 @@ radio:
   title: I want to play my radio at a reasonable volume
   due_on: <%= 2.weeks.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 paycheck:
@@ -73,7 +67,6 @@ paycheck:
   title: I haven't received my paycheck
   due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
-  status: published
   last_active_at: <%= 1.week.ago %>
 
 unfinished_thoughts:
@@ -83,5 +76,5 @@ unfinished_thoughts:
   column: miltons_wish_list_triage
   title: Some unfinished thoughts
   created_at: <%= 1.week.ago %>
-  status: drafted
+  due_on: <%= 3.days.from_now.to_date %>
   last_active_at: <%= 1.week.ago %>

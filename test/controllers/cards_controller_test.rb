@@ -55,7 +55,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to board_card_path(board, card)
     assert_equal "One shot", card.title
     assert_equal [ "First", "Second" ], card.steps.map(&:content).sort
-    assert card.published?
+    assert_equal "Triage", card.column.name
   end
 
   # A blank step row is the form offering one, so it must not fail the card.
@@ -190,7 +190,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.parsed_body["errors"].keys, "due_on"
   end
 
-  test "update as JSON cannot blank out a published card's due date" do
+  test "update as JSON cannot blank out a card's due date" do
     card = cards(:logo)
 
     put board_card_path(card.board, card, format: :json), params: { card: { due_on: "" } }

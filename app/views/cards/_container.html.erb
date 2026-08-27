@@ -1,7 +1,7 @@
 <section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;" data-controller="dialog-manager">
   <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
-      <%= render "cards/container/gild", card: card if card.published? && !card.closed? %>
+      <%= render "cards/container/gild", card: card unless card.closed? %>
       <%= render "cards/container/image", card: card %>
     </div>
 
@@ -18,9 +18,7 @@
             <%= render "cards/display/perma/steps", card: card %>
           </div>
 
-          <% if card.published? %>
-            <%= render "cards/triage/columns", card: card %>
-          <% end %>
+          <%= render "cards/triage/columns", card: card %>
 
           <%= render "cards/display/common/stamp", card: card %>
         </div>
@@ -33,7 +31,5 @@
     </div>
   <% end %>
 
-  <% if card.published? %>
-    <%= render "cards/container/closure", card: card %>
-  <% end %>
+  <%= render "cards/container/closure", card: card %>
 </section>

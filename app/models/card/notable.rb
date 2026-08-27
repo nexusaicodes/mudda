@@ -7,10 +7,6 @@ module Card::Notable
     has_many :notes, dependent: :destroy
   end
 
-  def notable?
-    published?
-  end
-
   # The tail of the note log, which is what a card is read for. A card can carry thousands of
   # notes, so its own representation embeds only the most recent ones; the notes index pages
   # through the rest.

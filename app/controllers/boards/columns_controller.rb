@@ -9,7 +9,7 @@ class Boards::ColumnsController < ApplicationController
   # boards/show.json.jbuilder) rather than as a collection of their own. What is left here is
   # the browser's: one lane's cards, and the color picker.
   def show
-    set_page_and_extract_portion_from @column.cards.published.by_due_date.with_golden_first.preloaded
+    set_page_and_extract_portion_from @column.cards.by_due_date.with_golden_first.preloaded
     fresh_when etag: [ @page.records, Date.current ]
   end
 

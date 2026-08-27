@@ -13,16 +13,6 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "create on draft card is forbidden" do
-    draft_card = boards(:writebook).cards.create!(status: :drafted, creator: users(:kevin))
-
-    assert_no_difference -> { draft_card.notes.count } do
-      post board_card_notes_path(draft_card.board, draft_card), params: { note: { body: "This should be forbidden" } }, as: :json
-    end
-
-    assert_response :forbidden
-  end
-
   test "update" do
     put board_card_note_path(cards(:logo).board, cards(:logo), notes(:logo_agreement_kevin)), params: { note: { body: "I've changed my mind" } }, as: :turbo_stream
 

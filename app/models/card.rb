@@ -1,7 +1,7 @@
 class Card < ApplicationRecord
   include Attachments, Colored, Notable,
     Due, Eventable, Golden, Multistep, Promptable,
-    Searchable, Statuses, Triageable
+    Searchable, Triageable
 
   belongs_to :board
   belongs_to :creator, class_name: "User", default: -> { Current.user }
@@ -10,12 +10,12 @@ class Card < ApplicationRecord
 
   has_rich_text :description
 
-  before_save :set_default_title, if: :published?
+  before_save :set_default_title
   before_create :assign_number
   before_update :renumber_for_new_board, if: :board_id_changed?
 
-  after_save   -> { board.touch }, if: :published?
-  after_touch  -> { board.touch }, if: :published?
+  after_save   -> { board.touch }
+  after_touch  -> { board.touch }
   after_update :handle_board_change, if: :saved_change_to_board_id?
 
   scope :reverse_chronologically, -> { order created_at:     :desc, id: :desc }
@@ -28,7 +28,6 @@ class Card < ApplicationRecord
   scope :indexed_by, ->(index) do
     case index
     when "golden" then golden
-    when "draft" then drafted
     else all
     end
   end

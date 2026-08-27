@@ -134,12 +134,12 @@ fixed; only color is editable.
 compose screen (`cards#new`) holds its state in the browser until one POST creates the card,
 its steps included, and `local-save` keeps that state across a reload. Concerns: `Attachments`,
 `Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
-`Searchable`, `Statuses`, `Triageable`.
+`Searchable`, `Triageable`.
 
-**Note** → a timestamped, rich-text entry on a published card (`Card::Notable`). Created via
+**Note** → a timestamped, rich-text entry on a card (`Card::Notable`). Created via
 `card.notes.create!`; only the creator can edit or delete it.
 
-**Event** → records significant actions (card triage/publish/board-change, note creation).
+**Event** → records significant actions (card creation/triage/board-change, note creation).
 Polymorphic `eventable`, JSON `particulars`. Kept as an audit trail written via the
 `Eventable` concern; there is **no activity/timeline page** that renders it (removed — the
 app lands on your last-opened board instead).
@@ -149,7 +149,9 @@ app lands on your last-opened board instead).
 > roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
 > Also gone: `Tag`/`Tagging` and the `Entropy` auto-postpone system (replaced by due dates;
 > see below). `Comment` was renamed to `Note`. `Identity` was folded into `User`, and
-> `Card::Goldness` into a boolean on `cards`.
+> `Card::Goldness` into a boolean on `cards`. The `drafted`/`published` status enum and the
+> half-built card record behind it are gone too: a card is composed in the browser and
+> created complete.
 > All email/mailers (Action Mailer + Action Mailbox, SMTP) are removed — the app sends no email.
 > The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the standing
 > owner password with optional passkeys (see Authentication); the owner is provisioned by `db/seeds.rb`.
@@ -173,7 +175,7 @@ Every board is created (`Board::Triageable`) with five fixed lanes, in order:
 - `closed?` = in **Done**; `open?` = not Done.
 - `postponed?` = in **Backlog**.
 - `awaiting_triage?` = in **Triage**; `triaged?` = not Triage.
-- `active?` = published and not Done/Backlog.
+- `active?` = not Done/Backlog.
 
 `triage_into(column)` moves a card between lanes. The `card_triaged` event is recorded by an
 `after_update` on `column_id`, so **every** lane change is audited whichever door it comes
@@ -188,9 +190,9 @@ through `cards/drops/columns_controller.rb`.
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
 Cards carry an explicit **`due_on`** date (`Card::Due`):
-- `due_on` is required whenever a card is published (`validates :due_on, presence: true, if: :published?`),
-  so no save path — including the JSON create/update — can persist a published card without one.
-- `overdue?` is true for a published card whose `due_on` is in the past.
+- `due_on` is required on every card (`validates :due_on, presence: true`), so no save path —
+  including the JSON create/update — can persist one without it.
+- `overdue?` is true for a card whose `due_on` is in the past.
 
 This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),
 which has been removed along with the `entropies` table and the hourly auto-postpone job.

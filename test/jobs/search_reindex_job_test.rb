@@ -32,8 +32,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
 
     big_card = boards(:writebook).cards.create!(
       creator: users(:david),
-      title: "too big to index",
-      status: :published, due_on: 1.week.from_now,
+      title: "too big to index", due_on: 1.week.from_now,
       description: "x" * 5_000
     )
 
@@ -45,25 +44,24 @@ class SearchReindexJobTest < ActiveJob::TestCase
     assert_not shard.exists?(searchable_type: "Card", searchable_id: big_card.id)
   end
 
-  test "does not index drafted cards or their notes" do
+  # Repairing the index has to reach every card and note, since nothing is exempt from it.
+  test "indexes cards and their notes" do
     Current.account = accounts(:"37s")
     Current.session = Session.new(user: users(:david))
 
     card = boards(:writebook).cards.create!(
       creator: users(:david),
-      title: "will be drafted",
-      status: :published, due_on: 1.week.from_now
+      title: "worth finding", due_on: 1.week.from_now
     )
-    note = card.notes.create!(creator: users(:david), body: "on a card that will be drafted")
-    card.update!(status: :drafted)
+    note = card.notes.create!(creator: users(:david), body: "and so is this")
 
     nuke_search_records
 
     SearchReindexJob.perform_now
 
     shard = Search::Record
-    assert_not shard.exists?(searchable_type: "Card", searchable_id: card.id)
-    assert_not shard.exists?(searchable_type: "Note", searchable_id: note.id)
+    assert shard.exists?(searchable_type: "Card", searchable_id: card.id)
+    assert shard.exists?(searchable_type: "Note", searchable_id: note.id)
   end
 
   private

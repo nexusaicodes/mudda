@@ -202,7 +202,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert @response.parsed_body["errors"].present?
   end
 
-  test "publishing a card without a due date is a JSON 422 naming the field" do
+  test "creating a card without a due date is a JSON 422 naming the field" do
     headers = bearer_headers_for(@user)
 
     post board_cards_path(boards(:writebook), format: :json),
@@ -395,7 +395,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     get cards_path(format: :json), headers: bearer_headers_for(@user)
 
     assert_response :success
-    assert_equal users(:david).accessible_cards.published.distinct.count.to_s,
+    assert_equal users(:david).accessible_cards.distinct.count.to_s,
       response.headers["X-Total-Count"]
   end
 
@@ -422,11 +422,11 @@ class ApiTest < ActionDispatch::IntegrationTest
     headers = bearer_headers_for(@user)
     board = boards(:writebook)
     Current.user = users(:david)
-    16.times { |i| board.cards.create! title: "Filler #{i}", due_on: 1.week.from_now, status: "published" }
+    16.times { |i| board.cards.create! title: "Filler #{i}", due_on: 1.week.from_now }
 
     get cards_path(format: :json), headers: headers
 
-    total = users(:david).accessible_cards.published.distinct.count
+    total = users(:david).accessible_cards.distinct.count
     assert_equal total, @response.parsed_body.dig("paging", "total")
     assert_operator @response.parsed_body.dig("paging", "pages"), :>, 1
     assert_match %r{\Ahttps?://.+\?.*page=2}, @response.parsed_body.dig("paging", "next"),
@@ -539,7 +539,7 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test "a board's card index answers for that board alone" do
     headers = bearer_headers_for(@user)
-    elsewhere = published_card_on(boards(:private), "Elsewhere")
+    elsewhere = card_on(boards(:private), "Elsewhere")
 
     get board_cards_path(boards(:writebook), format: :json), headers: headers
 
@@ -548,13 +548,13 @@ class ApiTest < ActionDispatch::IntegrationTest
       @response.parsed_body["data"].pluck("board").pluck("id").uniq
     # Numbers run per board, so both boards hold a card 1 — the title is what distinguishes them.
     assert_not_includes @response.parsed_body["data"].pluck("title"), elsewhere.title
-    assert_equal boards(:writebook).cards.published.count, @response.parsed_body["paging"]["total"]
+    assert_equal boards(:writebook).cards.count, @response.parsed_body["paging"]["total"]
   end
 
   test "a board's card index still honours filters, narrowed to that board" do
     headers = bearer_headers_for(@user)
     cards(:logo).gild
-    published_card_on(boards(:private), "Golden elsewhere").gild
+    card_on(boards(:private), "Golden elsewhere").gild
 
     get board_cards_path(boards(:writebook), format: :json, indexed_by: "golden"), headers: headers
 
@@ -563,7 +563,7 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   test "the top-level card index still spans every board" do
-    published_card_on(boards(:private), "Elsewhere")
+    card_on(boards(:private), "Elsewhere")
 
     get cards_path(format: :json), headers: bearer_headers_for(@user)
 
@@ -616,8 +616,7 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "a card moving to a board already using its number is renumbered, not rejected" do
     card, destination = cards(:logo), boards(:private)
     Current.user = @user
-    destination.cards.create!(title: "Already number one", due_on: 1.week.from_now,
-      status: "published", creator: @user, last_active_at: Time.current)
+    destination.cards.create!(title: "Already number one", due_on: 1.week.from_now, creator: @user, last_active_at: Time.current)
 
     put board_card_path(card.board, card, format: :json),
       params: { board_id: destination.id }, headers: bearer_headers_for(@user), as: :json
@@ -646,8 +645,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal [ cards(:logo).number ], @response.parsed_body["data"].pluck("number")
 
     Current.user = @user
-    boards(:private).cards.create!(title: "Also number one", due_on: 1.week.from_now,
-      status: "published", creator: @user, last_active_at: Time.current)
+    boards(:private).cards.create!(title: "Also number one", due_on: 1.week.from_now, creator: @user, last_active_at: Time.current)
 
     get search_path(format: :json, q: "1"), headers: headers
     assert_response :success
@@ -722,9 +720,9 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   private
-    def published_card_on(board, title)
+    def card_on(board, title)
       Current.user = @user
-      board.cards.create!(title: title, due_on: 1.week.from_now, status: "published",
+      board.cards.create!(title: title, due_on: 1.week.from_now,
         creator: @user, last_active_at: Time.current)
     end
 

@@ -19,7 +19,7 @@ class CardsController < ApplicationController
   # The board comes from the path, and a new card always starts in that board's Triage column,
   # so neither id is read from the body.
   def create
-    @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user, status: "published")
+    @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user)
 
     respond_to do |format|
       # The form has to come back with its errors on it, so this is the one write that reads

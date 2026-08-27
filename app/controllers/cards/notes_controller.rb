@@ -4,7 +4,6 @@ class Cards::NotesController < ApplicationController
 
   before_action :set_note, only: %i[ show edit update destroy ]
   before_action :ensure_creatorship, only: %i[ edit update destroy ]
-  before_action :ensure_card_is_notable, only: :create
 
   def index
     set_page_and_extract_portion_from @card.notes.chronologically
@@ -50,10 +49,6 @@ class Cards::NotesController < ApplicationController
 
     def ensure_creatorship
       head :forbidden if Current.user != @note.creator
-    end
-
-    def ensure_card_is_notable
-      head :forbidden unless @card.notable?
     end
 
     def note_params

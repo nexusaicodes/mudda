@@ -7,7 +7,7 @@
   } do %>
   <header class="cards__header">
     <%= render "boards/show/color_picker", column: column %>
-    <%= render "boards/show/expander", title: column.name, count: column.cards.published.count, column_id: dom_id(column) %>
+    <%= render "boards/show/expander", title: column.name, count: column.cards.count, column_id: dom_id(column) %>
 
     <%= link_to board_column_path(column.board, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
       <%= icon_tag "grid", class: "translucent" %>

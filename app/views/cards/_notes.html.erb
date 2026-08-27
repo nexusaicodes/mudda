@@ -1,8 +1,6 @@
 <%= notes_tag(card) do %>
-  <% if card.published? %>
-    <%= render partial: "cards/notes/note", collection: card.notes.preloaded.chronologically, cached: true %>
-    <%= render "cards/notes/new", card: card %>
-  <% end %>
+  <%= render partial: "cards/notes/note", collection: card.notes.preloaded.chronologically, cached: true %>
+  <%= render "cards/notes/new", card: card %>
 
   <footer class="delete-card txt-align-center full-width flex flex-column margin-block-start-double">
     <hr class="separator--horizontal full-width margin-block" style="--border-color: var(--color-ink-lighter)">

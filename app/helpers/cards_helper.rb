@@ -26,10 +26,6 @@ module CardsHelper
     ].join(" ")
   end
 
-  def card_drafted_or_added(card)
-    card.drafted? ? "Drafted" : "Added"
-  end
-
   def card_due_urgency(card)
     days = (card.due_on - Date.current).to_i
 

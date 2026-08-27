@@ -6,8 +6,6 @@ class Note < ApplicationRecord
 
   has_rich_text :body
 
-  validate :card_is_notable
-
   scope :chronologically, -> { order created_at: :asc, id: :desc }
   scope :preloaded, -> { with_rich_text_body }
 
@@ -16,9 +14,4 @@ class Note < ApplicationRecord
   def to_partial_path
     "cards/#{super}"
   end
-
-  private
-    def card_is_notable
-      errors.add(:card, "does not allow notes") unless card.notable?
-    end
 end

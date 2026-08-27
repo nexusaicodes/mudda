@@ -29,7 +29,7 @@ class Prompts::CardsController < ApplicationController
     end
 
     def published_cards
-      Current.user.accessible_cards.published
+      Current.user.accessible_cards
     end
 
     # Numbers run per board, so a number can match one card on each of them.

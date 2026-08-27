@@ -139,8 +139,7 @@ erDiagram
         bigint creator_id FK "NOT NULL — User"
         bigint number "NOT NULL — per-board sequence the API addresses"
         string title "limit 255 NULLABLE"
-        string status "limit 255 default drafted NOT NULL — drafted or published"
-        date due_on "NULLABLE in DB — required when published"
+        date due_on "NULLABLE in DB — required by the model"
         boolean golden "default false NOT NULL — the pin"
         datetime last_active_at "NOT NULL"
         datetime created_at "NOT NULL"
@@ -308,7 +307,7 @@ erDiagram
 | 3 | Doing | in progress |
 | 4 | Done | `closed?` |
 
-`active?` = published and in neither Done nor Backlog. `open?` = not Done. `golden?` is the
+`active?` = in neither Done nor Backlog. `open?` = not Done. `golden?` is the
 pin, and it is a column on the card.
 
 ### Text and attachments
@@ -363,7 +362,7 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `boards` | `..._on_account_id` / `..._on_creator_id` | `account_id` / `creator_id` | |
 | `columns` | `index_columns_on_board_id_and_position` | `board_id, position` | |
 | `cards` | `index_cards_on_board_id_and_number` | `board_id, number` | ✓ |
-| `cards` | `..._on_board_id_and_last_active_at_and_status` | `board_id, last_active_at, status` | |
+| `cards` | `..._on_board_id_and_last_active_at` | `board_id, last_active_at` | |
 | `cards` | `..._on_column_id` / `..._on_creator_id` | `column_id` / `creator_id` | |
 | `steps` | `index_steps_on_card_id_and_completed` | `card_id, completed` | |
 | `notes` | `..._on_card_id` / `..._on_creator_id` | `card_id` / `creator_id` | |
@@ -388,9 +387,6 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 
 **`sessions.kind`** — `browser` (default, a cookie) · `token` (an API token, always labelled).
 
-**`cards.status`** — `drafted` (default) · `published`. A card is published via `Card#publish`,
-which also requires `due_on`.
-
 **`columns.name`** — `Triage` · `Backlog` · `Todo` · `Doing` · `Done`. Created together by
 `Board::Triageable` on every board; not creatable, reorderable, or deletable.
 
@@ -398,10 +394,10 @@ which also requires `due_on`.
 
 | Action | Eventable | `particulars` | Written by |
 |---|---|---|---|
-| `card_published` | Card | `{}` | `Card::Statuses` (on create if published, and on `publish`) |
-| `card_triaged` | Card | `{column}` | `Card::Triageable#triage_into` |
+| `card_created` | Card | `{}` | `Card::Eventable` (on create) |
+| `card_triaged` | Card | `{column}` | `Card::Triageable` (on any change of `column_id`) |
 | `card_title_changed` | Card | `{old_title, new_title}` | `Card::Eventable` |
-| `card_board_changed` | Card | `{old_board, new_board}` | `Card#move_to` |
+| `card_board_changed` | Card | `{old_board, new_board}` | `Card#handle_board_change` |
 | `note_created` | Note | `{}` | `Note::Eventable` |
 
 **`action_text_rich_texts.name`** — `description` (on Card) · `body` (on Note).
