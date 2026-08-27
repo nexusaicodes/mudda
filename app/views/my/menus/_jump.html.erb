@@ -1,11 +1,6 @@
 <div class="flex gap">
   <div class="flex flex-column full-width justify-center gap-half">
     <div class="nav__header" tabindex="-1" data-dialog-target="focusTouch">
-      <% if Current.identity.accounts.many? %>
-        <div class="nav__header-title max-width">
-          <div class="overflow-ellipsis"><strong><%= Current.account.name %></strong></div>
-        </div>
-      <% end %>
       <div class="nav__header-actions nav__header-actions--end nav__close">
         <button class="btn txt-xx-small" data-action="dialog#close">
           <%= icon_tag "close" %>

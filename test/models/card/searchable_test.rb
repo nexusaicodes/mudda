@@ -43,7 +43,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "search content is truncated to a reasonable limit" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
 
     # Create a card with unreasonably long content
     long_content = "asdf " * Searchable::SEARCH_CONTENT_LIMIT
@@ -61,7 +61,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "deleting card removes search record and FTS entry" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
     card = @board.cards.create!(title: "Card to delete", status: "published", due_on: 1.week.from_now, creator: @user)
 
     # Verify search record exists
@@ -90,7 +90,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "updating a draft card does not index it" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
 
     card = @board.cards.create!(title: "Draft card", creator: @user, status: "drafted")
     assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
@@ -104,7 +104,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "publishing a draft card indexes it" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
 
     card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "drafted", due_on: 1.week.from_now)
     assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
@@ -119,7 +119,7 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "unpublishing a draft card removes it from the search index" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
 
     card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "published", due_on: 1.week.from_now)
     assert_not_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)

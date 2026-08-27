@@ -20,12 +20,18 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :cards, only: :create
-  end
-
-  namespace :columns do
+    # Card numbers run per board, so a card is addressed by its board and its number.
     resources :cards do
       scope module: :cards do
+        resource :draft, only: :show
+        resource :board
+        resource :column
+        resource :goldness
+        resource :image
+        resource :publish
+        resources :steps
+        resources :notes
+
         namespace :drops do
           resource :column
         end
@@ -33,22 +39,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # Cross-board lists: a filtered index and the card-mention autocomplete, neither of which
+  # addresses a single card.
+  resources :cards, only: :index
   namespace :cards do
     resources :previews
-  end
-
-  resources :cards do
-    scope module: :cards do
-      resource :draft, only: :show
-      resource :board
-      resource :column
-      resource :goldness
-      resource :image
-      resource :publish
-      resources :steps
-
-      resources :notes
-    end
   end
 
   resource :search
@@ -75,7 +70,7 @@ Rails.application.routes.draw do
 
   namespace :my do
     resource :passkey_challenge, only: :create
-    resource :identity, only: :show
+    resource :user, only: :show
     resources :passkeys, except: %i[ show new ]
     resource :timezone
     resource :menu
@@ -85,9 +80,13 @@ Rails.application.routes.draw do
     resources :cards
   end
 
+  resolve "Card" do |card, options|
+    route_for :board_card, card.board, card, options
+  end
+
   resolve "Note" do |note, options|
     options[:anchor] = ActionView::RecordIdentifier.dom_id(note)
-    route_for :card, note.card, options
+    route_for :board_card, note.card.board, note.card, options
   end
 
   resolve "Event" do |event, options|

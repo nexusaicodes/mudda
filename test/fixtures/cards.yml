@@ -1,102 +1,87 @@
 logo:
-  id: <%= ActiveRecord::FixtureSet.identify("logo", :uuid) %>
   number: 1
-  board: writebook_uuid
-  creator: david_uuid
-  column: writebook_triage_uuid
+  board: writebook
+  creator: david
+  column: writebook_triage
   title: The logo isn't big enough
+  golden: true
   due_on: <%= 3.days.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 layout:
-  id: <%= ActiveRecord::FixtureSet.identify("layout", :uuid) %>
   number: 2
-  board: writebook_uuid
-  creator: david_uuid
-  column: writebook_triage_uuid
+  board: writebook
+  creator: david
+  column: writebook_triage
   title: Layout is broken
   due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 text:
-  id: <%= ActiveRecord::FixtureSet.identify("text", :uuid) %>
   number: 3
-  board: writebook_uuid
-  creator: kevin_uuid
-  column: writebook_doing_uuid
+  board: writebook
+  creator: kevin
+  column: writebook_doing
   title: The text is too small
   due_on: <%= 2.weeks.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 shipping:
-  id: <%= ActiveRecord::FixtureSet.identify("shipping", :uuid) %>
   number: 4
-  board: writebook_uuid
-  creator: kevin_uuid
-  column: writebook_done_uuid
+  board: writebook
+  creator: kevin
+  column: writebook_done
   title: We need to ship the app
   due_on: <%= 3.days.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 buy_domain:
-  id: <%= ActiveRecord::FixtureSet.identify("buy_domain", :uuid) %>
   number: 5
-  board: writebook_uuid
-  creator: david_uuid
-  column: writebook_triage_uuid
+  board: writebook
+  creator: david
+  column: writebook_triage
   title: Buy domain
   due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 radio:
-  id: <%= ActiveRecord::FixtureSet.identify("radio", :uuid) %>
   number: 1
-  board: miltons_wish_list_uuid
-  creator: mike_uuid
-  column: miltons_wish_list_triage_uuid
+  board: miltons_wish_list
+  creator: mike
+  column: miltons_wish_list_triage
   title: I want to play my radio at a reasonable volume
   due_on: <%= 2.weeks.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: initech_uuid
 
 paycheck:
-  id: <%= ActiveRecord::FixtureSet.identify("paycheck", :uuid) %>
   number: 2
-  board: miltons_wish_list_uuid
-  creator: mike_uuid
-  column: miltons_wish_list_triage_uuid
+  board: miltons_wish_list
+  creator: mike
+  column: miltons_wish_list_triage
   title: I haven't received my paycheck
   due_on: <%= 1.week.from_now %>
   created_at: <%= 1.week.ago %>
   status: published
   last_active_at: <%= 1.week.ago %>
-  account: initech_uuid
 
 unfinished_thoughts:
-  id: <%= ActiveRecord::FixtureSet.identify("unfinished_thoughts", :uuid) %>
   number: 3
-  board: miltons_wish_list_uuid
-  creator: mike_uuid
-  column: miltons_wish_list_triage_uuid
+  board: miltons_wish_list
+  creator: mike
+  column: miltons_wish_list_triage
   title: Some unfinished thoughts
   created_at: <%= 1.week.ago %>
   status: drafted
   last_active_at: <%= 1.week.ago %>
-  account: initech_uuid

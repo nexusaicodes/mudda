@@ -6,7 +6,7 @@ class BoardsController < ApplicationController
   before_action :set_board, except: %i[ index new create ]
 
   def index
-    set_page_and_extract_portion_from Current.user.boards.ordered_by_recent_activity.includes(creator: :identity)
+    set_page_and_extract_portion_from Current.user.boards.ordered_by_recent_activity.includes(:creator)
     fresh_when etag: @page.records
   end
 

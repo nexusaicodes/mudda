@@ -19,7 +19,7 @@ class Note::SearchableTest < ActiveSupport::TestCase
   end
 
   test "note search" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
     # Note is indexed on create
     note = @card.notes.create!(body: "searchable note text", creator: @user)
     record = search_record_class.find_by(searchable_type: "Note", searchable_id: note.id)

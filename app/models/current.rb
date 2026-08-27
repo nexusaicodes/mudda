@@ -1,22 +1,19 @@
 # Mudda runs a single account, so there is no tenant in the URL to resolve. The account
-# follows from whoever is signed in: session -> identity -> user -> account. An identity
-# owns exactly one user (db/seeds.rb and Account.create_with_owner each provision one, and
-# there is no way to join another), so the first user is the user.
+# follows from whoever is signed in: session -> user -> account.
 class Current < ActiveSupport::CurrentAttributes
-  attribute :session, :user, :identity, :account
+  attribute :session, :user, :account
   attribute :http_method, :request_id, :user_agent, :ip_address, :referrer
 
   def session=(value)
     super(value)
 
-    self.identity = value&.identity
-  end
-
-  def identity=(identity)
-    super(identity)
-
-    self.user = identity&.users&.active&.first
-    self.account = user&.account
+    self.user = value&.user
+    # A deactivated user is still identified — Authorization is what refuses them — but they
+    # have no account to act in.
+    self.account =
+      if user&.active?
+        user.account
+      end
   end
 
   # Jobs carry their tenant explicitly; see AccountTenanted.

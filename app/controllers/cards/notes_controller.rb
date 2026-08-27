@@ -15,7 +15,7 @@ class Cards::NotesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { render :show, status: :created, location: card_note_path(@card, @note, format: :json) }
+      format.json { render :show, status: :created, location: board_card_note_path(@card.board, @card, @note, format: :json) }
     end
   end
 

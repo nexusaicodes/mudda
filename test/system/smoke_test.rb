@@ -17,7 +17,7 @@ class SmokeTest < ApplicationSystemTestCase
   test "active storage attachments" do
     sign_in_as(users(:david))
 
-    visit card_url(cards(:layout))
+    visit board_card_url(cards(:layout).board, cards(:layout))
     fill_in_lexxy with: "Here is a note"
     attach_file file_fixture("moon.jpg") do
       click_on "Upload file"

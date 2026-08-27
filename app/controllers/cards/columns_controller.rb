@@ -1,8 +1,8 @@
 class Cards::ColumnsController < ApplicationController
-  before_action :set_card
+  include CardScoped
 
   def edit
-    @columns = @card.board.columns.sorted
+    @columns = @board.columns.sorted
 
     fresh_when etag: [ @card, @columns ]
   end
@@ -11,19 +11,15 @@ class Cards::ColumnsController < ApplicationController
     @card.triage_into(column)
 
     respond_to do |format|
-      format.html { redirect_back_or_to card_path(@card) }
+      format.html { redirect_back_or_to board_card_path(@board, @card) }
       format.json { render "cards/show" }
     end
   end
 
   private
-    def set_card
-      @card = Current.user.accessible_cards.find_by!(number: params[:card_id])
-    end
-
     # Scoped to the card's own board, so a column id from anywhere else is a 404 rather than
     # a move across boards.
     def column
-      @card.board.columns.find(params[:column_id])
+      @board.columns.find(params[:column_id])
     end
 end

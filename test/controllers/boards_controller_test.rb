@@ -102,12 +102,10 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :no_content
   end
 
-  test "index avoids N+1 queries on creator and identity" do
+  test "index avoids N+1 queries on creator" do
     assert_queries_match(/FROM [`"]users[`"].* IN \(/, count: 1) do
-      assert_queries_match(/FROM [`"]identities[`"].* IN \(/, count: 1) do
-        get boards_path, as: :json
-        assert_response :success
-      end
+      get boards_path, as: :json
+      assert_response :success
     end
 
     first_board = @response.parsed_body["data"].first

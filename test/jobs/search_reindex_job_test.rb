@@ -8,8 +8,8 @@ class SearchReindexJobTest < ActiveJob::TestCase
     card.reindex
     note.reindex
 
-    card_shard = Search::Record.for(card.account_id)
-    note_shard = Search::Record.for(note.account_id)
+    card_shard = Search::Record
+    note_shard = Search::Record
 
     assert card_shard.exists?(searchable_type: "Card", searchable_id: card.id)
     assert note_shard.exists?(searchable_type: "Note", searchable_id: note.id)
@@ -28,7 +28,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
 
   test "skips records whose rich text exceeds rich_text_limit" do
     Current.account = accounts(:"37s")
-    Current.session = Session.new(identity: identities(:david))
+    Current.session = Session.new(user: users(:david))
 
     big_card = boards(:writebook).cards.create!(
       creator: users(:david),
@@ -41,13 +41,13 @@ class SearchReindexJobTest < ActiveJob::TestCase
 
     SearchReindexJob.perform_now(rich_text_limit: 1_000)
 
-    shard = Search::Record.for(big_card.account_id)
+    shard = Search::Record
     assert_not shard.exists?(searchable_type: "Card", searchable_id: big_card.id)
   end
 
   test "does not index drafted cards or their notes" do
     Current.account = accounts(:"37s")
-    Current.session = Session.new(identity: identities(:david))
+    Current.session = Session.new(user: users(:david))
 
     card = boards(:writebook).cards.create!(
       creator: users(:david),
@@ -61,7 +61,7 @@ class SearchReindexJobTest < ActiveJob::TestCase
 
     SearchReindexJob.perform_now
 
-    shard = Search::Record.for(card.account_id)
+    shard = Search::Record
     assert_not shard.exists?(searchable_type: "Card", searchable_id: card.id)
     assert_not shard.exists?(searchable_type: "Note", searchable_id: note.id)
   end

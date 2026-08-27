@@ -32,7 +32,7 @@ a sudden `401` on a long-lived agent as "mint a new token". A browser session do
 expire on a timer.
 
 An `Authorization` header always decides the request: present one and the session cookie is
-ignored entirely, so a tool running on a machine that is also signed in gets the identity it
+ignored entirely, so a tool running on a machine that is also signed in gets the user it
 asked for — and a token that is rejected is a `401`, never a quiet fallback to whatever
 browser session happened to be around.
 
@@ -88,6 +88,11 @@ returns `401` rather than redirecting to the sign-in page.
 Requests and responses are JSON. Writes accept either flat attributes
 (`{"title":"…"}`) or wrapped (`{"card":{"title":"…"}}`).
 
+### Who am I
+
+`GET /my/user.json` reports the signed-in user — `id`, `name`, `email_address` — with the
+account nested under `account`. There is one id here, and it is the user's.
+
 ### Boards
 
 | Verb | Path | Notes |
@@ -112,20 +117,24 @@ be created, reordered, or deleted; only their colour is editable.
 ### Cards
 
 Cards are addressed by their **`number`** — the small integer the UI shows — not their id.
+**Numbers run per board**, so a number alone does not name a card: every path below carries
+the board. Two boards each holding a card numbered `1` is normal, and a card moved to
+another board is renumbered on arrival.
 
 | Verb | Path | Notes |
 |---|---|---|
-| `GET` | `/cards.json` | Filterable — see below |
+| `GET` | `/cards.json` | Filterable across every board — see below |
 | `POST` | `/boards/:board_id/cards.json` | `title`, `description`, `due_on`. **`due_on` is required** |
-| `GET` | `/cards/:number.json` | Includes `steps` |
-| `PUT` | `/cards/:number.json` | `title`, `description`, `due_on` |
-| `DELETE` | `/cards/:number.json` | |
-| `PUT` | `/cards/:number/column.json` | `column_id` — moves the card between lanes, returns the moved card |
-| `PUT` | `/cards/:number/board.json` | `board_id` — reparents the card, landing it in the destination's Triage |
-| `POST` `DELETE` | `/cards/:number/goldness.json` | Pin and unpin |
+| `GET` | `/boards/:board_id/cards/:number.json` | Includes `steps` |
+| `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on` |
+| `DELETE` | `/boards/:board_id/cards/:number.json` | |
+| `PUT` | `/boards/:board_id/cards/:number/column.json` | `column_id` — moves the card between lanes, returns the moved card |
+| `PUT` | `/boards/:board_id/cards/:number/board.json` | `destination_id` — reparents the card, landing it in the destination's Triage and renumbering it |
+| `POST` `DELETE` | `/boards/:board_id/cards/:number/goldness.json` | Pin and unpin |
 
 A card is created published, in Triage, and every lane change from there records an event.
-`due_on` is required on any published card, so a create without one is a `422`.
+`due_on` is required on any published card, so a create without one is a `422`. Every card
+in an index carries its own `url`, which is the reliable way to reach it again.
 
 `GET /cards.json` accepts `board_ids[]`, `column_ids[]`, `card_ids[]`, `terms[]` (full-text),
 `creation` (a time window), `indexed_by` (`all` or `golden`) and `sorted_by` (`latest`,
@@ -148,15 +157,16 @@ and `color`.
 
 | Verb | Path | Notes |
 |---|---|---|
-| `GET` `POST` | `/cards/:number/notes.json` | `body`. Published cards only |
-| `GET` `PUT` `DELETE` | `/cards/:number/notes/:id.json` | Only the creator may edit or delete |
-| `GET` `POST` | `/cards/:number/steps.json` | `content`, `completed` |
-| `GET` `PUT` `DELETE` | `/cards/:number/steps/:id.json` | |
+| `GET` `POST` | `/boards/:board_id/cards/:number/notes.json` | `body`. Published cards only |
+| `GET` `PUT` `DELETE` | `/boards/:board_id/cards/:number/notes/:id.json` | Only the creator may edit or delete |
+| `GET` `POST` | `/boards/:board_id/cards/:number/steps.json` | `content`, `completed` |
+| `GET` `PUT` `DELETE` | `/boards/:board_id/cards/:number/steps/:id.json` | |
 
 ### Search
 
 `GET /search.json?q=…` runs full-text search across every board and returns cards. A query
-that is exactly a card number returns that card.
+that is exactly a card number jumps straight to that card — but only while one board answers
+to that number; once two do, the search results are returned instead.
 
 ## Errors
 

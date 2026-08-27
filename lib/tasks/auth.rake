@@ -10,11 +10,11 @@ namespace :auth do
 
   desc "Mint an API token for a script or agent (LABEL=claude bin/rails auth:token)"
   task token: :environment do
-    identity = Identity.owner or abort "No owner identity — set MUDDA_OWNER_EMAIL to one, or run bin/rails db:seed first."
+    user = User.owner or abort "No owner user — set MUDDA_OWNER_EMAIL to one, or run bin/rails db:seed first."
 
-    session = identity.sessions.create!(label: ENV["LABEL"].presence || "api")
+    session = user.sessions.create!(kind: :token, label: ENV["LABEL"].presence || "api")
 
-    warn "Token for #{identity.email_address} labelled #{session.label.inspect}, valid for " \
+    warn "Token for #{user.email_address} labelled #{session.label.inspect}, valid for " \
       "#{Session::API_TOKEN_EXPIRY.inspect}. Minting replaced any token already carrying that label."
     warn %(  Authorization: Bearer <token>)
     puts session.token
@@ -22,7 +22,7 @@ namespace :auth do
 
   desc "List the API tokens that have been minted"
   task tokens: :environment do
-    sessions = Session.where.not(label: nil).order(:created_at)
+    sessions = Session.token.order(:created_at)
 
     if sessions.any?
       puts "LABEL\tMINTED\tEXPIRES"
@@ -41,7 +41,7 @@ namespace :auth do
   task revoke: :environment do
     label = ENV["LABEL"].presence or abort "Set LABEL to the token label you want revoked."
 
-    count = Session.where(label: label).destroy_all.size
+    count = Session.token.where(label: label).destroy_all.size
     puts "Revoked #{count} token(s) labelled #{label.inspect}."
   end
 end

@@ -8,14 +8,13 @@ class CardTest < ActiveSupport::TestCase
   test "create assigns a number to the card" do
     user = users(:david)
     board = boards(:writebook)
-    account = board.account
     card = nil
 
-    assert_difference -> { account.reload.cards_count }, +1 do
+    assert_difference -> { board.reload.cards_count }, +1 do
       card = Card.create!(title: "Test", board: board, creator: user)
     end
 
-    assert_equal account.reload.cards_count, card.number
+    assert_equal board.reload.cards_count, card.number
   end
 
   test "assigns distinct numbers when the account counter is stale in memory" do

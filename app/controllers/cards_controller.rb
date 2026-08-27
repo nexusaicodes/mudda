@@ -3,7 +3,7 @@ class CardsController < ApplicationController
 
   include FilterScoped
 
-  before_action :set_board, only: %i[ create ]
+  before_action :set_board, except: :index
   before_action :set_card, only: %i[ show edit update destroy ]
   before_action :redirect_if_drafted, only: :show
 
@@ -15,14 +15,14 @@ class CardsController < ApplicationController
     respond_to do |format|
       format.html do
         card = Current.user.draft_new_card_in(@board)
-        redirect_to card_draft_path(card)
+        redirect_to board_card_draft_path(card.board, card)
       end
 
       format.json do
         @card = @board.cards.new card_params.merge(creator: Current.user, status: "published")
 
         if @card.save
-          render :show, status: :created, location: card_path(@card, format: :json)
+          render :show, status: :created, location: board_card_path(@board, @card, format: :json)
         else
           render json: { errors: @card.errors }, status: :unprocessable_entity
         end
@@ -64,11 +64,11 @@ class CardsController < ApplicationController
     end
 
     def set_card
-      @card = Current.user.accessible_cards.find_by!(number: params[:id])
+      @card = @board.cards.find_by!(number: params[:id])
     end
 
     def redirect_if_drafted
-      redirect_to card_draft_path(@card) if @card.drafted?
+      redirect_to board_card_draft_path(@card.board, @card) if @card.drafted?
     end
 
     def card_params

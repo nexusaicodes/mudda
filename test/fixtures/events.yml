@@ -1,53 +1,41 @@
 logo_published:
-  id: <%= ActiveRecord::FixtureSet.identify("logo_published", :uuid) %>
-  creator: david_uuid
-  board: writebook_uuid
-  eventable: logo_uuid (Card)
+  creator: david
+  board: writebook
+  eventable: logo (Card)
   action: card_published
   created_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 layout_published:
-  id: <%= ActiveRecord::FixtureSet.identify("layout_published", :uuid) %>
-  creator: david_uuid
-  board: writebook_uuid
-  eventable: layout_uuid (Card)
+  creator: david
+  board: writebook
+  eventable: layout (Card)
   action: card_published
   created_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 layout_noted:
-  id: <%= ActiveRecord::FixtureSet.identify("layout_noted", :uuid) %>
-  creator: david_uuid
-  board: writebook_uuid
-  eventable: layout_overflowing_david_uuid (Note)
+  creator: david
+  board: writebook
+  eventable: layout_overflowing_david (Note)
   action: note_created
   created_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 text_published:
-  id: <%= ActiveRecord::FixtureSet.identify("text_published", :uuid) %>
-  creator: kevin_uuid
-  board: writebook_uuid
-  eventable: text_uuid (Card)
+  creator: kevin
+  board: writebook
+  eventable: text (Card)
   action: card_published
   created_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 shipping_published:
-  id: <%= ActiveRecord::FixtureSet.identify("shipping_published", :uuid) %>
-  creator: kevin_uuid
-  board: writebook_uuid
-  eventable: shipping_uuid (Card)
+  creator: kevin
+  board: writebook
+  eventable: shipping (Card)
   action: card_published
   created_at: <%= 1.week.ago %>
-  account: 37s_uuid
 
 shipping_closed:
-  id: <%= ActiveRecord::FixtureSet.identify("shipping_closed", :uuid) %>
-  creator: kevin_uuid
-  board: writebook_uuid
-  eventable: shipping_uuid (Card)
+  creator: kevin
+  board: writebook
+  eventable: shipping (Card)
   action: card_triaged
   created_at: <%= 2.days.ago %>
-  account: 37s_uuid

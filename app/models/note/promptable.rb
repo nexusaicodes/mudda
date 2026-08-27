@@ -20,7 +20,7 @@ module Note::Promptable
         * Card title: #{card.title}
         * Created by: #{creator.name}
         * Created at: #{created_at}
-        * Path: #{card_path(card, anchor: ActionView::RecordIdentifier.dom_id(self))}
+        * Path: #{board_card_path(card.board, card, anchor: ActionView::RecordIdentifier.dom_id(self))}
         END OF NOTE #{id}
       PROMPT
   end

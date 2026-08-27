@@ -18,6 +18,6 @@ class ApplicationHelperTest < ActionView::TestCase
   test "last_board_storage_key is scoped to the account" do
     account = accounts("37s")
 
-    assert_equal "mudda:last-board:#{account.external_account_id}", last_board_storage_key(account)
+    assert_equal "mudda:last-board:#{account.id}", last_board_storage_key(account)
   end
 end

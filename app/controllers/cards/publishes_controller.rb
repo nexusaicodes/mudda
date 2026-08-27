@@ -7,7 +7,7 @@ class Cards::PublishesController < ApplicationController
         format.html do
           if add_another_param?
             card = @board.cards.create!(status: :drafted)
-            redirect_to card_draft_path(card), notice: "Card added"
+            redirect_to board_card_draft_path(card.board, card), notice: "Card added"
           else
             redirect_to @card.board
           end
@@ -17,7 +17,7 @@ class Cards::PublishesController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to card_draft_path(@card), alert: "Add a due date before creating this card." }
+        format.html { redirect_to board_card_draft_path(@card.board, @card), alert: "Add a due date before creating this card." }
         format.json { render json: { errors: @card.errors }, status: :unprocessable_entity }
       end
     end

@@ -35,7 +35,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     def sign_in_as(user)
       visit new_session_url
 
-      fill_in "email_address", with: user.identity.email_address
+      fill_in "email_address", with: user.email_address
       fill_in "password", with: owner_password
       find("#log_in").click
 

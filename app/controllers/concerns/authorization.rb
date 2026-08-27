@@ -14,8 +14,8 @@ module Authorization
   end
 
   private
-    # An identity with no active user has no account to enter. Signing the browser out is what
-    # keeps the login page from bouncing it back to root forever; a token keeps working.
+    # A deactivated user has no account to enter. Signing the browser out is what keeps the
+    # login page from bouncing it back to root forever; a token keeps working.
     def ensure_can_access_account
       unless Current.user&.active?
         if request.format.json?

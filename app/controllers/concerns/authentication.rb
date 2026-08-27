@@ -9,7 +9,7 @@ module Authentication
     before_action :require_authentication
     helper_method :authenticated?
 
-    etag { Current.identity.id if authenticated? }
+    etag { Current.user.id if authenticated? }
 
     include LoginHelper
   end
@@ -29,7 +29,7 @@ module Authentication
 
   private
     def authenticated?
-      Current.identity.present?
+      Current.user.present?
     end
 
     def require_authentication
@@ -100,23 +100,29 @@ module Authentication
       request.post? && request.format.json?
     end
 
-    def start_new_session_for(identity, label: nil)
+    def start_new_session_for(user, label: nil)
       return_to = session[:return_to_after_authenticating]
       reset_session
       session[:return_to_after_authenticating] = return_to
 
-      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip, label: session_label(label) }
+      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip,
+        kind: session_kind, label: session_label(label) }
 
-      identity.sessions.create!(attributes).tap do |session|
+      user.sessions.create!(attributes).tap do |session|
         set_current_session session
         cookies.signed.permanent[:session_token] = { value: session.token, httponly: true, same_site: :lax }
       end
     end
 
-    # A token handed to a JSON client is labelled so auth:tokens and auth:revoke can reach it;
-    # a browser session carries no label. A client may name itself, so two of them can hold
-    # tokens at once — a label holds one live token, and a shared default would have them
-    # revoking each other on every sign-in.
+    # A JSON sign-in is a script or an agent asking for a token; a browser asking for HTML
+    # gets a cookie session.
+    def session_kind
+      request.format.json? ? :token : :browser
+    end
+
+    # A token is labelled so auth:tokens and auth:revoke can reach it. A client may name
+    # itself, so two of them can hold tokens at once — a label holds one live token, and a
+    # shared default would have them revoking each other on every sign-in.
     def session_label(label)
       if request.format.json?
         label.presence || "json-sign-in"

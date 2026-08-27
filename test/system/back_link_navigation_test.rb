@@ -31,7 +31,7 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
 
     visit account_settings_url
     click_on "Invite people"
-    visit card_url(cards(:logo))
+    visit board_card_url(cards(:logo).board, cards(:logo))
 
     assert_selector "a.btn--back strong", text: "Back to Writebook"
   end

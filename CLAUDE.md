@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The authoritative architecture and conventions live in these files, which you should treat as primary:
 
-- **[AGENTS.md](AGENTS.md)** — what Mudda is, dev/test commands, and the big-picture architecture (single account resolved from the signed-in identity, owner-password auth + optional passkeys, core domain models, the fixed-column card lifecycle, due dates, UUIDv7 keys, in-process background jobs, SQLite full-text search).
+- **[AGENTS.md](AGENTS.md)** — what Mudda is, dev/test commands, and the big-picture architecture (single account resolved from the signed-in user, owner-password auth + optional passkeys, core domain models, the fixed-column card lifecycle, due dates, per-board card numbers, in-process background jobs, SQLite full-text search).
 - **[API.md](API.md)** — the JSON API a script or agent drives: bearer tokens, the resource table, the error envelope, pagination.
 - **[ERD.md](ERD.md)** — the full database schema: every table, column, index, and
-  relationship, plus the enumerated values and which tables are vestigial.
+  relationship, plus the enumerated values.
 - **[STYLE.md](STYLE.md)** — house style (conditional returns over guard clauses, method/invocation ordering, bang conventions, CRUD-only controllers, vanilla Rails, `_later`/`_now` job naming).
 
 ## This is a standalone, single-person build

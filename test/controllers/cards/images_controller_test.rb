@@ -11,7 +11,7 @@ class Cards::ImagesControllerTest < ActionDispatch::IntegrationTest
 
     assert card.image.attached?
 
-    delete card_image_path(card)
+    delete board_card_image_path(card.board, card)
 
     assert_redirected_to card
     assert_not card.reload.image.attached?
@@ -23,7 +23,7 @@ class Cards::ImagesControllerTest < ActionDispatch::IntegrationTest
 
     assert card.image.attached?
 
-    delete card_image_path(card), as: :json
+    delete board_card_image_path(card.board, card), as: :json
 
     assert_response :no_content
     assert_not card.reload.image.attached?

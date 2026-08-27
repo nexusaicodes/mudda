@@ -1,6 +1,6 @@
 # ActionPack::Passkey provides WebAuthn passkey registration and authentication backed by Active Record.
 #
-# Passkeys are scoped to a polymorphic +holder+ (typically a User or Identity) and store the
+# Passkeys are scoped to a polymorphic +holder+ (a User in this app) and store the
 # credential ID, public key, sign count, and transport hints needed for the WebAuthn ceremonies.
 #
 # == Registration

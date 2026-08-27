@@ -1,17 +1,17 @@
 writebook:
-  id: <%= ActiveRecord::FixtureSet.identify("writebook", :uuid) %>
   name: Writebook
-  creator: david_uuid
-  account: 37s_uuid
+  creator: david
+  account: 37s
+  cards_count: 5
 
 private:
-  id: <%= ActiveRecord::FixtureSet.identify("private", :uuid) %>
   name: Private board
-  creator: kevin_uuid
-  account: 37s_uuid
+  creator: kevin
+  account: 37s
+  cards_count: 0
 
 miltons_wish_list:
-  id: <%= ActiveRecord::FixtureSet.identify("miltons_wish_list", :uuid) %>
   name: Milton's Wish List
-  creator: mike_uuid
-  account: initech_uuid
+  creator: mike
+  account: initech
+  cards_count: 3

@@ -1,4 +1,4 @@
-<%= column_tag id: dom_id(column), name: column.name, drop_url: columns_card_drops_column_path("__id__", column_id: column.id), card_color: column.color.to_s,
+<%= column_tag id: dom_id(column), name: column.name, drop_url: board_card_drops_column_path(column.board, "__id__", column_id: column.id), card_color: column.color.to_s,
       class: "cards--doing", style: "--card-color: #{column.color};",
   data: {
     collapsible_columns_target: column.name == Card::Triageable::DOING_COLUMN ? "column defaultColumn" : "column",

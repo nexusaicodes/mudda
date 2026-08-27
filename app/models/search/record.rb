@@ -3,8 +3,9 @@ class Search::Record < ApplicationRecord
 
   belongs_to :searchable, polymorphic: true
   belongs_to :card
+  belongs_to :board
 
-  validates :account_id, :searchable_type, :searchable_id, :card_id, :board_id, :created_at, presence: true
+  validates :searchable_type, :searchable_id, :card_id, :board_id, :created_at, presence: true
 
   class << self
     def upsert!(attributes)
@@ -22,11 +23,12 @@ class Search::Record < ApplicationRecord
     end
   end
 
+  # Search spans every board in the user's account, and nothing else reaches it.
   scope :for_query, ->(query, user:) do
     query = Search::Query.wrap(query)
 
     if query.valid?
-      matching(query.to_s, user.account_id).where(account_id: user.account_id)
+      matching(query.to_s).where(board: user.boards)
     else
       none
     end
@@ -38,7 +40,7 @@ class Search::Record < ApplicationRecord
     for_query(query, user: user)
       .includes(:searchable, card: [ :board, :creator ])
       .order(created_at: :desc)
-      .select(:id, :account_id, :searchable_type, :searchable_id, :card_id, :board_id, :title, :content, :created_at, *search_fields(query))
+      .select(:id, :searchable_type, :searchable_id, :card_id, :board_id, :title, :content, :created_at, *search_fields(query))
   end
 
   def source

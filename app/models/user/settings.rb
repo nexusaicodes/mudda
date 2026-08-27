@@ -1,5 +1,4 @@
 class User::Settings < ApplicationRecord
-  belongs_to :account, default: -> { user.account }
   belongs_to :user
 
   def timezone

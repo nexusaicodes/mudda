@@ -34,7 +34,6 @@ module Searchable
 
     def search_record_attributes
       {
-        account_id: account_id,
         searchable_type: self.class.name,
         searchable_id: id,
         card_id: search_card_id,
@@ -50,11 +49,10 @@ module Searchable
     end
 
     def search_record_class
-      Search::Record.for(account_id)
+      Search::Record
     end
 
   # Models must implement these methods:
-  # - account_id: returns the account id
   # - search_title: returns title string or nil
   # - search_content: returns content string
   # - search_card_id: returns the card id (self.id for cards, card_id for notes)

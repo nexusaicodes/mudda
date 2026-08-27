@@ -57,21 +57,21 @@ Compose setup in [DOCKER.md](DOCKER.md).
 
 ## Architecture Overview
 
-### One Account, Resolved From the Signed-in Identity
+### One Account, Resolved From the Signed-in User
 
 Mudda serves a single account per deployment, and **URLs carry no account prefix** —
 paths are `/boards/:id`, not `/{account_id}/boards/:id`. (Upstream Fizzy prefixed every
 path and rewrote `PATH_INFO`/`SCRIPT_NAME` in a Rack middleware; that middleware and
 `Account#slug` are gone.)
 
-- `Current.account` is derived in `app/models/current.rb`: session → identity → user →
-  account. An identity owns exactly one user, so the first user is the user.
+- `Current.account` is derived in `app/models/current.rb`: session → user → account.
 - `Current.account` is therefore **nil on unauthenticated requests**. Anything reachable
   while signed out must not depend on it (see `Users::AvatarsController`).
-- Models still carry `account_id` for data isolation, and `Account#external_account_id`
-  still exists — it keys the browser-local "last opened board" (`ApplicationHelper#last_board_storage_key`)
-  and identifies the account in seeds and error context. It is a deterministic hash of the
-  account name, not a running sequence (see UUID Primary Keys).
+- **`account_id` lives on `users` and `boards`, and nowhere else.** Everything below a board
+  reaches its account through the board (`Account#cards` joins through `boards`), so there is
+  one place a record's tenant is written down. `accounts.id` keys the browser-local "last
+  opened board" (`ApplicationHelper#last_board_storage_key`) and names the account in error
+  context.
 - Background jobs serialize and restore `Current.account` explicitly (see Background Jobs),
   since they run with no session.
 
@@ -81,7 +81,8 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
 ### Authentication
 
 **Owner password (standing) + optional passkeys:**
-- A global `Identity` (email-based) owns the single `User` in the account.
+- The `User` is the principal: it carries the `email_address`, holds the passkeys, and owns
+  the sessions. There is no separate `Identity`.
 - **Password sign-in:** the owner signs in with their email + a deployment secret held in
   `ENV["MUDDA_OWNER_PASSWORD"]`. `OwnerPassword` (`app/models/owner_password.rb`) verifies the
   secret with `secure_compare` and is `enabled?` whenever the secret is configured.
@@ -91,35 +92,34 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   sign-in, never required. The owner can add or remove any/all passkeys under `my/passkeys`; doing
   so never disables password sign-in.
 - **Recovery:** `bin/rails auth:reset` (`make reset-auth`) removes all passkeys and signs out every
-  session. The seed (`db/seeds.rb`) is the source of truth for the owner identity/account, and warns
+  session. The seed (`db/seeds.rb`) is the source of truth for the owner user/account, and warns
   only when there is neither a password secret nor a passkey (no way to sign in).
-- Passkeys (WebAuthn) via `Identity has_passkeys` + `lib/action_pack/passkey/` and the
+- Passkeys (WebAuthn) via `User has_passkeys` + `lib/action_pack/passkey/` and the
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
-- `Session belongs_to :identity`; `Current` resolves session → identity → active user →
-  account (the account is derived from the user, not the URL — see above). A deactivated user
-  resolves to no user and no account, and `Authorization` refuses the request: a browser is
-  signed out and redirected to the login page, while a JSON client keeps its session and gets
-  a 403. A `Session` may carry a `label`, which marks it as an API token minted by
-  `make token` (`auth:token`) or by the JSON sign-in, which labels its sessions `json-sign-in`.
-  A label holds one live token: minting under a label revokes the previous one, so a JSON
-  client names itself (`label` in the sign-in body) rather than sharing the `json-sign-in`
-  default and revoking its neighbours. `Session#token`
-  is the single definition of the credential — labelled sessions expire after
-  `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not.
+- `Session belongs_to :user`; `Current` resolves session → user → account (the account is
+  derived from the user, not the URL — see above). A deactivated user is still named by
+  `Current` but has no account, and `Authorization` refuses the request: a browser is signed
+  out and redirected to the login page, while a JSON client keeps its session and gets a 403.
+- **`Session#kind` says how the user is present** — `browser` (a cookie) or `token` (a script
+  or agent). A token always carries a `label` and a browser session never does; both are
+  validated, so the two can't disagree. Tokens are minted by `make token` (`auth:token`) or
+  by the JSON sign-in, which labels its sessions `json-sign-in` unless the client names
+  itself. A label holds one live token: minting under a label revokes the previous one, so a
+  JSON client should send its own `label` rather than sharing the default and revoking its
+  neighbours. `Session#token` is the single definition of the credential — tokens expire
+  after `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 
 ### Core Domain Models
 
-**Account** → the tenant/organization. Concerns: `Searchable`.
-Has users, boards, cards, columns. `create_with_owner` provisions the single account user.
+**Account** → the tenant/organization. Concerns: `Searchable`. Has users and boards;
+`#cards` reaches them through the boards. `create_with_owner` provisions the single user.
 
-**Identity** → global, email-based principal. `has_passkeys`, `has_many :sessions, :users,
-:accounts (through users)`.
-
-**User** → the account's person (`belongs_to :account, :identity`). Concerns: `Accessor`,
-`Avatar`, `Configurable`, `Named`, `Searcher`. Owns filters and notes.
-`deactivate` nulls the identity.
+**User** → the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`,
+`has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`.
+Owns filters and notes. `deactivate` sets `active: false` and leaves the sessions alone, so
+`Authorization` still has a credential to refuse.
 
 **Board** → primary organizational unit. Concerns: `Cards`, `Filterable`,
 `Triageable`. **Every board has the same five
@@ -146,8 +146,9 @@ app lands on your last-opened board instead).
 > **Removed in this fork's refactor (vs. upstream Fizzy):** team collaboration entirely —
 > notifications, mentions, assignments, watching, reactions, board access control (`Access`),
 > roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
-> Also gone: `Tag`/`Tagging` (see `db/migrate/*_drop_tags.rb`) and the `Entropy`
-> auto-postpone system (replaced by due dates; see below). `Comment` was renamed to `Note`.
+> Also gone: `Tag`/`Tagging` and the `Entropy` auto-postpone system (replaced by due dates;
+> see below). `Comment` was renamed to `Note`. `Identity` was folded into `User`, and
+> `Card::Goldness` into a boolean on `cards`.
 > All email/mailers (Action Mailer + Action Mailbox, SMTP) are removed — the app sends no email.
 > The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the standing
 > owner password with optional passkeys (see Authentication); the owner is provisioned by `db/seeds.rb`.
@@ -175,8 +176,8 @@ Every board is created (`Board::Triageable`) with five fixed lanes, in order:
 
 `triage_into(column)` moves a card between lanes (and records a `triaged` event);
 `move_to(new_board)` reparents a card to another board (re-homing its events) and drops it
-into the destination board's Triage column. Cards are dropped between columns through
-`columns/cards/drops/columns_controller.rb`.
+into the destination board's Triage column — **renumbering it**, since numbers run per board.
+Cards are dropped between columns through `cards/drops/columns_controller.rb`.
 
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
@@ -190,10 +191,14 @@ which has been removed along with the `entropies` table and the hourly auto-post
 
 ### Web endpoints (REST resources)
 
-Routes (`config/routes.rb`) model behavior as CRUD on resources. Nested resources on `cards`:
-`draft`, `board`, `column`, `goldness`, `image`, `publish`, `steps`, and `notes`.
-Boards expose read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there
-is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
+Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest under their
+board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
+`resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
+call site. Nested resources on `cards`: `draft`, `board`, `column`, `goldness`, `image`,
+`publish`, `steps`, `notes`, and `drops/column`. Two cross-board lists stay at the top level
+— `/cards` (the filtered index) and `/prompts/cards` (the mention autocomplete). Boards expose
+read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there is no
+create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 
 Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
 on the same URL — there is no separate API surface. A browser authenticates with its session
@@ -205,19 +210,17 @@ as much as the record errors. Indexes answer with `{ "data": [...], "paging": {.
 than silently ignored — each endpoint declaring what it answers to with
 `allows_query_params` (`StrictQueryParams`). See [API.md](API.md).
 
-### UUID Primary Keys
+### Keys and Card Numbers
 
-Primary keys are UUIDs (`lib/rails_ext/active_record_uuid_type.rb`): UUIDv7 generated, then
-hex → base36, left-padded to a fixed **25-char** string (`36^25 > 2^128`), stored as a
-16-byte SQLite blob — so `hex()` in a SQL client prints a different encoding of the same
-value, not the id the app or the API uses. `Card#number` is a **separate integer sequence**
-(from `account.cards_count`), not a UUID, and it is what the API addresses cards by.
+Primary keys are plain autoincrementing integers — Rails' default, no extensions. What a
+`SELECT` prints is the id the app and the API use.
 
-`Account#external_account_id` is an integer too, but the `Account::ExternalIdSequence`
-counter that would generate it is **dead code**: `assign_external_account_id` only fires when
-the value is absent (`||=`), and `db/seeds.rb` always supplies one from
-`ActiveRecord::FixtureSet.identify(account_name)`. The `account_external_id_sequences` table
-is empty in every deployment.
+`Card#number` is a **separate** integer, and it is what the API addresses cards by. It is a
+**per-board** sequence drawn from `boards.cards_count`, unique only within its board — so
+two boards can each hold a card numbered `1`, a card moved between boards is renumbered on
+arrival, and a bare number never names a card on its own. Two places that used to treat one
+as a unique address now say so: `SearchesController` jumps to a card only while exactly one
+board answers to that number, and `Prompts::CardsController` prepends every match.
 
 See [ERD.md](ERD.md) for the full schema — every table, column, index, and relationship,
 cross-verified against a live database.

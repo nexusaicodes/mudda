@@ -14,7 +14,7 @@ class Cards::StepsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream
-      format.json { render :show, status: :created, location: card_step_path(@card, @step, format: :json) }
+      format.json { render :show, status: :created, location: board_card_step_path(@card.board, @card, @step, format: :json) }
     end
   end
 

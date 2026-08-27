@@ -1,44 +1,39 @@
 david:
-  id: <%= ActiveRecord::FixtureSet.identify("david", :uuid) %>
   name: David
-  identity: david
-  account: 37s_uuid
+  email_address: david@example.com
+  account: 37s
   verified_at: <%= Time.current.to_fs(:db) %>
 
 jz:
-  id: <%= ActiveRecord::FixtureSet.identify("jz", :uuid) %>
   name: JZ
-  identity: jz
-  account: 37s_uuid
+  email_address: jz@example.com
+  account: 37s
   verified_at: <%= Time.current.to_fs(:db) %>
 
 jason:
-  id: <%= ActiveRecord::FixtureSet.identify("jason", :uuid) %>
   name: Jason
-  identity: jason
-  account: 37s_uuid
+  email_address: jason@example.com
+  account: 37s
   verified_at: <%= Time.current.to_fs(:db) %>
 
 kevin:
-  id: <%= ActiveRecord::FixtureSet.identify("kevin", :uuid) %>
   name: Kevin
-  identity: kevin
-  account: 37s_uuid
+  email_address: kevin@example.com
+  account: 37s
   verified_at: <%= Time.current.to_fs(:db) %>
 
 system:
-  id: <%= ActiveRecord::FixtureSet.identify("system", :uuid) %>
   name: System
-  account: 37s_uuid
+  email_address: system@example.com
+  account: 37s
 
 mike:
-  id: <%= ActiveRecord::FixtureSet.identify("mike", :uuid) %>
   name: Mike
-  identity: mike
-  account: initech_uuid
+  email_address: mike@example.com
+  account: initech
   verified_at: <%= Time.current.to_fs(:db) %>
 
 system_initech:
-  id: <%= ActiveRecord::FixtureSet.identify("system_initech", :uuid) %>
   name: System
-  account: initech_uuid
+  email_address: system@initech.example.com
+  account: initech

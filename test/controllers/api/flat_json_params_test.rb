@@ -28,7 +28,7 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
   test "update card with flat JSON" do
     card = cards(:logo)
 
-    put card_path(card),
+    put board_card_path(card.board, card),
       params: { title: "Flat update", description: "<p>Updated flat</p>" },
       as: :json
 
@@ -63,7 +63,7 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     card = cards(:logo)
 
     assert_difference -> { card.steps.count }, +1 do
-      post card_steps_path(card), params: { content: "Flat step" }, as: :json
+      post board_card_steps_path(card.board, card), params: { content: "Flat step" }, as: :json
     end
 
     assert_response :created
@@ -74,7 +74,7 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     card = cards(:logo)
     step = card.steps.create!(content: "Original")
 
-    put card_step_path(card, step), params: { content: "Flat updated" }, as: :json
+    put board_card_step_path(card.board, card, step), params: { content: "Flat updated" }, as: :json
 
     assert_response :success
     assert_equal "Flat updated", step.reload.content

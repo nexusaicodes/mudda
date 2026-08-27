@@ -2,7 +2,6 @@ class Filter < ApplicationRecord
   include Fields, Params, Resources, Summarized
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
-  belongs_to :account, default: -> { creator.account }
 
   class << self
     def from_params(params)

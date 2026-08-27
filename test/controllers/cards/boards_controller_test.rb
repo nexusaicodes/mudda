@@ -12,7 +12,7 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_not_equal new_board, card.board
 
     assert_changes -> { card.reload.board }, from: card.board, to: new_board do
-      put card_board_path(card), params: { board_id: new_board.id }
+      put board_card_board_path(card.board, card), params: { destination_id: new_board.id }
     end
 
     assert_redirected_to card
@@ -24,7 +24,7 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_not_equal new_board, card.board
 
-    put card_board_path(card), params: { board_id: new_board.id }, as: :json
+    put board_card_board_path(card.board, card), params: { destination_id: new_board.id }, as: :json
 
     assert_response :success
     assert_equal new_board, card.reload.board
