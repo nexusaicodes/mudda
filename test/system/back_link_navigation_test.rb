@@ -4,7 +4,7 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
   test "card back link returns to board filter view when navigating from it" do
     sign_in_as(users(:david))
 
-    filter_url = board_url(boards(:writebook), creator_ids: [ users(:david).id ])
+    filter_url = board_url(boards(:writebook), column_ids: [ columns(:writebook_triage).id ])
     visit filter_url
     click_on cards(:logo).title
 
@@ -17,7 +17,7 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
   test "card back link returns to global filter view when navigating from it" do
     sign_in_as(users(:kevin))
 
-    filter_url = cards_url(creator_ids: [ users(:kevin).id ])
+    filter_url = cards_url(column_ids: [ columns(:writebook_doing).id ])
     visit filter_url
     click_on cards(:text).title
 
@@ -26,12 +26,13 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
     assert_current_path filter_url, ignore_query: false
   end
 
+  # Only the card indexes are worth returning to, so arriving from anywhere else — a
+  # maximized lane, here — leaves the back link pointing at the card's own board.
   test "card back link is not rewritten when navigating from a non-filter page" do
     sign_in_as(users(:david))
 
-    visit account_settings_url
-    click_on "Invite people"
-    visit board_card_url(cards(:logo).board, cards(:logo))
+    visit board_column_url(boards(:writebook), columns(:writebook_triage))
+    click_on cards(:logo).title
 
     assert_selector "a.btn--back strong", text: "Back to Writebook"
   end

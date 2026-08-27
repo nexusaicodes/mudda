@@ -48,13 +48,16 @@ class SmokeTest < ApplicationSystemTestCase
   test "dragging card to a new column" do
     sign_in_as(users(:david))
 
-    card = Card.find("03axhd1h3qgnsffqplkyf28fv")
-    assert_nil(card.column)
+    # Doing is the lane the board opens expanded, so its cards are the ones on screen to drag.
+    card, destination = cards(:text), columns(:writebook_todo)
+    assert_equal "Doing", card.column.name
 
     visit board_url(boards(:writebook))
 
-    card_el = page.find("#article_card_03axhd1h3qgnsffqplkyf28fv")
-    column_el = page.find("#column_03axmcferfmbnv4qg816nw6bg")
+    # Each lane loads its cards in its own turbo frame, so scope the lookup to the lane and
+    # let Capybara wait for that frame rather than the whole page.
+    card_el = page.find("#column_#{card.column_id}").find("#article_card_#{card.id}")
+    column_el = page.find("#column_#{destination.id}")
     cards_count = column_el.find(".cards__expander-count").text.to_i
 
     card_el.drag_to(column_el)
