@@ -1,0 +1,6 @@
+<li class="step">
+  <input type="checkbox" class="checkbox" disabled>
+  <%= text_field_tag "card[steps_attributes][][content]", content, id: nil,
+        class: "input step__content hide-focus-ring", placeholder: "Add a step…",
+        autocomplete: "off", aria: { label: "Step" }, data: { "1p-ignore": "true" } %>
+</li>

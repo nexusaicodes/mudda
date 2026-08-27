@@ -213,15 +213,30 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   # A bang method's RecordInvalid has to reach the client as the JSON error envelope, and a
-  # nested record's errors in the same one as the card's own.
+  # nested record's errors in the same one as the card's own. Blanking an *existing* step is
+  # the failure; a blank new row is dropped instead (see Card::Multistep).
   test "a validation failure inside a card's steps is a JSON 422" do
     card, headers = cards(:logo), bearer_headers_for(@user)
+    step = card.steps.create!(content: "Original")
 
     put board_card_path(card.board, card, format: :json),
-      params: { steps_attributes: [ { content: "" } ] }, headers: headers, as: :json
+      params: { steps_attributes: [ { id: step.id, content: "" } ] }, headers: headers, as: :json
 
     assert_response :unprocessable_entity
     assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "steps.content")
+    assert_equal "Original", step.reload.content
+  end
+
+  test "a blank new step row is dropped rather than failing the card" do
+    card, headers = cards(:logo), bearer_headers_for(@user)
+
+    assert_no_difference -> { card.steps.count } do
+      put board_card_path(card.board, card, format: :json),
+        params: { title: "Still fine", steps_attributes: [ { content: "" } ] }, headers: headers, as: :json
+    end
+
+    assert_response :success
+    assert_equal "Still fine", card.reload.title
   end
 
   test "moving a card to a column that is not on its board is a JSON 404, not a silent no-op" do

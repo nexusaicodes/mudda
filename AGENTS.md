@@ -128,10 +128,11 @@ fixed columns** (see below). All of the account's boards are visible to the user
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
 fixed; only color is editable.
 
-**Card** → the main work item. Sequential per-account `number` (via
-`account.increment!(:cards_count)`), rich-text description, image attachment, steps, and
-**notes**. Status enum is `drafted` / `published` (`Card::Statuses`); a card is published via
-`publish` (which also requires a due date). Concerns: `Attachments`,
+**Card** → the main work item. Sequential per-board `number` (via
+`board.increment!(:cards_count)`), rich-text description, image attachment, steps, and
+**notes**. A card is created complete — there is no draft state and nothing to publish; the
+compose screen (`cards#new`) holds its state in the browser until one POST creates the card,
+its steps included, and `local-save` keeps that state across a reload. Concerns: `Attachments`,
 `Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
 `Searchable`, `Statuses`, `Triageable`.
 
@@ -199,9 +200,9 @@ which has been removed along with the `entropies` table and the hourly auto-post
 Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest under their
 board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
 `resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
-call site. Nested resources on `cards`: `draft`, `image`, `publish`, `notes`, and — for the
-browser alone — `board` and `column` (the two picker screens), `goldness` (the star),
-`steps`, and `drops/column` (the drag-and-drop target, which repaints both lanes).
+call site. Nested resources on `cards`: `image` and `notes`, and — for the browser alone —
+`board` and `column` (the two picker screens), `goldness` (the star), `steps`, and
+`drops/column` (the drag-and-drop target, which repaints both lanes).
 
 **A card is one resource, not eleven.** Its board, its lane, its goldness, and its steps are
 all attributes of the card, so a client reads them from `GET .../cards/:number` — which

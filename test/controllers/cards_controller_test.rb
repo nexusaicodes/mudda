@@ -29,31 +29,53 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ cards(:logo).number, cards(:layout).number, cards(:buy_domain).number, cards(:text).number ].sort, @response.parsed_body["data"].pluck("number").sort
   end
 
-  test "create a new draft" do
+  # Opening the compose screen must not reach the database: a card that is never submitted
+  # would otherwise take a number with it.
+  test "new" do
+    board = boards(:writebook)
+
+    assert_no_difference [ -> { Card.count }, -> { board.reload.cards_count } ] do
+      get new_board_card_path(board)
+    end
+
+    assert_response :success
+    assert_select "form#card_form"
+  end
+
+  test "create builds the whole card from the form" do
+    board = boards(:writebook)
+
     assert_difference -> { Card.count }, 1 do
-      post board_cards_path(boards(:writebook))
+      post board_cards_path(board), params: { card: {
+        title: "One shot", due_on: 1.week.from_now.to_date,
+        steps_attributes: [ { content: "First" }, { content: "Second" } ] } }
     end
 
     card = Card.last
-    assert_redirected_to board_card_draft_path(card.board, card)
-
-    assert card.drafted?
+    assert_redirected_to board_card_path(board, card)
+    assert_equal "One shot", card.title
+    assert_equal [ "First", "Second" ], card.steps.map(&:content).sort
+    assert card.published?
   end
 
-  test "create resumes existing draft if it exists" do
-    draft = boards(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
-
-    assert_no_difference -> { Card.count } do
-      post board_cards_path(boards(:writebook))
-      assert_redirected_to board_card_draft_path(draft.board, draft)
+  # A blank step row is the form offering one, so it must not fail the card.
+  test "create ignores blank step rows" do
+    assert_difference -> { Card.count }, 1 do
+      post board_cards_path(boards(:writebook)), params: { card: {
+        title: "Sparse", due_on: 1.week.from_now.to_date,
+        steps_attributes: [ { content: "Only one" }, { content: "" } ] } }
     end
+
+    assert_equal [ "Only one" ], Card.last.steps.map(&:content)
   end
 
-  test "show redirects to draft when card is drafted" do
-    card = boards(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
+  test "create renders the form again when the card is invalid" do
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)), params: { card: { title: "No due date" } }
+    end
 
-    get board_card_path(card.board, card)
-    assert_redirected_to board_card_draft_path(card.board, card)
+    assert_response :unprocessable_entity
+    assert_select "form#card_form"
   end
 
   test "show renders inline code in title" do

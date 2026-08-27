@@ -5,7 +5,6 @@ class CardsController < ApplicationController
 
   before_action :set_board, if: -> { params[:board_id].present? }
   before_action :set_card, only: %i[ show edit update destroy ]
-  before_action :redirect_if_drafted, only: :show
 
   # Nested under a board, the index answers for that board alone; at the top level it spans
   # every board. The filter narrows either one.
@@ -13,18 +12,28 @@ class CardsController < ApplicationController
     set_page_and_extract_portion_from within_board(@filter.cards)
   end
 
+  def new
+    @card = @board.cards.new
+  end
+
+  # The board comes from the path, and a new card always starts in that board's Triage column,
+  # so neither id is read from the body.
   def create
+    @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user, status: "published")
+
     respond_to do |format|
+      # The form has to come back with its errors on it, so this is the one write that reads
+      # a return value rather than leaving the envelope to JsonErrors.
       format.html do
-        card = Current.user.draft_new_card_in(@board)
-        redirect_to board_card_draft_path(card.board, card)
+        if @card.save
+          redirect_to @card
+        else
+          render :new, status: :unprocessable_entity
+        end
       end
 
       format.json do
-        # The board comes from the path, and a new card always starts in that board's Triage
-        # column, so neither id is read from the body.
-        @card = @board.cards.create! card_params.except(:board_id, :column_id).merge(creator: Current.user, status: "published")
-
+        @card.save!
         render :show, status: :created, location: board_card_path(@board, @card, format: :json)
       end
     end
@@ -72,10 +81,6 @@ class CardsController < ApplicationController
 
     def set_card
       @card = @board.cards.find_by!(number: params[:id])
-    end
-
-    def redirect_if_drafted
-      redirect_to board_card_draft_path(@card.board, @card) if @card.drafted?
     end
 
     def card_params

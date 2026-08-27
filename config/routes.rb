@@ -19,14 +19,12 @@ Rails.application.routes.draw do
     end
 
     # Card numbers run per board, so a card is addressed by its board and its number.
-    resources :cards, except: :new do
+    resources :cards do
       scope module: :cards do
-        resource :draft, only: :show
         resource :board, only: :edit
         resource :column, only: %i[ edit update ]
         resource :goldness, only: %i[ create destroy ]
         resource :image, only: :destroy
-        resource :publish, only: :create
         resources :steps, except: %i[ new index ]
         resources :notes, except: :new
 

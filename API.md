@@ -122,12 +122,11 @@ another board is renumbered on arrival.
 |---|---|---|
 | `GET` | `/cards.json` | Every board — filterable, see below |
 | `GET` | `/boards/:board_id/cards.json` | That board only — same filters |
-| `POST` | `/boards/:board_id/cards.json` | `title`, `description`, `due_on`. **`due_on` is required** |
+| `POST` | `/boards/:board_id/cards.json` | The whole card in one payload — see below. **`due_on` is required** |
 | `GET` | `/boards/:board_id/cards/:number.json` | The whole card — see below |
 | `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on`, `golden`, `board_id`, `column_id`, `steps_attributes` |
 | `DELETE` | `/boards/:board_id/cards/:number.json` | |
 | `DELETE` | `/boards/:board_id/cards/:number/image.json` | Remove the background image |
-| `POST` | `/boards/:board_id/cards/:number/publish.json` | Publish a draft; `422` without a `due_on` |
 
 **A card is fetched in one request.** `GET /boards/1/cards/7.json` carries the card's own
 fields, its `board`, its `column`, all of its `steps`, and the most recent 20 `notes`. When
@@ -144,6 +143,17 @@ not resources of their own, so all of them move with a single `PUT`:
 
 `steps_attributes` adds a step (no `id`), edits one (`id` plus the fields to change), or
 removes one (`id` plus `"_destroy": true`). A step `id` belonging to another card is a `404`.
+A row with nothing in it is dropped rather than failing the card — it is a form offering a
+step — but blanking the `content` of an *existing* step is a `422`, because its `id` makes the
+row non-blank.
+
+The same payload creates a card, so there is no second step to creating one:
+
+```
+POST /boards/1/cards.json
+{ "title": "Ship it", "due_on": "2026-12-01",
+  "steps_attributes": [ { "content": "First" }, { "content": "Second" } ] }
+```
 
 Moving between lanes with `column_id` records the same `card_triaged` event the UI does; a
 `column_id` from another board is a `404`, not a silent no-op.
@@ -154,9 +164,9 @@ it are both stale afterwards. Read the new ones from the response. A `board_id` 
 can't reach is a `404`. Because a move always lands in Triage, a `column_id` sent alongside a
 `board_id` does not survive it.
 
-A card is created published, in Triage. `due_on` is required on any published card, so a
-create without one is a `422`. Every card in an index carries its own `url`, which is the
-reliable way to reach it again.
+A card is created in Triage, and lands complete: there is no draft state and nothing to
+publish. `due_on` is required, so a create without one is a `422`. Every card in an index
+carries its own `url`, which is the reliable way to reach it again.
 
 Both card indexes take the same filters; nesting one under a board narrows it to that board
 rather than replacing the filter. `GET /boards/:board_id/cards.json` is the cheap way to walk
@@ -203,18 +213,18 @@ to that number; once two do, the search results are returned instead.
 There is no separate API: JSON and HTML come from the same routes, so `bin/rails routes`
 lists both audiences at once. Anything that only renders a form or a Turbo fragment answers
 `406` to a `.json` request — every `new` and `edit` path, plus `/`, `/landing`, `/my/menu`,
-`/my/passkeys`, `/prompts/cards` (the `#`-mention autocomplete), the draft screen, the
+`/my/passkeys`, `/prompts/cards` (the `#`-mention autocomplete), the compose screen, the
 drag-and-drop drop target, and the filter and search-history endpoints the filter chrome
 posts to. Build a client from the tables above, not from the route list.
 
 Several of those exist over here as fields rather than paths, and the browser's version is
 refused before it does anything, so a `406` never leaves a half-done write behind. A card's
 lane (`/cards/:number/column`), its star (`/goldness`), its board picker (`/board`), its
-steps (`/steps`), and a lane's colour (`/boards/:id/columns/:id`) are all the browser's;
-`PUT` the card or read the board instead.
+steps (`/steps`), a lane's colour (`/boards/:id/columns/:id`), and the compose screen
+(`/cards/new`) are all the browser's; `PUT` or `POST` the card, or read the board, instead.
 
-Two asymmetries worth knowing: `image` has only `DELETE` — attaching one is a multipart card
-update — and `publish` has no inverse, so a published card cannot be returned to a draft.
+One asymmetry worth knowing: `image` has only `DELETE` — attaching one is a multipart card
+update.
 
 ## Errors
 
