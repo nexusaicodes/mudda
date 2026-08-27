@@ -57,21 +57,25 @@ Compose setup in [DOCKER.md](DOCKER.md).
 
 ## Architecture Overview
 
-### Multi-Tenancy (URL-Based)
+### One Account, Resolved From the Signed-in Identity
 
-Mudda uses **URL path-based multi-tenancy** (`config/initializers/tenanting/account_slug.rb`):
-- Each Account (tenant) has a unique integer `external_account_id` (assigned via
-  `Account::ExternalIdSequence`).
-- URLs are prefixed: `/{account_id}/boards/...`.
-- The `AccountSlug::Extractor` Rack middleware matches the leading numeric slug, **moves it
-  from `PATH_INFO` to `SCRIPT_NAME`** (so Rails treats the app as "mounted" at that path),
-  decodes it to an `external_account_id`, looks up the Account, and wraps the request in
-  `Current.with_account(...)`.
-- Models carry `account_id` for data isolation.
-- Background jobs serialize and restore `Current.account` automatically (see Background Jobs).
+Mudda serves a single account per deployment, and **URLs carry no account prefix** —
+paths are `/boards/:id`, not `/{account_id}/boards/:id`. (Upstream Fizzy prefixed every
+path and rewrote `PATH_INFO`/`SCRIPT_NAME` in a Rack middleware; that middleware and
+`Account#slug` are gone.)
 
-**Key insight:** multi-tenancy without subdomains or separate databases, which keeps local
-development and testing simple.
+- `Current.account` is derived in `app/models/current.rb`: session → identity → user →
+  account. An identity owns exactly one user, so the first user is the user.
+- `Current.account` is therefore **nil on unauthenticated requests**. Anything reachable
+  while signed out must not depend on it (see `Users::AvatarsController`).
+- Models still carry `account_id` for data isolation, and `Account#external_account_id`
+  still exists — it keys the browser-local "last opened board" (`ApplicationHelper#last_board_storage_key`)
+  and identifies the account in seeds and error context.
+- Background jobs serialize and restore `Current.account` explicitly (see Background Jobs),
+  since they run with no session.
+
+**Key insight:** the account follows the credential, not the URL — so there is exactly one
+canonical path for every resource, which is what lets a fixed API/MCP endpoint work.
 
 ### Authentication
 
@@ -189,7 +193,7 @@ cookie as the browser, so scripting the app means reusing a signed-in session.
 
 Primary keys are UUIDs (`lib/rails_ext/active_record_uuid_type.rb`): UUIDv7 generated, then
 hex → base36, left-padded to a fixed **25-char** string (`36^25 > 2^128`), stored as a
-SQLite blob. Note that `Account#external_account_id` (the URL slug) and
+SQLite blob. Note that `Account#external_account_id` and
 `Card#number` are **separate integer sequences**, not UUIDs.
 
 ### Background Jobs
