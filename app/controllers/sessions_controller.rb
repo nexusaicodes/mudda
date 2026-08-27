@@ -1,7 +1,6 @@
 class SessionsController < ApplicationController
   include ActionPack::Passkey::Request
 
-  disallow_account_scope
   require_unauthenticated_access except: :destroy
 
   layout "public"

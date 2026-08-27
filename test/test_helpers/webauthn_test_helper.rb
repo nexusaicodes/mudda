@@ -21,7 +21,7 @@ module WebauthnTestHelper
 
   private
     def request_webauthn_challenge(purpose: "authentication")
-      untenanted { post my_passkey_challenge_url, params: { purpose: purpose } }
+      post my_passkey_challenge_url, params: { purpose: purpose }
       response.parsed_body["challenge"]
     end
 

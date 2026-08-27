@@ -7,11 +7,6 @@ class AccountTest < ActiveSupport::TestCase
     end
   end
 
-  test "slug" do
-    account = accounts("37s")
-    assert_equal "/#{account.external_account_id}", account.slug
-  end
-
   test ".create_with_owner creates a new local account" do
     Current.without_account do
       identity = identities(:david)

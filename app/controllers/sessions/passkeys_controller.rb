@@ -1,7 +1,6 @@
 class Sessions::PasskeysController < ApplicationController
   include ActionPack::Passkey::Request
 
-  disallow_account_scope
   require_unauthenticated_access
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 

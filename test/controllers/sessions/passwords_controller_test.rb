@@ -4,29 +4,23 @@ class Sessions::PasswordsControllerTest < ActionDispatch::IntegrationTest
   test "sign in with the owner password" do
     identity = identities(:david)
 
-    untenanted do
-      post session_password_path, params: { email_address: identity.email_address, password: owner_password }
-    end
+    post session_password_path, params: { email_address: identity.email_address, password: owner_password }
 
     assert_response :redirect
     assert cookies[:session_token].present?
   end
 
   test "reject a wrong password" do
-    untenanted do
-      post session_password_path, params: { email_address: identities(:david).email_address, password: "wrong" }
+    post session_password_path, params: { email_address: identities(:david).email_address, password: "wrong" }
 
-      assert_redirected_to new_session_path
-      assert_not cookies[:session_token].present?
-    end
+    assert_redirected_to new_session_path
+    assert_not cookies[:session_token].present?
   end
 
   test "password sign-in still works once a passkey exists" do
     create_passkey_for identities(:david)
 
-    untenanted do
-      post session_password_path, params: { email_address: identities(:david).email_address, password: owner_password }
-    end
+    post session_password_path, params: { email_address: identities(:david).email_address, password: owner_password }
 
     assert_response :redirect
     assert cookies[:session_token].present?

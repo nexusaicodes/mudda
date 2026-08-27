@@ -30,12 +30,11 @@ module ActiveStorageControllerExtensions
 
   included do
     before_action do
-      # Add script_name so that Disk Service will generate correct URLs for uploads
+      # Disk Service needs the request's host to generate correct upload URLs.
       ActiveStorage::Current.url_options = {
         protocol: request.protocol,
         host: request.host,
-        port: request.port,
-        script_name: request.script_name
+        port: request.port
       }
     end
   end

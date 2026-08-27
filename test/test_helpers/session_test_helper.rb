@@ -21,38 +21,16 @@ module SessionTestHelper
   end
 
   def sign_out
-    untenanted do
-      delete session_path
-    end
+    delete session_path
+
     assert_not cookies[:session_token].present?
-  end
-
-  def with_current_user(user)
-    user = users(user) unless user.is_a? User
-    @old_session = Current.session
-    begin
-      Current.session = Session.new(identity: user.identity)
-      yield
-    ensure
-      Current.session = @old_session
-    end
-  end
-
-  def untenanted(&block)
-    original_script_name = integration_session.default_url_options[:script_name]
-    integration_session.default_url_options[:script_name] = ""
-    yield
-  ensure
-    integration_session.default_url_options[:script_name] = original_script_name
   end
 
   private
     def password_sign_in(identity)
       cookies.delete :session_token
 
-      untenanted do
-        post session_password_path, params: { email_address: identity.email_address, password: owner_password }
-      end
+      post session_password_path, params: { email_address: identity.email_address, password: owner_password }
 
       assert_response :redirect, "Posting the owner password should grant access"
       assert_not_nil cookies.get_cookie("session_token"), "Expected session_token cookie to be set after sign in"

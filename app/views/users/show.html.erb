@@ -27,7 +27,7 @@
           <span>Manage passkeys</span>
         <% end %>
 
-        <%= button_to session_path(script_name: nil), method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
+        <%= button_to session_path, method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
           <span>Sign out of Mudda on this device</span>
         <% end %>
       </div>

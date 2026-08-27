@@ -5,46 +5,19 @@ class ApplicationHelperTest < ActionView::TestCase
     Nokogiri::HTML::DocumentFragment.parse(html)
   end
 
-  test "page_title_tag on untenanted page" do
-    Current.account = nil
-
+  test "page_title_tag without a page title" do
     assert_select parse(page_title_tag), "title", text: "Mudda"
   end
 
-  test "page_title_tag on untenanted page with a page title" do
-    @page_title = "Holodeck"
-    Current.account = nil
-
-    assert_select parse(page_title_tag), "title", text: "Holodeck | Mudda"
-  end
-
-  test "page_title_tag on tenanted page when user has a single account" do
-    Current.session = sessions(:david)
-
-    assert_select parse(page_title_tag), "title", text: "Mudda"
-  end
-
-  test "page_title_tag on tenanted page when user has multiple accounts" do
-    Current.session = sessions(:david)
-    other_account = Account.create!(external_account_id: "dangling-tenant", name: "Other Account")
-    identities(:david).users.create!(account: other_account, name: "David")
-
-    assert_select parse(page_title_tag), "title", text: "Mudda | Mudda"
-  end
-
-  test "page_title_tag on tenanted page with a page title when user has a single account" do
-    Current.session = sessions(:david)
+  test "page_title_tag with a page title" do
     @page_title = "Holodeck"
 
     assert_select parse(page_title_tag), "title", text: "Holodeck | Mudda"
   end
 
-  test "page_title_tag on tenanted page with a page title when user has multiple account" do
-    Current.session = sessions(:david)
-    other_account = Account.create!(external_account_id: "dangling-tenant", name: "Other Account")
-    identities(:david).users.create!(account: other_account, name: "David")
-    @page_title = "Holodeck"
+  test "last_board_storage_key is scoped to the account" do
+    account = accounts("37s")
 
-    assert_select parse(page_title_tag), "title", text: "Holodeck | Mudda | Mudda"
+    assert_equal "mudda:last-board:#{account.external_account_id}", last_board_storage_key(account)
   end
 end

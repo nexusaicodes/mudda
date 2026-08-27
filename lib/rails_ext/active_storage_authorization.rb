@@ -28,6 +28,15 @@ Rails.application.config.to_prepare do
       # Ensure require_authentication runs after set_blob.
       skip_before_action :require_authentication
       before_action :require_authentication, :ensure_accessible, unless: :publicly_accessible_blob?
+
+      # Representation controllers process the variant in set_representation, which stores
+      # a new blob. Move that behind the checks above so no work is done for an
+      # unauthorized request, and so the variant's blob is created with Current.account set
+      # — the account comes from the signed-in identity, not the URL.
+      if private_method_defined?(:set_representation)
+        skip_before_action :set_representation
+        before_action :set_representation
+      end
     end
 
     private

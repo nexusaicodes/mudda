@@ -10,9 +10,7 @@ class BlockSearchEngineIndexingTest < ActionDispatch::IntegrationTest
   end
 
   test "sets X-Robots-Tag header to none on unauthenticated requests" do
-    untenanted do
-      get new_session_path
-    end
+    get new_session_path
 
     assert_response :success
     assert_equal "none", response.headers["X-Robots-Tag"]

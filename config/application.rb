@@ -42,6 +42,6 @@ module Mudda
     end
 
     config.action_pack.passkey.draw_routes = false
-    config.action_pack.passkey.challenge_url = -> { my_passkey_challenge_path(script_name: "") }
+    config.action_pack.passkey.challenge_url = -> { my_passkey_challenge_path }
   end
 end

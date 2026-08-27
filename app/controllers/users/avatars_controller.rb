@@ -21,8 +21,10 @@ class Users::AvatarsController < ApplicationController
   end
 
   private
+    # Avatars are publicly accessible and keyed by an unguessable UUID, so this is not
+    # scoped to Current.account — which is absent on the unauthenticated show.
     def set_user
-      @user = Current.account.users.find(params[:user_id])
+      @user = User.find(params[:user_id])
     end
 
     def cache_control

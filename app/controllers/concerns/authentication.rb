@@ -2,7 +2,6 @@ module Authentication
   extend ActiveSupport::Concern
 
   included do
-    before_action :require_account # Checking and setting account must happen first
     before_action :require_authentication
     helper_method :authenticated?
 
@@ -22,22 +21,11 @@ module Authentication
       before_action :resume_session, **options
       allow_unauthorized_access **options
     end
-
-    def disallow_account_scope(**options)
-      skip_before_action :require_account, **options
-      before_action :redirect_tenanted_request, **options
-    end
   end
 
   private
     def authenticated?
       Current.identity.present?
-    end
-
-    def require_account
-      unless Current.account.present?
-        redirect_to main_app.session_menu_path(script_name: nil)
-      end
     end
 
     def require_authentication
@@ -55,9 +43,7 @@ module Authentication
     end
 
     def request_authentication
-      if Current.account.present?
-        session[:return_to_after_authenticating] = request.url
-      end
+      session[:return_to_after_authenticating] = request.url
 
       redirect_to_login_url
     end
@@ -68,10 +54,6 @@ module Authentication
 
     def redirect_authenticated_user
       redirect_to main_app.root_url if authenticated?
-    end
-
-    def redirect_tenanted_request
-      redirect_to main_app.root_url if Current.account.present?
     end
 
     def start_new_session_for(identity)
@@ -86,7 +68,7 @@ module Authentication
     end
 
     def terminate_session
-      Current.session.destroy
+      Current.session&.destroy
       cookies.delete(:session_token)
     end
 
