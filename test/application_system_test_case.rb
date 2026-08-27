@@ -30,8 +30,15 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   private
+    # Drives the real sign-in form: the owner password is the only way in, and
+    # +owner_password+ comes from SessionTestHelper.
     def sign_in_as(user)
-      visit session_transfer_url(user.identity.transfer_id, script_name: nil)
+      visit new_session_url
+
+      fill_in "email_address", with: user.identity.email_address
+      fill_in "password", with: owner_password
+      find("#log_in").click
+
       # The landing page redirects (client-side) to the last/most-recent board.
       assert_current_path %r{/boards/}
     end
