@@ -57,9 +57,10 @@ class BoardsController < ApplicationController
       @board = Current.user.boards.find params[:id]
     end
 
+    # The board narrows the query, not the filter: Filter#boards is a HABTM, so assigning
+    # board_ids would rewrite a saved filter's boards on disk as a side effect of a GET.
     def show_filtered_cards
-      @filter.board_ids = [ @board.id ]
-      set_page_and_extract_portion_from @filter.cards
+      set_page_and_extract_portion_from @filter.cards.where(board: @board)
     end
 
     def show_columns

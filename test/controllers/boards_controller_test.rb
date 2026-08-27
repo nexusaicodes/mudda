@@ -112,4 +112,32 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert first_board["creator"].present?
     assert first_board["creator"]["email_address"].present?
   end
+
+  # Filter#boards is a HABTM, so assigning board_ids here would write join rows — pinning a
+  # saved filter to whichever board its owner last looked at, on every later page.
+  test "showing a filtered board leaves a saved filter alone" do
+    Current.user = users(:kevin)
+    filter = users(:kevin).filters.remember(indexed_by: "golden")
+
+    get board_path(boards(:writebook), indexed_by: "golden")
+
+    assert_response :success
+    assert_equal filter, users(:kevin).filters.from_params(indexed_by: "golden"),
+      "The request must match the saved filter, or this test proves nothing"
+    # Re-find rather than reload: Filter#boards memoizes into @boards, which reload keeps.
+    assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
+  end
+
+  test "showing a filtered board lists only that board's cards" do
+    Current.user = users(:kevin)
+    cards(:logo).gild
+    boards(:private).cards.create!(title: "Golden elsewhere", due_on: 1.week.from_now,
+      status: "published", creator: users(:kevin), last_active_at: Time.current).gild
+
+    get board_path(boards(:writebook), indexed_by: "golden")
+
+    assert_response :success
+    assert_select ".card__title", text: /logo/i
+    assert_select "*", { text: /Golden elsewhere/, count: 0 }
+  end
 end
