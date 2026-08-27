@@ -12,12 +12,10 @@ Rails.application.routes.draw do
   end
 
   resources :boards do
+    # A board's columns are fixed and travel with the board itself, so what is left is the
+    # browser's: one lane's cards, and the color picker.
     scope module: :boards do
-      resources :columns, only: %i[ index show update ] do
-        scope module: :columns do
-          resources :cards, only: :index
-        end
-      end
+      resources :columns, only: %i[ show update ]
     end
 
     # Card numbers run per board, so a card is addressed by its board and its number.
@@ -29,7 +27,7 @@ Rails.application.routes.draw do
         resource :goldness, only: %i[ create destroy ]
         resource :image, only: :destroy
         resource :publish, only: :create
-        resources :steps, except: :new
+        resources :steps, except: %i[ new index ]
         resources :notes, except: :new
 
         namespace :drops do

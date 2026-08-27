@@ -174,7 +174,10 @@ Every board is created (`Board::Triageable`) with five fixed lanes, in order:
 - `awaiting_triage?` = in **Triage**; `triaged?` = not Triage.
 - `active?` = published and not Done/Backlog.
 
-`triage_into(column)` moves a card between lanes (and records a `triaged` event);
+`triage_into(column)` moves a card between lanes. The `card_triaged` event is recorded by an
+`after_update` on `column_id`, so **every** lane change is audited whichever door it comes
+through — the drop target, the picker, or a `PUT` to the card with a `column_id`.
+
 Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
 the card with a `board_id`. `Card#handle_board_change` does the rest on any such change: it
 drops the card into the destination's Triage column, **renumbers it** (numbers run per
@@ -196,15 +199,27 @@ which has been removed along with the `entropies` table and the hourly auto-post
 Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest under their
 board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
 `resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
-call site. Nested resources on `cards`: `draft`, `board` (the picker screen only —
-choosing one submits to `CardsController#update`, because a card's board is an attribute of
-the card), `column`, `goldness`, `image`, `publish`, `steps`, `notes`, and `drops/column`
-(the drag-and-drop target, which repaints both lanes; `column` is the general move).
+call site. Nested resources on `cards`: `draft`, `image`, `publish`, `notes`, and — for the
+browser alone — `board` and `column` (the two picker screens), `goldness` (the star),
+`steps`, and `drops/column` (the drag-and-drop target, which repaints both lanes).
+
+**A card is one resource, not eleven.** Its board, its lane, its goldness, and its steps are
+all attributes of the card, so a client reads them from `GET .../cards/:number` — which
+carries the board, the column, every step, and the tail of the note log — and writes them
+back with a single `PUT`, via `board_id`, `column_id`, `golden`, and `steps_attributes`
+(`accepts_nested_attributes_for :steps`). The browser's one-thing-at-a-time endpoints are the
+same associations by another door, and the `BrowserOnly` concern refuses any other format
+**before** the action runs, so a JSON request to one is a 406 rather than a write followed by
+a 406. Notes are the exception that stays a collection: a card can carry thousands, so it
+embeds only the most recent `Card::Notable::EMBEDDED_NOTES_LIMIT` and points at its notes
+index for the rest.
 
 The card index answers at both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
-same filters apply to either. `/prompts/cards` (the mention autocomplete) stays cross-board. Boards expose
-read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there is no
-create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
+same filters apply to either — including `column_ids[]`, which is how a single lane is read
+now that columns have no endpoints of their own. `/prompts/cards` (the mention autocomplete)
+stays cross-board. A board's five fixed columns travel with the board itself
+(`boards/show.json.jbuilder`); what is left under `boards/:id/columns` is the browser's lane
+frame and colour picker.
 
 Every declaration carries `only:`/`except:` naming exactly the actions its controller
 implements, so `bin/rails routes` lists what is served rather than what `resources` would

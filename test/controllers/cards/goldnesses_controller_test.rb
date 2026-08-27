@@ -19,25 +19,18 @@ class Cards::GoldnessesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "create as JSON" do
+  # Goldness is a boolean column on the card, so the star button is the browser's and every
+  # other client sets it by updating the card.
+  test "goldness has no JSON representation of its own" do
     card = cards(:text)
 
-    assert_not card.golden?
-
     post board_card_goldness_path(card.board, card), as: :json
-
-    assert_response :no_content
-    assert card.reload.golden?
-  end
-
-  test "destroy as JSON" do
-    card = cards(:logo)
-
-    assert card.golden?
-
-    delete board_card_goldness_path(card.board, card), as: :json
-
-    assert_response :no_content
+    assert_response :not_acceptable
     assert_not card.reload.golden?
+
+    put board_card_path(card.board, card), params: { card: { golden: true } }, as: :json
+    assert_response :success
+    assert card.reload.golden?
+    assert @response.parsed_body["golden"]
   end
 end

@@ -1,5 +1,5 @@
 class Cards::Drops::ColumnsController < ApplicationController
-  include CardScoped
+  include CardScoped, BrowserOnly
 
   def create
     @column = @board.columns.find(params[:column_id])

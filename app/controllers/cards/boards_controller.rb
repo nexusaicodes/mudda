@@ -1,7 +1,7 @@
 # The board picker. Choosing a board submits to CardsController#update, which is where a
 # card's board actually changes.
 class Cards::BoardsController < ApplicationController
-  include CardScoped
+  include CardScoped, BrowserOnly
 
   def edit
     @boards = Current.user.boards.ordered_by_recent_activity

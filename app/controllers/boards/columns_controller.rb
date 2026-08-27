@@ -1,28 +1,21 @@
 class Boards::ColumnsController < ApplicationController
   wrap_parameters :column, include: %i[ color ]
 
-  include BoardScoped, StrictQueryParams
+  include BoardScoped, BrowserOnly, StrictQueryParams
 
-  before_action :set_column, only: %i[ show update ]
+  before_action :set_column
 
-  def index
-    @columns = @board.columns.sorted
-    fresh_when etag: @columns
-  end
-
+  # A board's columns are fixed, so they travel with the board itself (see
+  # boards/show.json.jbuilder) rather than as a collection of their own. What is left here is
+  # the browser's: one lane's cards, and the color picker.
   def show
     set_page_and_extract_portion_from @column.cards.published.by_due_date.with_golden_first.preloaded
     fresh_when etag: [ @page.records, Date.current ]
   end
 
-  # Columns are fixed; only their color is editable.
+  # Color is a display preference, so it is set from the board page and nowhere else.
   def update
     @column.update!(column_params)
-
-    respond_to do |format|
-      format.turbo_stream
-      format.json { render :show }
-    end
   end
 
   private

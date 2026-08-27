@@ -1,6 +1,8 @@
 class Cards::ColumnsController < ApplicationController
-  include CardScoped
+  include CardScoped, BrowserOnly
 
+  # The lane picker. A card's column is one of its attributes, so everywhere but the browser
+  # moves it with a PUT to the card itself (see CardsController).
   def edit
     @columns = @board.columns.sorted
 
@@ -9,11 +11,7 @@ class Cards::ColumnsController < ApplicationController
 
   def update
     @card.triage_into(column)
-
-    respond_to do |format|
-      format.html { redirect_back_or_to board_card_path(@board, @card) }
-      format.json { render "cards/show" }
-    end
+    redirect_back_or_to board_card_path(@board, @card)
   end
 
   private

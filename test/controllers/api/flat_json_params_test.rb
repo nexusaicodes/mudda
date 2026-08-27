@@ -59,25 +59,15 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     assert_equal "Flat board", @response.parsed_body["name"]
   end
 
-  test "create step with flat JSON" do
+  test "add a step to a card with flat JSON" do
     card = cards(:logo)
 
     assert_difference -> { card.steps.count }, +1 do
-      post board_card_steps_path(card.board, card), params: { content: "Flat step" }, as: :json
+      put board_card_path(card.board, card), params: { steps_attributes: [ { content: "Flat step" } ] }, as: :json
     end
 
-    assert_response :created
-    assert_equal "Flat step", Step.last.content
-  end
-
-  test "update step with flat JSON" do
-    card = cards(:logo)
-    step = card.steps.create!(content: "Original")
-
-    put board_card_step_path(card.board, card, step), params: { content: "Flat updated" }, as: :json
-
     assert_response :success
-    assert_equal "Flat updated", step.reload.content
+    assert_equal "Flat step", Step.last.content
   end
 
   test "update user with flat JSON" do

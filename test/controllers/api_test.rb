@@ -166,7 +166,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     %w[ Todo Doing Done ].each do |name|
       column_id = columns.find { |column| column["name"] == name }["id"]
 
-      put board_card_column_path(board, number, format: :json),
+      put board_card_path(board, number, format: :json),
         params: { column_id: column_id }, headers: headers, as: :json
 
       assert_response :success
@@ -212,22 +212,22 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "due_on")
   end
 
-  # A bang method's RecordInvalid has to reach the client as the JSON error envelope.
-  test "a validation failure on a bang-method write is a JSON 422" do
-    headers = bearer_headers_for(@user)
+  # A nested record's errors have to reach the client in the same envelope as the card's own.
+  test "a validation failure inside a card's steps is a JSON 422" do
+    card, headers = cards(:logo), bearer_headers_for(@user)
 
-    post board_card_steps_path(cards(:logo).board, cards(:logo), format: :json),
-      params: { content: "" }, headers: headers, as: :json
+    put board_card_path(card.board, card, format: :json),
+      params: { steps_attributes: [ { content: "" } ] }, headers: headers, as: :json
 
     assert_response :unprocessable_entity
-    assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "content")
+    assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "steps.content")
   end
 
   test "moving a card to a column that is not on its board is a JSON 404, not a silent no-op" do
     headers = bearer_headers_for(@user)
     card = cards(:logo)
 
-    put board_card_column_path(card.board, card, format: :json),
+    put board_card_path(card.board, card, format: :json),
       params: { column_id: columns(:private_todo).id }, headers: headers, as: :json
 
     assert_response :not_found
@@ -387,14 +387,11 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "every index answers with data and paging" do
     headers = bearer_headers_for(@user)
     board = boards(:writebook)
-    column = board.columns.sorted.first
 
     [ cards_path(format: :json),
+      board_cards_path(board, format: :json),
       boards_path(format: :json),
-      board_columns_path(board, format: :json),
-      board_column_cards_path(board, column, format: :json),
       board_card_notes_path(cards(:logo).board, cards(:logo), format: :json),
-      board_card_steps_path(cards(:logo).board, cards(:logo), format: :json),
       search_path(format: :json, q: "layout") ].each do |path|
       get path, headers: headers
 
@@ -465,12 +462,9 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test "the indexes that take no filters are strict too" do
     headers = bearer_headers_for(@user)
-    board = boards(:writebook)
 
     [ board_card_notes_path(cards(:logo).board, cards(:logo), format: :json, pagee: 3),
-      board_card_steps_path(cards(:logo).board, cards(:logo), format: :json, complete: true),
-      board_columns_path(board, format: :json, sorted_by: "oldest"),
-      board_column_cards_path(board, board.columns.sorted.first, format: :json, colum_ids: "x") ].each do |path|
+      board_card_notes_path(cards(:logo).board, cards(:logo), format: :json, complete: true) ].each do |path|
       get path, headers: headers
 
       assert_response :unprocessable_entity, "#{path} should refuse a parameter it does not answer to"
@@ -648,16 +642,67 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "goldness round-trips through the JSON API" do
     card, headers = cards(:text), bearer_headers_for(@user)
 
-    post board_card_goldness_path(card.board, card, format: :json), headers: headers
+    put board_card_path(card.board, card, format: :json),
+      params: { golden: true }, headers: headers, as: :json
     assert_response :success
-
-    get board_card_path(card.board, card, format: :json), headers: headers
     assert @response.parsed_body["golden"]
 
-    delete board_card_goldness_path(card.board, card, format: :json), headers: headers
+    put board_card_path(card.board, card, format: :json),
+      params: { golden: false }, headers: headers, as: :json
+    assert_not @response.parsed_body["golden"]
 
     get board_card_path(card.board, card, format: :json), headers: headers
     assert_not @response.parsed_body["golden"]
+  end
+
+  # A card is read in one request: its steps and the tail of its note log come with it.
+  test "a card carries the tail of its note log" do
+    card, headers = cards(:logo), bearer_headers_for(@user)
+    limit = Card::Notable::EMBEDDED_NOTES_LIMIT
+
+    (limit + 3).times { |i| card.notes.create!(body: "Note #{i}", creator: @user) }
+
+    get board_card_path(card.board, card, format: :json), headers: headers
+
+    assert_response :success
+    notes = @response.parsed_body["notes"]
+    assert_equal limit, notes.size
+    assert_equal "Note 3", notes.first.dig("body", "plain_text")
+    assert_equal "Note #{limit + 2}", notes.last.dig("body", "plain_text")
+    assert @response.parsed_body["notes_truncated"]
+
+    # And the whole log is a page away, at the url the card names.
+    get @response.parsed_body["notes_url"], headers: headers, as: :json
+    assert_response :success
+    assert_operator @response.parsed_body["data"].size, :>, 0
+    assert @response.parsed_body["paging"].key?("next")
+  end
+
+  test "a card whose notes all fit is not marked truncated" do
+    card, headers = cards(:logo), bearer_headers_for(@user)
+    assert_operator card.notes.count, :<, Card::Notable::EMBEDDED_NOTES_LIMIT
+
+    get board_card_path(card.board, card, format: :json), headers: headers
+
+    assert_equal card.notes.count, @response.parsed_body["notes"].size
+    assert_not @response.parsed_body["notes_truncated"]
+  end
+
+  # column_id is the single source of a card's lifecycle, so moving lanes has to leave the
+  # same audit trail whichever door it comes through.
+  test "moving a card between lanes by updating it records the triage" do
+    card, headers = cards(:logo), bearer_headers_for(@user)
+    done = card.board.columns.find_by!(name: "Done")
+
+    assert_difference -> { card.events.where(action: "card_triaged").count }, +1 do
+      put board_card_path(card.board, card, format: :json),
+        params: { column_id: done.id }, headers: headers, as: :json
+    end
+
+    assert_response :success
+    assert_equal "Done", @response.parsed_body["column"]["name"]
+    assert card.reload.closed?
+    assert_equal({ "particulars" => { "column" => "Done" } }, card.events.where(action: "card_triaged").last.particulars)
   end
 
   private

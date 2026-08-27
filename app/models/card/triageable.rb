@@ -19,6 +19,7 @@ module Card::Triageable
     belongs_to :column, touch: true
 
     before_validation :assign_default_column, on: :create
+    after_update :track_triage_event, if: :saved_change_to_column_id?
 
     scope :in_column_named,     ->(*names) { joins(:column).where(columns: { name: names }) }
     scope :not_in_column_named, ->(*names) { joins(:column).where.not(columns: { name: names }) }
@@ -56,14 +57,18 @@ module Card::Triageable
   end
 
   def triage_into(column)
-    transaction do
-      update! column: column
-      track_event "triaged", particulars: { column: column.name }
-    end
+    update! column: column
   end
 
   private
     def assign_default_column
       self.column ||= board&.triage_column
+    end
+
+    # Every lane change is a triage, whichever route asked for it: the drag-and-drop target,
+    # the column picker, a PUT to the card with a column_id, or the move into the destination
+    # board's Triage on a reparent.
+    def track_triage_event
+      track_event "triaged", particulars: { column: column.name }
     end
 end

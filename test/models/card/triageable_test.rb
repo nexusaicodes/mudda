@@ -35,6 +35,30 @@ class Card::TriageableTest < ActiveSupport::TestCase
     assert card.triaged?
   end
 
+  # The event follows column_id itself, not the method that changed it, so a plain attribute
+  # write is audited the same as triage_into.
+  test "any lane change is audited" do
+    card = cards(:logo)
+
+    assert_difference -> { card.reload.events.where(action: "card_triaged").count }, +1 do
+      card.update! column: columns(:writebook_done)
+    end
+  end
+
+  # A board change lands the card in the destination's Triage, which is a lane change like
+  # any other and is recorded as one alongside the board-change event.
+  test "landing in a new board's Triage is audited as a triage" do
+    card = cards(:text)
+
+    assert_difference -> { card.reload.events.where(action: "card_triaged").count }, +1 do
+      assert_difference -> { card.reload.events.where(action: "card_board_changed").count }, +1 do
+        card.update! board: boards(:private)
+      end
+    end
+
+    assert card.reload.awaiting_triage?
+  end
+
   test "scopes" do
     assert_includes Card.awaiting_triage, cards(:logo)
     assert_not_includes Card.awaiting_triage, cards(:text)

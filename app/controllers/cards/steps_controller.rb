@@ -1,21 +1,14 @@
 class Cards::StepsController < ApplicationController
   wrap_parameters :step, include: %i[ content completed ]
 
-  include CardScoped, StrictQueryParams
+  include CardScoped, BrowserOnly, StrictQueryParams
 
   before_action :set_step, only: %i[ show edit update destroy ]
 
-  def index
-    fresh_when etag: @card.steps
-  end
-
+  # The browser edits steps one at a time. Everywhere else they are part of the card, written
+  # through its steps_attributes (see Card::Multistep) and read from its own representation.
   def create
     @step = @card.steps.create!(step_params)
-
-    respond_to do |format|
-      format.turbo_stream
-      format.json { render :show, status: :created, location: board_card_step_path(@card.board, @card, @step, format: :json) }
-    end
   end
 
   def show
@@ -26,20 +19,10 @@ class Cards::StepsController < ApplicationController
 
   def update
     @step.update!(step_params)
-
-    respond_to do |format|
-      format.turbo_stream
-      format.json { render :show }
-    end
   end
 
   def destroy
     @step.destroy!
-
-    respond_to do |format|
-      format.turbo_stream
-      format.json { head :no_content }
-    end
   end
 
   private

@@ -1,5 +1,5 @@
 class CardsController < ApplicationController
-  wrap_parameters :card, include: %i[ title description image due_on created_at last_active_at board_id ]
+  wrap_parameters :card, include: %i[ title description image due_on created_at last_active_at board_id column_id golden steps_attributes ]
 
   include FilterScoped
 
@@ -21,7 +21,9 @@ class CardsController < ApplicationController
       end
 
       format.json do
-        @card = @board.cards.new card_params.except(:board_id).merge(creator: Current.user, status: "published")
+        # The board comes from the path, and a new card always starts in that board's Triage
+        # column, so neither id is read from the body.
+        @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user, status: "published")
 
         if @card.save
           render :show, status: :created, location: board_card_path(@board, @card, format: :json)
@@ -84,19 +86,34 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at, :board_id ])
+      params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at, :golden,
+        :board_id, :column_id, steps_attributes: [ [ :id, :content, :completed, :_destroy ] ] ])
     end
 
-    # A card's board is one of its attributes, so moving it is an update. The destination
-    # resolves through the user's own boards, so board_id can never name one they can't
-    # reach, and a blank one means "leave the card where it is".
+    # A card's board and column are two of its attributes, so moving it either way is an
+    # update. Both associations are resolved rather than assigned by id, so neither can name
+    # a record the caller can't reach; a blank one leaves the card where it is. Note that a
+    # board change lands the card in the destination's Triage column (Card#handle_board_change),
+    # so a column_id sent alongside a board_id does not survive the move.
     def card_attributes
-      attributes = card_params.except(:board_id)
+      card_params.except(:board_id, :column_id).merge(destination_board).merge(destination_column)
+    end
 
+    def destination_board
       if board_id = card_params[:board_id].presence
-        attributes.merge(board: Current.user.boards.find(board_id))
+        { board: Current.user.boards.find(board_id) }
       else
-        attributes
+        {}
+      end
+    end
+
+    # Scoped to the card's own board, so a column id from anywhere else is a 404 rather than
+    # a move across boards.
+    def destination_column
+      if column_id = card_params[:column_id].presence
+        { column: @card.board.columns.find(column_id) }
+      else
+        {}
       end
     end
 end
