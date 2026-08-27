@@ -25,6 +25,16 @@ Send it on every request:
 curl -H "Authorization: Bearer $TOKEN" https://your-mudda/boards.json
 ```
 
+The scheme is matched **case-sensitively**: `Bearer` and `Token` are accepted, `bearer` is
+not. A token is valid for **90 days** from the moment it is minted, and an expired one is
+refused exactly like a revoked one — a `401`, with nothing to distinguish the two, so treat
+a sudden `401` on a long-lived agent as "mint a new token". A browser session does not
+expire on a timer.
+
+An `Authorization` header always decides the request: present one and the session cookie is
+ignored, so a tool running on a machine that is also signed in gets the identity it asked
+for.
+
 **Signing in over JSON** returns the same kind of token, if minting one from a shell isn't
 convenient. Sessions minted this way are labelled `json-sign-in`:
 
@@ -35,6 +45,9 @@ curl -X POST https://your-mudda/session/password.json \
 # => {"session_token":"…"}
 ```
 
+Like every other write, the credentials may be sent flat as above or wrapped
+(`{"session":{"email_address":"…","password":"…"}}`).
+
 Sign-in is rate limited to 10 attempts every 3 minutes.
 
 ### Managing tokens
@@ -42,7 +55,7 @@ Sign-in is rate limited to 10 attempts every 3 minutes.
 | Command | What it does |
 |---|---|
 | `make token LABEL=claude` | Mint a token and print it (unlabelled mints as `api`) |
-| `make tokens` | List minted tokens and when they were created |
+| `make tokens` | List minted tokens, when they were created, and when they expire |
 | `make revoke LABEL=claude` | Revoke every token with that label |
 | `make reset-auth` | Revoke everything, tokens and browser sessions alike |
 
@@ -52,7 +65,11 @@ Each wraps `bin/rails auth:*` in the app's container; run
 Labels exist so an agent's access can be revoked without signing your browser out. Give every
 agent its own label — everything sharing one label is revoked together, so
 `make revoke LABEL=json-sign-in` ends every session minted through the JSON sign-in.
-`DELETE /session.json` ends the current session too.
+
+**A label holds one live token.** Minting under a label revokes whatever token that label
+already had, so an agent that signs in on every run replaces its credential rather than
+leaving a pile of them behind. `DELETE /session.json` ends the token making the request;
+revoking any *other* token needs shell access to the box.
 
 A bearer request is never handed a session cookie, and an unauthenticated JSON request
 returns `401` rather than redirecting to the sign-in page.

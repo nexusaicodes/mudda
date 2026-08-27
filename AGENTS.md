@@ -100,6 +100,9 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   signed out and redirected to the login page, while a JSON client keeps its session and gets
   a 403. A `Session` may carry a `label`, which marks it as an API token minted by
   `make token` (`auth:token`) or by the JSON sign-in, which labels its sessions `json-sign-in`.
+  A label holds one live token: minting under a label revokes the previous one. `Session#token`
+  is the single definition of the credential — labelled sessions expire after
+  `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 

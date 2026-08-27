@@ -1,4 +1,6 @@
 class Sessions::PasswordsController < ApplicationController
+  wrap_parameters :session, include: %i[ email_address password ]
+
   # Throttling the only way into the app can't ride on the general cache, which is the null
   # store in test and in development without caching — a rate limit that silently counts
   # nothing is worse than none, because it reads as protection.
@@ -27,12 +29,18 @@ class Sessions::PasswordsController < ApplicationController
   end
 
   private
+    # A JSON client may send the credentials flat or wrapped, the way every other write in
+    # this API accepts both; a browser form always sends them flat.
+    def credentials
+      params[:session] || params
+    end
+
     def email_address
-      params[:email_address]
+      credentials[:email_address]
     end
 
     def password
-      params[:password]
+      credentials[:password]
     end
 
     def rate_limit_exceeded

@@ -36,8 +36,10 @@ module Authentication
       resume_session || request_authentication
     end
 
+    # An Authorization header is a deliberate act, so it decides the request; a cookie is
+    # ambient and only answers when nothing was presented.
     def resume_session
-      if session = find_session_by_cookie || find_session_by_bearer_token
+      if session = find_session_by_bearer_token || find_session_by_cookie
         set_current_session session
       end
     end
@@ -49,14 +51,9 @@ module Authentication
     # Non-browser clients present the same signed id the JSON sign-in hands back, as
     # `Authorization: Bearer <token>`. See API.md.
     def find_session_by_bearer_token
-      if token = bearer_token
+      authenticate_with_http_token do |token, _options|
         Session.find_signed(token)
       end
-    end
-
-    # The scheme is case-insensitive per RFC 7235, and clients vary on how they pad the value.
-    def bearer_token
-      request.authorization&.match(/\ABearer\s+(.+?)\s*\z/i)&.captures&.first
     end
 
     # An API client needs an error it can read, not a login page. Every other format —
@@ -103,7 +100,7 @@ module Authentication
 
       identity.sessions.create!(attributes).tap do |session|
         set_current_session session
-        cookies.signed.permanent[:session_token] = { value: session.signed_id, httponly: true, same_site: :lax }
+        cookies.signed.permanent[:session_token] = { value: session.token, httponly: true, same_site: :lax }
       end
     end
 
@@ -126,6 +123,6 @@ module Authentication
     # the session's signed id — not the cookie's value, which wraps that id in a second layer
     # of cookie signing and so can't be handed back to Session.find_signed.
     def session_token
-      Current.session&.signed_id
+      Current.session&.token
     end
 end

@@ -8,12 +8,38 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   # Authentication
 
-  test "the bearer scheme is case-insensitive and tolerates padding" do
-    token = bearer_headers_for(@identity)["Authorization"].delete_prefix("Bearer ")
+  # Parsing is Rails' own (authenticate_with_http_token), so the accepted schemes are its
+  # schemes: the RFC 7235 names, matched case-sensitively. Pinned because the narrowing from
+  # our old case-insensitive regex was deliberate.
+  test "the Bearer and Token schemes authenticate, and padding is tolerated" do
+    token = raw_token_for(@identity)
 
-    get boards_path(format: :json), headers: { "Authorization" => "bearer  #{token} " }
+    [ "Bearer #{token}", "Token #{token}", "Bearer  #{token} " ].each do |header|
+      get boards_path(format: :json), headers: { "Authorization" => header }
+
+      assert_response :success, "Expected #{header.sub(token, "<token>")} to authenticate"
+    end
+  end
+
+  test "a lowercased or uppercased scheme is not accepted" do
+    token = raw_token_for(@identity)
+
+    [ "bearer #{token}", "BEARER #{token}" ].each do |header|
+      get boards_path(format: :json), headers: { "Authorization" => header }
+
+      assert_response :unauthorized, "Expected #{header.sub(token, "<token>")} to be refused"
+    end
+  end
+
+  # A header is a deliberate act; a cookie is ambient. A tool driving the API from a browser
+  # session's machine must get the identity it asked for.
+  test "an explicit Authorization header wins over a session cookie" do
+    sign_in_as @identity
+
+    get my_identity_path(format: :json), headers: bearer_headers_for(:jz)
 
     assert_response :success
+    assert_equal identities(:jz).id, @response.parsed_body["id"]
   end
 
   test "password sign-in over JSON labels the session it mints" do
@@ -198,6 +224,68 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal "Triage", card.reload.column.name
   end
 
+  # Token lifetime and labels
+
+  test "an API token expires but a browser session does not" do
+    api_token = @identity.sessions.create!(label: "agent").token
+    browser   = @identity.sessions.create!.token
+
+    travel Session::API_TOKEN_EXPIRY + 1.day do
+      get boards_path(format: :json), headers: { "Authorization" => "Bearer #{api_token}" }
+      assert_response :unauthorized
+
+      assert_not_nil Session.find_signed(browser), "A browser session must not expire on a timer"
+    end
+  end
+
+  test "an API token still authenticates inside its lifetime" do
+    token = @identity.sessions.create!(label: "agent").token
+
+    travel Session::API_TOKEN_EXPIRY - 1.day do
+      get boards_path(format: :json), headers: { "Authorization" => "Bearer #{token}" }
+
+      assert_response :success
+    end
+  end
+
+  test "minting a token replaces the one already carrying that label" do
+    first = @identity.sessions.create!(label: "agent").token
+    assert_difference -> { @identity.sessions.where(label: "agent").count }, 0 do
+      @second = @identity.sessions.create!(label: "agent").token
+    end
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{first}" }
+    assert_response :unauthorized, "The replaced token must stop working"
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{@second}" }
+    assert_response :success
+  end
+
+  test "a token carrying one label leaves the other labels alone" do
+    kept = @identity.sessions.create!(label: "kept").token
+    @identity.sessions.create!(label: "other")
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{kept}" }
+
+    assert_response :success
+  end
+
+  test "browser sessions never revoke each other" do
+    assert_difference -> { @identity.sessions.where(label: nil).count }, 2 do
+      @identity.sessions.create!
+      @identity.sessions.create!
+    end
+  end
+
+  test "signing in over JSON accepts the credentials wrapped as well as flat" do
+    post session_password_path(format: :json),
+      params: { session: { email_address: @identity.email_address, password: owner_password } },
+      as: :json
+
+    assert_response :success
+    assert @response.parsed_body["session_token"].present?
+  end
+
   # Every JSON failure carries the same envelope, so a client never has to branch on the
   # response shape to find out what went wrong. See API.md.
 
@@ -254,6 +342,10 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def raw_token_for(identity)
+      bearer_headers_for(identity)["Authorization"].delete_prefix("Bearer ")
+    end
+
     def assert_error_envelope(key)
       errors = @response.parsed_body["errors"]
 

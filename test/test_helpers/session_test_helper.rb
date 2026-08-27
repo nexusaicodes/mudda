@@ -26,7 +26,7 @@ module SessionTestHelper
     identity = resolve_identity(identity)
     session = identity.sessions.create!(label: label)
 
-    { "Authorization" => "Bearer #{session.signed_id}" }
+    { "Authorization" => "Bearer #{session.token}" }
   end
 
   def sign_out
