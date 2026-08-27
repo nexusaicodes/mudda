@@ -12,16 +12,18 @@ module Authorization
   end
 
   private
-    # An identity with no active user has no account to enter. Terminating the session is
-    # what keeps this from looping: without it the sign-in page would see an authenticated
-    # identity, bounce to root, and land back here.
+    # An identity with no active user has no account to enter. A browser is signed out and sent
+    # back to the login page — terminating the session is what keeps that from looping, since
+    # otherwise the sign-in page would see an authenticated identity, bounce to root, and land
+    # back here. An API client keeps its token and just gets the status code.
     def ensure_can_access_account
       unless Current.user&.active?
-        terminate_session
+        if request.format.json?
+          head :forbidden
+        else
+          terminate_session
 
-        respond_to do |format|
-          format.html { redirect_to login_url }
-          format.json { head :forbidden }
+          redirect_to login_url
         end
       end
     end

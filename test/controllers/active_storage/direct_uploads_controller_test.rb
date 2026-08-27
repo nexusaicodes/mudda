@@ -57,9 +57,8 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
     assert_response :redirect
   end
 
-  # Cross-account uploads used to be reachable by swapping the account slug in the URL.
-  # The account now follows the signed-in identity, so the guard that remains is the one
-  # against a deactivated user.
+  # The account follows the signed-in identity, so the guard on an upload is that the
+  # identity still has an active user behind it.
   test "create as a deactivated user is forbidden" do
     sign_in_as :david
     users(:david).update!(active: false)

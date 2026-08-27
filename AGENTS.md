@@ -94,8 +94,11 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   only when there is neither a password secret nor a passkey (no way to sign in).
 - Passkeys (WebAuthn) via `Identity has_passkeys` + `lib/action_pack/passkey/` and the
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
-- `Session belongs_to :identity`; `Current` resolves session → identity → user (scoped to
-  `Current.account`) → account.
+- `Session belongs_to :identity`; `Current` resolves session → identity → active user →
+  account (the account is derived from the user, not the URL — see above). A deactivated user
+  resolves to no user and no account, and `Authorization` refuses the request: a browser is
+  signed out and redirected to the login page, while a JSON client keeps its session and gets
+  a 403.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 

@@ -35,6 +35,16 @@ class CurrentTest < ActiveSupport::TestCase
     assert_nil Current.account
   end
 
+  test "an identity whose only user is deactivated has no user or account" do
+    users(:kevin).update!(active: false)
+
+    Current.session = sessions(:kevin)
+
+    assert_equal identities(:kevin), Current.identity
+    assert_nil Current.user
+    assert_nil Current.account
+  end
+
   test "with_account overrides the derived account for the block" do
     Current.session = sessions(:kevin)
 

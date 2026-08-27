@@ -15,7 +15,7 @@ class Current < ActiveSupport::CurrentAttributes
   def identity=(identity)
     super(identity)
 
-    self.user = identity&.users&.first
+    self.user = identity&.users&.active&.first
     self.account = user&.account
   end
 
