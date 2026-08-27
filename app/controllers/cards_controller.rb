@@ -3,12 +3,14 @@ class CardsController < ApplicationController
 
   include FilterScoped
 
-  before_action :set_board, except: :index
+  before_action :set_board, if: -> { params[:board_id].present? }
   before_action :set_card, only: %i[ show edit update destroy ]
   before_action :redirect_if_drafted, only: :show
 
+  # Nested under a board, the index answers for that board alone; at the top level it spans
+  # every board. The filter narrows either one.
   def index
-    set_page_and_extract_portion_from @filter.cards
+    set_page_and_extract_portion_from within_board(@filter.cards)
   end
 
   def create
@@ -59,6 +61,12 @@ class CardsController < ApplicationController
   end
 
   private
+    # Narrows the query, not the filter: Filter#boards is a HABTM, so assigning board_ids on
+    # a saved filter would rewrite its boards on disk as a side effect of a GET.
+    def within_board(cards)
+      @board ? cards.where(board: @board) : cards
+    end
+
     def set_board
       @board = Current.user.boards.find params[:board_id]
     end

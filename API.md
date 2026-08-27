@@ -123,7 +123,8 @@ another board is renumbered on arrival.
 
 | Verb | Path | Notes |
 |---|---|---|
-| `GET` | `/cards.json` | Filterable across every board — see below |
+| `GET` | `/cards.json` | Every board — filterable, see below |
+| `GET` | `/boards/:board_id/cards.json` | That board only — same filters |
 | `POST` | `/boards/:board_id/cards.json` | `title`, `description`, `due_on`. **`due_on` is required** |
 | `GET` | `/boards/:board_id/cards/:number.json` | Includes `steps` |
 | `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on` |
@@ -135,6 +136,10 @@ another board is renumbered on arrival.
 A card is created published, in Triage, and every lane change from there records an event.
 `due_on` is required on any published card, so a create without one is a `422`. Every card
 in an index carries its own `url`, which is the reliable way to reach it again.
+
+Both card indexes take the same filters; nesting one under a board narrows it to that board
+rather than replacing the filter. `GET /boards/:board_id/cards.json` is the cheap way to walk
+one board — `/boards/:board_id/columns/:id/cards.json` narrows further, to a single lane.
 
 `GET /cards.json` accepts `board_ids[]`, `column_ids[]`, `card_ids[]`, `terms[]` (full-text),
 `creation` (a time window), `indexed_by` (`all` or `golden`) and `sorted_by` (`latest`,

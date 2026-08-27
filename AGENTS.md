@@ -195,8 +195,9 @@ Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest un
 board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
 `resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
 call site. Nested resources on `cards`: `draft`, `board`, `column`, `goldness`, `image`,
-`publish`, `steps`, `notes`, and `drops/column`. Two cross-board lists stay at the top level
-— `/cards` (the filtered index) and `/prompts/cards` (the mention autocomplete). Boards expose
+`publish`, `steps`, `notes`, and `drops/column`. The card index answers at
+both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
+same filters apply to either. `/prompts/cards` (the mention autocomplete) stays cross-board. Boards expose
 read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there is no
 create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 

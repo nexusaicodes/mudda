@@ -527,6 +527,57 @@ class ApiTest < ActionDispatch::IntegrationTest
       "The same number on another board must address that board's card"
   end
 
+  test "a board's card index answers for that board alone" do
+    headers = bearer_headers_for(@user)
+    elsewhere = published_card_on(boards(:private), "Elsewhere")
+
+    get board_cards_path(boards(:writebook), format: :json), headers: headers
+
+    assert_response :success
+    assert_equal [ boards(:writebook).id ],
+      @response.parsed_body["data"].pluck("board").pluck("id").uniq
+    # Numbers run per board, so both boards hold a card 1 — the title is what distinguishes them.
+    assert_not_includes @response.parsed_body["data"].pluck("title"), elsewhere.title
+    assert_equal boards(:writebook).cards.published.count, @response.parsed_body["paging"]["total"]
+  end
+
+  test "a board's card index still honours filters, narrowed to that board" do
+    headers = bearer_headers_for(@user)
+    cards(:logo).gild
+    published_card_on(boards(:private), "Golden elsewhere").gild
+
+    get board_cards_path(boards(:writebook), format: :json, indexed_by: "golden"), headers: headers
+
+    assert_response :success
+    assert_equal [ cards(:logo).number ], @response.parsed_body["data"].pluck("number")
+  end
+
+  test "the top-level card index still spans every board" do
+    published_card_on(boards(:private), "Elsewhere")
+
+    get cards_path(format: :json), headers: bearer_headers_for(@user)
+
+    assert_response :success
+    assert_equal [ boards(:private).id, boards(:writebook).id ].sort,
+      @response.parsed_body["data"].pluck("board").pluck("id").uniq.sort
+  end
+
+  # Filter#boards is a HABTM, so a careless board_ids= would write join rows and permanently
+  # re-scope whatever saved filter the request happened to match.
+  test "a board's card index leaves a saved filter alone" do
+    Current.user = @user
+    filter = Current.user.filters.remember(indexed_by: "golden")
+
+    get board_cards_path(boards(:writebook), format: :json, indexed_by: "golden"),
+      headers: bearer_headers_for(@user)
+
+    assert_response :success
+    assert_equal filter, Current.user.filters.from_params(indexed_by: "golden"),
+      "The request must match the saved filter, or this test proves nothing"
+    # Re-find rather than reload: Filter#boards memoizes into @boards, which reload keeps.
+    assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
+  end
+
   test "a card moving to a board already using its number is renumbered, not rejected" do
     card, destination = cards(:logo), boards(:private)
     Current.user = @user
@@ -585,6 +636,12 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def published_card_on(board, title)
+      Current.user = @user
+      board.cards.create!(title: title, due_on: 1.week.from_now, status: "published",
+        creator: @user, last_active_at: Time.current)
+    end
+
     def raw_token_for(user)
       bearer_headers_for(user)["Authorization"].delete_prefix("Bearer ")
     end
