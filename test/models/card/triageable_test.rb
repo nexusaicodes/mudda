@@ -38,7 +38,7 @@ class Card::TriageableTest < ActiveSupport::TestCase
   test "cannot triage into a column from a different board" do
     card = cards(:logo)
 
-    assert_raises(RuntimeError) do
+    assert_raises(Card::Triageable::WrongBoardError) do
       card.triage_into(columns(:private_todo))
     end
   end
