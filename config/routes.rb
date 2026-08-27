@@ -2,12 +2,12 @@ Rails.application.routes.draw do
   root "landings#show"
 
   namespace :account do
-    resource :settings
+    resource :settings, only: %i[ show update ]
   end
 
   resources :users, only: %i[ show edit update ] do
     scope module: :users do
-      resource :avatar
+      resource :avatar, only: %i[ show destroy ]
     end
   end
 
@@ -21,19 +21,19 @@ Rails.application.routes.draw do
     end
 
     # Card numbers run per board, so a card is addressed by its board and its number.
-    resources :cards do
+    resources :cards, except: :new do
       scope module: :cards do
         resource :draft, only: :show
-        resource :board
-        resource :column
-        resource :goldness
-        resource :image
-        resource :publish
-        resources :steps
-        resources :notes
+        resource :board, only: %i[ edit update ]
+        resource :column, only: %i[ edit update ]
+        resource :goldness, only: %i[ create destroy ]
+        resource :image, only: :destroy
+        resource :publish, only: :create
+        resources :steps, except: :new
+        resources :notes, except: :new
 
         namespace :drops do
-          resource :column
+          resource :column, only: :create
         end
       end
     end
@@ -43,15 +43,15 @@ Rails.application.routes.draw do
   # addresses a single card.
   resources :cards, only: :index
   namespace :cards do
-    resources :previews
+    resources :previews, only: :index
   end
 
-  resource :search
+  resource :search, only: :show
   namespace :searches do
-    resources :queries
+    resources :queries, only: :create
   end
 
-  resources :filters do
+  resources :filters, only: %i[ create destroy ] do
     scope module: :filters do
       collection do
         resource :settings_refresh, only: :create
@@ -66,18 +66,18 @@ Rails.application.routes.draw do
     end
   end
 
-  resource :landing
+  resource :landing, only: :show
 
   namespace :my do
     resource :passkey_challenge, only: :create
     resource :user, only: :show
     resources :passkeys, except: %i[ show new ]
-    resource :timezone
-    resource :menu
+    resource :timezone, only: :update
+    resource :menu, only: :show
   end
 
   namespace :prompts do
-    resources :cards
+    resources :cards, only: :index
   end
 
   resolve "Card" do |card, options|

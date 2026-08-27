@@ -201,6 +201,10 @@ same filters apply to either. `/prompts/cards` (the mention autocomplete) stays 
 read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there is no
 create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 
+Every declaration carries `only:`/`except:` naming exactly the actions its controller
+implements, so `bin/rails routes` lists what is served rather than what `resources` would
+imply. A route with no action behind it is a 404 that reads like an endpoint.
+
 Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
 on the same URL — there is no separate API surface. A browser authenticates with its session
 cookie; a script or agent presents the same session as `Authorization: Bearer <token>`
