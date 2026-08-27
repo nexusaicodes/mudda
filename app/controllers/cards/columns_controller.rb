@@ -8,15 +8,22 @@ class Cards::ColumnsController < ApplicationController
   end
 
   def update
-    if column = @card.board.columns.find_by(id: params[:column_id])
-      @card.triage_into(column)
-    end
+    @card.triage_into(column)
 
-    redirect_back_or_to card_path(@card)
+    respond_to do |format|
+      format.html { redirect_back_or_to card_path(@card) }
+      format.json { render "cards/show" }
+    end
   end
 
   private
     def set_card
       @card = Current.user.accessible_cards.find_by!(number: params[:card_id])
+    end
+
+    # Strict on purpose: a column id that isn't on this card's board used to be a silent
+    # no-op that still reported success.
+    def column
+      @card.board.columns.find(params[:column_id])
     end
 end
