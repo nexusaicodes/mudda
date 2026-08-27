@@ -13,7 +13,7 @@ module StrictQueryParams
   extend ActiveSupport::Concern
 
   # The controls that page and shape a response, which every index shares.
-  PAGINATION_PARAMS = %w[ page previous expand_all target ]
+  PAGINATION_PARAMS = %w[ page previous expand_all ]
 
   included do
     include JsonErrors

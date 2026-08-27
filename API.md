@@ -127,15 +127,22 @@ another board is renumbered on arrival.
 | `GET` | `/boards/:board_id/cards.json` | That board only — same filters |
 | `POST` | `/boards/:board_id/cards.json` | `title`, `description`, `due_on`. **`due_on` is required** |
 | `GET` | `/boards/:board_id/cards/:number.json` | Includes `steps` |
-| `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on` |
+| `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on`, `board_id` |
 | `DELETE` | `/boards/:board_id/cards/:number.json` | |
 | `PUT` | `/boards/:board_id/cards/:number/column.json` | `column_id` — moves the card between lanes, returns the moved card |
-| `PUT` | `/boards/:board_id/cards/:number/board.json` | `destination_id` — reparents the card, landing it in the destination's Triage and renumbering it |
 | `POST` `DELETE` | `/boards/:board_id/cards/:number/goldness.json` | Pin and unpin |
+| `DELETE` | `/boards/:board_id/cards/:number/image.json` | Remove the background image |
+| `POST` | `/boards/:board_id/cards/:number/publish.json` | Publish a draft; `422` without a `due_on` |
 
 A card is created published, in Triage, and every lane change from there records an event.
 `due_on` is required on any published card, so a create without one is a `422`. Every card
 in an index carries its own `url`, which is the reliable way to reach it again.
+
+**Moving a card to another board is an update**, since a card's board is one of its
+attributes: `PUT /boards/1/cards/7.json` with `{"board_id": 2}`. The card lands in the
+destination's Triage column, is **renumbered** there, and takes its events with it — so the
+number and the URL you used to reach it are both stale afterwards. Read the new ones from the
+response. A `board_id` the caller can't reach is a `404`, not a move.
 
 Both card indexes take the same filters; nesting one under a board narrows it to that board
 rather than replacing the filter. `GET /boards/:board_id/cards.json` is the cheap way to walk
@@ -172,6 +179,18 @@ and `color`.
 `GET /search.json?q=…` runs full-text search across every board and returns cards. A query
 that is exactly a card number jumps straight to that card — but only while one board answers
 to that number; once two do, the search results are returned instead.
+
+## What isn't here
+
+There is no separate API: JSON and HTML come from the same routes, so `bin/rails routes`
+lists both audiences at once. Anything that only renders a form or a Turbo fragment answers
+`406` to a `.json` request — every `new` and `edit` path, plus `/`, `/landing`, `/my/menu`,
+`/my/passkeys`, `/prompts/cards` (the `#`-mention autocomplete), the draft screen, the
+drag-and-drop drop target, and the filter and search-history endpoints the filter chrome
+posts to. Build a client from the tables above, not from the route list.
+
+Two asymmetries worth knowing: `image` has only `DELETE` — attaching one is a multipart card
+update — and `publish` has no inverse, so a published card cannot be returned to a draft.
 
 ## Errors
 

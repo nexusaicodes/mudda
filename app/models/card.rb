@@ -51,11 +51,7 @@ class Card < ApplicationRecord
   end
 
   def move_to(new_board)
-    transaction do
-      card.update!(board: new_board)
-      card.events.update_all(board_id: new_board.id)
-      Event.where(eventable: card.notes).update_all(board_id: new_board.id)
-    end
+    update! board: new_board
   end
 
   def filled?
@@ -76,8 +72,16 @@ class Card < ApplicationRecord
 
       transaction do
         update! column: board.triage_column
+        rehome_events
         track_board_change_event(old_board.name)
       end
+    end
+
+    # Events are indexed by board, so a card's own events and its notes' follow it rather
+    # than staying behind on the board it left.
+    def rehome_events
+      events.update_all(board_id: board_id)
+      Event.where(eventable: notes).update_all(board_id: board_id)
     end
 
     def track_board_change_event(old_board_name)

@@ -24,7 +24,7 @@ Rails.application.routes.draw do
     resources :cards, except: :new do
       scope module: :cards do
         resource :draft, only: :show
-        resource :board, only: %i[ edit update ]
+        resource :board, only: :edit
         resource :column, only: %i[ edit update ]
         resource :goldness, only: %i[ create destroy ]
         resource :image, only: :destroy
@@ -39,12 +39,8 @@ Rails.application.routes.draw do
     end
   end
 
-  # Cross-board lists: a filtered index and the card-mention autocomplete, neither of which
-  # addresses a single card.
+  # The cross-board card list. Nesting it under a board narrows it; see CardsController.
   resources :cards, only: :index
-  namespace :cards do
-    resources :previews, only: :index
-  end
 
   resource :search, only: :show
   namespace :searches do

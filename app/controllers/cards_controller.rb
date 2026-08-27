@@ -1,5 +1,5 @@
 class CardsController < ApplicationController
-  wrap_parameters :card, include: %i[ title description image due_on created_at last_active_at ]
+  wrap_parameters :card, include: %i[ title description image due_on created_at last_active_at board_id ]
 
   include FilterScoped
 
@@ -40,9 +40,10 @@ class CardsController < ApplicationController
 
   def update
     respond_to do |format|
-      format.turbo_stream { @card.update! card_params }
+      format.html { @card.update!(card_attributes) and redirect_to @card }
+      format.turbo_stream { @card.update! card_attributes }
       format.json do
-        if @card.update card_params
+        if @card.update card_attributes
           render :show
         else
           render json: { errors: @card.errors }, status: :unprocessable_entity
@@ -80,6 +81,16 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at ])
+      params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at, :board_id ])
+    end
+
+    # Moving a card is editing it. The destination is resolved through the user's own boards,
+    # so board_id can never point at one they can't reach.
+    def card_attributes
+      if board_id = card_params[:board_id]
+        card_params.except(:board_id).merge(board: Current.user.boards.find(board_id))
+      else
+        card_params
+      end
     end
 end

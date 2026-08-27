@@ -175,9 +175,11 @@ Every board is created (`Board::Triageable`) with five fixed lanes, in order:
 - `active?` = published and not Done/Backlog.
 
 `triage_into(column)` moves a card between lanes (and records a `triaged` event);
-`move_to(new_board)` reparents a card to another board (re-homing its events) and drops it
-into the destination board's Triage column — **renumbering it**, since numbers run per board.
-Cards are dropped between columns through `cards/drops/columns_controller.rb`.
+`move_to(new_board)` reparents a card to another board, but the work lives in
+`handle_board_change`, so **any** board change — including a plain `PUT` to the card with a
+`board_id` — drops it into the destination's Triage column, **renumbers it** (numbers run per
+board), and re-homes its events and its notes' events. Cards are dropped between columns
+through `cards/drops/columns_controller.rb`.
 
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
@@ -194,9 +196,12 @@ which has been removed along with the `entropies` table and the hourly auto-post
 Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest under their
 board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
 `resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
-call site. Nested resources on `cards`: `draft`, `board`, `column`, `goldness`, `image`,
-`publish`, `steps`, `notes`, and `drops/column`. The card index answers at
-both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
+call site. Nested resources on `cards`: `draft`, `board` (the picker screen only —
+choosing one submits to `CardsController#update`, because a card's board is an attribute of
+the card), `column`, `goldness`, `image`, `publish`, `steps`, `notes`, and `drops/column`
+(the drag-and-drop target, which repaints both lanes; `column` is the general move).
+
+The card index answers at both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
 same filters apply to either. `/prompts/cards` (the mention autocomplete) stays cross-board. Boards expose
 read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there is no
 create/destroy/reorder) and a nested read-only `columns/:id/cards` index.

@@ -13,7 +13,7 @@
     <ul class="popup__list margin-block-start-half margin-none-block-end" data-filter-target="list">
       <% @boards.each do |board| %>
         <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" aria-checked="<%= @card.board == board %>">
-          <%= button_to board_card_board_path(@card.board, @card, params: { destination_id: board.id }), method: :patch,
+          <%= button_to board_card_path(@card.board, @card, params: { card: { board_id: board.id } }), method: :patch,
                 class: "popup__btn btn",
                 form_class: "max-width flex-item-grow" do %>
             <span class="overflow-ellipsis flex-item-grow"><%= board.name %></span>

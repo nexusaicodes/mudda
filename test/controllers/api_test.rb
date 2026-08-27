@@ -578,14 +578,28 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
   end
 
+  # board_id is client-supplied now that moving a card is editing it, so it has to be
+  # resolved through the caller's own boards.
+  test "a card cannot be moved onto another account's board" do
+    card = cards(:logo)
+    foreign = boards(:miltons_wish_list)
+    assert_not_equal card.board.account, foreign.account
+
+    put board_card_path(card.board, card, format: :json),
+      params: { board_id: foreign.id }, headers: bearer_headers_for(@user), as: :json
+
+    assert_response :not_found
+    assert_equal boards(:writebook), card.reload.board
+  end
+
   test "a card moving to a board already using its number is renumbered, not rejected" do
     card, destination = cards(:logo), boards(:private)
     Current.user = @user
     destination.cards.create!(title: "Already number one", due_on: 1.week.from_now,
       status: "published", creator: @user, last_active_at: Time.current)
 
-    put board_card_board_path(card.board, card, format: :json),
-      params: { destination_id: destination.id }, headers: bearer_headers_for(@user), as: :json
+    put board_card_path(card.board, card, format: :json),
+      params: { board_id: destination.id }, headers: bearer_headers_for(@user), as: :json
 
     assert_response :success
     assert_equal destination, card.reload.board
@@ -595,8 +609,8 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "a card moving to another board is renumbered there" do
     card, destination = cards(:logo), boards(:private)
 
-    put board_card_board_path(card.board, card, format: :json),
-      params: { destination_id: destination.id }, headers: bearer_headers_for(@user), as: :json
+    put board_card_path(card.board, card, format: :json),
+      params: { board_id: destination.id }, headers: bearer_headers_for(@user), as: :json
 
     assert_response :success
     assert_equal destination, card.reload.board
