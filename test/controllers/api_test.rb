@@ -16,7 +16,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert @response.parsed_body["session_token"].present?
   end
 
-  test "the token password sign-in returns authenticates subsequent requests" do
+  test "the token from password sign-in authenticates later requests" do
     post session_password_path(format: :json),
       params: { email_address: @identity.email_address, password: owner_password }
 
