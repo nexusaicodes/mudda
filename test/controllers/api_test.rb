@@ -198,6 +198,51 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal "Triage", card.reload.column.name
   end
 
+  # Every JSON failure carries the same envelope, so a client never has to branch on the
+  # response shape to find out what went wrong. See API.md.
+
+  test "an unauthenticated JSON request carries the error envelope" do
+    get boards_path(format: :json)
+
+    assert_response :unauthorized
+    assert_error_envelope "base"
+  end
+
+  test "a rejected token carries the error envelope" do
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer nonsense" }
+
+    assert_response :unauthorized
+    assert_error_envelope "base"
+  end
+
+  test "a deactivated user's token is forbidden and carries the error envelope" do
+    headers = bearer_headers_for(@identity)
+    users(:david).deactivate
+
+    get boards_path(format: :json), headers: headers
+
+    assert_response :forbidden
+    assert_error_envelope "base"
+  end
+
+  test "invalid credentials carry the error envelope" do
+    post session_password_path(format: :json),
+      params: { email_address: @identity.email_address, password: "wrong" }
+
+    assert_response :unauthorized
+    assert_error_envelope "base"
+  end
+
+  test "the sign-in rate limit carries the error envelope" do
+    11.times do
+      post session_password_path(format: :json),
+        params: { email_address: @identity.email_address, password: "wrong" }
+    end
+
+    assert_response :too_many_requests
+    assert_error_envelope "base"
+  end
+
   # Pagination
 
   test "index responses carry the paging headers" do
@@ -207,4 +252,13 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal users(:david).accessible_cards.published.distinct.count.to_s,
       response.headers["X-Total-Count"]
   end
+
+  private
+    def assert_error_envelope(key)
+      errors = @response.parsed_body["errors"]
+
+      assert errors.is_a?(Hash), "Expected an errors object, got #{@response.parsed_body.inspect}"
+      assert errors[key].is_a?(Array), "Expected errors[#{key.inspect}] to be an array of messages"
+      assert errors[key].all?(&:present?), "Expected every message to say something"
+    end
 end

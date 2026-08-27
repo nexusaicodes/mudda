@@ -2,6 +2,10 @@ module Authentication
   extend ActiveSupport::Concern
 
   included do
+    # Refusals render through JsonErrors, so a host that authenticates gets the envelope
+    # whether or not it remembered to include it (Active Storage's controllers do not).
+    include JsonErrors
+
     before_action :require_authentication
     helper_method :authenticated?
 
@@ -55,12 +59,12 @@ module Authentication
       request.authorization&.match(/\ABearer\s+(.+?)\s*\z/i)&.captures&.first
     end
 
-    # An API client needs a status code, not a login page. Every other format — including the
-    # binary ones Active Storage serves — keeps redirecting, so respond_to is the wrong tool
-    # here: it would answer 406 to anything it wasn't told about.
+    # An API client needs an error it can read, not a login page. Every other format —
+    # including the binary ones Active Storage serves — keeps redirecting, so respond_to is
+    # the wrong tool here: it would answer 406 to anything it wasn't told about.
     def request_authentication
       if request.format.json?
-        head :unauthorized
+        render_unauthorized "Not authenticated"
       else
         if navigational_request?
           session[:return_to_after_authenticating] = request.url

@@ -1,6 +1,12 @@
 class Sessions::PasswordsController < ApplicationController
+  # Throttling the only way into the app can't ride on the general cache, which is the null
+  # store in test and in development without caching — a rate limit that silently counts
+  # nothing is worse than none, because it reads as protection.
+  RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
+
   require_unauthenticated_access
-  rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
+  rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded,
+    store: RATE_LIMIT_STORE
 
   layout "public"
 
@@ -15,7 +21,7 @@ class Sessions::PasswordsController < ApplicationController
     else
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: "That didn't work. Check your password and try again." }
-        format.json { render json: { message: "Invalid credentials." }, status: :unauthorized }
+        format.json { render_unauthorized "Invalid credentials" }
       end
     end
   end
@@ -34,7 +40,7 @@ class Sessions::PasswordsController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: rate_limit_exceeded_message }
-        format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }
+        format.json { render_json_errors({ base: [ rate_limit_exceeded_message ] }, status: :too_many_requests) }
       end
     end
 end
