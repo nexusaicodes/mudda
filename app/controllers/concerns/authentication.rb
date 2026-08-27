@@ -50,9 +50,6 @@ module Authentication
       redirect_to_login_url
     end
 
-    # Only a page the browser is navigating to is worth returning to after signing in. The
-    # sub-resource requests a signed-out page fires — the Active Storage blobs behind private
-    # images, say — would otherwise land the owner on a raw file.
     def navigational_request?
       request.get? && (request.format.html? || request.format.turbo_stream?)
     end
@@ -65,8 +62,6 @@ module Authentication
       redirect_to main_app.root_url if authenticated?
     end
 
-    # Rotating the session on sign-in keeps a pre-authentication one from deciding where the
-    # owner lands, so the return-to destination is carried across deliberately.
     def start_new_session_for(identity)
       return_to = session[:return_to_after_authenticating]
       reset_session

@@ -1,6 +1,4 @@
 module LoginHelper
-  # Active Storage's controllers include Authentication but live in a mounted engine,
-  # where bare route helpers resolve against the engine. main_app reaches the app's routes.
   def login_url
     main_app.new_session_path
   end

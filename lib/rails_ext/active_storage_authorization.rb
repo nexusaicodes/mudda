@@ -29,10 +29,9 @@ Rails.application.config.to_prepare do
       skip_before_action :require_authentication
       before_action :require_authentication, :ensure_accessible, unless: :publicly_accessible_blob?
 
-      # Representation controllers process the variant in set_representation, which stores
-      # a new blob. Move that behind the checks above so no work is done for an
-      # unauthorized request, and so the variant's blob is created with Current.account set
-      # — the account comes from the signed-in identity, not the URL.
+      # set_representation generates the variant and saves it as a new blob, so it has to run
+      # after the checks above: an unauthorized request shouldn't do image processing, and the
+      # new blob needs Current.account, which only exists once the request is authenticated.
       if private_method_defined?(:set_representation)
         skip_before_action :set_representation
         before_action :set_representation
