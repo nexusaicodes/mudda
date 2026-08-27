@@ -50,10 +50,6 @@ class Card < ApplicationRecord
     number.to_s
   end
 
-  def move_to(new_board)
-    update! board: new_board
-  end
-
   def filled?
     title.present? || description.present?
   end

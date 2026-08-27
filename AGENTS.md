@@ -175,9 +175,9 @@ Every board is created (`Board::Triageable`) with five fixed lanes, in order:
 - `active?` = published and not Done/Backlog.
 
 `triage_into(column)` moves a card between lanes (and records a `triaged` event);
-`move_to(new_board)` reparents a card to another board, but the work lives in
-`handle_board_change`, so **any** board change — including a plain `PUT` to the card with a
-`board_id` — drops it into the destination's Triage column, **renumbers it** (numbers run per
+Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
+the card with a `board_id`. `Card#handle_board_change` does the rest on any such change: it
+drops the card into the destination's Triage column, **renumbers it** (numbers run per
 board), and re-homes its events and its notes' events. Cards are dropped between columns
 through `cards/drops/columns_controller.rb`.
 

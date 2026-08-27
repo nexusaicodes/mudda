@@ -578,6 +578,17 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
   end
 
+  test "a blank board_id leaves the card where it is" do
+    card = cards(:logo)
+
+    put board_card_path(card.board, card, format: :json),
+      params: { title: "Renamed", board_id: "" }, headers: bearer_headers_for(@user), as: :json
+
+    assert_response :success
+    assert_equal boards(:writebook), card.reload.board
+    assert_equal "Renamed", card.title
+  end
+
   # board_id is client-supplied now that moving a card is editing it, so it has to be
   # resolved through the caller's own boards.
   test "a card cannot be moved onto another account's board" do

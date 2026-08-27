@@ -21,7 +21,7 @@ class CardsController < ApplicationController
       end
 
       format.json do
-        @card = @board.cards.new card_params.merge(creator: Current.user, status: "published")
+        @card = @board.cards.new card_params.except(:board_id).merge(creator: Current.user, status: "published")
 
         if @card.save
           render :show, status: :created, location: board_card_path(@board, @card, format: :json)
@@ -40,7 +40,10 @@ class CardsController < ApplicationController
 
   def update
     respond_to do |format|
-      format.html { @card.update!(card_attributes) and redirect_to @card }
+      format.html do
+        @card.update! card_attributes
+        redirect_to @card
+      end
       format.turbo_stream { @card.update! card_attributes }
       format.json do
         if @card.update card_attributes
@@ -84,13 +87,16 @@ class CardsController < ApplicationController
       params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at, :board_id ])
     end
 
-    # Moving a card is editing it. The destination is resolved through the user's own boards,
-    # so board_id can never point at one they can't reach.
+    # A card's board is one of its attributes, so moving it is an update. The destination
+    # resolves through the user's own boards, so board_id can never name one they can't
+    # reach, and a blank one means "leave the card where it is".
     def card_attributes
-      if board_id = card_params[:board_id]
-        card_params.except(:board_id).merge(board: Current.user.boards.find(board_id))
+      attributes = card_params.except(:board_id)
+
+      if board_id = card_params[:board_id].presence
+        attributes.merge(board: Current.user.boards.find(board_id))
       else
-        card_params
+        attributes
       end
     end
 end

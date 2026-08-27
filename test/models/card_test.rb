@@ -88,7 +88,7 @@ class CardTest < ActiveSupport::TestCase
     assert card_events_on_old_board.exists?
     assert note_events_on_old_board.exists?
 
-    card.move_to(new_board)
+    card.update!(board: new_board)
 
     assert_equal new_board, card.reload.board
 
