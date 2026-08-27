@@ -6,8 +6,6 @@ class Card < ApplicationRecord
   belongs_to :board
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
-  has_one_attached :image, dependent: :purge_later
-
   has_rich_text :description
 
   before_save :set_default_title
@@ -23,7 +21,7 @@ class Card < ApplicationRecord
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
   scope :by_due_date,             -> { order Arel.sql("cards.due_on IS NULL, CASE WHEN cards.due_on < '#{Date.current.to_fs(:db)}' THEN 1 ELSE 0 END, cards.due_on ASC, cards.id ASC") }
   scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ]) }
-  scope :preloaded,               -> { with_users.preload(:column, :steps, :image_attachment, board: [ :columns ]).with_rich_text_description_and_embeds }
+  scope :preloaded,               -> { with_users.preload(:column, :steps, board: [ :columns ]).with_rich_text_description_and_embeds }
 
   scope :indexed_by, ->(index) do
     case index

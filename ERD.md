@@ -49,7 +49,6 @@ erDiagram
     CARDS ||--o{ STEPS : "has_many dependent-destroy"
     CARDS ||--o{ SEARCH_RECORDS : "card_id"
     CARDS ||--o| ACTION_TEXT_RICH_TEXTS : "has_rich_text description"
-    CARDS ||--o| ACTIVE_STORAGE_ATTACHMENTS : "has_one_attached image"
     CARDS ||--o{ EVENTS : "polymorphic eventable"
 
     NOTES ||--o| ACTION_TEXT_RICH_TEXTS : "has_rich_text body"
@@ -227,8 +226,8 @@ erDiagram
     ACTIVE_STORAGE_ATTACHMENTS {
         bigint id PK
         bigint record_id FK "NOT NULL"
-        string record_type "limit 255 NOT NULL — Card or User"
-        string name "limit 255 NOT NULL — image or avatar"
+        string record_type "limit 255 NOT NULL — User or ActionText::RichText"
+        string name "limit 255 NOT NULL — avatar or embeds"
         bigint blob_id FK "NOT NULL"
         datetime created_at "NOT NULL"
     }
@@ -318,7 +317,6 @@ Card and note **bodies are not in their own tables** — this trips up every raw
 erDiagram
     CARDS ||--o| ACTION_TEXT_RICH_TEXTS : "name = description"
     NOTES ||--o| ACTION_TEXT_RICH_TEXTS : "name = body"
-    CARDS ||--o| ACTIVE_STORAGE_ATTACHMENTS : "name = image"
     USERS ||--o| ACTIVE_STORAGE_ATTACHMENTS : "name = avatar"
     ACTIVE_STORAGE_ATTACHMENTS }o--|| ACTIVE_STORAGE_BLOBS : "blob_id"
     ACTIVE_STORAGE_BLOBS ||--o{ ACTIVE_STORAGE_VARIANT_RECORDS : "derivatives"
@@ -401,7 +399,7 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `note_created` | Note | `{}` | `Note::Eventable` |
 
 **`action_text_rich_texts.name`** — `description` (on Card) · `body` (on Note).
-**`active_storage_attachments.name`** — `image` (on Card) · `avatar` (on User).
+**`active_storage_attachments.name`** — `avatar` (on User) · `embeds` (on ActionText::RichText, for rich text attachments).
 
 ---
 

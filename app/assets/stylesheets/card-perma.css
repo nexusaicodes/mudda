@@ -58,11 +58,6 @@
       border: none;
     }
 
-    .card__background {
-      filter: brightness(1.2) contrast(0.8);
-      opacity: 0.2;
-    }
-
     .card__header {
       @media (max-width: 639px) {
         flex-wrap: wrap;
@@ -270,8 +265,7 @@
           "meta bg-zoom"
           "meta reactions";
 
-        &:not(:has(.reaction)),
-        &:has(.card__background) {
+        &:not(:has(.reaction)) {
           column-gap: 2ch;
         }
       }
@@ -297,10 +291,6 @@
 
     .reaction__popup.popup {
       inline-size: max-content;
-    }
-
-    .card__zoom-bg-btn {
-      grid-area: bg-zoom;
     }
 
     .bubble {
@@ -364,18 +354,6 @@
     .card-perma__actions--right {
       inset-inline-end: 0;
       justify-content: flex-end;
-    }
-  }
-
-  .card-perma__image-btn {
-    &:has(input[type="file"]:focus),
-    &:has(input[type="file"]:focus-visible) {
-      outline: var(--focus-ring) !important;
-      outline-offset: var(--focus-ring-offset);
-    }
-
-    input[type="file"] {
-      outline: none;
     }
   }
 

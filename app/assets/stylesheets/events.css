@@ -299,21 +299,11 @@
       inline-size: 100%;
     }
 
-    &:has(.card__background img:not([src=""])) {
-      background-color: var(--color-canvas) !important;
-    }
-
     .event_attachments {
       .attachment--image {
         block-size: auto;
         max-inline-size: 30%;
       }
-    }
-
-    .card__background {
-      filter: brightness(1.2) contrast(0.8);
-      opacity: 0.2;
-      z-index: 0;
     }
 
     .card__header {

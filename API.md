@@ -126,10 +126,11 @@ another board is renumbered on arrival.
 | `GET` | `/boards/:board_id/cards/:number.json` | The whole card — see below |
 | `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on`, `golden`, `board_id`, `column_id`, `steps_attributes` |
 | `DELETE` | `/boards/:board_id/cards/:number.json` | |
-| `DELETE` | `/boards/:board_id/cards/:number/image.json` | Remove the background image |
 
 **A card is fetched in one request.** `GET /boards/1/cards/7.json` carries the card's own
-fields, its `board`, its `column`, all of its `steps`, and the most recent 20 `notes`. When
+fields, its `board`, its `column`, all of its `steps`, and the most recent 20 `notes`.
+Images belong in the description, which is rich text: upload them to
+`POST /rails/active_storage/direct_uploads` and reference the signed ids in the body. When
 there are older notes than that, `notes_truncated` is `true` and `notes_url` pages through
 the whole log; otherwise the embedded notes are all of them.
 
@@ -222,9 +223,6 @@ refused before it does anything, so a `406` never leaves a half-done write behin
 lane (`/cards/:number/column`), its star (`/goldness`), its board picker (`/board`), its
 steps (`/steps`), a lane's colour (`/boards/:id/columns/:id`), and the compose screen
 (`/cards/new`) are all the browser's; `PUT` or `POST` the card, or read the board, instead.
-
-One asymmetry worth knowing: `image` has only `DELETE` — attaching one is a multipart card
-update.
 
 ## Errors
 

@@ -129,8 +129,7 @@ fixed columns** (see below). All of the account's boards are visible to the user
 fixed; only color is editable.
 
 **Card** → the main work item. Sequential per-board `number` (via
-`board.increment!(:cards_count)`), rich-text description, image attachment, steps, and
-**notes**. A card is created complete — there is no draft state and nothing to publish; the
+`board.increment!(:cards_count)`), rich-text description, steps, and **notes**. A card is created complete — there is no draft state and nothing to publish; the
 compose screen (`cards#new`) holds its state in the browser until one POST creates the card,
 its steps included, and `local-save` keeps that state across a reload. Concerns: `Attachments`,
 `Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
@@ -151,7 +150,8 @@ app lands on your last-opened board instead).
 > see below). `Comment` was renamed to `Note`. `Identity` was folded into `User`, and
 > `Card::Goldness` into a boolean on `cards`. The `drafted`/`published` status enum and the
 > half-built card record behind it are gone too: a card is composed in the browser and
-> created complete.
+> created complete, and the card background image is gone with it — pictures live in the
+> description, which is rich text and uploads through Active Storage direct upload.
 > All email/mailers (Action Mailer + Action Mailbox, SMTP) are removed — the app sends no email.
 > The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the standing
 > owner password with optional passkeys (see Authentication); the owner is provisioned by `db/seeds.rb`.
@@ -202,7 +202,7 @@ which has been removed along with the `entropies` table and the hourly auto-post
 Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest under their
 board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
 `resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
-call site. Nested resources on `cards`: `image` and `notes`, and — for the browser alone —
+call site. Nested resources on `cards`: `notes`, and — for the browser alone —
 `board` and `column` (the two picker screens), `goldness` (the star), `steps`, and
 `drops/column` (the drag-and-drop target, which repaints both lanes).
 

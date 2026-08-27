@@ -1,5 +1,5 @@
 class CardsController < ApplicationController
-  wrap_parameters :card, include: %i[ title description image due_on created_at last_active_at board_id column_id golden steps_attributes ]
+  wrap_parameters :card, include: %i[ title description due_on created_at last_active_at board_id column_id golden steps_attributes ]
 
   include FilterScoped
 
@@ -84,7 +84,7 @@ class CardsController < ApplicationController
     end
 
     def card_params
-      params.expect(card: [ :title, :description, :image, :due_on, :created_at, :last_active_at, :golden,
+      params.expect(card: [ :title, :description, :due_on, :created_at, :last_active_at, :golden,
         :board_id, :column_id, steps_attributes: [ [ :id, :content, :completed, :_destroy ] ] ])
     end
 

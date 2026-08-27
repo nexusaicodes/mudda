@@ -107,13 +107,11 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     patch board_card_path(cards(:logo).board, cards(:logo)), as: :turbo_stream, params: {
       card: {
         title: "Logo needs to change",
-        image: fixture_file_upload("moon.jpg", "image/jpeg"),
         description: "Something more in-depth" } }
     assert_response :success
 
     card = cards(:logo).reload
     assert_equal "Logo needs to change", card.title
-    assert_equal "moon.jpg", card.image.filename.to_s
     assert_equal "Something more in-depth", card.description.to_plain_text.strip
   end
 

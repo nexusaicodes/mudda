@@ -2,7 +2,6 @@
   <% cache card do %>
     <div class="card-perma__actions card-perma__actions--left">
       <%= render "cards/container/gild", card: card unless card.closed? %>
-      <%= render "cards/container/image", card: card %>
     </div>
 
     <div class="card-perma__bg">
@@ -25,7 +24,6 @@
 
         <footer class="card__footer">
           <%= render "cards/display/common/meta", card: card %>
-          <%= render "cards/display/perma/background", card: card %>
         </footer>
       <% end %>
     </div>
