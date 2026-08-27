@@ -42,4 +42,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
       # The landing page redirects (client-side) to the last/most-recent board.
       assert_current_path %r{/boards/}
     end
+
+    # The editor is a custom element, so Capybara's fill_in cannot reach it.
+    def fill_in_lexxy(selector = "lexxy-editor", with:)
+      editor_element = find(selector)
+      editor_element.set with
+      page.execute_script("arguments[0].value = '#{with}'", editor_element)
+    end
 end

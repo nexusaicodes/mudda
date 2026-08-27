@@ -10,7 +10,7 @@
                   local_save_key_value: "note-#{card.id}",
                   action: "turbo:submit-end->local-save#submit turbo:submit-end->form#blurActiveInput keydown.ctrl+enter->form#debouncedSubmit:prevent keydown.meta+enter->form#debouncedSubmit:prevent keydown.esc->form#cancel:stop" } do |form| %>
         <%= form.rich_textarea :body, required: true, placeholder: new_note_placeholder(card),
-              data: { local_save_target: "input", action: "lexxy:change->form#disableSubmitWhenInvalid lexxy:change->local-save#save turbo:morph-element->local-save#restoreContent" } do %>
+              data: { local_save_target: "input", action: "lexxy:change->form#disableSubmitWhenInvalid lexxy:change->local-save#save turbo:morph-element->local-save#restore" } do %>
           <%= general_prompts(@card.board) %>
         <% end %>
 

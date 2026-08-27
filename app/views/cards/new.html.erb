@@ -21,7 +21,7 @@
             <%= form.text_area :title, placeholder: "Name it…",
                   class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
                   autofocus: true, rows: 1, dir: "auto", maxlength: 255,
-                  data: { autoresize_target: "textarea", local_save_target: "input", action: "input->autoresize#resize" } %>
+                  data: { autoresize_target: "textarea", local_save_target: "input", action: "input->autoresize#resize input->local-save#save" } %>
           <% end %>
         </h1>
 
@@ -34,11 +34,13 @@
         <div class="card-field__due flex align-center">
           <%= form.label :due_on, "Due date", class: "card-field__due-label" %>
           <%= form.date_field :due_on, required: true, class: "card-field__due-input input",
-                data: { local_save_target: "input" } %>
+                data: { local_save_target: "input", action: "change->local-save#save" } %>
         </div>
 
         <%# A trailing blank row so a step can be typed without asking for one first. Blank
-            rows are dropped on create, so an untouched one costs nothing. %>
+            rows are dropped on create, so an untouched one costs nothing. Step rows are not
+            local-saved: they all share one field name, and restoring them would mean
+            rebuilding rows that aren't on the page yet. %>
         <ol class="steps txt-small" data-step-fields-target="list">
           <% @card.steps.each do |step| %>
             <%= render "cards/new/step_field", content: step.content %>
