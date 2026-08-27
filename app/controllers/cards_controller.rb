@@ -23,13 +23,9 @@ class CardsController < ApplicationController
       format.json do
         # The board comes from the path, and a new card always starts in that board's Triage
         # column, so neither id is read from the body.
-        @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user, status: "published")
+        @card = @board.cards.create! card_params.except(:board_id, :column_id).merge(creator: Current.user, status: "published")
 
-        if @card.save
-          render :show, status: :created, location: board_card_path(@board, @card, format: :json)
-        else
-          render json: { errors: @card.errors }, status: :unprocessable_entity
-        end
+        render :show, status: :created, location: board_card_path(@board, @card, format: :json)
       end
     end
   end
@@ -48,11 +44,8 @@ class CardsController < ApplicationController
       end
       format.turbo_stream { @card.update! card_attributes }
       format.json do
-        if @card.update card_attributes
-          render :show
-        else
-          render json: { errors: @card.errors }, status: :unprocessable_entity
-        end
+        @card.update! card_attributes
+        render :show
       end
     end
   end

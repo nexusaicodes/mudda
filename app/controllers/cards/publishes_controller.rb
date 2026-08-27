@@ -18,7 +18,7 @@ class Cards::PublishesController < ApplicationController
     else
       respond_to do |format|
         format.html { redirect_to board_card_draft_path(@card.board, @card), alert: "Add a due date before creating this card." }
-        format.json { render json: { errors: @card.errors }, status: :unprocessable_entity }
+        format.json { render_json_errors @card.errors, status: :unprocessable_entity }
       end
     end
   end

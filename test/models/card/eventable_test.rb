@@ -55,6 +55,21 @@ class Card::EventableTest < ActiveSupport::TestCase
     assert_equal Time.current, cards(:logo).last_active_at
   end
 
+  # particulars is the audit trail's payload, so an event has to record the change itself
+  # rather than a wrapper around it.
+  test "an event records its particulars flat" do
+    card = cards(:logo)
+    old_title = card.title
+
+    card.update!(title: "Renamed logo")
+    assert_equal({ "old_title" => old_title, "new_title" => "Renamed logo" },
+      card.events.where(action: "card_title_changed").last.particulars)
+
+    card.update!(board: boards(:private))
+    assert_equal({ "old_board" => boards(:writebook).name, "new_board" => boards(:private).name },
+      card.events.where(action: "card_board_changed").last.particulars)
+  end
+
   test "renaming a card touches its events so the activity feed cache invalidates" do
     card = cards(:logo)
     event = card.events.first

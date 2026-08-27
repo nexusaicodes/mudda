@@ -212,7 +212,8 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "due_on")
   end
 
-  # A nested record's errors have to reach the client in the same envelope as the card's own.
+  # A bang method's RecordInvalid has to reach the client as the JSON error envelope, and a
+  # nested record's errors in the same one as the card's own.
   test "a validation failure inside a card's steps is a JSON 422" do
     card, headers = cards(:logo), bearer_headers_for(@user)
 
@@ -702,7 +703,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "Done", @response.parsed_body["column"]["name"]
     assert card.reload.closed?
-    assert_equal({ "particulars" => { "column" => "Done" } }, card.events.where(action: "card_triaged").last.particulars)
+    assert_equal({ "column" => "Done" }, card.events.where(action: "card_triaged").last.particulars)
   end
 
   private
