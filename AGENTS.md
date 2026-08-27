@@ -98,7 +98,8 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   account (the account is derived from the user, not the URL — see above). A deactivated user
   resolves to no user and no account, and `Authorization` refuses the request: a browser is
   signed out and redirected to the login page, while a JSON client keeps its session and gets
-  a 403.
+  a 403. A `Session` may carry a `label`, which marks it as an API token minted by
+  `bin/rails auth:token`.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 
@@ -188,9 +189,11 @@ Routes (`config/routes.rb`) model behavior as CRUD on resources. Nested resource
 Boards expose read-only `columns` (`index`/`show`/`update` only — columns are fixed, so there
 is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 
-Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI.
-There is **no separate/token-based API**: JSON requests authenticate with the same session
-cookie as the browser, so scripting the app means reusing a signed-in session.
+Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
+on the same URL — there is no separate API surface. A browser authenticates with its session
+cookie; a script or agent presents the same session as `Authorization: Bearer <token>`
+(`bin/rails auth:token`). Unauthenticated JSON gets a 401, and failures come back as
+`{ "errors": { "field": ["message"] } }` via the `JsonErrors` concern. See [API.md](API.md).
 
 ### UUID Primary Keys
 
