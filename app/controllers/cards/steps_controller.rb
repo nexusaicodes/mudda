@@ -1,7 +1,7 @@
 class Cards::StepsController < ApplicationController
   wrap_parameters :step, include: %i[ content completed ]
 
-  include CardScoped
+  include CardScoped, StrictQueryParams
 
   before_action :set_step, only: %i[ show edit update destroy ]
 

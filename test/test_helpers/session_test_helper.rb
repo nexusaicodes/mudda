@@ -21,12 +21,14 @@ module SessionTestHelper
   end
 
   # The credential a non-browser client presents. Mirrors what POST /session/password.json
-  # hands back and what bin/rails auth:token prints.
-  def bearer_headers_for(identity, label: "test")
+  # hands back and what bin/rails auth:token prints. The label is unique per call because a
+  # label holds one live token — a shared default would have two tokens in one test revoke
+  # each other.
+  def bearer_headers_for(identity, label: "test-#{SecureRandom.hex(4)}")
     identity = resolve_identity(identity)
     session = identity.sessions.create!(label: label)
 
-    { "Authorization" => "Bearer #{session.signed_id}" }
+    { "Authorization" => "Bearer #{session.token}" }
   end
 
   def sign_out

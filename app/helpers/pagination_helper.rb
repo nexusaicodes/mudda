@@ -1,4 +1,22 @@
 module PaginationHelper
+  # The paging block every index JSON response carries alongside its data. Page size is
+  # geared — 15, then 30, then 50, then 100 a page (GearedPagination::Ratios) — so there is
+  # no single per_page worth reporting.
+  def paging_for(page)
+    {
+      total: page.recordset.records_count,
+      page: page.number,
+      pages: page.recordset.page_count,
+      next: (next_page_url(page) if page.before_last?)
+    }
+  end
+
+  # The same block for an index that returns everything it has, so a client reads one shape
+  # across every index rather than checking which ones paginate.
+  def paging_for_all(records)
+    { total: records.size, page: 1, pages: 1, next: nil }
+  end
+
   def pagination_frame_tag(namespace, page, data: {}, **attributes, &)
     turbo_frame_tag pagination_frame_id_for(namespace, page.number), data: { timeline_target: "frame", **data }, role: "presentation", **attributes, &
   end
@@ -38,6 +56,16 @@ module PaginationHelper
   end
 
   private
+    # Built from the request's own URL rather than from its params: url_for reads :host,
+    # :protocol and :port as options, so a caller could otherwise put `?host=` in the query
+    # and be handed a `next` pointing at their own server — which a client following it would
+    # send its bearer token to. This is how geared_pagination builds the Link header.
+    def next_page_url(page)
+      Addressable::URI.parse(request.url).tap do |uri|
+        uri.query_values = (uri.query_values || {}).merge("page" => page.next_param.to_s)
+      end.to_s
+    end
+
     def pagination_list(name, tag_element: :div, paginate_on_scroll: false, **properties, &block)
       classes = properties.delete(:class)
       properties[:id] ||= "#{name}-pagination-list"

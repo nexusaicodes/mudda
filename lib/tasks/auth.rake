@@ -14,9 +14,10 @@ namespace :auth do
 
     session = identity.sessions.create!(label: ENV["LABEL"].presence || "api")
 
-    warn "Token for #{identity.email_address} labelled #{session.label.inspect}. Send it as:"
+    warn "Token for #{identity.email_address} labelled #{session.label.inspect}, valid for " \
+      "#{Session::API_TOKEN_EXPIRY.inspect}. Minting replaced any token already carrying that label."
     warn %(  Authorization: Bearer <token>)
-    puts session.signed_id
+    puts session.token
   end
 
   desc "List the API tokens that have been minted"
@@ -24,7 +25,13 @@ namespace :auth do
     sessions = Session.where.not(label: nil).order(:created_at)
 
     if sessions.any?
-      sessions.each { |session| puts "#{session.label}\t#{session.created_at}" }
+      puts "LABEL\tMINTED\tEXPIRES"
+      sessions.each do |session|
+        expires_at = session.created_at + Session::API_TOKEN_EXPIRY
+        expiry = expires_at.past? ? "expired" : expires_at.to_s
+
+        puts "#{session.label}\t#{session.created_at}\t#{expiry}"
+      end
     else
       puts "No API tokens. Mint one with make token LABEL=claude."
     end

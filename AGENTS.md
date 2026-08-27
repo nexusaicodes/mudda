@@ -70,7 +70,8 @@ path and rewrote `PATH_INFO`/`SCRIPT_NAME` in a Rack middleware; that middleware
   while signed out must not depend on it (see `Users::AvatarsController`).
 - Models still carry `account_id` for data isolation, and `Account#external_account_id`
   still exists — it keys the browser-local "last opened board" (`ApplicationHelper#last_board_storage_key`)
-  and identifies the account in seeds and error context.
+  and identifies the account in seeds and error context. It is a deterministic hash of the
+  account name, not a running sequence (see UUID Primary Keys).
 - Background jobs serialize and restore `Current.account` explicitly (see Background Jobs),
   since they run with no session.
 
@@ -100,6 +101,11 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   signed out and redirected to the login page, while a JSON client keeps its session and gets
   a 403. A `Session` may carry a `label`, which marks it as an API token minted by
   `make token` (`auth:token`) or by the JSON sign-in, which labels its sessions `json-sign-in`.
+  A label holds one live token: minting under a label revokes the previous one, so a JSON
+  client names itself (`label` in the sign-in body) rather than sharing the `json-sign-in`
+  default and revoking its neighbours. `Session#token`
+  is the single definition of the credential — labelled sessions expire after
+  `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 
@@ -192,15 +198,29 @@ is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
 on the same URL — there is no separate API surface. A browser authenticates with its session
 cookie; a script or agent presents the same session as `Authorization: Bearer <token>`
-(`make token LABEL=…`). Unauthenticated JSON gets a 401, and failures come back as
-`{ "errors": { "field": ["message"] } }` via the `JsonErrors` concern. See [API.md](API.md).
+(`make token LABEL=…`). **Every** failure comes back as `{ "errors": { "field": ["message"] } }`
+via the `JsonErrors` concern — the 401 and 403 refused by `Authentication`/`Authorization`
+as much as the record errors. Indexes answer with `{ "data": [...], "paging": {...} }`
+(`PaginationHelper#paging_for`), and an unrecognised query parameter is a 422 rather
+than silently ignored — each endpoint declaring what it answers to with
+`allows_query_params` (`StrictQueryParams`). See [API.md](API.md).
 
 ### UUID Primary Keys
 
 Primary keys are UUIDs (`lib/rails_ext/active_record_uuid_type.rb`): UUIDv7 generated, then
 hex → base36, left-padded to a fixed **25-char** string (`36^25 > 2^128`), stored as a
-SQLite blob. Note that `Account#external_account_id` and
-`Card#number` are **separate integer sequences**, not UUIDs.
+16-byte SQLite blob — so `hex()` in a SQL client prints a different encoding of the same
+value, not the id the app or the API uses. `Card#number` is a **separate integer sequence**
+(from `account.cards_count`), not a UUID, and it is what the API addresses cards by.
+
+`Account#external_account_id` is an integer too, but the `Account::ExternalIdSequence`
+counter that would generate it is **dead code**: `assign_external_account_id` only fires when
+the value is absent (`||=`), and `db/seeds.rb` always supplies one from
+`ActiveRecord::FixtureSet.identify(account_name)`. The `account_external_id_sequences` table
+is empty in every deployment.
+
+See [ERD.md](ERD.md) for the full schema — every table, column, index, and relationship,
+cross-verified against a live database.
 
 ### Background Jobs
 

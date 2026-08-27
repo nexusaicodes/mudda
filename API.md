@@ -25,6 +25,17 @@ Send it on every request:
 curl -H "Authorization: Bearer $TOKEN" https://your-mudda/boards.json
 ```
 
+The scheme is matched **case-sensitively**: `Bearer` and `Token` are accepted, `bearer` is
+not. A token is valid for **90 days** from the moment it is minted, and an expired one is
+refused exactly like a revoked one — a `401`, with nothing to distinguish the two, so treat
+a sudden `401` on a long-lived agent as "mint a new token". A browser session does not
+expire on a timer.
+
+An `Authorization` header always decides the request: present one and the session cookie is
+ignored entirely, so a tool running on a machine that is also signed in gets the identity it
+asked for — and a token that is rejected is a `401`, never a quiet fallback to whatever
+browser session happened to be around.
+
 **Signing in over JSON** returns the same kind of token, if minting one from a shell isn't
 convenient. Sessions minted this way are labelled `json-sign-in`:
 
@@ -35,6 +46,17 @@ curl -X POST https://your-mudda/session/password.json \
 # => {"session_token":"…"}
 ```
 
+Like every other write, the credentials may be sent flat as above or wrapped
+(`{"session":{"email_address":"…","password":"…"}}`).
+
+Add `"label"` to name the token, exactly as `make token LABEL=…` does. **Give every client
+its own** — a label holds one live token, so two clients sharing the default `json-sign-in`
+would revoke each other on every sign-in:
+
+```bash
+-d '{"email_address":"you@example.com","password":"…","label":"claude"}'
+```
+
 Sign-in is rate limited to 10 attempts every 3 minutes.
 
 ### Managing tokens
@@ -42,7 +64,7 @@ Sign-in is rate limited to 10 attempts every 3 minutes.
 | Command | What it does |
 |---|---|
 | `make token LABEL=claude` | Mint a token and print it (unlabelled mints as `api`) |
-| `make tokens` | List minted tokens and when they were created |
+| `make tokens` | List minted tokens, when they were created, and when they expire |
 | `make revoke LABEL=claude` | Revoke every token with that label |
 | `make reset-auth` | Revoke everything, tokens and browser sessions alike |
 
@@ -52,7 +74,11 @@ Each wraps `bin/rails auth:*` in the app's container; run
 Labels exist so an agent's access can be revoked without signing your browser out. Give every
 agent its own label — everything sharing one label is revoked together, so
 `make revoke LABEL=json-sign-in` ends every session minted through the JSON sign-in.
-`DELETE /session.json` ends the current session too.
+
+**A label holds one live token.** Minting under a label revokes whatever token that label
+already had, so an agent that signs in on every run replaces its credential rather than
+leaving a pile of them behind. `DELETE /session.json` ends the token making the request;
+revoking any *other* token needs shell access to the box.
 
 A bearer request is never handed a session cookie, and an unauthenticated JSON request
 returns `401` rather than redirecting to the sign-in page.
@@ -103,8 +129,17 @@ A card is created published, in Triage, and every lane change from there records
 
 `GET /cards.json` accepts `board_ids[]`, `column_ids[]`, `card_ids[]`, `terms[]` (full-text),
 `creation` (a time window), `indexed_by` (`all` or `golden`) and `sorted_by` (`latest`,
-`newest` or `oldest`). Anything else is ignored rather than rejected — a misspelled filter
-widens the result set instead of erroring, so check what you get back.
+`newest` or `oldest`), alongside `page`. **Anything else is a `422` naming the offending
+parameter**, so a misspelled filter fails loudly rather than quietly widening the result set:
+
+```json
+{ "errors": { "column_id": [ "is not a recognised parameter" ] } }
+```
+
+**Every** JSON index is held to this, each against its own contract: `q` is a search
+parameter and a `422` on `/cards.json`, `column_ids[]` is a card filter and a `422` on
+`/search.json`, and the indexes that take no filters at all (a card's notes and steps, a
+board's columns) accept only `page`.
 
 Cards report `closed` (in Done), `postponed` (in Backlog), `overdue`, `golden`, `due_on`,
 and `color`.
@@ -125,7 +160,8 @@ that is exactly a card number returns that card.
 
 ## Errors
 
-Failures come back in one shape:
+Every failure comes back in one shape — including the ones that carry no record, so a client
+never has to branch on the response to find out what went wrong:
 
 ```json
 { "errors": { "due_on": ["can't be blank"] } }
@@ -133,17 +169,32 @@ Failures come back in one shape:
 
 | Status | When |
 |---|---|
-| `401` | No credential, or a token that has been revoked |
+| `401` | No credential, or a token that has been revoked or expired |
 | `403` | The user is deactivated |
 | `404` | No such record — including a `column_id` that isn't on the card's board |
-| `422` | Validation failed; the keys name the fields |
+| `422` | Validation failed, or an unrecognised query parameter; the keys name the fields |
 | `429` | Sign-in rate limit |
 
 ## Pagination
 
-Index endpoints return a bare JSON array and carry the paging in headers:
+Every index answers with the same envelope — the records under `data`, the paging under
+`paging`:
 
-- `X-Total-Count` — how many records match in total
-- `Link: <…?page=2>; rel="next"` — present only when there is a next page
+```json
+{
+  "data": [ … ],
+  "paging": { "total": 42, "page": 1, "pages": 3, "next": "https://your-mudda/cards.json?page=2" }
+}
+```
 
-Request later pages with `?page=N`. Both headers are set on JSON requests only.
+`next` is the URL of the following page, or `null` on the last one — follow it rather than
+building page numbers yourself. It is built from the request's own host, and is `null` for
+any page at or past the end, so following it always terminates. Indexes that return everything they have (a board's columns,
+a card's steps) carry the same block, reporting a single page, so nothing has to special-case
+them.
+
+There is no `per_page`, because the page size is not fixed: pages ramp **15, 30, 50, then 100
+records** and stay at 100 (`geared_pagination`). Read `total` and `pages`, not a page size.
+
+The `X-Total-Count` and `Link: <…?page=2>; rel="next"` headers carry the same information and
+are still set on JSON requests.

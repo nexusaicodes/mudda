@@ -1,6 +1,6 @@
 class Cards::NotesController < ApplicationController
   wrap_parameters :note, include: %i[ body created_at ]
-  include CardScoped
+  include CardScoped, StrictQueryParams
 
   before_action :set_note, only: %i[ show edit update destroy ]
   before_action :ensure_creatorship, only: %i[ edit update destroy ]

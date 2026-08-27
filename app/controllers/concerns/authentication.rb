@@ -2,6 +2,10 @@ module Authentication
   extend ActiveSupport::Concern
 
   included do
+    # Refusals render through JsonErrors, so it comes with the concern rather than with each
+    # host — Active Storage's controllers authenticate without including it.
+    include JsonErrors
+
     before_action :require_authentication
     helper_method :authenticated?
 
@@ -32,9 +36,20 @@ module Authentication
       resume_session || request_authentication
     end
 
+    # An Authorization header is a deliberate act, so it decides the request outright — a
+    # rejected token is a refusal, not an invitation to fall back on whichever cookie the
+    # browser happened to be carrying.
     def resume_session
-      if session = find_session_by_cookie || find_session_by_bearer_token
+      if session = presented_session
         set_current_session session
+      end
+    end
+
+    def presented_session
+      if request.authorization.present?
+        find_session_by_bearer_token
+      else
+        find_session_by_cookie
       end
     end
 
@@ -45,22 +60,17 @@ module Authentication
     # Non-browser clients present the same signed id the JSON sign-in hands back, as
     # `Authorization: Bearer <token>`. See API.md.
     def find_session_by_bearer_token
-      if token = bearer_token
+      authenticate_with_http_token do |token, _options|
         Session.find_signed(token)
       end
     end
 
-    # The scheme is case-insensitive per RFC 7235, and clients vary on how they pad the value.
-    def bearer_token
-      request.authorization&.match(/\ABearer\s+(.+?)\s*\z/i)&.captures&.first
-    end
-
-    # An API client needs a status code, not a login page. Every other format — including the
-    # binary ones Active Storage serves — keeps redirecting, so respond_to is the wrong tool
-    # here: it would answer 406 to anything it wasn't told about.
+    # An API client needs an error it can read, not a login page. Every other format —
+    # including the binary ones Active Storage serves — keeps redirecting, so respond_to is
+    # the wrong tool here: it would answer 406 to anything it wasn't told about.
     def request_authentication
       if request.format.json?
-        head :unauthorized
+        render_unauthorized "Not authenticated"
       else
         if navigational_request?
           session[:return_to_after_authenticating] = request.url
@@ -90,23 +100,27 @@ module Authentication
       request.post? && request.format.json?
     end
 
-    def start_new_session_for(identity)
+    def start_new_session_for(identity, label: nil)
       return_to = session[:return_to_after_authenticating]
       reset_session
       session[:return_to_after_authenticating] = return_to
 
-      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip, label: session_label }
+      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip, label: session_label(label) }
 
       identity.sessions.create!(attributes).tap do |session|
         set_current_session session
-        cookies.signed.permanent[:session_token] = { value: session.signed_id, httponly: true, same_site: :lax }
+        cookies.signed.permanent[:session_token] = { value: session.token, httponly: true, same_site: :lax }
       end
     end
 
     # A token handed to a JSON client is labelled so auth:tokens and auth:revoke can reach it;
-    # a browser session carries no label.
-    def session_label
-      "json-sign-in" if request.format.json?
+    # a browser session carries no label. A client may name itself, so two of them can hold
+    # tokens at once — a label holds one live token, and a shared default would have them
+    # revoking each other on every sign-in.
+    def session_label(label)
+      if request.format.json?
+        label.presence || "json-sign-in"
+      end
     end
 
     def set_current_session(session)
@@ -122,6 +136,6 @@ module Authentication
     # the session's signed id — not the cookie's value, which wraps that id in a second layer
     # of cookie signing and so can't be handed back to Session.find_signed.
     def session_token
-      Current.session&.signed_id
+      Current.session&.token
     end
 end

@@ -19,14 +19,14 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     get cards_path(format: :json), params: { column_ids: [ columns(:writebook_doing).id ] }
     assert_response :success
 
-    assert_equal [ cards(:text).number ], @response.parsed_body.pluck("number")
+    assert_equal [ cards(:text).number ], @response.parsed_body["data"].pluck("number")
   end
 
   test "index as JSON can OR multiple workflow column ids" do
     get cards_path(format: :json), params: { column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ] }
     assert_response :success
 
-    assert_equal [ cards(:logo).number, cards(:layout).number, cards(:buy_domain).number, cards(:text).number ].sort, @response.parsed_body.pluck("number").sort
+    assert_equal [ cards(:logo).number, cards(:layout).number, cards(:buy_domain).number, cards(:text).number ].sort, @response.parsed_body["data"].pluck("number").sort
   end
 
   test "create a new draft" do

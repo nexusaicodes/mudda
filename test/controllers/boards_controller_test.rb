@@ -110,8 +110,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
-    json = @response.parsed_body
-    first_board = json.first
+    first_board = @response.parsed_body["data"].first
     assert first_board["creator"].present?
     assert first_board["creator"]["email_address"].present?
   end

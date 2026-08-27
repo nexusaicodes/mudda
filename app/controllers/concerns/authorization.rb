@@ -2,6 +2,8 @@ module Authorization
   extend ActiveSupport::Concern
 
   included do
+    include JsonErrors
+
     before_action :ensure_can_access_account, if: :authenticated?
   end
 
@@ -17,7 +19,7 @@ module Authorization
     def ensure_can_access_account
       unless Current.user&.active?
         if request.format.json?
-          head :forbidden
+          render_forbidden "Not authorized"
         else
           terminate_session
 
