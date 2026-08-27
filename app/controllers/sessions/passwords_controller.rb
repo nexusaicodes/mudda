@@ -1,9 +1,8 @@
 class Sessions::PasswordsController < ApplicationController
   wrap_parameters :session, include: %i[ email_address password ]
 
-  # Throttling the only way into the app can't ride on the general cache, which is the null
-  # store in test and in development without caching — a rate limit that silently counts
-  # nothing is worse than none, because it reads as protection.
+  # Its own store, because the general cache is the null store in test and in development
+  # without caching — where a shared one would count nothing while still reading as a limit.
   RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
 
   require_unauthenticated_access

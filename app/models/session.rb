@@ -18,9 +18,8 @@ class Session < ApplicationRecord
   end
 
   private
-    # A label names one client, and make revoke LABEL=… already revokes every session
-    # carrying it. Minting is then a replacement rather than an addition, so a client that
-    # signs in on every run leaves one live token instead of a growing pile.
+    # A label names one client, and make revoke LABEL=… revokes every session carrying it.
+    # Minting is a replacement, so an agent signing in on each run holds one live token.
     def revoke_others_sharing_its_label
       if api_token?
         identity.sessions.where(label: label).where.not(id: id).destroy_all

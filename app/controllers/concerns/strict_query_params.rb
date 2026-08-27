@@ -1,12 +1,11 @@
 # Refuses a query parameter we don't recognise, on JSON requests.
 #
-# Unrecognised keys used to be dropped on the floor, which fails silently in whichever
-# direction hurts: a misspelled `column_ids` widens a card index to every card, and a
-# misspelled `q` narrows a search to nothing. Either way the caller gets a plausible answer
-# to a question it didn't ask, and no reason to doubt it.
+# Dropping an unrecognised key fails silently in whichever direction hurts: a misspelled
+# `column_ids` widens a card index to every card, a misspelled `q` narrows a search to none.
+# Either way the caller gets a plausible answer to a question it didn't ask.
 #
-# A browser sends assorted form and Turbo params and a person can't act on a 422 anyway, so
-# only JSON — where the caller is a program — is held to this.
+# A browser sends assorted form and Turbo params and a person can't act on a 422, so only
+# JSON — where the caller is a program — is held to this.
 module StrictQueryParams
   extend ActiveSupport::Concern
 

@@ -2,8 +2,8 @@ module Authentication
   extend ActiveSupport::Concern
 
   included do
-    # Refusals render through JsonErrors, so a host that authenticates gets the envelope
-    # whether or not it remembered to include it (Active Storage's controllers do not).
+    # Refusals render through JsonErrors, so it comes with the concern rather than with each
+    # host — Active Storage's controllers authenticate without including it.
     include JsonErrors
 
     before_action :require_authentication

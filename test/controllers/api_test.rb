@@ -8,9 +8,8 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   # Authentication
 
-  # Parsing is Rails' own (authenticate_with_http_token), so the accepted schemes are its
-  # schemes: the RFC 7235 names, matched case-sensitively. Pinned because the narrowing from
-  # our old case-insensitive regex was deliberate.
+  # Parsing is Rails' own, so the accepted schemes are its schemes: the RFC 7235 names,
+  # matched case-sensitively. Pinned because that strictness is a contract, not an accident.
   test "the Bearer and Token schemes authenticate, and padding is tolerated" do
     token = raw_token_for(@identity)
 
@@ -31,8 +30,8 @@ class ApiTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # A header is a deliberate act; a cookie is ambient. A tool driving the API from a browser
-  # session's machine must get the identity it asked for.
+  # A header is deliberate, a cookie ambient: a tool run from a signed-in machine must get
+  # the identity it asked for.
   test "an explicit Authorization header wins over a session cookie" do
     sign_in_as @identity
 
@@ -341,8 +340,7 @@ class ApiTest < ActionDispatch::IntegrationTest
       response.headers["X-Total-Count"]
   end
 
-  # Headers are easy to drop on the floor, so the paging a client needs travels in the body
-  # too — in the same shape on every index, paginated or not.
+  # Paging travels in the body, in the same shape on every index, paginated or not.
   test "every index answers with data and paging" do
     headers = bearer_headers_for(@identity)
     board = boards(:writebook)
@@ -393,8 +391,7 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   # Filters
 
-  # A filter Rails doesn't recognise used to be dropped, which widens the result set: a
-  # caller that misspells a filter gets everything back and no reason to doubt it.
+  # Silently dropping it would widen the result set: every card back, and no reason to doubt it.
   test "an unknown filter is refused rather than ignored" do
     get cards_path(format: :json, column_id: columns(:writebook_doing).id),
       headers: bearer_headers_for(@identity)
@@ -426,8 +423,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  # The browser sends assorted form and Turbo params, and breaking a page over a stray one
-  # would be a bad trade for strictness a person can't act on anyway.
+  # The browser sends assorted form and Turbo params; a person can't act on a 422 anyway.
   test "an unknown param is still tolerated on HTML" do
     sign_in_as @identity
 

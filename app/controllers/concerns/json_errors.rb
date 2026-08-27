@@ -1,10 +1,9 @@
 # Renders the errors a JSON client needs as JSON, in one shape:
 # { "errors": { "attribute": [ "message" ] } }
 #
-# Every failure a JSON client can see uses it — the authentication and authorization
-# refusals raised as callbacks (see Authentication and Authorization) as much as the record
-# errors rescued here. An API client that has to branch on the response shape to find out
-# what went wrong is one bad branch away from reporting the wrong thing.
+# Every failure a JSON client can see uses it: the refusals Authentication and Authorization
+# render from callbacks as much as the record errors rescued here. One shape means a client
+# never branches on the response to find out what went wrong.
 #
 # Non-JSON requests re-raise, so the browser keeps Rails' usual error pages. A handler that
 # raises propagates out of process_action rather than re-entering rescue_with_handler.
