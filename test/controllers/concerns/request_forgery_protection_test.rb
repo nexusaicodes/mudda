@@ -64,13 +64,13 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_response :created
   end
 
-  # The bearer credential is what exempts a request, not the presence of the header: a browser
-  # request carries a cookie and is verified as one, whatever Authorization it also sends.
-  test "a cross-site request carrying an Authorization header is refused" do
+  # What exempts a request is the absence of Sec-Fetch-Site, not the credential: a real bearer
+  # token carries no weight once the browser says the request came from somewhere else.
+  test "a cross-site request carrying a bearer token is still refused" do
     assert_no_difference -> { Board.count } do
       post boards_path,
         params: { board: { name: "Test Board" } },
-        headers: { "Authorization" => "Bearer nonsense", "Sec-Fetch-Site" => "cross-site" },
+        headers: bearer_headers_for(:kevin).merge("Sec-Fetch-Site" => "cross-site"),
         as: :json
     end
 

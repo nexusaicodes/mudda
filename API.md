@@ -32,8 +32,9 @@ a sudden `401` on a long-lived agent as "mint a new token". A browser session do
 expire on a timer.
 
 An `Authorization` header always decides the request: present one and the session cookie is
-ignored, so a tool running on a machine that is also signed in gets the identity it asked
-for.
+ignored entirely, so a tool running on a machine that is also signed in gets the identity it
+asked for — and a token that is rejected is a `401`, never a quiet fallback to whatever
+browser session happened to be around.
 
 **Signing in over JSON** returns the same kind of token, if minting one from a shell isn't
 convenient. Sessions minted this way are labelled `json-sign-in`:
@@ -47,6 +48,14 @@ curl -X POST https://your-mudda/session/password.json \
 
 Like every other write, the credentials may be sent flat as above or wrapped
 (`{"session":{"email_address":"…","password":"…"}}`).
+
+Add `"label"` to name the token, exactly as `make token LABEL=…` does. **Give every client
+its own** — a label holds one live token, so two clients sharing the default `json-sign-in`
+would revoke each other on every sign-in:
+
+```bash
+-d '{"email_address":"you@example.com","password":"…","label":"claude"}'
+```
 
 Sign-in is rate limited to 10 attempts every 3 minutes.
 
@@ -127,8 +136,10 @@ parameter**, so a misspelled filter fails loudly rather than quietly widening th
 { "errors": { "column_id": [ "is not a recognised parameter" ] } }
 ```
 
-`GET /search.json` is held to the same rule — a mistyped `q` would otherwise come back as an
-empty result, which reads as "nothing found".
+**Every** JSON index is held to this, each against its own contract: `q` is a search
+parameter and a `422` on `/cards.json`, `column_ids[]` is a card filter and a `422` on
+`/search.json`, and the indexes that take no filters at all (a card's notes and steps, a
+board's columns) accept only `page`.
 
 Cards report `closed` (in Done), `postponed` (in Backlog), `overdue`, `golden`, `due_on`,
 and `color`.
@@ -177,7 +188,8 @@ Every index answers with the same envelope — the records under `data`, the pag
 ```
 
 `next` is the URL of the following page, or `null` on the last one — follow it rather than
-building page numbers yourself. Indexes that return everything they have (a board's columns,
+building page numbers yourself. It is built from the request's own host, and is `null` for
+any page at or past the end, so following it always terminates. Indexes that return everything they have (a board's columns,
 a card's steps) carry the same block, reporting a single page, so nothing has to special-case
 them.
 

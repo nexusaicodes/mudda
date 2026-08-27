@@ -1,5 +1,5 @@
 class Boards::Columns::CardsController < ApplicationController
-  include BoardScoped
+  include BoardScoped, StrictQueryParams
 
   before_action :set_column
 

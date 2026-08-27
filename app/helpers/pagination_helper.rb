@@ -7,7 +7,7 @@ module PaginationHelper
       total: page.recordset.records_count,
       page: page.number,
       pages: page.recordset.page_count,
-      next: (next_page_url(page) unless page.last?)
+      next: (next_page_url(page) if page.before_last?)
     }
   end
 
@@ -56,8 +56,14 @@ module PaginationHelper
   end
 
   private
+    # Built from the request's own URL rather than from its params: url_for reads :host,
+    # :protocol and :port as options, so a caller could otherwise put `?host=` in the query
+    # and be handed a `next` pointing at their own server — which a client following it would
+    # send its bearer token to. This is how geared_pagination builds the Link header.
     def next_page_url(page)
-      url_for(params.permit!.to_h.merge(page: page.next_param, only_path: false))
+      Addressable::URI.parse(request.url).tap do |uri|
+        uri.query_values = (uri.query_values || {}).merge("page" => page.next_param.to_s)
+      end.to_s
     end
 
     def pagination_list(name, tag_element: :div, paginate_on_scroll: false, **properties, &block)

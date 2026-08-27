@@ -101,7 +101,9 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   signed out and redirected to the login page, while a JSON client keeps its session and gets
   a 403. A `Session` may carry a `label`, which marks it as an API token minted by
   `make token` (`auth:token`) or by the JSON sign-in, which labels its sessions `json-sign-in`.
-  A label holds one live token: minting under a label revokes the previous one. `Session#token`
+  A label holds one live token: minting under a label revokes the previous one, so a JSON
+  client names itself (`label` in the sign-in body) rather than sharing the `json-sign-in`
+  default and revoking its neighbours. `Session#token`
   is the single definition of the credential — labelled sessions expire after
   `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not.
 - **No roles, no per-board access control.** The single user can reach every board and card
@@ -200,7 +202,8 @@ cookie; a script or agent presents the same session as `Authorization: Bearer <t
 via the `JsonErrors` concern — the 401 and 403 refused by `Authentication`/`Authorization`
 as much as the record errors. Indexes answer with `{ "data": [...], "paging": {...} }`
 (`PaginationHelper#paging_for`), and an unrecognised query parameter is a 422 rather
-than silently ignored (`StrictQueryParams`). See [API.md](API.md).
+than silently ignored — each endpoint declaring what it answers to with
+`allows_query_params` (`StrictQueryParams`). See [API.md](API.md).
 
 ### UUID Primary Keys
 

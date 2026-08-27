@@ -36,11 +36,20 @@ module Authentication
       resume_session || request_authentication
     end
 
-    # An Authorization header is a deliberate act, so it decides the request; a cookie is
-    # ambient and only answers when nothing was presented.
+    # An Authorization header is a deliberate act, so it decides the request outright — a
+    # rejected token is a refusal, not an invitation to fall back on whichever cookie the
+    # browser happened to be carrying.
     def resume_session
-      if session = find_session_by_bearer_token || find_session_by_cookie
+      if session = presented_session
         set_current_session session
+      end
+    end
+
+    def presented_session
+      if request.authorization.present?
+        find_session_by_bearer_token
+      else
+        find_session_by_cookie
       end
     end
 
@@ -91,12 +100,12 @@ module Authentication
       request.post? && request.format.json?
     end
 
-    def start_new_session_for(identity)
+    def start_new_session_for(identity, label: nil)
       return_to = session[:return_to_after_authenticating]
       reset_session
       session[:return_to_after_authenticating] = return_to
 
-      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip, label: session_label }
+      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip, label: session_label(label) }
 
       identity.sessions.create!(attributes).tap do |session|
         set_current_session session
@@ -105,9 +114,13 @@ module Authentication
     end
 
     # A token handed to a JSON client is labelled so auth:tokens and auth:revoke can reach it;
-    # a browser session carries no label.
-    def session_label
-      "json-sign-in" if request.format.json?
+    # a browser session carries no label. A client may name itself, so two of them can hold
+    # tokens at once — a label holds one live token, and a shared default would have them
+    # revoking each other on every sign-in.
+    def session_label(label)
+      if request.format.json?
+        label.presence || "json-sign-in"
+      end
     end
 
     def set_current_session(session)

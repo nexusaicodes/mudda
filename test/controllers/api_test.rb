@@ -32,6 +32,16 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   # A header is deliberate, a cookie ambient: a tool run from a signed-in machine must get
   # the identity it asked for.
+  # Fail closed: a header that was presented and refused is a refusal, not a cue to fall back
+  # on whichever cookie the browser was carrying.
+  test "a rejected Authorization header refuses the request even with a valid cookie" do
+    sign_in_as @identity
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer nonsense" }
+
+    assert_response :unauthorized
+  end
+
   test "an explicit Authorization header wins over a session cookie" do
     sign_in_as @identity
 
@@ -276,6 +286,38 @@ class ApiTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # Two agents that both sign in over JSON must not revoke each other, which a shared default
+  # label would guarantee.
+  test "a signing-in client can name its own token label" do
+    post session_password_path(format: :json),
+      params: { email_address: @identity.email_address, password: owner_password, label: "agent-a" },
+      as: :json
+    assert_response :success
+    first = @response.parsed_body["session_token"]
+
+    reset!
+    post session_password_path(format: :json),
+      params: { email_address: @identity.email_address, password: owner_password, label: "agent-b" },
+      as: :json
+    assert_response :success
+    second = @response.parsed_body["session_token"]
+
+    reset!
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{first}" }
+    assert_response :success, "agent-a's token must survive agent-b signing in"
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{second}" }
+    assert_response :success
+    assert_equal %w[ agent-a agent-b ], @identity.sessions.where.not(label: nil).pluck(:label).sort
+  end
+
+  test "a malformed session body is refused rather than raising" do
+    post session_password_path(format: :json), params: { session: "nonsense" }, as: :json
+
+    assert_response :unauthorized
+    assert_error_envelope "base"
+  end
+
   test "signing in over JSON accepts the credentials wrapped as well as flat" do
     post session_password_path(format: :json),
       params: { session: { email_address: @identity.email_address, password: owner_password } },
@@ -409,6 +451,31 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   # A mistyped search parameter fails the other way — an empty result reads as "nothing
   # found" rather than "you asked the wrong question".
+  # Each endpoint is held to its own contract, not the union of everyone's.
+  test "a filter that belongs to another endpoint is not accepted here" do
+    headers = bearer_headers_for(@identity)
+
+    get search_path(format: :json, q: "layout", column_ids: [ columns(:writebook_doing).id ]), headers: headers
+    assert_response :unprocessable_entity
+
+    get cards_path(format: :json, q: "layout"), headers: headers
+    assert_response :unprocessable_entity
+  end
+
+  test "the indexes that take no filters are strict too" do
+    headers = bearer_headers_for(@identity)
+    board = boards(:writebook)
+
+    [ card_notes_path(cards(:logo), format: :json, pagee: 3),
+      card_steps_path(cards(:logo), format: :json, complete: true),
+      board_columns_path(board, format: :json, sorted_by: "oldest"),
+      board_column_cards_path(board, board.columns.sorted.first, format: :json, colum_ids: "x") ].each do |path|
+      get path, headers: headers
+
+      assert_response :unprocessable_entity, "#{path} should refuse a parameter it does not answer to"
+    end
+  end
+
   test "an unknown parameter on search is refused too" do
     get search_path(format: :json, query: "layout"), headers: bearer_headers_for(@identity)
 

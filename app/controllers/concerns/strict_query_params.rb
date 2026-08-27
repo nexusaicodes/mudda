@@ -6,17 +6,29 @@
 #
 # A browser sends assorted form and Turbo params and a person can't act on a 422, so only
 # JSON — where the caller is a program — is held to this.
+#
+# Each host declares what it answers to by overriding +allowed_query_params+, so an endpoint
+# is checked against its own contract rather than the union of everyone's.
 module StrictQueryParams
   extend ActiveSupport::Concern
 
-  # The filter fields, plus the controls that page and shape a response.
-  ALLOWED_QUERY_PARAMS = %w[
-    indexed_by sorted_by creation card_ids column_ids board_ids terms
-    page previous expand_all filter_id q target format
-  ]
+  # The controls that page and shape a response, which every index shares.
+  PAGINATION_PARAMS = %w[ page previous expand_all target ]
 
   included do
+    include JsonErrors
+
+    class_attribute :additional_query_params, default: []
+
     before_action :reject_unknown_query_params
+  end
+
+  class_methods do
+    # Declared rather than overridden, so what an endpoint answers to doesn't depend on the
+    # order its concerns happen to be included in.
+    def allows_query_params(*names)
+      self.additional_query_params = additional_query_params + names.map(&:to_s)
+    end
   end
 
   private
@@ -27,10 +39,13 @@ module StrictQueryParams
       end
     end
 
-    # Rails reads `terms[]=a&terms[]=b` as `terms`, and route params never appear here — so
-    # `id` and `board_id` are out of scope without having to be named.
+    def allowed_query_params
+      PAGINATION_PARAMS + self.class.additional_query_params
+    end
+
+    # Route params live in path_parameters, so `id` and `board_id` are out of scope without
+    # having to be named — and Rack has already read `terms[]=a&terms[]=b` as `terms`.
     def unknown_query_params
-      @unknown_query_params ||=
-        request.query_parameters.keys.map { |key| key.delete_suffix("[]") }.uniq - ALLOWED_QUERY_PARAMS
+      @unknown_query_params ||= request.query_parameters.keys - allowed_query_params
     end
 end

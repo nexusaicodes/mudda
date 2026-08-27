@@ -1,5 +1,5 @@
 class Sessions::PasswordsController < ApplicationController
-  wrap_parameters :session, include: %i[ email_address password ]
+  wrap_parameters :session, include: %i[ email_address password label ]
 
   # Its own store, because the general cache is the null store in test and in development
   # without caching — where a shared one would count nothing while still reading as a limit.
@@ -13,7 +13,7 @@ class Sessions::PasswordsController < ApplicationController
 
   def create
     if identity = OwnerPassword.authenticate(email_address, password)
-      start_new_session_for identity
+      start_new_session_for identity, label: credentials[:label]
 
       respond_to do |format|
         format.html { redirect_to after_authentication_url }
@@ -29,9 +29,15 @@ class Sessions::PasswordsController < ApplicationController
 
   private
     # A JSON client may send the credentials flat or wrapped, the way every other write in
-    # this API accepts both; a browser form always sends them flat.
+    # this API accepts both; a browser form always sends them flat. A `session` that isn't a
+    # hash is a malformed body, not credentials — falling through to params answers it with
+    # the 401 it deserves rather than a 500.
     def credentials
-      params[:session] || params
+      if params[:session].is_a?(ActionController::Parameters)
+        params[:session]
+      else
+        params
+      end
     end
 
     def email_address
