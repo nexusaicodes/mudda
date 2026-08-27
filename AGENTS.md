@@ -70,7 +70,8 @@ path and rewrote `PATH_INFO`/`SCRIPT_NAME` in a Rack middleware; that middleware
   while signed out must not depend on it (see `Users::AvatarsController`).
 - Models still carry `account_id` for data isolation, and `Account#external_account_id`
   still exists — it keys the browser-local "last opened board" (`ApplicationHelper#last_board_storage_key`)
-  and identifies the account in seeds and error context.
+  and identifies the account in seeds and error context. It is a deterministic hash of the
+  account name, not a running sequence (see UUID Primary Keys).
 - Background jobs serialize and restore `Current.account` explicitly (see Background Jobs),
   since they run with no session.
 
@@ -205,8 +206,18 @@ than silently ignored (`StrictQueryParams`). See [API.md](API.md).
 
 Primary keys are UUIDs (`lib/rails_ext/active_record_uuid_type.rb`): UUIDv7 generated, then
 hex → base36, left-padded to a fixed **25-char** string (`36^25 > 2^128`), stored as a
-SQLite blob. Note that `Account#external_account_id` and
-`Card#number` are **separate integer sequences**, not UUIDs.
+16-byte SQLite blob — so `hex()` in a SQL client prints a different encoding of the same
+value, not the id the app or the API uses. `Card#number` is a **separate integer sequence**
+(from `account.cards_count`), not a UUID, and it is what the API addresses cards by.
+
+`Account#external_account_id` is an integer too, but the `Account::ExternalIdSequence`
+counter that would generate it is **dead code**: `assign_external_account_id` only fires when
+the value is absent (`||=`), and `db/seeds.rb` always supplies one from
+`ActiveRecord::FixtureSet.identify(account_name)`. The `account_external_id_sequences` table
+is empty in every deployment.
+
+See [ERD.md](ERD.md) for the full schema — every table, column, index, and relationship,
+cross-verified against a live database.
 
 ### Background Jobs
 
