@@ -7,9 +7,8 @@ module JsonErrors
   extend ActiveSupport::Concern
 
   included do
-    rescue_from ActiveRecord::RecordNotFound,      with: :render_not_found
-    rescue_from ActiveRecord::RecordInvalid,       with: :render_record_invalid
-    rescue_from Card::Triageable::WrongBoardError, with: :render_wrong_board
+    rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+    rescue_from ActiveRecord::RecordInvalid,  with: :render_record_invalid
   end
 
   private
@@ -22,12 +21,6 @@ module JsonErrors
     def render_record_invalid(error)
       render_error error, status: :unprocessable_entity do
         error.record.errors
-      end
-    end
-
-    def render_wrong_board(error)
-      render_error error, status: :unprocessable_entity do
-        { column: [ error.message ] }
       end
     end
 

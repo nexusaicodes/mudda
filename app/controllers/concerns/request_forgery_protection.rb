@@ -7,7 +7,7 @@ module RequestForgeryProtection
 
   private
     def verified_via_header_only?
-      super || allowed_api_request? || bearer_token.present?
+      super || allowed_api_request?
     end
 
     def allowed_api_request?

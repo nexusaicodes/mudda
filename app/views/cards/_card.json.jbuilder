@@ -1,4 +1,4 @@
-json.cache! [ card, Date.current ] do
+json.cache! [ card, card.overdue? ] do
   json.(card, :id, :number, :title, :status)
   json.description card.description.to_plain_text
   json.description_html card.description.to_s

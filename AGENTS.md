@@ -99,7 +99,7 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   resolves to no user and no account, and `Authorization` refuses the request: a browser is
   signed out and redirected to the login page, while a JSON client keeps its session and gets
   a 403. A `Session` may carry a `label`, which marks it as an API token minted by
-  `bin/rails auth:token`.
+  `make token` (`auth:token`) or by the JSON sign-in, which labels its sessions `json-sign-in`.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 
@@ -192,7 +192,7 @@ is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
 on the same URL — there is no separate API surface. A browser authenticates with its session
 cookie; a script or agent presents the same session as `Authorization: Bearer <token>`
-(`bin/rails auth:token`). Unauthenticated JSON gets a 401, and failures come back as
+(`make token LABEL=…`). Unauthenticated JSON gets a 401, and failures come back as
 `{ "errors": { "field": ["message"] } }` via the `JsonErrors` concern. See [API.md](API.md).
 
 ### UUID Primary Keys

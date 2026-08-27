@@ -10,9 +10,9 @@ namespace :auth do
 
   desc "Mint an API token for a script or agent (LABEL=claude bin/rails auth:token)"
   task token: :environment do
-    identity = owner_identity or abort "No identity found — run bin/rails db:seed first."
+    identity = Identity.owner or abort "No owner identity — set MUDDA_OWNER_EMAIL to one, or run bin/rails db:seed first."
 
-    session = identity.sessions.create!(label: ENV.fetch("LABEL", "api"))
+    session = identity.sessions.create!(label: ENV["LABEL"].presence || "api")
 
     warn "Token for #{identity.email_address} labelled #{session.label.inspect}. Send it as:"
     warn %(  Authorization: Bearer <token>)
@@ -26,7 +26,7 @@ namespace :auth do
     if sessions.any?
       sessions.each { |session| puts "#{session.label}\t#{session.created_at}" }
     else
-      puts "No API tokens. Mint one with LABEL=claude bin/rails auth:token."
+      puts "No API tokens. Mint one with make token LABEL=claude."
     end
   end
 
@@ -37,10 +37,4 @@ namespace :auth do
     count = Session.where(label: label).destroy_all.size
     puts "Revoked #{count} token(s) labelled #{label.inspect}."
   end
-end
-
-# The single owner of this deployment. Falls back to the only identity there is when
-# MUDDA_OWNER_EMAIL isn't set in the shell running the task.
-def owner_identity
-  Identity.find_by(email_address: ENV["MUDDA_OWNER_EMAIL"]) || Identity.first
 end

@@ -11,10 +11,12 @@ follows whoever the credential belongs to. See [AGENTS.md](AGENTS.md).
 
 Two credentials work, and both resolve to the same `Session`.
 
-**A token** — for scripts, agents, and anything without a cookie jar:
+**A token** — for scripts, agents, and anything without a cookie jar. Mudda runs through
+Docker Compose, so the task runs in the app's container:
 
 ```bash
-LABEL=claude bin/rails auth:token     # prints the token on the last line
+make token LABEL=claude               # prints the token on the last line
+# or: docker compose run --rm web bin/rails auth:token
 ```
 
 Send it on every request:
@@ -24,7 +26,7 @@ curl -H "Authorization: Bearer $TOKEN" https://your-mudda/boards.json
 ```
 
 **Signing in over JSON** returns the same kind of token, if minting one from a shell isn't
-convenient:
+convenient. Sessions minted this way are labelled `json-sign-in`:
 
 ```bash
 curl -X POST https://your-mudda/session/password.json \
@@ -39,12 +41,17 @@ Sign-in is rate limited to 10 attempts every 3 minutes.
 
 | Command | What it does |
 |---|---|
-| `LABEL=claude bin/rails auth:token` | Mint a token and print it |
-| `bin/rails auth:tokens` | List minted tokens and when they were created |
-| `LABEL=claude bin/rails auth:revoke` | Revoke every token with that label |
-| `bin/rails auth:reset` | Revoke everything, tokens and browser sessions alike |
+| `make token LABEL=claude` | Mint a token and print it (unlabelled mints as `api`) |
+| `make tokens` | List minted tokens and when they were created |
+| `make revoke LABEL=claude` | Revoke every token with that label |
+| `make reset-auth` | Revoke everything, tokens and browser sessions alike |
 
-Labels exist so an agent's access can be revoked without signing your browser out.
+Each wraps `bin/rails auth:*` in the app's container; run
+`docker compose run --rm web bin/rails auth:token` directly if you prefer.
+
+Labels exist so an agent's access can be revoked without signing your browser out. Give every
+agent its own label — everything sharing one label is revoked together, so
+`make revoke LABEL=json-sign-in` ends every session minted through the JSON sign-in.
 `DELETE /session.json` ends the current session too.
 
 A bearer request is never handed a session cookie, and an unauthenticated JSON request

@@ -50,6 +50,33 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "a bearer client's JSON request succeeds over HTTPS" do
+    Rails.configuration.force_ssl = false
+    reset!
+
+    assert_difference -> { Board.count }, +1 do
+      post boards_path,
+        params: { board: { name: "Test Board" } },
+        headers: bearer_headers_for(:kevin).merge("X-Forwarded-Proto" => "https"),
+        as: :json
+    end
+
+    assert_response :created
+  end
+
+  # The bearer credential is what exempts a request, not the presence of the header: a browser
+  # request carries a cookie and is verified as one, whatever Authorization it also sends.
+  test "a cross-site request carrying an Authorization header is refused" do
+    assert_no_difference -> { Board.count } do
+      post boards_path,
+        params: { board: { name: "Test Board" } },
+        headers: { "Authorization" => "Bearer nonsense", "Sec-Fetch-Site" => "cross-site" },
+        as: :json
+    end
+
+    assert_response :unprocessable_entity
+  end
+
   test "HTTPS request fails with missing Sec-Fetch-Site header" do
     Rails.configuration.force_ssl = false
 

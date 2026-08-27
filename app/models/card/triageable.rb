@@ -10,11 +10,6 @@ module Card::Triageable
   # since they back lists and counts that exclude drafts; a draft sitting in a lane
   # therefore matches the predicate but not the scope.
 
-  # Raised when a card is asked to move into a column belonging to another board. Both
-  # controller paths look the column up inside the card's own board, so this is defensive —
-  # it exists so callers that pass an id straight through get a rescuable error, not a crash.
-  class WrongBoardError < StandardError; end
-
   TRIAGE_COLUMN   = "Triage"
   BACKLOG_COLUMN  = "Backlog"
   DOING_COLUMN    = "Doing"
@@ -61,8 +56,6 @@ module Card::Triageable
   end
 
   def triage_into(column)
-    raise WrongBoardError, "The column must belong to the card board" unless board == column.board
-
     transaction do
       update! column: column
       track_event "triaged", particulars: { column: column.name }

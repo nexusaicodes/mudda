@@ -8,6 +8,30 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   # Authentication
 
+  test "the bearer scheme is case-insensitive and tolerates padding" do
+    token = bearer_headers_for(@identity)["Authorization"].delete_prefix("Bearer ")
+
+    get boards_path(format: :json), headers: { "Authorization" => "bearer  #{token} " }
+
+    assert_response :success
+  end
+
+  test "password sign-in over JSON labels the session it mints" do
+    post session_password_path(format: :json),
+      params: { email_address: @identity.email_address, password: owner_password }
+
+    assert_equal "json-sign-in", @identity.sessions.order(:created_at).last.label
+  end
+
+  test "a client holding a token can mint another one" do
+    post session_password_path(format: :json),
+      params: { email_address: @identity.email_address, password: owner_password },
+      headers: bearer_headers_for(@identity)
+
+    assert_response :success
+    assert @response.parsed_body["session_token"].present?
+  end
+
   test "authenticate with the owner password" do
     post session_password_path(format: :json),
       params: { email_address: @identity.email_address, password: owner_password }
@@ -97,7 +121,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :created
     number = @response.parsed_body["number"]
 
-    # due_on has to survive the round trip — it was write-only before.
+    # due_on has to survive the round trip: what was sent in comes back out.
     get card_path(number, format: :json), headers: headers
     assert_equal 1.week.from_now.to_date.to_s, @response.parsed_body["due_on"]
     assert_not @response.parsed_body["overdue"]
@@ -152,7 +176,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "due_on")
   end
 
-  # Every write that goes through a bang method used to raise into a 500 HTML page.
+  # A bang method's RecordInvalid has to reach the client as the JSON error envelope.
   test "a validation failure on a bang-method write is a JSON 422" do
     headers = bearer_headers_for(@identity)
 
