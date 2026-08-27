@@ -195,8 +195,11 @@ is no create/destroy/reorder) and a nested read-only `columns/:id/cards` index.
 Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
 on the same URL — there is no separate API surface. A browser authenticates with its session
 cookie; a script or agent presents the same session as `Authorization: Bearer <token>`
-(`make token LABEL=…`). Unauthenticated JSON gets a 401, and failures come back as
-`{ "errors": { "field": ["message"] } }` via the `JsonErrors` concern. See [API.md](API.md).
+(`make token LABEL=…`). **Every** failure comes back as `{ "errors": { "field": ["message"] } }`
+via the `JsonErrors` concern — the 401 and 403 refused by `Authentication`/`Authorization`
+as much as the record errors. Indexes answer with `{ "data": [...], "paging": {...} }`
+(`PaginationHelper#paging_for`), and an unrecognised query parameter is a 422 rather
+than silently ignored (`StrictQueryParams`). See [API.md](API.md).
 
 ### UUID Primary Keys
 

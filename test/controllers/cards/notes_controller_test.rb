@@ -44,7 +44,7 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
     get card_notes_path(card), as: :json
 
     assert_response :success
-    assert_equal card.notes.count, @response.parsed_body.count
+    assert_equal card.notes.count, @response.parsed_body["data"].count
   end
 
   test "create as JSON" do

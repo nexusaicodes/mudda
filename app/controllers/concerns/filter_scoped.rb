@@ -2,6 +2,8 @@ module FilterScoped
   extend ActiveSupport::Concern
 
   included do
+    include StrictQueryParams
+
     before_action :set_filter
     before_action :set_user_filtering
   end

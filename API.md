@@ -120,8 +120,15 @@ A card is created published, in Triage, and every lane change from there records
 
 `GET /cards.json` accepts `board_ids[]`, `column_ids[]`, `card_ids[]`, `terms[]` (full-text),
 `creation` (a time window), `indexed_by` (`all` or `golden`) and `sorted_by` (`latest`,
-`newest` or `oldest`). Anything else is ignored rather than rejected — a misspelled filter
-widens the result set instead of erroring, so check what you get back.
+`newest` or `oldest`), alongside `page`. **Anything else is a `422` naming the offending
+parameter**, so a misspelled filter fails loudly rather than quietly widening the result set:
+
+```json
+{ "errors": { "column_id": [ "is not a recognised parameter" ] } }
+```
+
+`GET /search.json` is held to the same rule — a mistyped `q` would otherwise come back as an
+empty result, which reads as "nothing found".
 
 Cards report `closed` (in Done), `postponed` (in Backlog), `overdue`, `golden`, `due_on`,
 and `color`.
@@ -142,7 +149,8 @@ that is exactly a card number returns that card.
 
 ## Errors
 
-Failures come back in one shape:
+Every failure comes back in one shape — including the ones that carry no record, so a client
+never has to branch on the response to find out what went wrong:
 
 ```json
 { "errors": { "due_on": ["can't be blank"] } }
@@ -150,17 +158,31 @@ Failures come back in one shape:
 
 | Status | When |
 |---|---|
-| `401` | No credential, or a token that has been revoked |
+| `401` | No credential, or a token that has been revoked or expired |
 | `403` | The user is deactivated |
 | `404` | No such record — including a `column_id` that isn't on the card's board |
-| `422` | Validation failed; the keys name the fields |
+| `422` | Validation failed, or an unrecognised query parameter; the keys name the fields |
 | `429` | Sign-in rate limit |
 
 ## Pagination
 
-Index endpoints return a bare JSON array and carry the paging in headers:
+Every index answers with the same envelope — the records under `data`, the paging under
+`paging`:
 
-- `X-Total-Count` — how many records match in total
-- `Link: <…?page=2>; rel="next"` — present only when there is a next page
+```json
+{
+  "data": [ … ],
+  "paging": { "total": 42, "page": 1, "pages": 3, "next": "https://your-mudda/cards.json?page=2" }
+}
+```
 
-Request later pages with `?page=N`. Both headers are set on JSON requests only.
+`next` is the URL of the following page, or `null` on the last one — follow it rather than
+building page numbers yourself. Indexes that return everything they have (a board's columns,
+a card's steps) carry the same block, reporting a single page, so nothing has to special-case
+them.
+
+There is no `per_page`, because the page size is not fixed: pages ramp **15, 30, 50, then 100
+records** and stay at 100 (`geared_pagination`). Read `total` and `pages`, not a page size.
+
+The `X-Total-Count` and `Link: <…?page=2>; rel="next"` headers carry the same information and
+are still set on JSON requests.

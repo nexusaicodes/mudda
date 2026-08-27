@@ -1,5 +1,5 @@
 class SearchesController < ApplicationController
-  include Turbo::DriveHelper
+  include Turbo::DriveHelper, StrictQueryParams
 
   def show
     @query = params[:q].blank? ? nil : params[:q]

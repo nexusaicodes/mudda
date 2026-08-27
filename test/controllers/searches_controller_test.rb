@@ -54,7 +54,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_path(q: "broken"), as: :json
     assert_response :success
 
-    body = @response.parsed_body
+    body = @response.parsed_body["data"]
     assert_kind_of Array, body
     assert_equal 1, body.size
     assert_equal "Layout is broken", body.first["title"]
@@ -64,7 +64,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_path(q: @card.number), as: :json
     assert_response :success
 
-    body = @response.parsed_body
+    body = @response.parsed_body["data"]
     assert_kind_of Array, body
     assert_equal 1, body.size
     assert_equal @card.id, body.first["id"]
@@ -74,7 +74,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_path(q: "haggis"), as: :json
     assert_response :success
 
-    body = @response.parsed_body
+    body = @response.parsed_body["data"]
     assert_kind_of Array, body
     assert_equal 1, body.size
     assert_equal @note2_card.id, body.first["id"]

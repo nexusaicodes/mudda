@@ -170,7 +170,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :created
 
     get search_path(format: :json, q: "Ship the API"), headers: headers
-    assert_includes @response.parsed_body.pluck("number"), number
+    assert_includes @response.parsed_body["data"].pluck("number"), number
   end
 
   test "an overdue card reports itself as overdue" do
@@ -339,6 +339,101 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal users(:david).accessible_cards.published.distinct.count.to_s,
       response.headers["X-Total-Count"]
+  end
+
+  # Headers are easy to drop on the floor, so the paging a client needs travels in the body
+  # too — in the same shape on every index, paginated or not.
+  test "every index answers with data and paging" do
+    headers = bearer_headers_for(@identity)
+    board = boards(:writebook)
+    column = board.columns.sorted.first
+
+    [ cards_path(format: :json),
+      boards_path(format: :json),
+      board_columns_path(board, format: :json),
+      board_column_cards_path(board, column, format: :json),
+      card_notes_path(cards(:logo), format: :json),
+      card_steps_path(cards(:logo), format: :json),
+      search_path(format: :json, q: "layout") ].each do |path|
+      get path, headers: headers
+
+      assert_response :success, "#{path} should answer"
+      assert_kind_of Array, @response.parsed_body["data"], "#{path} should carry data"
+      assert_kind_of Integer, @response.parsed_body.dig("paging", "total"), "#{path} should carry paging"
+      assert_equal 1, @response.parsed_body.dig("paging", "page")
+    end
+  end
+
+  test "paging counts the whole result set and links the next page" do
+    headers = bearer_headers_for(@identity)
+    board = boards(:writebook)
+    Current.user = users(:david)
+    16.times { |i| board.cards.create! title: "Filler #{i}", due_on: 1.week.from_now, status: "published" }
+
+    get cards_path(format: :json), headers: headers
+
+    total = users(:david).accessible_cards.published.distinct.count
+    assert_equal total, @response.parsed_body.dig("paging", "total")
+    assert_operator @response.parsed_body.dig("paging", "pages"), :>, 1
+    assert_match %r{\Ahttps?://.+\?.*page=2}, @response.parsed_body.dig("paging", "next"),
+      "next must be a URL a client can follow without rebuilding it"
+
+    get @response.parsed_body.dig("paging", "next"), headers: headers
+
+    assert_response :success
+    assert_equal 2, @response.parsed_body.dig("paging", "page")
+  end
+
+  test "the last page links nowhere" do
+    get boards_path(format: :json), headers: bearer_headers_for(@identity)
+
+    assert_equal 1, @response.parsed_body.dig("paging", "pages")
+    assert_nil @response.parsed_body.dig("paging", "next")
+  end
+
+  # Filters
+
+  # A filter Rails doesn't recognise used to be dropped, which widens the result set: a
+  # caller that misspells a filter gets everything back and no reason to doubt it.
+  test "an unknown filter is refused rather than ignored" do
+    get cards_path(format: :json, column_id: columns(:writebook_doing).id),
+      headers: bearer_headers_for(@identity)
+
+    assert_response :unprocessable_entity
+    assert_equal [ "is not a recognised parameter" ], @response.parsed_body.dig("errors", "column_id")
+  end
+
+  test "every unknown filter is named, not just the first" do
+    get cards_path(format: :json, nope: 1, nah: 2), headers: bearer_headers_for(@identity)
+
+    assert_response :unprocessable_entity
+    assert_equal %w[ nah nope ], @response.parsed_body["errors"].keys.sort
+  end
+
+  # A mistyped search parameter fails the other way — an empty result reads as "nothing
+  # found" rather than "you asked the wrong question".
+  test "an unknown parameter on search is refused too" do
+    get search_path(format: :json, query: "layout"), headers: bearer_headers_for(@identity)
+
+    assert_response :unprocessable_entity
+    assert_equal [ "is not a recognised parameter" ], @response.parsed_body.dig("errors", "query")
+  end
+
+  test "the filters that do exist are still accepted" do
+    get cards_path(format: :json, column_ids: [ columns(:writebook_doing).id ], sorted_by: "oldest", page: 1),
+      headers: bearer_headers_for(@identity)
+
+    assert_response :success
+  end
+
+  # The browser sends assorted form and Turbo params, and breaking a page over a stray one
+  # would be a bad trade for strictness a person can't act on anyway.
+  test "an unknown param is still tolerated on HTML" do
+    sign_in_as @identity
+
+    get cards_path(nope: 1)
+
+    assert_response :success
   end
 
   private

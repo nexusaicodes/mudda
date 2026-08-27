@@ -16,8 +16,8 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     get board_columns_path(board), as: :json
 
     assert_response :success
-    assert_equal board.columns.count, @response.parsed_body.count
-    assert_equal board_column_cards_url(board, board.columns.sorted.first), @response.parsed_body.first["cards_url"]
+    assert_equal board.columns.count, @response.parsed_body["data"].count
+    assert_equal board_column_cards_url(board, board.columns.sorted.first), @response.parsed_body["data"].first["cards_url"]
   end
 
   test "show as JSON" do

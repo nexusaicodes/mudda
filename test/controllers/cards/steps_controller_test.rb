@@ -61,7 +61,7 @@ class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
     get card_steps_path(card), as: :json
     assert_response :success
 
-    body = @response.parsed_body
+    body = @response.parsed_body["data"]
     assert_equal 2, body.size
     assert_equal "Step one", body.first["content"]
   end
