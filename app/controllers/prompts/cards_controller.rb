@@ -1,4 +1,7 @@
+# The #-mention autocomplete: a fragment for the text editor, not a card index.
 class Prompts::CardsController < ApplicationController
+  include BrowserOnly
+
   MAX_RESULTS = 10
 
   def index
