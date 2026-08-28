@@ -6,7 +6,7 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
     @account = accounts("37s")
     @board = boards(:writebook)
     @card = cards(:logo)
-    @blob = attach_blob_to_card(@card)
+    @blob = attach_blob_as_rich_text_embed(@card)
   end
 
   test "authenticated user can view blob" do
@@ -138,13 +138,6 @@ class ActiveStorageAuthorizationTest < ActionDispatch::IntegrationTest
   end
 
   private
-    def attach_blob_to_card(card)
-      Current.with(session: sessions(:david)) do
-        card.image.attach io: file_fixture("moon.jpg").open, filename: "test.jpg", content_type: "image/jpeg"
-        card.image.blob
-      end
-    end
-
     def attach_blob_as_rich_text_embed(container)
       Current.with(account: @account, session: sessions(:david)) do
         blob = ActiveStorage::Blob.create_and_upload! \

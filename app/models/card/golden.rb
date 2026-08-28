@@ -2,21 +2,15 @@ module Card::Golden
   extend ActiveSupport::Concern
 
   included do
-    has_one :goldness, dependent: :destroy, class_name: "Card::Goldness"
-
-    scope :golden, -> { joins(:goldness) }
-    scope :with_golden_first, -> { left_outer_joins(:goldness).prepend_order("card_goldnesses.id IS NULL").preload(:goldness) }
-  end
-
-  def golden?
-    goldness.present?
+    scope :golden, -> { where(golden: true) }
+    scope :with_golden_first, -> { prepend_order("cards.golden DESC") }
   end
 
   def gild
-    create_goldness! unless golden?
+    update! golden: true
   end
 
   def ungild
-    goldness&.destroy
+    update! golden: false
   end
 end

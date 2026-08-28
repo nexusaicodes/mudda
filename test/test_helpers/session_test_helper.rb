@@ -7,26 +7,25 @@ module SessionTestHelper
     ActionDispatch::Cookies::CookieJar.build(request, cookies.to_hash)
   end
 
-  # Signs in via the owner password. Accepts an Identity, a User, or a fixture label.
-  def sign_in_as(identity)
-    identity = resolve_identity(identity)
-    password_sign_in identity
-    identity
+  # Signs in via the owner password. Accepts a User or a fixture label.
+  def sign_in_as(user)
+    user = resolve_user(user)
+    password_sign_in user
+    user
   end
 
-  def logout_and_sign_in_as(identity)
+  def logout_and_sign_in_as(user)
     ActionPack::Passkey.delete_all
     Session.delete_all
-    sign_in_as identity
+    sign_in_as user
   end
 
   # The credential a non-browser client presents. Mirrors what POST /session/password.json
   # hands back and what bin/rails auth:token prints. The label is unique per call because a
   # label holds one live token — a shared default would have two tokens in one test revoke
   # each other.
-  def bearer_headers_for(identity, label: "test-#{SecureRandom.hex(4)}")
-    identity = resolve_identity(identity)
-    session = identity.sessions.create!(label: label)
+  def bearer_headers_for(user, label: "test-#{SecureRandom.hex(4)}")
+    session = resolve_user(user).sessions.create!(kind: :token, label: label)
 
     { "Authorization" => "Bearer #{session.token}" }
   end
@@ -38,21 +37,17 @@ module SessionTestHelper
   end
 
   private
-    def password_sign_in(identity)
+    def password_sign_in(user)
       cookies.delete :session_token
 
-      post session_password_path, params: { email_address: identity.email_address, password: owner_password }
+      post session_password_path, params: { email_address: user.email_address, password: owner_password }
 
       assert_response :redirect, "Posting the owner password should grant access"
       assert_not_nil cookies.get_cookie("session_token"), "Expected session_token cookie to be set after sign in"
     end
 
-    def resolve_identity(identity)
-      case identity
-      when User then identity.identity or raise "User #{identity.name} (#{identity.id}) has no identity"
-      when Identity then identity
-      else identities(identity)
-      end
+    def resolve_user(user)
+      user.is_a?(User) ? user : users(user)
     end
 
     def owner_password

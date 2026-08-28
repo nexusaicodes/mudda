@@ -9,7 +9,7 @@ class AutoLinkScrubber < Loofah::Scrubber
   # anchors, allowing it to match email addresses embedded within longer strings.
   #
   # It's named EMAIL_AUTOLINK_REGEXP (not EMAIL_REGEXP) to avoid confusing Brakeman's imprecise
-  # constant lookup, which otherwise assumes Identity's email validation uses this \b-anchored pattern.
+  # constant lookup, which otherwise assumes User's email validation uses this \b-anchored pattern.
   # See https://github.com/presidentbeef/brakeman/pull/1981
   EMAIL_AUTOLINK_REGEXP = /\b[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\b/
   URL_REGEXP = URI::DEFAULT_PARSER.make_regexp(%w[http https])

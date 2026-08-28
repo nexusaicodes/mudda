@@ -21,7 +21,8 @@ class Users::AvatarsController < ApplicationController
   end
 
   private
-    # Unscoped: the unauthenticated show has no Current.account, and the UUID is unguessable.
+    # Unscoped: the unauthenticated show has no Current.account. What it renders — an avatar
+    # or a monogram — is what the sign-in page already shows, so an enumerable id costs nothing.
     def set_user
       @user = User.find(params[:user_id])
     end

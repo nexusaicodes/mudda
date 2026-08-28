@@ -2,61 +2,47 @@ Rails.application.routes.draw do
   root "landings#show"
 
   namespace :account do
-    resource :settings
+    resource :settings, only: %i[ show update ]
   end
 
   resources :users, only: %i[ show edit update ] do
     scope module: :users do
-      resource :avatar
+      resource :avatar, only: %i[ show destroy ]
     end
   end
 
   resources :boards do
+    # A board's columns are fixed and travel with the board itself, so what is left is the
+    # browser's: one lane's cards, and the color picker.
     scope module: :boards do
-      resources :columns, only: %i[ index show update ] do
-        scope module: :columns do
-          resources :cards, only: :index
-        end
-      end
+      resources :columns, only: %i[ show update ]
     end
 
-    resources :cards, only: :create
-  end
-
-  namespace :columns do
+    # Card numbers run per board, so a card is addressed by its board and its number.
     resources :cards do
       scope module: :cards do
+        resource :board, only: :edit
+        resource :column, only: %i[ edit update ]
+        resource :goldness, only: %i[ create destroy ]
+        resources :steps, except: %i[ new index ]
+        resources :notes, except: :new
+
         namespace :drops do
-          resource :column
+          resource :column, only: :create
         end
       end
     end
   end
 
-  namespace :cards do
-    resources :previews
-  end
+  # The cross-board card list. Nesting it under a board narrows it; see CardsController.
+  resources :cards, only: :index
 
-  resources :cards do
-    scope module: :cards do
-      resource :draft, only: :show
-      resource :board
-      resource :column
-      resource :goldness
-      resource :image
-      resource :publish
-      resources :steps
-
-      resources :notes
-    end
-  end
-
-  resource :search
+  resource :search, only: :show
   namespace :searches do
-    resources :queries
+    resources :queries, only: :create
   end
 
-  resources :filters do
+  resources :filters, only: %i[ create destroy ] do
     scope module: :filters do
       collection do
         resource :settings_refresh, only: :create
@@ -71,23 +57,27 @@ Rails.application.routes.draw do
     end
   end
 
-  resource :landing
+  resource :landing, only: :show
 
   namespace :my do
     resource :passkey_challenge, only: :create
-    resource :identity, only: :show
+    resource :user, only: :show
     resources :passkeys, except: %i[ show new ]
-    resource :timezone
-    resource :menu
+    resource :timezone, only: :update
+    resource :menu, only: :show
   end
 
   namespace :prompts do
-    resources :cards
+    resources :cards, only: :index
+  end
+
+  resolve "Card" do |card, options|
+    route_for :board_card, card.board, card, options
   end
 
   resolve "Note" do |note, options|
     options[:anchor] = ActionView::RecordIdentifier.dom_id(note)
-    route_for :card, note.card, options
+    route_for :board_card, note.card.board, note.card, options
   end
 
   resolve "Event" do |event, options|

@@ -9,19 +9,19 @@ class OwnerPasswordTest < ActiveSupport::TestCase
     assert OwnerPassword.enabled?
   end
 
-  test "authenticate returns the identity for a correct password" do
-    identity = identities(:david)
-    assert_equal identity, OwnerPassword.authenticate(identity.email_address, owner_password)
+  test "authenticate returns the user for a correct password" do
+    user = users(:david)
+    assert_equal user, OwnerPassword.authenticate(user.email_address, owner_password)
   end
 
   test "authenticate still succeeds once a passkey exists" do
-    identity = identities(:david)
-    create_passkey_for identity
-    assert_equal identity, OwnerPassword.authenticate(identity.email_address, owner_password)
+    user = users(:david)
+    create_passkey_for user
+    assert_equal user, OwnerPassword.authenticate(user.email_address, owner_password)
   end
 
   test "authenticate is nil for a wrong password" do
-    assert_nil OwnerPassword.authenticate(identities(:david).email_address, "not-the-password")
+    assert_nil OwnerPassword.authenticate(users(:david).email_address, "not-the-password")
   end
 
   test "authenticate is nil for an unknown email" do
@@ -29,8 +29,8 @@ class OwnerPasswordTest < ActiveSupport::TestCase
   end
 
   private
-    def create_passkey_for(identity)
-      identity.passkeys.create!(
+    def create_passkey_for(user)
+      user.passkeys.create!(
         credential_id: SecureRandom.base64(32),
         public_key: SessionTestHelper::DUMMY_PASSKEY_PUBLIC_KEY,
         sign_count: 0

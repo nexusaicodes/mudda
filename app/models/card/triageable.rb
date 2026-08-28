@@ -3,12 +3,8 @@ module Card::Triageable
 
   # A card always lives in exactly one column. The board's fixed lanes —
   # Triage, Backlog, Todo, Doing, Done — are all real Column rows; column_id is
-  # the single source of truth. There are no separate lifecycle states.
-  #
-  # The instance predicates report a single card's column placement regardless of
-  # its draft/published status. The scopes additionally filter to published cards,
-  # since they back lists and counts that exclude drafts; a draft sitting in a lane
-  # therefore matches the predicate but not the scope.
+  # the single source of truth. There are no separate lifecycle states, and each
+  # predicate below has a scope that says the same thing in SQL.
 
   TRIAGE_COLUMN   = "Triage"
   BACKLOG_COLUMN  = "Backlog"
@@ -19,16 +15,17 @@ module Card::Triageable
     belongs_to :column, touch: true
 
     before_validation :assign_default_column, on: :create
+    after_update :track_triage_event, if: :saved_change_to_column_id?
 
     scope :in_column_named,     ->(*names) { joins(:column).where(columns: { name: names }) }
     scope :not_in_column_named, ->(*names) { joins(:column).where.not(columns: { name: names }) }
 
     scope :closed,          -> { in_column_named(DONE_COLUMN) }
     scope :open,            -> { not_in_column_named(DONE_COLUMN) }
-    scope :postponed,       -> { published.in_column_named(BACKLOG_COLUMN) }
-    scope :awaiting_triage, -> { published.in_column_named(TRIAGE_COLUMN) }
-    scope :triaged,         -> { published.not_in_column_named(TRIAGE_COLUMN) }
-    scope :active,          -> { published.not_in_column_named(DONE_COLUMN, BACKLOG_COLUMN) }
+    scope :postponed,       -> { in_column_named(BACKLOG_COLUMN) }
+    scope :awaiting_triage, -> { in_column_named(TRIAGE_COLUMN) }
+    scope :triaged,         -> { not_in_column_named(TRIAGE_COLUMN) }
+    scope :active,          -> { not_in_column_named(DONE_COLUMN, BACKLOG_COLUMN) }
   end
 
   def closed?
@@ -52,18 +49,22 @@ module Card::Triageable
   end
 
   def active?
-    published? && !closed? && !postponed?
+    !closed? && !postponed?
   end
 
   def triage_into(column)
-    transaction do
-      update! column: column
-      track_event "triaged", particulars: { column: column.name }
-    end
+    update! column: column
   end
 
   private
     def assign_default_column
       self.column ||= board&.triage_column
+    end
+
+    # Every lane change is a triage, whichever route asked for it: the drag-and-drop target,
+    # the column picker, a PUT to the card with a column_id, or the move into the destination
+    # board's Triage on a reparent.
+    def track_triage_event
+      track_event "triaged", particulars: { column: column.name }
     end
 end

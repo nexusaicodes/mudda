@@ -11,12 +11,11 @@ module SearchTestHelper
   def setup_search_test
     clear_search_records
     Account.find_by(name: "Search Test")&.destroy
-    Identity.find_by(email_address: "test@example.com")&.destroy
+    User.find_by(email_address: "test@example.com")&.destroy
 
-    @account = Account.create!(name: "Search Test", external_account_id: ActiveRecord::FixtureSet.identify("search_test"))
+    @account = Account.create!(name: "Search Test")
     Current.account = @account
-    @identity = Identity.create!(email_address: "test@example.com")
-    @user = User.create!(name: "Test User", account: @account, identity: @identity)
+    @user = User.create!(name: "Test User", email_address: "test@example.com", account: @account)
     Current.user = @user
     @board = Board.create!(name: "Test Board", account: @account, creator: @user)
   end
@@ -24,7 +23,7 @@ module SearchTestHelper
   def teardown_search_test
     clear_search_records
     Account.find_by(name: "Search Test")&.destroy
-    Identity.find_by(email_address: "test@example.com")&.destroy
+    User.find_by(email_address: "test@example.com")&.destroy
   end
 
   private

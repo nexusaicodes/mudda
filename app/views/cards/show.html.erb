@@ -15,7 +15,5 @@
   <%= render "cards/container", card: @card %>
   <%= render "cards/notes", card: @card %>
 
-  <%= render "layouts/lightbox" do %>
-    <%= button_to_remove_card_image(@card) if @card.image.attached? %>
-  <% end %>
+  <%= render "layouts/lightbox" %>
 </div>

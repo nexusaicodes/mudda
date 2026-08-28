@@ -20,8 +20,4 @@ module Note::Searchable
   def search_board_id
     card.board_id
   end
-
-  def searchable?
-    card.published?
-  end
 end

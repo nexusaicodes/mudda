@@ -10,7 +10,7 @@ module ApplicationHelper
   # The single source of truth for the browser-local "last opened board" key.
   # Written by the `last-board` Stimulus controller and read by the landing page.
   def last_board_storage_key(account = Current.account)
-    "mudda:last-board:#{account.external_account_id}"
+    "mudda:last-board:#{account.id}"
   end
 
   def back_link_to(label, url, action, prefer_referrer: [], **options)

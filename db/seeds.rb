@@ -6,17 +6,14 @@ email_address = ENV.fetch("MUDDA_OWNER_EMAIL") do
 end
 owner_name = ENV.fetch("MUDDA_OWNER_NAME", email_address.split("@").first.capitalize)
 account_name = ENV.fetch("MUDDA_OWNER_ACCOUNT", "Mudda")
-external_account_id = ActiveRecord::FixtureSet.identify(account_name)
 
-identity = Identity.find_or_create_by!(email_address:)
-
-account = Account.find_by(external_account_id:) ||
+owner = User.find_by(email_address: email_address.strip.downcase) ||
   Account.create_with_owner(
-    account: { external_account_id:, name: account_name },
-    owner: { name: owner_name, identity: }
-  )
+    account: { name: account_name },
+    owner: { name: owner_name, email_address: }
+  ).users.first!
 
-puts %(Seeded account ##{account.external_account_id} "#{account.name}" — owner #{email_address})
+puts %(Seeded account ##{owner.account_id} "#{owner.account.name}" — owner #{owner.email_address})
 
 # Without a password secret and with no passkey yet, there is no way to sign in. Fail fast in a
 # real deployment; only tolerate it locally, where the secret is usually supplied at runtime.

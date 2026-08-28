@@ -5,6 +5,11 @@
 # render from callbacks as much as the record errors rescued here. One shape means a client
 # never branches on the response to find out what went wrong.
 #
+# Writes therefore use the bang methods and let the rescue do the rendering, rather than
+# branching on a return value and building the envelope by hand. Publishing is the one
+# exception — Card#publish reports failure by returning false, not by raising — and it
+# renders through the same helper.
+#
 # Non-JSON requests re-raise, so the browser keeps Rails' usual error pages. A handler that
 # raises propagates out of process_action rather than re-entering rescue_with_handler.
 module JsonErrors

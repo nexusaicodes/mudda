@@ -1,5 +1,4 @@
 class Search::Query < ApplicationRecord
-  belongs_to :account, default: -> { user&.account || Current.account }
   belongs_to :user, optional: true
 
   validates :terms, presence: true

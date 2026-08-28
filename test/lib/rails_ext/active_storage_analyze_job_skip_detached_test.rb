@@ -12,9 +12,9 @@ class ActiveStorageAnalyzeJobSkipDetachedTest < ActiveSupport::TestCase
   end
 
   test "performs analysis when blob has attachments" do
-    card = cards(:logo)
-    card.image.attach io: StringIO.new("x" * 1024), filename: "test.png", content_type: "image/png"
-    blob = card.image.blob
+    user = users(:david)
+    user.avatar.attach io: file_fixture("avatar.png").open, filename: "test.png", content_type: "image/png"
+    blob = user.avatar.blob
 
     blob.expects(:analyze).once
 

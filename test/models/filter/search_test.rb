@@ -4,7 +4,7 @@ class Filter::SearchTest < ActiveSupport::TestCase
   include SearchTestHelper
 
   test "deduplicate multiple results" do
-    card = @board.cards.create!(title: "Duplicate results test", description: "Have you had any haggis today?", creator: @user, status: "published", due_on: 1.week.from_now)
+    card = @board.cards.create!(title: "Duplicate results test", description: "Have you had any haggis today?", creator: @user, due_on: 1.week.from_now)
     card.notes.create(body: "I hate haggis.", creator: @user)
     card.notes.create(body: "I love haggis.", creator: @user)
 
@@ -14,9 +14,9 @@ class Filter::SearchTest < ActiveSupport::TestCase
   end
 
   test "multiple terms all match" do
-    matching_card = @board.cards.create!(title: "haggis neeps tatties", creator: @user, status: "published", due_on: 1.week.from_now)
-    @board.cards.create!(title: "haggis only", creator: @user, status: "published", due_on: 1.week.from_now)
-    @board.cards.create!(title: "neeps only", creator: @user, status: "published", due_on: 1.week.from_now)
+    matching_card = @board.cards.create!(title: "haggis neeps tatties", creator: @user, due_on: 1.week.from_now)
+    @board.cards.create!(title: "haggis only", creator: @user, due_on: 1.week.from_now)
+    @board.cards.create!(title: "neeps only", creator: @user, due_on: 1.week.from_now)
 
     filter = @user.filters.new(terms: [ "haggis", "neeps" ], indexed_by: "all", sorted_by: "latest")
 

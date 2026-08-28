@@ -11,13 +11,14 @@ class SmokeTest < ApplicationSystemTestCase
     fill_in "card_due_on", with: 1.week.from_now.to_date
     click_on "Create card"
 
-    assert_selector "h3", text: "Hello, world!"
+    assert_current_path %r{/boards/\d+/cards/\d+}
+    assert_text "Hello, world!"
   end
 
   test "active storage attachments" do
     sign_in_as(users(:david))
 
-    visit card_url(cards(:layout))
+    visit board_card_url(cards(:layout).board, cards(:layout))
     fill_in_lexxy with: "Here is a note"
     attach_file file_fixture("moon.jpg") do
       click_on "Upload file"
@@ -47,13 +48,16 @@ class SmokeTest < ApplicationSystemTestCase
   test "dragging card to a new column" do
     sign_in_as(users(:david))
 
-    card = Card.find("03axhd1h3qgnsffqplkyf28fv")
-    assert_nil(card.column)
+    # Doing is the lane the board opens expanded, so its cards are the ones on screen to drag.
+    card, destination = cards(:text), columns(:writebook_todo)
+    assert_equal "Doing", card.column.name
 
     visit board_url(boards(:writebook))
 
-    card_el = page.find("#article_card_03axhd1h3qgnsffqplkyf28fv")
-    column_el = page.find("#column_03axmcferfmbnv4qg816nw6bg")
+    # Each lane loads its cards in its own turbo frame, so scope the lookup to the lane and
+    # let Capybara wait for that frame rather than the whole page.
+    card_el = page.find("#column_#{card.column_id}").find("#article_card_#{card.id}")
+    column_el = page.find("#column_#{destination.id}")
     cards_count = column_el.find(".cards__expander-count").text.to_i
 
     card_el.drag_to(column_el)
@@ -61,11 +65,4 @@ class SmokeTest < ApplicationSystemTestCase
     column_el.find(".cards__expander-count", text: cards_count + 1)
     assert_equal("Todo", card.reload.column.name)
   end
-
-  private
-    def fill_in_lexxy(selector = "lexxy-editor", with:)
-      editor_element = find(selector)
-      editor_element.set with
-      page.execute_script("arguments[0].value = '#{with}'", editor_element)
-    end
 end

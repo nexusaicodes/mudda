@@ -1,4 +1,4 @@
-<%= column_tag id: dom_id(column), name: column.name, drop_url: columns_card_drops_column_path("__id__", column_id: column.id), card_color: column.color.to_s,
+<%= column_tag id: dom_id(column), name: column.name, drop_url: board_card_drops_column_path(column.board, "__id__", column_id: column.id), card_color: column.color.to_s,
       class: "cards--doing", style: "--card-color: #{column.color};",
   data: {
     collapsible_columns_target: column.name == Card::Triageable::DOING_COLUMN ? "column defaultColumn" : "column",
@@ -7,7 +7,7 @@
   } do %>
   <header class="cards__header">
     <%= render "boards/show/color_picker", column: column %>
-    <%= render "boards/show/expander", title: column.name, count: column.cards.published.count, column_id: dom_id(column) %>
+    <%= render "boards/show/expander", title: column.name, count: column.cards.count, column_id: dom_id(column) %>
 
     <%= link_to board_column_path(column.board, column), class: "cards__maximize-button btn btn--circle txt-x-small borderless", data: { turbo_frame: "_top" } do %>
       <%= icon_tag "grid", class: "translucent" %>

@@ -1,25 +1,10 @@
+# The board picker. Choosing a board submits to CardsController#update, which is where a
+# card's board actually changes.
 class Cards::BoardsController < ApplicationController
-  include BoardScoped
-
-  skip_before_action :set_board, only: %i[ edit ]
-  before_action :set_card
+  include CardScoped, BrowserOnly
 
   def edit
     @boards = Current.user.boards.ordered_by_recent_activity
     fresh_when @boards
   end
-
-  def update
-    @card.move_to(@board)
-
-    respond_to do |format|
-      format.html { redirect_to @card }
-      format.json { render "cards/show" }
-    end
-  end
-
-  private
-    def set_card
-      @card = Current.user.accessible_cards.find_by!(number: params[:card_id])
-    end
 end

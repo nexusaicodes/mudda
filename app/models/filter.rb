@@ -2,7 +2,6 @@ class Filter < ApplicationRecord
   include Fields, Params, Resources, Summarized
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
-  belongs_to :account, default: -> { creator.account }
 
   class << self
     def from_params(params)
@@ -18,7 +17,7 @@ class Filter < ApplicationRecord
 
   def cards
     @cards ||= begin
-      result = creator.accessible_cards.preloaded.published
+      result = creator.accessible_cards.preloaded
       result = result.indexed_by(indexed_by)
       result = result.sorted_by(sorted_by)
       result = result.where(id: card_ids) if card_ids.present?

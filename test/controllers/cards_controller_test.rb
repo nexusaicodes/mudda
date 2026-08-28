@@ -29,45 +29,67 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ cards(:logo).number, cards(:layout).number, cards(:buy_domain).number, cards(:text).number ].sort, @response.parsed_body["data"].pluck("number").sort
   end
 
-  test "create a new draft" do
+  # Opening the compose screen must not reach the database: a card that is never submitted
+  # would otherwise take a number with it.
+  test "new" do
+    board = boards(:writebook)
+
+    assert_no_difference [ -> { Card.count }, -> { board.reload.cards_count } ] do
+      get new_board_card_path(board)
+    end
+
+    assert_response :success
+    assert_select "form#card_form"
+  end
+
+  test "create builds the whole card from the form" do
+    board = boards(:writebook)
+
     assert_difference -> { Card.count }, 1 do
-      post board_cards_path(boards(:writebook))
+      post board_cards_path(board), params: { card: {
+        title: "One shot", due_on: 1.week.from_now.to_date,
+        steps_attributes: [ { content: "First" }, { content: "Second" } ] } }
     end
 
     card = Card.last
-    assert_redirected_to card_draft_path(card)
-
-    assert card.drafted?
+    assert_redirected_to board_card_path(board, card)
+    assert_equal "One shot", card.title
+    assert_equal [ "First", "Second" ], card.steps.map(&:content).sort
+    assert_equal "Triage", card.column.name
   end
 
-  test "create resumes existing draft if it exists" do
-    draft = boards(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
-
-    assert_no_difference -> { Card.count } do
-      post board_cards_path(boards(:writebook))
-      assert_redirected_to card_draft_path(draft)
+  # A blank step row is the form offering one, so it must not fail the card.
+  test "create ignores blank step rows" do
+    assert_difference -> { Card.count }, 1 do
+      post board_cards_path(boards(:writebook)), params: { card: {
+        title: "Sparse", due_on: 1.week.from_now.to_date,
+        steps_attributes: [ { content: "Only one" }, { content: "" } ] } }
     end
+
+    assert_equal [ "Only one" ], Card.last.steps.map(&:content)
   end
 
-  test "show redirects to draft when card is drafted" do
-    card = boards(:writebook).cards.create!(creator: users(:kevin), status: :drafted)
+  test "create renders the form again when the card is invalid" do
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)), params: { card: { title: "No due date" } }
+    end
 
-    get card_path(card)
-    assert_redirected_to card_draft_path(card)
+    assert_response :unprocessable_entity
+    assert_select "form#card_form"
   end
 
   test "show renders inline code in title" do
     card = cards(:logo)
     card.update_column :title, "Fix the `bug` in production"
 
-    get card_path(card)
+    get board_card_path(card.board, card)
     assert_select ".card__title-link" do |element|
       assert_equal "Fix the <code>bug</code> in production", element.inner_html
     end
   end
 
   test "edit" do
-    get edit_card_path(cards(:logo))
+    get edit_board_card_path(cards(:logo).board, cards(:logo))
     assert_response :success
   end
 
@@ -77,32 +99,30 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
       <action-text-attachment sgid="gid://mudda/Card/nonexistent" content-type="application/octet-stream"></action-text-attachment>
     HTML
 
-    get edit_card_path(card)
+    get edit_board_card_path(card.board, card)
     assert_response :success
   end
 
   test "update" do
-    patch card_path(cards(:logo)), as: :turbo_stream, params: {
+    patch board_card_path(cards(:logo).board, cards(:logo)), as: :turbo_stream, params: {
       card: {
         title: "Logo needs to change",
-        image: fixture_file_upload("moon.jpg", "image/jpeg"),
         description: "Something more in-depth" } }
     assert_response :success
 
     card = cards(:logo).reload
     assert_equal "Logo needs to change", card.title
-    assert_equal "moon.jpg", card.image.filename.to_s
     assert_equal "Something more in-depth", card.description.to_plain_text.strip
   end
 
   test "edit form renders a due date field" do
-    get edit_card_path(cards(:logo))
+    get edit_board_card_path(cards(:logo).board, cards(:logo))
     assert_response :success
     assert_select "input[type=date][name=?]", "card[due_on]"
   end
 
   test "update changes the due date" do
-    patch card_path(cards(:logo)), as: :turbo_stream, params: {
+    patch board_card_path(cards(:logo).board, cards(:logo)), as: :turbo_stream, params: {
       card: { due_on: "2030-01-15" } }
     assert_response :success
 
@@ -111,7 +131,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
   test "delete card" do
     assert_difference -> { Card.count }, -1 do
-      delete card_path(cards(:logo))
+      delete board_card_path(cards(:logo).board, cards(:logo))
     end
 
     assert_redirected_to boards(:writebook)
@@ -123,7 +143,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
       creator: users(:kevin),
       body: '<action-text-attachment url="image.png" content-type="image/*" presentation="gallery"></action-text-attachment>'
 
-    get card_path(card)
+    get board_card_path(card.board, card)
     assert_response :success
   end
 
@@ -132,7 +152,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     card.steps.create!(content: "First step")
     card.steps.create!(content: "Second step", completed: true)
 
-    get card_path(card), as: :json
+    get board_card_path(card.board, card), as: :json
     assert_response :success
 
     assert_equal card.title, @response.parsed_body["title"]
@@ -150,7 +170,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     end
 
     card = Card.last
-    assert_equal card_path(card, format: :json), @response.headers["Location"]
+    assert_equal board_card_path(card.board, card, format: :json), @response.headers["Location"]
     assert_equal "My new card", @response.parsed_body["title"]
 
     assert_equal "My new card", card.title
@@ -168,10 +188,10 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.parsed_body["errors"].keys, "due_on"
   end
 
-  test "update as JSON cannot blank out a published card's due date" do
+  test "update as JSON cannot blank out a card's due date" do
     card = cards(:logo)
 
-    put card_path(card, format: :json), params: { card: { due_on: "" } }
+    put board_card_path(card.board, card, format: :json), params: { card: { due_on: "" } }
     assert_response :unprocessable_entity
 
     assert_predicate card.reload.due_on, :present?
@@ -225,7 +245,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     card = cards(:logo)
     custom_time = Time.utc(2024, 3, 15, 14, 0, 0)
 
-    put card_path(card, format: :json), params: { card: { last_active_at: custom_time } }
+    put board_card_path(card.board, card, format: :json), params: { card: { last_active_at: custom_time } }
 
     assert_response :success
     assert_equal custom_time, card.reload.last_active_at
@@ -248,7 +268,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_not_equal last_active_time, card.reload.last_active_at
 
     # After import, restore the correct last_active_at
-    put card_path(card, format: :json), params: { card: { last_active_at: last_active_time } }
+    put board_card_path(card.board, card, format: :json), params: { card: { last_active_at: last_active_time } }
     assert_response :success
 
     assert_equal last_active_time, card.reload.last_active_at
@@ -257,7 +277,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "update as JSON" do
     card = cards(:logo)
 
-    put card_path(card, format: :json), params: { card: { title: "Update test" } }
+    put board_card_path(card.board, card, format: :json), params: { card: { title: "Update test" } }
     assert_response :success
 
     assert_equal "Update test", card.reload.title
@@ -266,7 +286,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "delete as JSON" do
     card = cards(:logo)
 
-    delete card_path(card, format: :json)
+    delete board_card_path(card.board, card, format: :json)
     assert_response :no_content
 
     assert_not Card.exists?(card.id)

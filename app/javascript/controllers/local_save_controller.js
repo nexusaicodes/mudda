@@ -1,6 +1,9 @@
 import { Controller } from "@hotwired/stimulus"
 import { debounce, nextFrame } from "helpers/timing_helpers"
 
+// Keeps a form in the browser until it has been submitted successfully, so a reload or a
+// closed tab does not lose what was typed. Every input target is stored under one key, by
+// field name, and cleared together once the form goes through.
 export default class extends Controller {
   static targets = ["input"]
   static values = { key: String }
@@ -10,7 +13,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.restoreContent()
+    this.restore()
   }
 
   submit({ detail: { success } }) {
@@ -20,40 +23,68 @@ export default class extends Controller {
   }
 
   save() {
-    const content = this.inputTarget.value
-    if (content) {
-      localStorage.setItem(this.keyValue, content)
+    const filled = this.inputTargets.filter(input => input.value)
+
+    if (filled.length) {
+      localStorage.setItem(this.keyValue, JSON.stringify(Object.fromEntries(filled.map(input => [input.name, input.value]))))
     } else {
       this.#clear()
     }
   }
 
-  async restoreContent() {
+  async restore() {
     await nextFrame()
-    let savedContent = localStorage.getItem(this.keyValue)
+    const saved = this.#saved()
 
-    if (savedContent) {
-      savedContent = `<div>${savedContent}</div>` // temporary for old markdown saves
-      this.inputTarget.value = savedContent
-      this.#triggerChangeEvent(savedContent)
-    }
+    this.inputTargets.filter(input => saved[input.name]).forEach(input => this.#restoreInput(input, saved[input.name]))
   }
 
   // Private
+
+  #saved() {
+    const stored = localStorage.getItem(this.keyValue)
+
+    if (stored) {
+      return this.#parse(stored)
+    } else {
+      return {}
+    }
+  }
+
+  #parse(stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      if (parsed && typeof parsed === "object") return parsed
+    } catch {
+      // Saved before forms were stored by field name, when there was only one field to store.
+    }
+
+    return this.#legacy(stored)
+  }
+
+  // A value from the single-field format is HTML, and the editor it belongs to needs it
+  // wrapped the way it was written.
+  #legacy(stored) {
+    const input = this.inputTargets[0]
+    return input ? { [input.name]: `<div>${stored}</div>` } : {}
+  }
+
+  #restoreInput(input, value) {
+    input.value = value
+
+    if (input.tagName === "LEXXY-EDITOR") {
+      this.#triggerChangeEvent(input, value)
+    }
+  }
 
   #clear() {
     localStorage.removeItem(this.keyValue)
   }
 
-  #triggerChangeEvent(newValue) {
-    if (this.inputTarget.tagName === "LEXXY-EDITOR") {
-      this.inputTarget.dispatchEvent(new CustomEvent('lexxy:change', {
-        bubbles: true,
-        detail: {
-          previousContent: '',
-          newContent: newValue
-        }
-      }))
-    }
+  #triggerChangeEvent(input, newContent) {
+    input.dispatchEvent(new CustomEvent("lexxy:change", {
+      bubbles: true,
+      detail: { previousContent: "", newContent }
+    }))
   }
 }

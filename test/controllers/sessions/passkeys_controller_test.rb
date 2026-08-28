@@ -4,9 +4,9 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
   include WebauthnTestHelper
 
   setup do
-    @identity = identities(:kevin)
+    @user = users(:kevin)
 
-    @credential = @identity.passkeys.create!(
+    @credential = @user.passkeys.create!(
       name: "Test Passkey",
       credential_id: Base64.urlsafe_encode64(SecureRandom.random_bytes(32), padding: false),
       public_key: webauthn_private_key.public_to_der,

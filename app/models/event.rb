@@ -1,7 +1,6 @@
 class Event < ApplicationRecord
   include Promptable
 
-  belongs_to :account, default: -> { board.account }
   belongs_to :board
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true
@@ -12,10 +11,9 @@ class Event < ApplicationRecord
   scope :preloaded, -> {
     includes(:creator, :board, {
       eventable: [
-        :creator, :goldness, :image_attachment,
+        :creator,
         { rich_text_body: :embeds_attachments },
-        { rich_text_description: :embeds_attachments },
-        { card: [ :goldness, :image_attachment ] }
+        { rich_text_description: :embeds_attachments }
       ]
     })
   }

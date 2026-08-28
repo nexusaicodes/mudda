@@ -5,34 +5,23 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "update changes card board" do
+  test "edit lists the boards a card can move to" do
     card = cards(:logo)
-    new_board = boards(:private)
 
-    assert_not_equal new_board, card.board
+    get edit_board_card_board_path(card.board, card)
 
-    assert_changes -> { card.reload.board }, from: card.board, to: new_board do
-      put card_board_path(card), params: { board_id: new_board.id }
+    assert_response :success
+    users(:kevin).boards.each { |board| assert_select "li", text: /#{board.name}/ }
+  end
+
+  # The picker only offers the choice; CardsController#update is what moves the card.
+  test "choosing a board moves the card" do
+    card, destination = cards(:logo), boards(:private)
+
+    assert_changes -> { card.reload.board }, from: card.board, to: destination do
+      put board_card_path(card.board, card), params: { card: { board_id: destination.id } }
     end
 
     assert_redirected_to card
-  end
-
-  test "update as JSON" do
-    card = cards(:logo)
-    new_board = boards(:private)
-
-    assert_not_equal new_board, card.board
-
-    put card_board_path(card), params: { board_id: new_board.id }, as: :json
-
-    assert_response :success
-    assert_equal new_board, card.reload.board
-
-    json = @response.parsed_body
-    assert_equal card.id, json["id"]
-    assert_equal card.number, json["number"]
-    assert_equal card.title, json["title"]
-    assert_equal new_board.id, json["board"]["id"]
   end
 end

@@ -27,9 +27,14 @@ class SearchesController < ApplicationController
   end
 
   private
-    # Jump straight to a card only when the query is exactly a card number; a looser
-    # match would hijack any full-text query that merely starts with a digit.
+    # Jump straight to a card only when the query is exactly a card number and exactly one
+    # board answers to it — numbers run per board, so the same number can name several
+    # cards, and then the search results are the honest answer. A looser match would also
+    # hijack any full-text query that merely starts with a digit.
     def card_matching_number
-      Current.user.accessible_cards.find_by(number: @query) if @query&.match?(/\A\d+\z/)
+      if @query&.match?(/\A\d+\z/)
+        matches = Current.user.accessible_cards.where(number: @query).limit(2).to_a
+        matches.first if matches.one?
+      end
     end
 end

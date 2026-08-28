@@ -12,8 +12,8 @@ class Sessions::PasswordsController < ApplicationController
   layout "public"
 
   def create
-    if identity = OwnerPassword.authenticate(email_address, password)
-      start_new_session_for identity, label: credentials[:label]
+    if user = OwnerPassword.authenticate(email_address, password)
+      start_new_session_for user, label: credentials[:label]
 
       respond_to do |format|
         format.html { redirect_to after_authentication_url }

@@ -1,0 +1,70 @@
+<% @page_title = "New card" %>
+<% @header_class = "header--card" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= link_back_to_board @board %>
+  </div>
+<% end %>
+
+<section class="card-perma card-perma--draft" style="--card-color: <%= @card.color %>;">
+  <div class="card-perma__bg">
+    <article class="card">
+      <%# The card does not exist yet: everything on this screen travels in one create.
+          local-save keeps the form in the browser until it does. %>
+      <%= form_with model: [ @board, @card ], id: "card_form",
+            data: { controller: "autoresize form local-save step-fields",
+                    local_save_key_value: "new-card-#{@board.id}",
+                    action: "turbo:submit-end->local-save#submit" } do |form| %>
+        <h1 class="card__title">
+          <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
+            <%= form.text_area :title, placeholder: "Name it…",
+                  class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
+                  autofocus: true, rows: 1, dir: "auto", maxlength: 255,
+                  data: { autoresize_target: "textarea", local_save_target: "input", action: "input->autoresize#resize input->local-save#save" } %>
+          <% end %>
+        </h1>
+
+        <%= form.rich_textarea :description, class: "card__description lexxy-content",
+              placeholder: "Add some notes, context, pictures, or video about this…",
+              data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restore" } do %>
+          <%= general_prompts(@board) %>
+        <% end %>
+
+        <div class="card-field__due flex align-center">
+          <%= form.label :due_on, "Due date", class: "card-field__due-label" %>
+          <%= form.date_field :due_on, required: true, class: "card-field__due-input input",
+                data: { local_save_target: "input", action: "change->local-save#save" } %>
+        </div>
+
+        <%# A trailing blank row so a step can be typed without asking for one first. Blank
+            rows are dropped on create, so an untouched one costs nothing. Step rows are not
+            local-saved: they all share one field name, and restoring them would mean
+            rebuilding rows that aren't on the page yet. %>
+        <ol class="steps txt-small" data-step-fields-target="list">
+          <% @card.steps.each do |step| %>
+            <%= render "cards/new/step_field", content: step.content %>
+          <% end %>
+          <%= render "cards/new/step_field", content: nil %>
+        </ol>
+
+        <template data-step-fields-target="template">
+          <%= render "cards/new/step_field", content: nil %>
+        </template>
+
+        <button type="button" class="btn btn--link txt-small" data-action="step-fields#add">
+          <%= icon_tag "add" %>
+          <span>Add a step</span>
+        </button>
+
+        <div class="card-perma__notch card-perma__notch--bottom flex-column">
+          <div class="card-perma__notch-new-card-buttons">
+            <%= form.submit "Create card", class: "btn",
+                  title: "Create card (#{ hotkey_label(["ctrl", "enter"]) })",
+                  data: { form_target: "submit", controller: "clicker", action: "keydown.ctrl+enter@document->clicker#click keydown.meta+enter@document->clicker#click" } %>
+          </div>
+        </div>
+      <% end %>
+    </article>
+  </div>
+</section>

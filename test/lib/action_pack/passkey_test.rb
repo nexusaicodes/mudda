@@ -2,13 +2,13 @@ require "test_helper"
 
 class ActionPack::PasskeyTest < ActiveSupport::TestCase
   setup do
-    @identity = identities(:kevin)
+    @user = users(:kevin)
     @private_key = OpenSSL::PKey::EC.generate("prime256v1")
 
     ActionPack::WebAuthn::Current.host = "www.example.com"
     ActionPack::WebAuthn::Current.origin = "http://www.example.com"
 
-    @passkey = @identity.passkeys.create!(
+    @passkey = @user.passkeys.create!(
       credential_id: Base64.urlsafe_encode64(SecureRandom.random_bytes(32), padding: false),
       public_key: @private_key.public_to_der,
       sign_count: 0,
