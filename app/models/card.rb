@@ -8,13 +8,14 @@ class Card < ApplicationRecord
 
   has_rich_text :description
 
+  before_validation :land_in_destination_triage, on: :update, if: :board_id_changed?
   before_save :set_default_title
   before_create :assign_number
   before_update :renumber_for_new_board, if: :board_id_changed?
 
   after_save   -> { board.touch }
   after_touch  -> { board.touch }
-  after_update :handle_board_change, if: :saved_change_to_board_id?
+  after_update :track_board_change, if: -> { tracked_change?("board_id") }
 
   scope :reverse_chronologically, -> { order created_at:     :desc, id: :desc }
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
@@ -60,14 +61,16 @@ class Card < ApplicationRecord
       self.title = "Untitled" if title.blank?
     end
 
-    def handle_board_change
-      old_board = Board.find_by(id: board_id_before_last_save)
+    # A move names where the card ends up. A lane named alongside the board is kept, and
+    # column_on_its_board refuses one from anywhere else; with no lane named, the card starts
+    # over in the destination's Triage. Settled before validation, so the move is one UPDATE.
+    def land_in_destination_triage
+      self.column = board.triage_column unless column_id_changed?
+    end
 
-      transaction do
-        update! column: board.triage_column
-        rehome_events
-        track_board_change_event(old_board.name)
-      end
+    def track_board_change
+      rehome_events
+      track_event "board_changed", particulars: { old_board: Board.find_by(id: tracked_change_was("board_id"))&.name, new_board: board.name }
     end
 
     # Events are indexed by board, so a card's own events and its notes' follow it rather
@@ -75,10 +78,6 @@ class Card < ApplicationRecord
     def rehome_events
       events.update_all(board_id: board_id)
       Event.where(eventable: notes).update_all(board_id: board_id)
-    end
-
-    def track_board_change_event(old_board_name)
-      track_event "board_changed", particulars: { old_board: old_board_name, new_board: board.name }
     end
 
     # Numbers run per board, so a card's number and its board together address it.

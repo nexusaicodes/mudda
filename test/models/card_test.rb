@@ -73,6 +73,42 @@ class CardTest < ActiveSupport::TestCase
     end
   end
 
+  test "a move keeps a lane named on the destination" do
+    card = cards(:logo)
+
+    card.update! board: boards(:private), column: columns(:private_done)
+
+    assert_equal columns(:private_done), card.reload.column
+  end
+
+  test "a card cannot sit on one board in another board's lane" do
+    card = cards(:logo)
+
+    assert_raises(ActiveRecord::RecordInvalid) { card.update! board: boards(:private), column: columns(:writebook_done) }
+    assert_raises(ActiveRecord::RecordInvalid) { card.reload.update! column: columns(:private_done) }
+    assert_equal [ boards(:writebook), columns(:writebook_triage) ], [ card.reload.board, card.column ]
+  end
+
+  # Each change is recorded from a snapshot taken before the UPDATE, so a nested write during
+  # the save — the touch from a step saved with the card — can't erase the others.
+  test "every change in one save is recorded, steps and all" do
+    card = cards(:logo)
+
+    card.update! title: "Renamed with a step", column: columns(:writebook_doing),
+      steps_attributes: [ { content: "A new step" } ]
+
+    assert_equal %w[ card_title_changed card_triaged ], card.events.order(:id).last(2).map(&:action).sort
+  end
+
+  test "a change records its activity in the same UPDATE" do
+    freeze_time
+    card = cards(:logo)
+
+    card.update! title: "Active now"
+
+    assert_equal Time.current, card.reload.last_active_at
+  end
+
   test "move cards to a different board" do
     card = cards(:logo)
     old_board = card.board

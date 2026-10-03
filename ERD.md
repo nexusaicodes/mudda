@@ -395,7 +395,7 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `card_created` | Card | `{}` | `Card::Eventable` (on create) |
 | `card_triaged` | Card | `{column}` | `Card::Triageable` (on any change of `column_id`) |
 | `card_title_changed` | Card | `{old_title, new_title}` | `Card::Eventable` |
-| `card_board_changed` | Card | `{old_board, new_board}` | `Card#handle_board_change` |
+| `card_board_changed` | Card | `{old_board, new_board}` | `Card#track_board_change` |
 | `note_created` | Note | `{}` | `Note::Eventable` |
 
 **`action_text_rich_texts.name`** — `description` (on Card) · `body` (on Note).

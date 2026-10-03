@@ -15,7 +15,8 @@ module Card::Triageable
     belongs_to :column, touch: true
 
     before_validation :assign_default_column, on: :create
-    after_update :track_triage_event, if: :saved_change_to_column_id?
+    validate :column_on_its_board
+    after_update :track_triage_event, if: -> { tracked_change?("column_id") }
 
     scope :in_column_named,     ->(*names) { joins(:column).where(columns: { name: names }) }
     scope :not_in_column_named, ->(*names) { joins(:column).where.not(columns: { name: names }) }
@@ -59,6 +60,14 @@ module Card::Triageable
   private
     def assign_default_column
       self.column ||= board&.triage_column
+    end
+
+    # Every door that moves a card — the drop target, the pickers, a PUT, the console — meets
+    # this, so a card can never sit on one board in another board's lane.
+    def column_on_its_board
+      if column && column.board_id != board_id
+        errors.add :column, "must belong to the card's board"
+      end
     end
 
     # Every lane change is a triage, whichever route asked for it: the drag-and-drop target,

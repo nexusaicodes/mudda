@@ -89,27 +89,28 @@ class CardsController < ApplicationController
     end
 
     # A card's board and column are two of its attributes, so moving it either way is an
-    # update. Both associations are resolved rather than assigned by id, so neither can name
-    # a record the caller can't reach; a blank one leaves the card where it is. Note that a
-    # board change lands the card in the destination's Triage column (Card#handle_board_change),
-    # so a column_id sent alongside a board_id does not survive the move.
+    # update, and the request names where the card ends up. Both associations are resolved
+    # rather than assigned by id, so neither can name a record the caller can't reach; a blank
+    # one leaves the card where it is. A column_id names a lane on the board the card ends on —
+    # the destination when board_id is sent too, which with no column_id lands the card in that
+    # board's Triage (Card#land_in_destination_triage).
     def card_attributes
       card_params.except(:board_id, :column_id).merge(destination_board).merge(destination_column)
     end
 
     def destination_board
-      if board_id = card_params[:board_id].presence
+      @destination_board ||= if board_id = card_params[:board_id].presence
         { board: Current.user.boards.find(board_id) }
       else
         {}
       end
     end
 
-    # Scoped to the card's own board, so a column id from anywhere else is a 404 rather than
-    # a move across boards.
+    # Scoped to the board the card ends on, so a column id from anywhere else is a 404 rather
+    # than a card on one board in another board's lane.
     def destination_column
       if column_id = card_params[:column_id].presence
-        { column: @card.board.columns.find(column_id) }
+        { column: destination_board.fetch(:board, @card.board).columns.find(column_id) }
       else
         {}
       end

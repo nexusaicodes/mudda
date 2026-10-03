@@ -182,10 +182,18 @@ Every board is created (`Board::Triageable`) with five fixed lanes, in order:
 through — the drop target, the picker, or a `PUT` to the card with a `column_id`.
 
 Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
-the card with a `board_id`. `Card#handle_board_change` does the rest on any such change: it
-drops the card into the destination's Triage column, **renumbers it** (numbers run per
-board), and re-homes its events and its notes' events. Cards are dropped between columns
-through `cards/drops/columns_controller.rb`.
+the card with a `board_id` — and a lane may be named in the same write. Before validation a
+move with no lane named lands in the destination's Triage (`Card#land_in_destination_triage`);
+`Card::Triageable` validates that a card's column is on its board, so no door can leave it in
+another board's lane. The card is **renumbered** (numbers run per board) in the same UPDATE,
+and its events and its notes' events are re-homed. Cards are dropped between columns through
+`cards/drops/columns_controller.rb`.
+
+**Every change in a save is recorded.** `Card::Eventable` snapshots the tracked changes
+(title, column, board) in `before_update` and records one event per change from that snapshot,
+and sets `last_active_at` in the same UPDATE. Nothing writes the card again from inside its own
+save: a nested write replaces `saved_changes`, which is how a request that changed two things
+used to record only one.
 
 ### Due Dates (replaces the old entropy/auto-postpone system)
 

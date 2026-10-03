@@ -156,14 +156,20 @@ POST /boards/1/cards.json
   "steps_attributes": [ { "content": "First" }, { "content": "Second" } ] }
 ```
 
+A `PUT` names where the card ends up. Everything it sends is applied, in one write, or the
+request is refused and nothing is written — no part of it is silently dropped. Each thing it
+changed is recorded as its own event (`card_title_changed`, `card_triaged`,
+`card_board_changed`), however many it changed at once.
+
 Moving between lanes with `column_id` records the same `card_triaged` event the UI does; a
 `column_id` from another board is a `404`, not a silent no-op.
 
-Moving to another **board** with `board_id` lands the card in the destination's Triage column,
-**renumbers** it, and takes its events with it — so the number and the URL you used to reach
-it are both stale afterwards. Read the new ones from the response. A `board_id` the caller
-can't reach is a `404`. Because a move always lands in Triage, a `column_id` sent alongside a
-`board_id` does not survive it.
+Moving to another **board** with `board_id` **renumbers** the card there and takes its events
+with it — so the number and the URL you used to reach it are both stale afterwards. Read the
+new ones from the response. A `board_id` the caller can't reach is a `404`. A `column_id` sent
+alongside it names a lane on the **destination** (`{ "board_id": 7, "column_id": 31 }` lands
+the card in board 7's lane 31, and a lane from anywhere else is a `404`); with no `column_id`,
+the card lands in the destination's Triage.
 
 A card is created in Triage, and lands complete: there is no draft state and nothing to
 publish. `due_on` is required, so a create without one is a `422`. Every card in an index
@@ -237,7 +243,7 @@ never has to branch on the response to find out what went wrong:
 |---|---|
 | `401` | No credential, or a token that has been revoked or expired |
 | `403` | The user is deactivated |
-| `404` | No such record — including a `column_id` that isn't on the card's board |
+| `404` | No such record — including a `column_id` that isn't on the board the card ends on |
 | `422` | Validation failed, or an unrecognised query parameter; the keys name the fields |
 | `429` | Sign-in rate limit |
 

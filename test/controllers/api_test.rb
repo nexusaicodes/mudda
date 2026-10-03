@@ -719,6 +719,46 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal({ "column" => "Done" }, card.events.where(action: "card_triaged").last.particulars)
   end
 
+  # A PUT names where the card ends up, so a lane sent with a board is a lane on that board.
+  test "a move that names a lane on the destination lands the card there" do
+    card, destination = cards(:logo), boards(:private)
+
+    put board_card_path(card.board, card, format: :json),
+      params: { board_id: destination.id, column_id: columns(:private_doing).id },
+      headers: bearer_headers_for(@user), as: :json
+
+    assert_response :success
+    assert_equal destination, card.reload.board
+    assert_equal columns(:private_doing), card.column
+    assert_equal %w[ card_triaged card_board_changed ], card.events.order(:id).last(2).map(&:action)
+  end
+
+  test "a move that names a lane on the board it leaves is a 404 and writes nothing" do
+    card = cards(:logo)
+
+    assert_no_difference -> { Event.count } do
+      put board_card_path(card.board, card, format: :json),
+        params: { board_id: boards(:private).id, column_id: columns(:writebook_done).id },
+        headers: bearer_headers_for(@user), as: :json
+    end
+
+    assert_response :not_found
+    assert_equal [ boards(:writebook), columns(:writebook_triage) ], [ card.reload.board, card.column ]
+  end
+
+  # One request, one event per thing it changed — however many things that is.
+  test "a PUT that changes several things records each of them" do
+    card = cards(:logo)
+
+    put board_card_path(card.board, card, format: :json),
+      params: { title: "Moved and renamed", board_id: boards(:private).id },
+      headers: bearer_headers_for(@user), as: :json
+
+    assert_response :success
+    assert_equal %w[ card_board_changed card_title_changed card_triaged ],
+      card.reload.events.order(:id).last(3).map(&:action).sort
+  end
+
   private
     def card_on(board, title)
       Current.user = @user
