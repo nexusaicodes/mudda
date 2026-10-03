@@ -4,14 +4,16 @@
 class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
   layout "public"
 
+  # The redirect back to the client follows a form submission, which the page's form-action
+  # would otherwise refuse for any origin but this one, so that origin joins the sources the app
+  # already allows. It is set ahead of the checks below, because a page they render — the
+  # consent screen again, with nothing ticked — is submitted too.
+  content_security_policy do |policy|
+    policy.form_action(*policy.directives.fetch("form-action", [ "'self'" ]), *redirect_source)
+  end
+
   before_action :ensure_resource_is_this_server
   before_action :narrow_scopes_to_those_granted, only: :create
-
-  # The redirect back to the client follows a form submission, which the page's form-action
-  # would otherwise refuse for any origin but this one.
-  content_security_policy do |policy|
-    policy.form_action :self, *redirect_source
-  end
 
   private
     # RFC 8707: a client names the resource it wants a token for. Tokens from here work only
@@ -49,6 +51,13 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
 
       Session.authorize_oauth_application pre_auth.client.application, user: current_resource_owner,
         scopes: pre_auth.scopes.to_a, user_agent: request.user_agent, ip_address: request.remote_ip
+    end
+
+    # Doorkeeper approves a confidential client without asking when it already holds a token for
+    # these scopes. Consent here also sets what the client's session may do, so the user is
+    # always asked: an old token must not quietly restore scopes the user has since narrowed.
+    def can_authorize_response?
+      false
     end
 
     # Only a redirect URI registered to the client is trusted with a place in the policy.

@@ -127,6 +127,7 @@ class OauthTest < ActionDispatch::IntegrationTest
     post oauth_authorization_path, params: authorize_params(client_id).merge(granted_scopes: [])
 
     assert_response :unprocessable_entity
+    assert_match "form-action 'self' https://claude.ai", @response.headers["Content-Security-Policy"]
     assert_not users(:david).sessions.token.exists?(oauth_application: Doorkeeper::Application.find_by(uid: client_id))
   end
 
@@ -147,6 +148,26 @@ class OauthTest < ActionDispatch::IntegrationTest
 
     assert_response :bad_request
     assert_select "h1", text: /can't be connected/
+  end
+
+  test "PKCE is required of a confidential client too" do
+    sign_in_as :david
+
+    get authorize_path(register(token_endpoint_auth_method: "client_secret_post")["client_id"]).sub(/&code_challenge=[^&]*/, "")
+
+    assert_response :bad_request
+  end
+
+  test "a confidential client already holding a token is still put through consent" do
+    sign_in_as :david
+    client_id = register(token_endpoint_auth_method: "client_secret_post")["client_id"]
+    Doorkeeper::AccessToken.create! application: Doorkeeper::Application.find_by!(uid: client_id),
+      resource_owner_id: users(:david).id, scopes: "read write delete"
+
+    get authorize_path(client_id, scope: "read write delete")
+
+    assert_response :success
+    assert_select "form"
   end
 
   test "a resource other than this server is refused" do
@@ -210,6 +231,17 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_response :success
     get my_user_path(format: :json), headers: bearer(@response.parsed_body["access_token"])
     assert_response :success
+  end
+
+  test "a refresh token unused for the idle expiry buys nothing" do
+    tokens = connect
+
+    travel Session::Oauth::IDLE_EXPIRY + 1.day do
+      post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: tokens["refresh_token"], client_id: @client_id }
+
+      assert_response :bad_request
+      assert_equal "invalid_grant", @response.parsed_body["error"]
+    end
   end
 
   test "an expired access token is refused" do

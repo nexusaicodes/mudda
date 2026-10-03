@@ -74,7 +74,7 @@ A token does what its scopes grant, decided by the request's verb:
 |---|---|
 | `read` | `GET` — anything |
 | `write` | `POST`, `PUT`, `PATCH` — creating and changing |
-| `delete` | `DELETE` — permanently removing |
+| `delete` | `DELETE`, or a write that removes nested records (`"_destroy": true`) — permanently removing |
 
 A token is granted `read write` unless asked otherwise; **`delete` is only ever granted on
 request** — tick it on the API tokens page, pass `SCOPES="read write delete"` to `make token`,
@@ -85,9 +85,10 @@ outside a token's scopes is a `403` before the action runs, so nothing is writte
 { "errors": { "base": ["This token is not granted the write scope"] } }
 ```
 
-`DELETE /session.json`, ending the token's own session, is open to every token. A browser
-session is never limited by scope. `GET /my/user.json` reports the token making the request,
-as `"token": { "label": "claude", "scopes": ["read", "write"] }`.
+`DELETE /session.json`, ending the token's own session, and `GET /my/user.json`, which reports
+the token making the request as `"token": { "label": "claude", "scopes": ["read", "write"] }`,
+are open to every token. A browser session is never limited by scope. A token can't manage
+tokens or passkeys at all — those pages answer only a signed-in browser.
 
 Tokens minted before scopes existed hold all three.
 
@@ -194,7 +195,7 @@ not resources of their own, so all of them move with a single `PUT`:
 ```
 
 `steps_attributes` adds a step (no `id`), edits one (`id` plus the fields to change), or
-removes one (`id` plus `"_destroy": true`). A step `id` belonging to another card is a `404`.
+removes one (`id` plus `"_destroy": true`, which needs the `delete` scope). A step `id` belonging to another card is a `404`.
 A row with nothing in it is dropped rather than failing the card — it is a form offering a
 step — but blanking the `content` of an *existing* step is a `422`, because its `id` makes the
 row non-blank.

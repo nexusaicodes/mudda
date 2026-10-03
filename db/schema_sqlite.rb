@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_04_000001) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_04_000002) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", limit: 255, null: false
@@ -223,6 +223,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_04_000001) do
     t.bigint "user_id", null: false
     t.index ["oauth_application_id"], name: "index_sessions_on_oauth_application_id"
     t.index ["user_id", "kind"], name: "index_sessions_on_user_id_and_kind"
+    t.index ["user_id", "oauth_application_id"], name: "index_sessions_on_user_id_and_oauth_application_id", unique: true, where: "oauth_application_id IS NOT NULL"
   end
 
   create_table "steps", force: :cascade do |t|

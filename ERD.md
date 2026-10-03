@@ -366,6 +366,7 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `user_settings` | `index_user_settings_on_user_id` | `user_id` | ✓ |
 | `sessions` | `index_sessions_on_user_id_and_kind` | `user_id, kind` | |
 | `sessions` | `index_sessions_on_oauth_application_id` | `oauth_application_id` | |
+| `sessions` | `index_sessions_on_user_id_and_oauth_application_id` | `user_id, oauth_application_id` | ✓ (where `oauth_application_id` is set) |
 | `oauth_applications` | `..._on_uid` | `uid` | ✓ |
 | `oauth_access_grants` | `..._on_token` / `..._on_resource_owner_id` / `..._on_application_id` | `token` / `resource_owner_id` / `application_id` | ✓ / / |
 | `oauth_access_tokens` | `..._on_token` / `..._on_refresh_token` | `token` / `refresh_token` | ✓ / ✓ |

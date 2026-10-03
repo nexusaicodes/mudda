@@ -43,6 +43,31 @@ Doorkeeper.configure do
   force_ssl_in_redirect_uri { |uri| !Session::Oauth.loopback?(uri.host) }
 end
 
+# force_pkce exempts confidential clients, which is what registration makes a client by default.
+# OAuth 2.1 and the MCP authorization spec ask PKCE of every client, so every authorization must
+# carry a code challenge — and redeeming the code then needs its verifier.
+Doorkeeper::OAuth::PreAuthorization.prepend(Module.new do
+  private
+    def validate_code_challenge
+      if code_challenge.present?
+        true
+      else
+        @invalid_request_reason = :invalid_code_challenge
+        false
+      end
+    end
+end)
+
+# Doorkeeper's refresh tokens never expire. Each refresh rotates the refresh token, so one older
+# than Session::Oauth::IDLE_EXPIRY belongs to a client that has gone unused that long, and is
+# refused: the client has to send the user through consent again.
+Doorkeeper::OAuth::RefreshTokenRequest.prepend(Module.new do
+  private
+    def validate_token
+      super && refresh_token.created_at.after?(Session::Oauth::IDLE_EXPIRY.ago)
+    end
+end)
+
 # A client that is removed takes the sessions it was granted with it.
 Rails.application.config.to_prepare do
   Doorkeeper::Application.has_many :sessions, foreign_key: :oauth_application_id, dependent: :destroy

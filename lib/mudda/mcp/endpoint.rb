@@ -63,11 +63,13 @@ module Mudda::Mcp
       end
 
       # The API's own refusal: a 401 for no credential or a bad one, a 403 for a deactivated
-      # user. A 401 also points the client at the OAuth metadata (RFC 9728), which is how an MCP
-      # client finds out it can connect by sending the user to sign in, and asks for the scopes a
-      # token gets by default — deleting is something the user has to be asked for separately.
+      # user, a 429 with its Retry-After for a token over its rate limit. A 401 also points the
+      # client at the OAuth metadata (RFC 9728), which is how an MCP client finds out it can
+      # connect by sending the user to sign in, and asks for the scopes a token gets by default —
+      # deleting is something the user has to be asked for separately.
       def refusal_for(response, env)
         headers = { "content-type" => "application/json" }
+        headers["retry-after"] = response.headers["retry-after"] if response.headers["retry-after"]
         headers["www-authenticate"] = authenticate_header(env) if response.status == 401
 
         [ response.status, headers, [ JSON.generate(response.body || {}) ] ]

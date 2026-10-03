@@ -8,6 +8,11 @@ module Session::Oauth
 
   LOOPBACK_HOSTS = %w[ localhost 127.0.0.1 ::1 [::1] ]
 
+  # A client that hasn't refreshed its access token for this long can't refresh it any more
+  # (see config/initializers/doorkeeper.rb), so a client that stopped being used stops working
+  # instead of holding a refresh token forever.
+  IDLE_EXPIRY = 90.days
+
   # Where a native client (Claude Code, Cursor) listens for the code; see
   # config/initializers/doorkeeper.rb.
   def self.loopback?(host)
@@ -35,16 +40,24 @@ module Session::Oauth
     end
 
     # Consent creates the client's session, or brings it up to date with what was granted this
-    # time. A user has one session per client.
+    # time. A user has one session per client, which a unique index holds even when two consents
+    # arrive together.
     def authorize_oauth_application(application, user:, scopes:, **attributes)
-      user.sessions.token.find_or_initialize_by(oauth_application: application).tap do |session|
-        session.update!(attributes.merge(label: application.name.truncate(100), scopes: scopes))
-      end
+      attributes = attributes.merge(label: application.name.truncate(100), scopes: scopes)
+
+      user.sessions.token.create_or_find_by!(oauth_application: application) { it.assign_attributes(attributes) }
+        .tap { it.update!(attributes) }
     end
   end
 
   def oauth?
     oauth_application_id.present?
+  end
+
+  # When the client last refreshed its access token, which is when it was last used, give or
+  # take the token's hour.
+  def last_refreshed_at
+    Doorkeeper::AccessToken.where(application_id: oauth_application_id, resource_owner_id: user_id).maximum(:created_at) || created_at
   end
 
   private

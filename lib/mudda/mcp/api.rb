@@ -8,10 +8,6 @@ module Mudda::Mcp
       def success?
         status.between?(200, 299)
       end
-
-      def location
-        headers["location"]
-      end
     end
 
     # What a call inherits from the request that carried it: who is asking, from where, and the

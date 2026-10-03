@@ -39,6 +39,27 @@ class TokenScopesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "removing a step through its card needs the delete scope" do
+    card = cards(:logo)
+    step = card.steps.create!(content: "Sketch")
+    params = { steps_attributes: [ { id: step.id, _destroy: true } ] }
+
+    put board_card_path(@board, card, format: :json), params: params, headers: bearer_headers_for(:david, scopes: %w[ read write ]), as: :json
+    assert_response :forbidden
+    assert Step.exists?(step.id)
+
+    put board_card_path(@board, card, format: :json), params: params, headers: bearer_headers_for(:david, scopes: Session::SCOPES), as: :json
+    assert_response :success
+    assert_not Step.exists?(step.id)
+  end
+
+  test "any token may read who it is" do
+    get my_user_path(format: :json), headers: bearer_headers_for(:david, scopes: %w[ write ])
+
+    assert_response :success
+    assert_equal %w[ write ], @response.parsed_body.dig("token", "scopes")
+  end
+
   test "any token may end its own session" do
     delete session_path(format: :json), headers: bearer_headers_for(:david, scopes: %w[ read ])
 

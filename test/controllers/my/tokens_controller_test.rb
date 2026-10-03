@@ -42,6 +42,14 @@ class My::TokensControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "minting with no scope ticked and no name points out both" do
+    post my_tokens_path, params: { token: { label: "", scopes: [ "" ] } }
+
+    assert_response :unprocessable_entity
+    assert_match "Choose at least one thing", @response.body
+    assert_match "Label can", @response.body
+  end
+
   test "revoking a token ends it" do
     token = users(:kevin).sessions.create!(kind: :token, label: "claude")
 

@@ -38,7 +38,8 @@ claude mcp add --transport http mudda https://your-mudda/mcp \
 
 Any client that speaks Streamable HTTP and can send a header works the same way. The token is
 the only credential `/mcp` accepts — a browser's session cookie is not — and a refusal is the
-API's own: `401` with no token or a revoked or expired one, `403` for a deactivated user.
+API's own: `401` with no token or a revoked or expired one, `403` for a deactivated user, `429`
+(with `Retry-After`) for a token over its rate limit.
 
 ## Tools
 
@@ -66,9 +67,11 @@ Cards are addressed by board id and per-board `number`, as in the API.
 **A client is offered only the tools its token's scopes allow** (API.md → Scopes): reading
 tools need `read`, the create and update tools `write`, and the three delete tools `delete` —
 which a token holds only when it was asked for. A tool that isn't offered can't be called, and
-the API refuses an out-of-scope call regardless. Each tool carries MCP annotations
-(`readOnlyHint`, `destructiveHint`, `idempotentHint`), so a client can ask before running the
-destructive ones.
+the API refuses an out-of-scope call regardless. Removing a step with `update_card` is a
+deletion, so it too needs `delete`. Each tool carries MCP annotations (`readOnlyHint`,
+`destructiveHint`, `idempotentHint`), so a client can ask before running the destructive ones;
+`update_card` is marked destructive and not idempotent, since it can remove steps and repeating
+it adds its new steps again.
 
 **What an agent does is attributed to it.** The token acts as the account's one user, and the
 audit trail records the token's label as the event's `agent_name`.
@@ -105,10 +108,13 @@ spec:
 
 What is enforced:
 
-- **PKCE with `S256`** on every authorization, and only the authorization-code and refresh-token
-  grants.
+- **PKCE with `S256`** on every authorization — confidential clients included, which
+  Doorkeeper's `force_pkce` alone would exempt — and only the authorization-code and
+  refresh-token grants.
 - **Consent needs the signed-in browser.** A signed-out user is sent to sign in and brought
   back; a bearer token can't approve anything, so a read-only token can't grant itself more.
+- **The user is always asked.** A client that already holds a token is still shown the consent
+  screen, because consent also sets what its session may do.
 - **The user chooses the scopes.** Every scope the client asked for is listed with a checkbox;
   only the ticked ones are granted. Clients are pointed at `read write` by default, so deleting
   is asked for only by a client that wants it, and shown as such.
@@ -119,11 +125,15 @@ What is enforced:
 - **A `resource` (RFC 8707) naming any other server is refused** — tokens from here only work
   here.
 - Tokens and client secrets are stored hashed. Access tokens last an hour; each refresh rotates
-  the refresh token.
+  the refresh token. A refresh token unused for 90 days (`Session::Oauth::IDLE_EXPIRY`) is
+  refused, so a client that stopped being used has to ask the user again.
 - Registration is open but grants nothing on its own, and is limited to 20 an hour per address.
 
 **A connected client is a token session like any other** (`Session::Oauth`): labelled with
-the client's name, carrying the scopes granted, one per client. Its access tokens resolve to
+the client's name, carrying the scopes granted, one per client (a unique index holds it). A
+client that registers again under the same name — Claude Code does on each `claude mcp add` —
+replaces the session its earlier registration held, the way minting replaces a token of the
+same label. Its access tokens resolve to
 that session, so scopes, the rate limit, and agent attribution (`agent_name` = the client's
 name) apply unchanged. Revoking it under API tokens — or `make revoke LABEL=<its name>` —
 revokes its access and refresh tokens; consenting again brings it back. `make reset-auth` ends
@@ -144,8 +154,9 @@ Cursor) don't need them.
 
 1. Checks the credential by calling `GET /my/user.json` as the client — the same
    `Authentication` concern as every API request decides it, minted token or OAuth access
-   token alike — which also reports the token's scopes. A `401` gains the `WWW-Authenticate`
-   header that starts OAuth.
+   token alike — which also reports the token's scopes. Any token may make this call, whatever
+   its scopes. A `401` gains the `WWW-Authenticate` header that starts OAuth; a `429` keeps its
+   `Retry-After`.
 2. Builds a stateless MCP server over the official `mcp` gem's Streamable HTTP transport, with
    the tools those scopes allow (`Mudda::Mcp::Tools.granted`). It answers in plain JSON and
    keeps no sessions, so any process can answer any call.

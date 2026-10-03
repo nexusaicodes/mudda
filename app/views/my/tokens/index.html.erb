@@ -37,9 +37,7 @@
     <fieldset class="flex flex-column gap-half borderless unpad margin-none">
       <legend class="margin-block-end-half">What it may do</legend>
       <%= hidden_field_tag "token[scopes][]", "", id: nil %>
-      <% { "read" => "Read boards, cards, and notes",
-           "write" => "Create and change them",
-           "delete" => "Delete them — permanently" }.each do |scope, description| %>
+      <% scope_descriptions.each do |scope, description| %>
         <label class="flex align-center gap-half">
           <%= check_box_tag "token[scopes][]", scope, @token.scopes.include?(scope), id: "token_scope_#{scope}" %>
           <span><strong><%= scope %></strong> — <%= description %></span>

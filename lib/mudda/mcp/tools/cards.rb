@@ -110,14 +110,15 @@ module Mudda::Mcp::Tools
               id: { type: "integer" },
               content: { type: "string" },
               completed: { type: "boolean" },
-              remove: { type: "boolean" }
+              remove: { type: "boolean", description: "Delete this step; needs the delete scope" }
             }
           }
         }
       ),
       required: %w[ board_id number ]
     )
-    kind :update
+    # Repeating a call adds its new steps again, and `remove` deletes steps.
+    kind :update, destructive_hint: true, idempotent_hint: false
 
     def self.call(board_id:, number:, to_board_id: nil, steps: nil, server_context:, **attributes)
       card = attributes.slice(:title, :due_on, :description, :golden, :column_id)

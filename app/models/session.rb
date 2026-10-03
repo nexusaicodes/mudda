@@ -36,6 +36,15 @@ class Session < ApplicationRecord
     API_TOKEN_EXPIRY if token?
   end
 
+  # A minted token lasts a fixed time from minting; an OAuth client's lasts while it is used.
+  def expires_at
+    if oauth?
+      last_refreshed_at + Oauth::IDLE_EXPIRY
+    elsif token?
+      created_at + API_TOKEN_EXPIRY
+    end
+  end
+
   # Stored space-separated, as OAuth writes them; accepted as a list or that same string.
   def scopes
     super.to_s.split
@@ -62,12 +71,17 @@ class Session < ApplicationRecord
     end
 
     # A label names one client, and make revoke LABEL=… revokes every session carrying it.
-    # Minting is a replacement, so an agent signing in on each run holds one live token. An
-    # OAuth client's session is its own: it neither replaces a minted token that happens to
-    # share its name nor is replaced by one.
+    # Minting is a replacement, so an agent signing in on each run holds one live token. So is
+    # connecting: a client that registers again under the same name (Claude Code does, on each
+    # `claude mcp add`) replaces the session its earlier registration held. The two kinds never
+    # replace each other — a minted token that happens to share a client's name is left alone.
     def revoke_others_sharing_its_label
       if token?
-        user.sessions.token.where(label: label, oauth_application_id: oauth_application_id).where.not(id: id).destroy_all
+        sessions_of_its_kind.where(label: label).where.not(id: id).destroy_all
       end
+    end
+
+    def sessions_of_its_kind
+      oauth? ? user.sessions.token.where.not(oauth_application_id: nil) : user.sessions.token.minted
     end
 end

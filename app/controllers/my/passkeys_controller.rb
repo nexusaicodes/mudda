@@ -1,6 +1,7 @@
 class My::PasskeysController < ApplicationController
   include ActionPack::Passkey::Request
 
+  require_browser_session
   before_action :set_passkey, only: %i[ edit update destroy ]
 
   def index

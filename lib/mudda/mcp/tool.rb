@@ -13,9 +13,10 @@ module Mudda::Mcp
     class << self
       attr_reader :scope
 
-      # Mudda reaches nothing outside itself, so no tool is open-world.
-      def kind(name)
-        hints = KINDS.fetch(name)
+      # Mudda reaches nothing outside itself, so no tool is open-world. A tool that does more
+      # than its kind suggests corrects the hints it gets from it.
+      def kind(name, **hints)
+        hints = KINDS.fetch(name).merge(hints)
 
         @scope = hints[:scope]
         annotations hints.except(:scope).merge(open_world_hint: false)

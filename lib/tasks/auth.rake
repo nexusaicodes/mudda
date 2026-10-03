@@ -30,8 +30,7 @@ namespace :auth do
     if sessions.any?
       puts "LABEL\tSCOPES\tMINTED\tEXPIRES"
       sessions.each do |session|
-        expires_at = session.created_at + Session::API_TOKEN_EXPIRY
-        expiry = if session.oauth? then "connected over OAuth" elsif expires_at.past? then "expired" else expires_at.to_s end
+        expiry = if session.expires_at.past? then "expired" elsif session.oauth? then "#{session.expires_at} unless used (OAuth)" else session.expires_at.to_s end
 
         puts "#{session.label}\t#{session.scopes.join(" ")}\t#{session.created_at}\t#{expiry}"
       end

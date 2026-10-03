@@ -48,6 +48,9 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal Mudda::Mcp::Tools::ALL.map(&:name_value).sort, tools.keys.sort
     assert tools.dig("get_card", "annotations", "readOnlyHint")
     assert_not tools.dig("update_card", "annotations", "readOnlyHint")
+    assert tools.dig("update_card", "annotations", "destructiveHint")
+    assert_not tools.dig("update_card", "annotations", "idempotentHint")
+    assert tools.dig("rename_board", "annotations", "idempotentHint")
     assert tools.dig("delete_card", "annotations", "destructiveHint")
   end
 
@@ -63,6 +66,24 @@ class McpTest < ActionDispatch::IntegrationTest
 
     assert_includes names, "get_card"
     assert_not_includes names, "create_card"
+  end
+
+  test "a token without read is still offered the tools it was granted" do
+    @headers = bearer_headers_for(:david, scopes: %w[ write ])
+    names = mcp("tools/list")["tools"].pluck("name")
+
+    assert_includes names, "create_card"
+    assert_not_includes names, "get_card"
+  end
+
+  test "a token over its rate limit is told when to retry" do
+    session = Session.token.find_signed(@headers["Authorization"].delete_prefix("Bearer "))
+    TokenRateLimit::STORE.write "rate-limit:token:#{session.id}", TokenRateLimit::REQUESTS_PER_MINUTE, expires_in: 1.minute
+
+    post "/mcp", params: rpc("tools/list").to_json, headers: mcp_headers(@headers)
+
+    assert_response :too_many_requests
+    assert_equal "60", @response.headers["Retry-After"]
   end
 
   test "a tool outside the token's scopes can't be called" do

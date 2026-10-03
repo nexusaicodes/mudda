@@ -12,7 +12,7 @@
   <p class="margin-none">
     <strong><%= @token.label %></strong> can <strong><%= @token.scopes.to_sentence %></strong>.
     Copy the token now — it won't be shown again. It stops working on
-    <%= (@token.created_at + Session::API_TOKEN_EXPIRY).to_date.to_fs(:long) %>, or when you revoke it.
+    <%= @token.expires_at.to_date.to_fs(:long) %>, or when you revoke it.
   </p>
 
   <div class="flex align-center gap-half" data-controller="clipboard">

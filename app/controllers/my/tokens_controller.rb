@@ -2,7 +2,7 @@
 # no shell (a cloud tenant) can still mint and revoke them. A token's own credential is shown
 # once, when it is minted, and never again.
 class My::TokensController < ApplicationController
-  before_action :ensure_browser_session
+  require_browser_session
 
   def index
     @tokens = tokens
@@ -12,7 +12,7 @@ class My::TokensController < ApplicationController
   def create
     @token = Current.user.sessions.token.new(token_params.merge(user_agent: request.user_agent, ip_address: request.remote_ip))
 
-    if granted_scopes? && @token.save
+    if valid_with_scopes_chosen? && @token.save
       render :create, status: :created
     else
       @tokens = tokens
@@ -26,11 +26,6 @@ class My::TokensController < ApplicationController
   end
 
   private
-    # A token can't mint, list, or revoke tokens: what it was granted is all it gets.
-    def ensure_browser_session
-      head :forbidden unless Current.session.browser?
-    end
-
     def tokens
       Current.user.sessions.token.order(created_at: :desc)
     end
@@ -40,10 +35,11 @@ class My::TokensController < ApplicationController
     end
 
     # Here the scopes are chosen one by one, so a token with none ticked is a mistake to point
-    # out rather than a request for Session::DEFAULT_SCOPES.
-    def granted_scopes?
-      token_params[:scopes].to_a.compact_blank.any?.tap do |granted|
-        @token.errors.add :base, "Choose at least one thing the token may do" unless granted
-      end
+    # out — alongside anything else wrong with it — rather than a request for
+    # Session::DEFAULT_SCOPES.
+    def valid_with_scopes_chosen?
+      @token.validate
+      @token.errors.add :base, "Choose at least one thing the token may do" if token_params[:scopes].to_a.compact_blank.empty?
+      @token.errors.none?
     end
 end
