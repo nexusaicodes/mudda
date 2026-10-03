@@ -45,16 +45,23 @@ class CardsController < ApplicationController
   def edit
   end
 
+  # A move gives the card a new address — its board and its number both change — so the
+  # response hands the client the new one: the browser is sent there, since a page left at the
+  # old URL would post its forms to a card that no longer answers to it, and JSON names it in
+  # Location.
   def update
     respond_to do |format|
       format.html do
         @card.update! card_attributes
-        redirect_to @card
+        redirect_to @card, status: :see_other
       end
-      format.turbo_stream { @card.update! card_attributes }
+      format.turbo_stream do
+        @card.update! card_attributes
+        redirect_to @card, status: :see_other if moved?
+      end
       format.json do
         @card.update! card_attributes
-        render :show
+        render :show, location: (board_card_url(@card.board, @card) if moved?)
       end
     end
   end
@@ -81,6 +88,10 @@ class CardsController < ApplicationController
 
     def set_card
       @card = @board.cards.find_by!(number: params[:id])
+    end
+
+    def moved?
+      @card.board != @board
     end
 
     def card_params

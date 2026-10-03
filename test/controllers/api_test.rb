@@ -733,6 +733,27 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal %w[ card_triaged card_board_changed ], card.events.order(:id).last(2).map(&:action)
   end
 
+  test "a move answers with the card's new address" do
+    card = cards(:logo)
+
+    put board_card_path(card.board, card, format: :json),
+      params: { board_id: boards(:private).id }, headers: bearer_headers_for(@user), as: :json
+
+    assert_response :success
+    assert_equal board_card_url(boards(:private), card.reload), @response.location
+    assert_equal @response.location, @response.parsed_body["url"]
+  end
+
+  test "an update that leaves the card where it is names no new address" do
+    card = cards(:logo)
+
+    put board_card_path(card.board, card, format: :json),
+      params: { title: "Same place" }, headers: bearer_headers_for(@user), as: :json
+
+    assert_response :success
+    assert_nil @response.location
+  end
+
   test "a move that names a lane on the board it leaves is a 404 and writes nothing" do
     card = cards(:logo)
 

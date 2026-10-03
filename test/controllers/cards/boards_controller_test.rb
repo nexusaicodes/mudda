@@ -24,4 +24,16 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to card
   end
+
+  # The picker's button sits in a Turbo frame, so Turbo asks for a stream. A stream would morph
+  # the card in place and leave the page at the URL the card just left.
+  test "choosing a board sends the browser to the card's new address" do
+    card, destination = cards(:logo), boards(:private)
+
+    put board_card_path(card.board, card), params: { card: { board_id: destination.id } },
+      headers: { "Accept" => "text/vnd.turbo-stream.html, text/html, application/xhtml+xml" }
+
+    assert_response :see_other
+    assert_redirected_to board_card_path(destination, card.reload)
+  end
 end

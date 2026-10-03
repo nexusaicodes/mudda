@@ -165,8 +165,9 @@ Moving between lanes with `column_id` records the same `card_triaged` event the 
 `column_id` from another board is a `404`, not a silent no-op.
 
 Moving to another **board** with `board_id` **renumbers** the card there and takes its events
-with it — so the number and the URL you used to reach it are both stale afterwards. Read the
-new ones from the response. A `board_id` the caller can't reach is a `404`. A `column_id` sent
+with it — so the number and the URL you used to reach it are both stale afterwards. The
+response names the new address in its `Location` header (the same as the body's `url`); an
+update that leaves the card where it is sends no `Location`. A `board_id` the caller can't reach is a `404`. A `column_id` sent
 alongside it names a lane on the **destination** (`{ "board_id": 7, "column_id": 31 }` lands
 the card in board 7's lane 31, and a lane from anywhere else is a `404`); with no `column_id`,
 the card lands in the destination's Triage.
