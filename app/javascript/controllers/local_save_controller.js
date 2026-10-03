@@ -4,6 +4,10 @@ import { debounce, nextFrame } from "helpers/timing_helpers"
 // Keeps a form in the browser until it has been submitted successfully, so a reload or a
 // closed tab does not lose what was typed. Every input target is stored under one key, by
 // field name, and cleared together once the form goes through.
+//
+// Fields that repeat under one name — the new card's step rows — are stored as a list. The
+// rows they need may not be on the page when the form comes back, so restoring dispatches
+// local-save:expand and lets whoever owns those rows add them (see step_fields_controller).
 export default class extends Controller {
   static targets = ["input"]
   static values = { key: String }
@@ -23,10 +27,18 @@ export default class extends Controller {
   }
 
   save() {
-    const filled = this.inputTargets.filter(input => input.value)
+    const saved = {}
 
-    if (filled.length) {
-      localStorage.setItem(this.keyValue, JSON.stringify(Object.fromEntries(filled.map(input => [input.name, input.value]))))
+    for (const [name, inputs] of this.#inputsByName()) {
+      const values = this.#trailingBlanksRemoved(inputs.map(input => input.value))
+
+      if (values.some(Boolean)) {
+        saved[name] = inputs.length > 1 ? values : values[0]
+      }
+    }
+
+    if (Object.keys(saved).length) {
+      localStorage.setItem(this.keyValue, JSON.stringify(saved))
     } else {
       this.#clear()
     }
@@ -36,10 +48,56 @@ export default class extends Controller {
     await nextFrame()
     const saved = this.#saved()
 
-    this.inputTargets.filter(input => saved[input.name]).forEach(input => this.#restoreInput(input, saved[input.name]))
+    this.#requestMissingInputs(saved)
+    this.#fill(saved)
   }
 
   // Private
+
+  #inputsByName() {
+    return this.inputTargets.reduce((groups, input) => {
+      return groups.set(input.name, [ ...groups.get(input.name) || [], input ])
+    }, new Map())
+  }
+
+  #trailingBlanksRemoved(values) {
+    const trimmed = [ ...values ]
+    while (trimmed.length && !trimmed.at(-1)) trimmed.pop()
+    return trimmed
+  }
+
+  // Dispatched before filling, and handled synchronously, so the inputs it asks for are
+  // targets by the time they are filled.
+  #requestMissingInputs(saved) {
+    for (const [name, value] of Object.entries(saved)) {
+      const present = this.#inputsNamed(name).length
+      const wanted = this.#listed(value).length
+
+      if (present > 0 && wanted > present) {
+        this.dispatch("expand", { detail: { name: name, count: wanted - present } })
+      }
+    }
+  }
+
+  #fill(saved) {
+    for (const [name, value] of Object.entries(saved)) {
+      const inputs = this.#inputsNamed(name)
+
+      this.#listed(value).forEach((restored, index) => {
+        if (inputs[index]) this.#restoreInput(inputs[index], restored)
+      })
+    }
+  }
+
+  // A single field is stored as a bare value and a repeating one as a list, so both are read
+  // back the same way.
+  #listed(value) {
+    return Array.isArray(value) ? value : [ value ]
+  }
+
+  #inputsNamed(name) {
+    return this.inputTargets.filter(input => input.name === name)
+  }
 
   #saved() {
     const stored = localStorage.getItem(this.keyValue)
@@ -51,22 +109,18 @@ export default class extends Controller {
     }
   }
 
+  // Anything that is not a field map is ignored rather than guessed at. Keys name a record
+  // ("card-7"), and ids are not stable across a rebuild, so a value left by an older format
+  // could otherwise be restored into a different record's form.
   #parse(stored) {
     try {
       const parsed = JSON.parse(stored)
       if (parsed && typeof parsed === "object") return parsed
     } catch {
-      // Saved before forms were stored by field name, when there was only one field to store.
+      // Not a field map.
     }
 
-    return this.#legacy(stored)
-  }
-
-  // A value from the single-field format is HTML, and the editor it belongs to needs it
-  // wrapped the way it was written.
-  #legacy(stored) {
-    const input = this.inputTargets[0]
-    return input ? { [input.name]: `<div>${stored}</div>` } : {}
+    return {}
   }
 
   #restoreInput(input, value) {

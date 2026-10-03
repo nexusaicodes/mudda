@@ -15,7 +15,7 @@
       <%= form_with model: [ @board, @card ], id: "card_form",
             data: { controller: "autoresize form local-save step-fields",
                     local_save_key_value: "new-card-#{@board.id}",
-                    action: "turbo:submit-end->local-save#submit" } do |form| %>
+                    action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand" } do |form| %>
         <h1 class="card__title">
           <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
             <%= form.text_area :title, placeholder: "Name it…",
@@ -38,9 +38,7 @@
         </div>
 
         <%# A trailing blank row so a step can be typed without asking for one first. Blank
-            rows are dropped on create, so an untouched one costs nothing. Step rows are not
-            local-saved: they all share one field name, and restoring them would mean
-            rebuilding rows that aren't on the page yet. %>
+            rows are dropped on create, so an untouched one costs nothing. %>
         <ol class="steps txt-small" data-step-fields-target="list">
           <% @card.steps.each do |step| %>
             <%= render "cards/new/step_field", content: step.content %>
