@@ -128,13 +128,37 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "logout" do
     post session_password_path(format: :json),
       params: { email_address: @user.email_address, password: owner_password }
+    token = @response.parsed_body["session_token"]
 
     assert_difference -> { @user.sessions.count }, -1 do
-      delete session_path(format: :json)
+      delete session_path(format: :json), headers: { "Authorization" => "Bearer #{token}" }
     end
 
     assert_response :no_content
-    assert_not cookies[:session_token].present?
+  end
+
+  # A token goes back in the body and nowhere else, so a script signing in from a machine
+  # where the owner is signed in neither gets a cookie nor disturbs the browser's.
+  test "a JSON sign-in hands back a token and leaves the browser's cookie alone" do
+    sign_in_as @user
+    browser_cookie = cookies[:session_token]
+
+    post session_password_path(format: :json),
+      params: { email_address: @user.email_address, password: owner_password }
+
+    assert_response :success
+    assert_equal browser_cookie, cookies[:session_token]
+    assert Session.token.find_signed(@response.parsed_body["session_token"])
+  end
+
+  # A browser session's id never expires and isn't labelled, so taking it out of the cookie
+  # and presenting it as a token must not make it one.
+  test "a browser session is not accepted as a bearer token" do
+    browser = @user.sessions.create!(kind: :browser)
+
+    get boards_path(format: :json), headers: { "Authorization" => "Bearer #{browser.token}" }
+
+    assert_response :unauthorized
   end
 
   # The whole workflow an agent needs

@@ -40,18 +40,35 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
   end
 
   # A deactivated owner keeps the API token they were issued: it is refused for as long as they
-  # are deactivated, and works again once they are not.
-  test "a deactivated user is refused JSON without losing their session" do
-    sign_in_as :kevin
+  # are deactivated, and works again once they are not — whatever format it asks for.
+  test "a deactivated user's token is refused without being revoked" do
+    headers = bearer_headers_for(:kevin)
     users(:kevin).update!(active: false)
 
     assert_no_difference -> { Session.count } do
-      get cards_path, as: :json
+      get cards_path, as: :json, headers: headers
       assert_response :forbidden
 
-      get cards_path, as: :json
+      get cards_path, headers: headers
       assert_response :forbidden
     end
+
+    users(:kevin).update!(active: true)
+    get cards_path, as: :json, headers: headers
+    assert_response :success
+  end
+
+  # The session's kind decides, not the format: a browser asking for JSON is still a browser.
+  test "a deactivated user's browser is signed out even when it asks for JSON" do
+    sign_in_as :kevin
+    users(:kevin).update!(active: false)
+
+    assert_difference -> { users(:kevin).sessions.browser.count }, -1 do
+      get cards_path, as: :json
+    end
+
+    assert_response :forbidden
+    assert_not cookies[:session_token].present?
   end
 
   test "a deactivated user is signed out on a format the app does not render" do

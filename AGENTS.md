@@ -98,8 +98,9 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
 - `Session belongs_to :user`; `Current` resolves session → user → account (the account is
   derived from the user, not the URL — see above). A deactivated user is still named by
-  `Current` but has no account, and `Authorization` refuses the request: a browser is signed
-  out and redirected to the login page, while a JSON client keeps its session and gets a 403.
+  `Current` but has no account, and `Authorization` refuses the request by the session's kind,
+  not the format asked for: a token keeps its session and gets a 403, while a browser is signed
+  out (redirected to the login page, or a 403 if it asked for JSON).
 - **`Session#kind` says how the user is present** — `browser` (a cookie) or `token` (a script
   or agent). A token always carries a `label` and a browser session never does; both are
   validated, so the two can't disagree. Tokens are minted by `make token` (`auth:token`) or
@@ -107,7 +108,10 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   itself. A label holds one live token: minting under a label revokes the previous one, so a
   JSON client should send its own `label` rather than sharing the default and revoking its
   neighbours. `Session#token` is the single definition of the credential — tokens expire
-  after `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not.
+  after `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not. **Each channel accepts
+  only its own kind:** the cookie resolves `Session.browser`, a bearer header `Session.token`,
+  so a browser session's never-expiring id can't be replayed as a token. A JSON sign-in mints
+  a token and sets no cookie.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 

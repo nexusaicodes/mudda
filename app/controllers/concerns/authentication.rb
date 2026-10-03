@@ -53,15 +53,18 @@ module Authentication
       end
     end
 
+    # Each channel accepts only its own kind of session. A browser session's id never expires,
+    # so presenting it as a bearer token must not turn it into a token that can't be listed,
+    # revoked by label, or timed out; and a token never rides in a cookie.
     def find_session_by_cookie
-      Session.find_signed(cookies.signed[:session_token])
+      Session.browser.find_signed(cookies.signed[:session_token])
     end
 
     # Non-browser clients present the same signed id the JSON sign-in hands back, as
     # `Authorization: Bearer <token>`. See API.md.
     def find_session_by_bearer_token
       authenticate_with_http_token do |token, _options|
-        Session.find_signed(token)
+        Session.token.find_signed(token)
       end
     end
 
@@ -101,16 +104,12 @@ module Authentication
     end
 
     def start_new_session_for(user, label: nil)
-      return_to = session[:return_to_after_authenticating]
-      reset_session
-      session[:return_to_after_authenticating] = return_to
-
       attributes = { user_agent: request.user_agent, ip_address: request.remote_ip,
         kind: session_kind, label: session_label(label) }
 
-      user.sessions.create!(attributes).tap do |session|
-        set_current_session session
-        cookies.signed.permanent[:session_token] = { value: session.token, httponly: true, same_site: :lax }
+      user.sessions.create!(attributes).tap do |new_session|
+        set_current_session new_session
+        sign_in_browser new_session if new_session.browser?
       end
     end
 
@@ -133,9 +132,19 @@ module Authentication
       Current.session = session
     end
 
+    # A token goes back in the response body; only a browser keeps its session in a cookie. So
+    # a JSON sign-in leaves the browser's own sign-in, and its Rails session, alone.
+    def sign_in_browser(new_session)
+      return_to = session[:return_to_after_authenticating]
+      reset_session
+      session[:return_to_after_authenticating] = return_to
+
+      cookies.signed.permanent[:session_token] = { value: new_session.token, httponly: true, same_site: :lax }
+    end
+
     def terminate_session
+      cookies.delete(:session_token) if Current.session&.browser?
       Current.session&.destroy
-      cookies.delete(:session_token)
     end
 
     # The credential a non-browser client presents as `Authorization: Bearer <token>`. This is

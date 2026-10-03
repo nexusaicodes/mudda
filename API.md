@@ -80,8 +80,11 @@ already had, so an agent that signs in on every run replaces its credential rath
 leaving a pile of them behind. `DELETE /session.json` ends the token making the request;
 revoking any *other* token needs shell access to the box.
 
-A bearer request is never handed a session cookie, and an unauthenticated JSON request
-returns `401` rather than redirecting to the sign-in page.
+A bearer request is never handed a session cookie, and neither is a JSON sign-in: the token
+comes back in the body only. A browser's own session is never accepted as a bearer token. An
+unauthenticated JSON request returns `401` rather than redirecting to the sign-in page, and a
+deactivated user's token is refused with `403` but not revoked — it works again once the user
+is reactivated.
 
 ## Resources
 
