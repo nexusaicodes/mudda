@@ -84,6 +84,6 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unauthorized
-    assert_equal "That passkey didn't work. Try again.", @response.parsed_body["message"]
+    assert_equal [ "That passkey didn't work. Try again." ], @response.parsed_body.dig("errors", "base")
   end
 end

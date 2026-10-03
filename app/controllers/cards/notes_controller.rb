@@ -50,7 +50,12 @@ class Cards::NotesController < ApplicationController
     end
 
     def ensure_creatorship
-      head :forbidden if Current.user != @note.creator
+      if Current.user != @note.creator
+        respond_to do |format|
+          format.json { render_forbidden "Only the note's creator can change it" }
+          format.any  { head :forbidden }
+        end
+      end
     end
 
     def note_params

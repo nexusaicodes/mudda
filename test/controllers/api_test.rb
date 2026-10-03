@@ -389,6 +389,65 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_error_envelope "base"
   end
 
+  # What escapes a controller is rendered by JsonPublicExceptions, so the shape holds there too.
+  # Test shows detailed exceptions, which skips the exceptions app; production doesn't.
+  test "an unknown route carries the error envelope" do
+    without_detailed_exceptions do
+      get "/no-such-thing.json", headers: bearer_headers_for(@user)
+    end
+
+    assert_response :not_found
+    assert_error_envelope "base"
+  end
+
+  test "an unknown route still serves the browser its error page" do
+    without_detailed_exceptions do
+      get "/no-such-thing"
+    end
+
+    assert_response :not_found
+    assert_match "<html", @response.body
+  end
+
+  test "a JSON request to an endpoint that serves none carries the error envelope" do
+    get new_board_path(format: :json), headers: bearer_headers_for(@user)
+
+    assert_response :not_acceptable
+    assert_error_envelope "base"
+  end
+
+  test "a missing payload names the parameter it needed" do
+    put board_path(boards(:writebook), format: :json), params: {}, headers: bearer_headers_for(@user), as: :json
+
+    assert_response :bad_request
+    assert_error_envelope "board"
+  end
+
+  # The database holds these columns NOT NULL; a null sent for one is a 422, never a 500.
+  test "a null for a required column is a 422 naming it" do
+    card = cards(:logo)
+    step = card.steps.create!(content: "Something to do")
+
+    { golden: nil, steps_attributes: [ { id: step.id, completed: nil } ] }.each do |field, value|
+      put board_card_path(card.board, card, format: :json),
+        params: { field => value }, headers: bearer_headers_for(@user), as: :json
+
+      assert_response :unprocessable_entity
+      assert_error_envelope field == :golden ? "golden" : "completed"
+    end
+  end
+
+  test "editing someone else's note carries the error envelope" do
+    note = notes(:logo_agreement_jz)
+    assert_not_equal @user, note.creator
+
+    put board_card_note_path(note.card.board, note.card, note, format: :json),
+      params: { body: "Not mine" }, headers: bearer_headers_for(@user), as: :json
+
+    assert_response :forbidden
+    assert_error_envelope "base"
+  end
+
   # Pagination
 
   test "index responses carry the paging headers" do
@@ -805,6 +864,15 @@ class ApiTest < ActionDispatch::IntegrationTest
 
     def raw_token_for(user)
       bearer_headers_for(user)["Authorization"].delete_prefix("Bearer ")
+    end
+
+    def without_detailed_exceptions
+      env_config = Rails.application.env_config
+      detailed = env_config["action_dispatch.show_detailed_exceptions"]
+      env_config["action_dispatch.show_detailed_exceptions"] = false
+      yield
+    ensure
+      env_config["action_dispatch.show_detailed_exceptions"] = detailed
     end
 
     def assert_error_envelope(key)

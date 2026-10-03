@@ -237,8 +237,9 @@ card, or read the board, instead.
 
 ## Errors
 
-Every failure comes back in one shape — including the ones that carry no record, so a client
-never has to branch on the response to find out what went wrong:
+Every failure comes back in one shape — including the ones that carry no record and the ones
+that never reach a controller (an unknown route, a crash), so a client never has to branch on
+the response to find out what went wrong:
 
 ```json
 { "errors": { "due_on": ["can't be blank"] } }
@@ -246,11 +247,14 @@ never has to branch on the response to find out what went wrong:
 
 | Status | When |
 |---|---|
+| `400` | The body is missing the object a write needs; the key names it |
 | `401` | No credential, or a token that has been revoked or expired |
-| `403` | The user is deactivated |
-| `404` | No such record — including a `column_id` that isn't on the board the card ends on |
-| `422` | Validation failed, or an unrecognised query parameter; the keys name the fields |
+| `403` | The user is deactivated, or the note isn't yours to edit |
+| `404` | No such record or route — including a `column_id` that isn't on the board the card ends on |
+| `406` | The endpoint doesn't answer JSON (see [What isn't here](#what-isnt-here)) |
+| `422` | Validation failed, a required field was sent as `null`, or an unrecognised query parameter; the keys name the fields |
 | `429` | Sign-in rate limit |
+| `500` | A bug — still in the envelope, under `base` |
 
 ## Pagination
 

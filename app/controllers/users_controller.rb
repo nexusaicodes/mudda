@@ -20,7 +20,7 @@ class UsersController < ApplicationController
     else
       respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
+        format.json { render_json_errors @user.errors, status: :unprocessable_entity }
       end
     end
   end

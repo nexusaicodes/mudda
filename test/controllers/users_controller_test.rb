@@ -82,6 +82,6 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     put user_path(users(:kevin), format: :json), params: { user: { avatar: svg_file } }
 
     assert_response :unprocessable_entity
-    assert @response.parsed_body["avatar"].present?
+    assert @response.parsed_body.dig("errors", "avatar").present?
   end
 end
