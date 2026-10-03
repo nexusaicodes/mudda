@@ -6,6 +6,7 @@ class Sessions::PasswordsController < ApplicationController
   RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
 
   require_unauthenticated_access
+  serves_json :create
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded,
     store: RATE_LIMIT_STORE
 

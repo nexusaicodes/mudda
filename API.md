@@ -92,6 +92,8 @@ Requests and responses are JSON. Writes accept either flat attributes
 
 `GET /my/user.json` reports the signed-in user — `id`, `name`, `email_address` — with the
 account nested under `account`. There is one id here, and it is the user's.
+`PATCH /my/timezone.json` with `timezone_name` (an IANA name) sets the zone dates are shown in,
+and answers `204`.
 
 ### Boards
 
@@ -219,17 +221,19 @@ to that number; once two do, the search results are returned instead.
 ## What isn't here
 
 There is no separate API: JSON and HTML come from the same routes, so `bin/rails routes`
-lists both audiences at once. Anything that only renders a form or a Turbo fragment answers
-`406` to a `.json` request — every `new` and `edit` path, plus `/`, `/landing`, `/my/menu`,
-`/my/passkeys`, `/prompts/cards` (the `#`-mention autocomplete), the compose screen, the
-drag-and-drop drop target, and the filter and search-history endpoints the filter chrome
-posts to. Build a client from the tables above, not from the route list.
+lists both audiences at once. JSON is opt-in: each controller names the actions it answers in
+JSON (`serves_json`), and a `.json` request to anything else is a `406` **before the action
+runs** — so a `406` never leaves a half-done write behind. That covers every `new` and `edit`
+path, plus `/`, `/landing`, `/my/menu`, `/my/passkeys`, `/prompts/cards` (the `#`-mention
+autocomplete), the compose screen, the drag-and-drop drop target, and the filter and
+search-history endpoints the filter chrome posts to. Build a client from the tables above, not
+from the route list.
 
-Several of those exist over here as fields rather than paths, and the browser's version is
-refused before it does anything, so a `406` never leaves a half-done write behind. A card's
-lane (`/cards/:number/column`), its star (`/goldness`), its board picker (`/board`), its
-steps (`/steps`), a lane's colour (`/boards/:id/columns/:id`), and the compose screen
-(`/cards/new`) are all the browser's; `PUT` or `POST` the card, or read the board, instead.
+Several of the browser's endpoints exist over here as fields rather than paths. A card's lane
+(`/boards/:board_id/cards/:number/column`), its star (`…/goldness`), its board picker
+(`…/board`), its steps (`…/steps`), a lane's colour (`/boards/:id/columns/:id`), and the
+compose screen (`/boards/:board_id/cards/new`) are all the browser's; `PUT` or `POST` the
+card, or read the board, instead.
 
 ## Errors
 

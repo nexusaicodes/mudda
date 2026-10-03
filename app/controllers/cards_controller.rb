@@ -3,6 +3,8 @@ class CardsController < ApplicationController
 
   include FilterScoped
 
+  serves_json :index, :show, :create, :update, :destroy
+
   before_action :set_board, if: -> { params[:board_id].present? }
   before_action :set_card, only: %i[ show edit update destroy ]
 

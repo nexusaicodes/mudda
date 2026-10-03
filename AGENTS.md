@@ -220,9 +220,10 @@ all attributes of the card, so a client reads them from `GET .../cards/:number` 
 carries the board, the column, every step, and the tail of the note log — and writes them
 back with a single `PUT`, via `board_id`, `column_id`, `golden`, and `steps_attributes`
 (`accepts_nested_attributes_for :steps`). The browser's one-thing-at-a-time endpoints are the
-same associations by another door, and the `BrowserOnly` concern refuses any other format
-**before** the action runs, so a JSON request to one is a 406 rather than a write followed by
-a 406. Notes are the exception that stays a collection: a card can carry thousands, so it
+same associations by another door. **JSON is opt-in:** each controller names the actions it
+answers in JSON with `serves_json` (`ServesJson`, in `ApplicationController`), and a JSON
+request to any other action is a 406 **before** the action runs — so an endpoint that never
+thought about JSON can't write and then fail to render. Notes are the exception that stays a collection: a card can carry thousands, so it
 embeds only the most recent `Card::Notable::EMBEDDED_NOTES_LIMIT` and points at its notes
 index for the rest.
 

@@ -1,7 +1,7 @@
 class Boards::ColumnsController < ApplicationController
   wrap_parameters :column, include: %i[ color ]
 
-  include BoardScoped, BrowserOnly, StrictQueryParams
+  include BoardScoped, StrictQueryParams
 
   before_action :set_column
 

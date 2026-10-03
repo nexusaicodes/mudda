@@ -1,6 +1,8 @@
 class UsersController < ApplicationController
   wrap_parameters :user, include: %i[ name avatar ]
 
+  serves_json :show, :update
+
   before_action :set_user
 
   def show

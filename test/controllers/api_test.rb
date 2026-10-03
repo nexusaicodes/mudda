@@ -780,6 +780,22 @@ class ApiTest < ActionDispatch::IntegrationTest
       card.reload.events.order(:id).last(3).map(&:action).sort
   end
 
+  # JSON is opt-in, so an endpoint that never declared it is refused before it runs — not
+  # after it has already written.
+  test "a JSON request to a browser-only write is refused before it writes" do
+    headers = bearer_headers_for(@user)
+    filter = filters(:newest_first)
+
+    delete filter_path(filter, format: :json), headers: headers
+    assert_response :not_acceptable
+    assert Filter.exists?(filter.id)
+
+    assert_no_difference -> { @user.search_queries.count } do
+      post searches_queries_path(format: :json), params: { q: "anything" }, headers: headers, as: :json
+    end
+    assert_response :not_acceptable
+  end
+
   private
     def card_on(board, title)
       Current.user = @user

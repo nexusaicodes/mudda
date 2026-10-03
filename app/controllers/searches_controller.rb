@@ -1,6 +1,8 @@
 class SearchesController < ApplicationController
   include Turbo::DriveHelper, StrictQueryParams
 
+  serves_json :show
+
   allows_query_params :q
 
   def show

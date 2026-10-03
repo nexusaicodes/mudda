@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   include Authorization
   include BlockSearchEngineIndexing
   include CurrentRequest, CurrentTimezone, SetPlatform
-  include JsonErrors
+  include JsonErrors, ServesJson
   include RequestForgeryProtection
   include TurboFlash, ViewTransitions
 

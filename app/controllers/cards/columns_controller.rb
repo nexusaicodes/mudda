@@ -1,5 +1,5 @@
 class Cards::ColumnsController < ApplicationController
-  include CardScoped, BrowserOnly
+  include CardScoped
 
   # The lane picker. A card's column is one of its attributes, so everywhere but the browser
   # moves it with a PUT to the card itself (see CardsController).

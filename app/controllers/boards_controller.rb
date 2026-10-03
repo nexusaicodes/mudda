@@ -3,6 +3,8 @@ class BoardsController < ApplicationController
 
   include FilterScoped
 
+  serves_json :index, :show, :create, :update, :destroy
+
   before_action :set_board, except: %i[ index new create ]
 
   def index

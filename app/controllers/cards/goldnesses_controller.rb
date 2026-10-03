@@ -1,7 +1,7 @@
 # The star button. Goldness is a boolean column on the card, so everywhere but the browser
 # sets it with a PUT to the card itself (see CardsController).
 class Cards::GoldnessesController < ApplicationController
-  include CardScoped, BrowserOnly
+  include CardScoped
 
   def create
     @card.gild

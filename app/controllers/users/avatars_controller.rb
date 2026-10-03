@@ -1,5 +1,6 @@
 class Users::AvatarsController < ApplicationController
   allow_unauthenticated_access only: :show
+  serves_json :destroy
 
   before_action :set_user
 
