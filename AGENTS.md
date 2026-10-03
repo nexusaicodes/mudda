@@ -286,6 +286,14 @@ which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spa
 in the account. Stemming is handled by the FTS5 `porter` tokenizer; highlighting and query
 sanitizing live in `Search::Highlighter` and `Search::Query`.
 
+### MCP
+
+`/mcp` serves the JSON API to AI agents as MCP tools (Streamable HTTP, stateless, bearer
+token only). `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`) is a middleware ahead of
+`ActionDispatch::Executor`; each tool is one in-process JSON API request made with the
+client's token, so tools carry no business logic. `lib/mudda` is required, not autoloaded —
+restart after changing it. See [MCP.md](MCP.md).
+
 ## Tools
 
 ### Chrome MCP (Local Dev)

@@ -4,6 +4,8 @@ Every resource in Mudda renders a JSON representation alongside its HTML one, on
 URL. There is no separate API surface to learn: `GET /boards/123` returns a page,
 `GET /boards/123.json` returns the board.
 
+An AI agent can use the same API as MCP tools at `/mcp`; see [MCP.md](MCP.md).
+
 Because Mudda serves a single account, **URLs carry no account prefix** and the account
 follows whoever the credential belongs to. See [AGENTS.md](AGENTS.md).
 
