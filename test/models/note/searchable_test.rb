@@ -47,10 +47,22 @@ class Note::SearchableTest < ActiveSupport::TestCase
     assert_includes results, card_with_note
     assert_not_includes results, card_without_note
 
-    # Note stores parent card_id and board_id
+    # Note stores its parent card, and reaches the board through it
     new_note = @card.notes.create!(body: "test note", creator: @user)
     record = search_record_class.find_by(searchable_type: "Note", searchable_id: new_note.id)
     assert_equal @card.id, record.card_id
-    assert_equal @board.id, record.board_id
+  end
+
+  # A record reaches its board through its card, so a moved card's notes stay findable after
+  # the board it left is gone, with nothing to reindex.
+  test "a moved card's notes are still found once the board it left is deleted" do
+    old_board = @board
+    card = old_board.cards.create!(title: "Wandering card", due_on: 1.week.from_now, creator: @user)
+    card.notes.create!(body: "peregrination", creator: @user)
+
+    card.update!(board: Board.create!(name: "New Home", account: @account, creator: @user))
+    old_board.destroy!
+
+    assert_includes Card.mentioning("peregrination", user: @user), card
   end
 end

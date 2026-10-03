@@ -1,41 +1,35 @@
 logo_published:
   creator: david
-  board: writebook
   eventable: logo (Card)
   action: card_created
   created_at: <%= 1.week.ago %>
 
 layout_published:
   creator: david
-  board: writebook
   eventable: layout (Card)
   action: card_created
   created_at: <%= 1.week.ago %>
 
 layout_noted:
   creator: david
-  board: writebook
   eventable: layout_overflowing_david (Note)
   action: note_created
   created_at: <%= 1.week.ago %>
 
 text_published:
   creator: kevin
-  board: writebook
   eventable: text (Card)
   action: card_created
   created_at: <%= 1.week.ago %>
 
 shipping_published:
   creator: kevin
-  board: writebook
   eventable: shipping (Card)
   action: card_created
   created_at: <%= 1.week.ago %>
 
 shipping_closed:
   creator: kevin
-  board: writebook
   eventable: shipping (Card)
   action: card_triaged
   created_at: <%= 2.days.ago %>

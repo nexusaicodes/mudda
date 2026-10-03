@@ -185,8 +185,9 @@ Reparenting a card is a plain attribute change — `card.update!(board: other)`,
 the card with a `board_id` — and a lane may be named in the same write. Before validation a
 move with no lane named lands in the destination's Triage (`Card#land_in_destination_triage`);
 `Card::Triageable` validates that a card's column is on its board, so no door can leave it in
-another board's lane. The card is **renumbered** (numbers run per board) in the same UPDATE,
-and its events and its notes' events are re-homed. Cards are dropped between columns through
+another board's lane. The card is **renumbered** (numbers run per board) in the same UPDATE;
+its events and search rows reach their board through the card, so they follow it with nothing
+to re-home. Cards are dropped between columns through
 `cards/drops/columns_controller.rb`.
 
 **Every change in a save is recorded.** `Card::Eventable` snapshots the tracked changes

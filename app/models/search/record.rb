@@ -3,9 +3,8 @@ class Search::Record < ApplicationRecord
 
   belongs_to :searchable, polymorphic: true
   belongs_to :card
-  belongs_to :board
 
-  validates :searchable_type, :searchable_id, :card_id, :board_id, :created_at, presence: true
+  validates :searchable_type, :searchable_id, :card_id, :created_at, presence: true
 
   class << self
     def upsert!(attributes)
@@ -23,12 +22,13 @@ class Search::Record < ApplicationRecord
     end
   end
 
-  # Search spans every board in the user's account, and nothing else reaches it.
+  # Search spans every board in the user's account, and nothing else reaches it. A record
+  # reaches its board through its card, so a moved card's notes follow it without a reindex.
   scope :for_query, ->(query, user:) do
     query = Search::Query.wrap(query)
 
     if query.valid?
-      matching(query.to_s).where(board: user.boards)
+      matching(query.to_s).where(card: user.accessible_cards)
     else
       none
     end
@@ -40,7 +40,7 @@ class Search::Record < ApplicationRecord
     for_query(query, user: user)
       .includes(:searchable, card: [ :board, :creator ])
       .order(created_at: :desc)
-      .select(:id, :searchable_type, :searchable_id, :card_id, :board_id, :title, :content, :created_at, *search_fields(query))
+      .select(:id, :searchable_type, :searchable_id, :card_id, :title, :content, :created_at, *search_fields(query))
   end
 
   def source

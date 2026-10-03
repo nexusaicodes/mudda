@@ -110,7 +110,6 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
     end
 
     create_table "events", force: :cascade do |t|
-      t.bigint "board_id", null: false
       t.bigint "creator_id", null: false
       t.bigint "eventable_id", null: false
       t.string "eventable_type", limit: 255, null: false
@@ -118,7 +117,6 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
       t.json "particulars", default: -> { "json_object()" }
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
-      t.index ["board_id", "action", "created_at"], name: "index_events_on_board_id_and_action_and_created_at"
       t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
       t.index ["creator_id"], name: "index_events_on_creator_id"
     end
@@ -149,7 +147,6 @@ class GenesisSchema < ActiveRecord::Migration[8.2]
     end
 
     create_table "search_records", force: :cascade do |t|
-      t.bigint "board_id", null: false
       t.bigint "card_id", null: false
       t.bigint "searchable_id", null: false
       t.string "searchable_type", limit: 255, null: false

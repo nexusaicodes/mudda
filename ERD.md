@@ -39,8 +39,6 @@ erDiagram
 
     BOARDS ||--o{ COLUMNS : "has_many dependent-destroy — always 5"
     BOARDS ||--o{ CARDS : "has_many dependent-destroy"
-    BOARDS ||--o{ EVENTS : "has_many"
-    BOARDS ||--o{ SEARCH_RECORDS : "board_id"
     BOARDS }o--o{ FILTERS : "boards_filters HABTM"
 
     COLUMNS ||--o{ CARDS : "has_many dependent-destroy — the lifecycle"
@@ -164,7 +162,6 @@ erDiagram
 
     EVENTS {
         bigint id PK
-        bigint board_id FK "NOT NULL"
         bigint creator_id FK "NOT NULL — User"
         bigint eventable_id FK "NOT NULL"
         string eventable_type "limit 255 NOT NULL — Card or Note"
@@ -198,7 +195,6 @@ erDiagram
 
     SEARCH_RECORDS {
         bigint id PK "the FTS rowid"
-        bigint board_id FK "NOT NULL — what scopes a search to the account"
         bigint card_id FK "NOT NULL — always resolves to a Card"
         bigint searchable_id FK "NOT NULL"
         string searchable_type "limit 255 NOT NULL — Card or Note"
@@ -340,8 +336,11 @@ erDiagram
 ```
 
 `search_records` denormalizes both cards and notes into one table; **every row carries
-`card_id`**, so a note match still resolves to the card that owns it, and `board_id` is what
-scopes a query to the searcher's account (`Search::Record.for_query`). `search_records_fts`
+`card_id`**, so a note match still resolves to the card that owns it, and the card is what
+scopes a query to the searcher's account (`Search::Record.for_query` reads
+`user.accessible_cards`). Neither `search_records` nor `events` keeps a copy of the board: both
+reach it through their card, so a moved card's index rows and audit trail follow it with
+nothing to re-home. `search_records_fts`
 is an FTS5 virtual table (`tokenize='porter'`) joined by rowid, with the usual FTS5 shadow
 tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should ignore.
 
@@ -364,7 +363,6 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `cards` | `..._on_column_id` / `..._on_creator_id` | `column_id` / `creator_id` | |
 | `steps` | `index_steps_on_card_id_and_completed` | `card_id, completed` | |
 | `notes` | `..._on_card_id` / `..._on_creator_id` | `card_id` / `creator_id` | |
-| `events` | `index_events_on_board_id_and_action_and_created_at` | `board_id, action, created_at` | |
 | `events` | `index_events_on_eventable` | `eventable_type, eventable_id` | |
 | `events` | `..._on_creator_id` | `creator_id` | |
 | `filters` | `index_filters_on_creator_id_and_params_digest` | `creator_id, params_digest` | ✓ |

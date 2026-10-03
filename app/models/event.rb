@@ -1,15 +1,13 @@
 class Event < ApplicationRecord
   include Promptable
 
-  belongs_to :board
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true
 
   scope :chronologically, -> { order created_at: :asc, id: :desc }
   scope :reverse_chronologically, -> { order created_at: :desc, id: :desc }
-  scope :for_boards, ->(ids) { where(board_id: ids) if ids.present? }
   scope :preloaded, -> {
-    includes(:creator, :board, {
+    includes(:creator, {
       eventable: [
         :creator,
         { rich_text_body: :embeds_attachments },

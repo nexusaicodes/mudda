@@ -16,8 +16,4 @@ module Note::Searchable
   def search_card_id
     card_id
   end
-
-  def search_board_id
-    card.board_id
-  end
 end

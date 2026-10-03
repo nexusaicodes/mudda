@@ -118,14 +118,12 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
 
   create_table "events", force: :cascade do |t|
     t.string "action", limit: 255, null: false
-    t.bigint "board_id", null: false
     t.datetime "created_at", null: false
     t.bigint "creator_id", null: false
     t.bigint "eventable_id", null: false
     t.string "eventable_type", limit: 255, null: false
     t.json "particulars", default: -> { "json_object()" }
     t.datetime "updated_at", null: false
-    t.index ["board_id", "action", "created_at"], name: "index_events_on_board_id_and_action_and_created_at"
     t.index ["creator_id"], name: "index_events_on_creator_id"
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
   end
@@ -158,7 +156,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
   end
 
   create_table "search_records", force: :cascade do |t|
-    t.bigint "board_id", null: false
     t.bigint "card_id", null: false
     t.text "content", limit: 65535
     t.datetime "created_at", null: false

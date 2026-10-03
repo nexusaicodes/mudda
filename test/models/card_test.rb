@@ -109,31 +109,20 @@ class CardTest < ActiveSupport::TestCase
     assert_equal Time.current, card.reload.last_active_at
   end
 
+  # Events hang off their card and its notes, so a move takes them along with nothing to
+  # re-home.
   test "move cards to a different board" do
     card = cards(:logo)
-    old_board = card.board
-    new_board = boards(:private)
+    note = card.notes.create!(body: "Sensitive information", creator: users(:david))
 
-    card.notes.create!(body: "Sensitive information", creator: users(:david))
+    card_events, note_events = card.events.ids, note.events.ids
 
-    card_events_on_old_board = card.events.where(board: old_board)
-    note_events_on_old_board = Event.where(board: old_board, eventable: card.notes)
+    card.update!(board: boards(:private))
 
-    assert card_events_on_old_board.exists?
-    assert note_events_on_old_board.exists?
-
-    card.update!(board: new_board)
-
-    assert_equal new_board, card.reload.board
-
-    card_events_on_new_board = card.events.where(board: new_board)
-    note_events_on_new_board = Event.where(board: new_board, eventable: card.notes)
-
-    assert_empty card_events_on_old_board
-    assert_empty note_events_on_old_board
-    assert card_events_on_new_board.exists?
-    assert note_events_on_new_board.exists?
-    assert card_events_on_new_board.find_by(action: "card_board_changed")
+    assert_equal boards(:private), card.reload.board
+    assert_empty card_events - card.events.ids
+    assert_equal note_events, note.events.ids
+    assert card.events.exists?(action: "card_board_changed")
   end
 
   test "a card is filled if it has either the title or the description set" do

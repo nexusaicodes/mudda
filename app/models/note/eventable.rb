@@ -13,6 +13,6 @@ module Note::Eventable
 
   private
     def track_creation
-      track_event("created", board: card.board, creator: creator)
+      track_event("created", creator: creator)
     end
 end

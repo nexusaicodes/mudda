@@ -20,8 +20,4 @@ module Card::Searchable
   def search_card_id
     id
   end
-
-  def search_board_id
-    board_id
-  end
 end

@@ -7,6 +7,6 @@ module Account::Searchable
 
   private
     def clear_search_records
-      Search::Record.where(board: boards).destroy_all
+      Search::Record.where(card: cards).destroy_all
     end
 end

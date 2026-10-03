@@ -69,15 +69,7 @@ class Card < ApplicationRecord
     end
 
     def track_board_change
-      rehome_events
       track_event "board_changed", particulars: { old_board: Board.find_by(id: tracked_change_was("board_id"))&.name, new_board: board.name }
-    end
-
-    # Events are indexed by board, so a card's own events and its notes' follow it rather
-    # than staying behind on the board it left.
-    def rehome_events
-      events.update_all(board_id: board_id)
-      Event.where(eventable: notes).update_all(board_id: board_id)
     end
 
     # Numbers run per board, so a card's number and its board together address it.

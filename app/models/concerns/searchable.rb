@@ -31,7 +31,6 @@ module Searchable
         searchable_type: self.class.name,
         searchable_id: id,
         card_id: search_card_id,
-        board_id: search_board_id,
         title: search_title,
         content: search_record_content,
         created_at: created_at
@@ -50,5 +49,4 @@ module Searchable
   # - search_title: returns title string or nil
   # - search_content: returns content string
   # - search_card_id: returns the card id (self.id for cards, card_id for notes)
-  # - search_board_id: returns the board id
 end
