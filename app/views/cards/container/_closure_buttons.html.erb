@@ -1,5 +1,5 @@
 <div class="flex gap-half">
-  <%= link_to edit_card_path(card), class: "btn btn--circle-mobile borderless",
+  <%= link_to edit_board_card_path(card.board, card), class: "btn btn--circle-mobile borderless",
         data: {
           controller: "hotkey",
           action: "keydown.e@document->hotkey#click",
@@ -11,7 +11,7 @@
   <% end %>
 
   <% if (done_column = card.board.done_column) && !card.closed? %>
-    <%= button_to card_column_path(card, column_id: done_column.id), method: :patch,
+    <%= button_to board_card_column_path(card.board, card, column_id: done_column.id), method: :patch,
           class: "btn btn--circle-mobile borderless",
           data: {
             controller: "hotkey",

@@ -46,4 +46,16 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
     delete user_avatar_path(users(:david)), as: :json
     assert_response :no_content
   end
+
+  # Showing an avatar is public; removing one is a write, scoped to the caller's own account.
+  test "another account's avatar cannot be deleted" do
+    other = users(:mike)
+    assert_not_equal users(:david).account, other.account
+    other.avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
+
+    delete user_avatar_path(other), as: :json
+
+    assert_response :not_found
+    assert other.reload.avatar.attached?
+  end
 end

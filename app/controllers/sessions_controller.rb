@@ -1,6 +1,8 @@
 class SessionsController < ApplicationController
   include ActionPack::Passkey::Request
 
+  serves_json :destroy
+
   require_unauthenticated_access except: :destroy
 
   layout "public"

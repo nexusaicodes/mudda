@@ -4,9 +4,9 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
   include WebauthnTestHelper
 
   setup do
-    @identity = identities(:kevin)
+    @user = users(:kevin)
 
-    @credential = @identity.passkeys.create!(
+    @credential = @user.passkeys.create!(
       name: "Test Passkey",
       credential_id: Base64.urlsafe_encode64(SecureRandom.random_bytes(32), padding: false),
       public_key: webauthn_private_key.public_to_der,
@@ -84,6 +84,6 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :unauthorized
-    assert_equal "That passkey didn't work. Try again.", @response.parsed_body["message"]
+    assert_equal [ "That passkey didn't work. Try again." ], @response.parsed_body.dig("errors", "base")
   end
 end

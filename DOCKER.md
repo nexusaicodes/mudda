@@ -41,7 +41,7 @@ Each deployment has exactly one owner, provisioned by `db/seeds.rb` from three e
 
 | Variable               | Purpose                                  | Dev default          |
 | ---------------------- | ---------------------------------------- | -------------------- |
-| `MUDDA_OWNER_EMAIL`    | The owner identity's email               | `saksham@nexusai.world` |
+| `MUDDA_OWNER_EMAIL`    | The owner's email address                | `saksham@nexusai.world` |
 | `MUDDA_OWNER_NAME`     | Display name                             | `Saksham Saxena`     |
 | `MUDDA_OWNER_PASSWORD` | Owner sign-in secret (never stored in DB) | `mudda-dev-password` |
 

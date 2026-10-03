@@ -18,7 +18,7 @@
             <% end %>
           </h3>
 
-          <%= link_to edit_card_note_path(note.card, note),
+          <%= link_to edit_board_card_note_path(note.card.board, note.card, note),
                 class: "note__edit btn btn--circle borderless translucent" do %>
             <%= icon_tag "menu-dots-horizontal" %>
             <span class="for-screen-reader">Edit this note</span>

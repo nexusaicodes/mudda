@@ -4,6 +4,7 @@ class UserTest < ActiveSupport::TestCase
   test "create" do
     user = User.create!(
       account: accounts("37s"),
+      email_address: "victor@example.com",
       name: "Victor Cooper"
     )
 
@@ -38,7 +39,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "validates name presence" do
-    user = User.new(account: accounts("37s"), name: "")
+    user = User.new(account: accounts("37s"), email_address: "victor@example.com", name: "")
     assert_not user.valid?
     assert_includes user.errors[:name], "can't be blank"
 
@@ -53,7 +54,7 @@ class UserTest < ActiveSupport::TestCase
   test "setup?" do
     user = users(:kevin)
 
-    user.update!(name: user.identity.email_address)
+    user.update!(name: user.email_address)
     assert_not user.setup?
 
     user.update!(name: "Kevin")

@@ -3,10 +3,6 @@ class Account < ApplicationRecord
 
   has_many :users, dependent: :destroy
   has_many :boards, dependent: :destroy
-  has_many :cards, dependent: :destroy
-  has_many :columns, dependent: :destroy
-
-  before_create :assign_external_account_id
 
   validates :name, presence: true
 
@@ -22,8 +18,8 @@ class Account < ApplicationRecord
     self
   end
 
-  private
-    def assign_external_account_id
-      self.external_account_id ||= ExternalIdSequence.next
-    end
+  # Every card lives on one of the account's boards; there is no direct column to join on.
+  def cards
+    Card.where(board: boards)
+  end
 end

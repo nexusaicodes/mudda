@@ -13,8 +13,8 @@ json.cache! note do
 
   json.card do
     json.id note.card_id
-    json.url card_url(note.card)
+    json.url board_card_url(note.card.board, note.card)
   end
 
-  json.url card_note_url(note.card, note)
+  json.url board_card_note_url(note.card.board, note.card, note)
 end

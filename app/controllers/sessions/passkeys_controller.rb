@@ -2,6 +2,7 @@ class Sessions::PasskeysController < ApplicationController
   include ActionPack::Passkey::Request
 
   require_unauthenticated_access
+  serves_json :create
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded
 
   def create
@@ -15,7 +16,7 @@ class Sessions::PasskeysController < ApplicationController
     else
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: "That passkey didn't work. Try again." }
-        format.json { render json: { message: "That passkey didn't work. Try again." }, status: :unauthorized }
+        format.json { render_unauthorized "That passkey didn't work. Try again." }
       end
     end
   end
@@ -26,7 +27,7 @@ class Sessions::PasskeysController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: rate_limit_exceeded_message }
-        format.json { render json: { message: rate_limit_exceeded_message }, status: :too_many_requests }
+        format.json { render_json_errors({ base: [ rate_limit_exceeded_message ] }, status: :too_many_requests) }
       end
     end
 end

@@ -2,10 +2,10 @@ module Card::Due
   extend ActiveSupport::Concern
 
   included do
-    validates :due_on, presence: true, if: :published?
+    validates :due_on, presence: true
   end
 
   def overdue?
-    published? && due_on.present? && due_on.past?
+    due_on.present? && due_on.past?
   end
 end

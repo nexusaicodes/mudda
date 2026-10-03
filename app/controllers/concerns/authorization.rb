@@ -14,17 +14,26 @@ module Authorization
   end
 
   private
-    # An identity with no active user has no account to enter. Signing the browser out is what
-    # keeps the login page from bouncing it back to root forever; a token keeps working.
+    # A deactivated user has no account to enter. What happens to the session follows its kind,
+    # not the format asked for: a token is refused but kept, so it works again once the user is
+    # reactivated, while a browser is signed out — which is what keeps the login page from
+    # bouncing it back to root forever.
     def ensure_can_access_account
       unless Current.user&.active?
-        if request.format.json?
+        if Current.session.token?
           render_forbidden "Not authorized"
         else
           terminate_session
-
-          redirect_to login_url
+          refuse_signed_out_browser
         end
+      end
+    end
+
+    def refuse_signed_out_browser
+      if request.format.json?
+        render_forbidden "Not authorized"
+      else
+        redirect_to login_url
       end
     end
 end

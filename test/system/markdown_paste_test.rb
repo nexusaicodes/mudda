@@ -4,7 +4,7 @@ class MarkdownPasteTest < ApplicationSystemTestCase
   test "markdown paste adds block spacing" do
     sign_in_as(users(:david))
 
-    visit card_url(cards(:layout))
+    visit board_card_url(cards(:layout).board, cards(:layout))
     find("lexxy-editor").click
     paste_markdown("Hello\n\nWorld")
 
@@ -18,7 +18,7 @@ class MarkdownPasteTest < ApplicationSystemTestCase
   test "markdown paste preserves line breaks" do
     sign_in_as(users(:david))
 
-    visit card_url(cards(:layout))
+    visit board_card_url(cards(:layout).board, cards(:layout))
     find("lexxy-editor").click
     paste_markdown("Hello\nWorld")
 

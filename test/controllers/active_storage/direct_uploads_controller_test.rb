@@ -57,8 +57,8 @@ class ActiveStorage::DirectUploadsControllerTest < ActionDispatch::IntegrationTe
     assert_response :unauthorized
   end
 
-  # The account follows the signed-in identity, so the guard on an upload is that the
-  # identity still has an active user behind it.
+  # The account follows the signed-in user, so the guard on an upload is that the
+  # user still has an active user behind it.
   test "create as a deactivated user is forbidden" do
     sign_in_as :david
     users(:david).update!(active: false)

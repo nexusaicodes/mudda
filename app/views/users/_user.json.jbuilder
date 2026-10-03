@@ -1,7 +1,5 @@
 json.cache! user do
-  json.(user, :id, :name, :active)
-
-  json.email_address user.identity&.email_address
+  json.(user, :id, :name, :email_address, :active)
   json.created_at user.created_at.utc
 
   json.url user_url(user)

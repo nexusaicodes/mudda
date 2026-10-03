@@ -6,14 +6,15 @@ class Sessions::PasswordsController < ApplicationController
   RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
 
   require_unauthenticated_access
+  serves_json :create
   rate_limit to: 10, within: 3.minutes, only: :create, with: :rate_limit_exceeded,
     store: RATE_LIMIT_STORE
 
   layout "public"
 
   def create
-    if identity = OwnerPassword.authenticate(email_address, password)
-      start_new_session_for identity, label: credentials[:label]
+    if user = OwnerPassword.authenticate(email_address, password)
+      start_new_session_for user, label: credentials[:label]
 
       respond_to do |format|
         format.html { redirect_to after_authentication_url }

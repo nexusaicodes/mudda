@@ -8,14 +8,13 @@ class CardTest < ActiveSupport::TestCase
   test "create assigns a number to the card" do
     user = users(:david)
     board = boards(:writebook)
-    account = board.account
     card = nil
 
-    assert_difference -> { account.reload.cards_count }, +1 do
-      card = Card.create!(title: "Test", board: board, creator: user)
+    assert_difference -> { board.reload.cards_count }, +1 do
+      card = Card.create!(title: "Test", board: board, creator: user, due_on: 1.week.from_now)
     end
 
-    assert_equal account.reload.cards_count, card.number
+    assert_equal board.reload.cards_count, card.number
   end
 
   test "assigns distinct numbers when the account counter is stale in memory" do
@@ -26,8 +25,8 @@ class CardTest < ActiveSupport::TestCase
     board_a = Account.find(board.account_id).boards.find(board.id)
     board_b = Account.find(board.account_id).boards.find(board.id)
 
-    card_a = board_a.cards.create!(title: "A", creator: users(:kevin))
-    card_b = board_b.cards.create!(title: "B", creator: users(:kevin))
+    card_a = board_a.cards.create!(title: "A", creator: users(:kevin), due_on: 1.week.from_now)
+    card_b = board_b.cards.create!(title: "B", creator: users(:kevin), due_on: 1.week.from_now)
 
     assert_not_equal card_a.number, card_b.number
     assert_equal card_a.number + 1, card_b.number
@@ -41,10 +40,10 @@ class CardTest < ActiveSupport::TestCase
     board = boards(:writebook)
     board.cards.destroy_all
 
-    far      = board.cards.create! title: "Far",      creator: users(:david), due_on: 10.days.from_now, status: :published
-    soon     = board.cards.create! title: "Soon",     creator: users(:david), due_on: 2.days.from_now,  status: :published
-    overdue  = board.cards.create! title: "Overdue",  creator: users(:david), due_on: 3.days.ago,       status: :published
-    later    = board.cards.create! title: "Later",    creator: users(:david), due_on: 5.days.from_now,  status: :published
+    far      = board.cards.create! title: "Far",      creator: users(:david), due_on: 10.days.from_now
+    soon     = board.cards.create! title: "Soon",     creator: users(:david), due_on: 2.days.from_now
+    overdue  = board.cards.create! title: "Overdue",  creator: users(:david), due_on: 3.days.ago
+    later    = board.cards.create! title: "Later",    creator: users(:david), due_on: 5.days.from_now
 
     assert_equal [ soon, later, far, overdue ], board.cards.by_due_date.to_a
   end
@@ -60,11 +59,9 @@ class CardTest < ActiveSupport::TestCase
     assert_empty Card.where(board: new_board)
   end
 
-  test "for published cards, it should set the default title 'Untitiled' when not provided" do
+  test "a card without a title of its own gets a default one" do
     card = boards(:writebook).cards.create! due_on: 1.week.from_now
-    assert_nil card.title
 
-    card.publish
     assert_equal "Untitled", card.reload.title
   end
 
@@ -76,31 +73,56 @@ class CardTest < ActiveSupport::TestCase
     end
   end
 
+  test "a move keeps a lane named on the destination" do
+    card = cards(:logo)
+
+    card.update! board: boards(:private), column: columns(:private_done)
+
+    assert_equal columns(:private_done), card.reload.column
+  end
+
+  test "a card cannot sit on one board in another board's lane" do
+    card = cards(:logo)
+
+    assert_raises(ActiveRecord::RecordInvalid) { card.update! board: boards(:private), column: columns(:writebook_done) }
+    assert_raises(ActiveRecord::RecordInvalid) { card.reload.update! column: columns(:private_done) }
+    assert_equal [ boards(:writebook), columns(:writebook_triage) ], [ card.reload.board, card.column ]
+  end
+
+  # Each change is recorded from a snapshot taken before the UPDATE, so a nested write during
+  # the save — the touch from a step saved with the card — can't erase the others.
+  test "every change in one save is recorded, steps and all" do
+    card = cards(:logo)
+
+    card.update! title: "Renamed with a step", column: columns(:writebook_doing),
+      steps_attributes: [ { content: "A new step" } ]
+
+    assert_equal %w[ card_title_changed card_triaged ], card.events.order(:id).last(2).map(&:action).sort
+  end
+
+  test "a change records its activity in the same UPDATE" do
+    freeze_time
+    card = cards(:logo)
+
+    card.update! title: "Active now"
+
+    assert_equal Time.current, card.reload.last_active_at
+  end
+
+  # Events hang off their card and its notes, so a move takes them along with nothing to
+  # re-home.
   test "move cards to a different board" do
     card = cards(:logo)
-    old_board = card.board
-    new_board = boards(:private)
+    note = card.notes.create!(body: "Sensitive information", creator: users(:david))
 
-    card.notes.create!(body: "Sensitive information", creator: users(:david))
+    card_events, note_events = card.events.ids, note.events.ids
 
-    card_events_on_old_board = card.events.where(board: old_board)
-    note_events_on_old_board = Event.where(board: old_board, eventable: card.notes)
+    card.update!(board: boards(:private))
 
-    assert card_events_on_old_board.exists?
-    assert note_events_on_old_board.exists?
-
-    card.move_to(new_board)
-
-    assert_equal new_board, card.reload.board
-
-    card_events_on_new_board = card.events.where(board: new_board)
-    note_events_on_new_board = Event.where(board: new_board, eventable: card.notes)
-
-    assert_empty card_events_on_old_board
-    assert_empty note_events_on_old_board
-    assert card_events_on_new_board.exists?
-    assert note_events_on_new_board.exists?
-    assert card_events_on_new_board.find_by(action: "card_board_changed")
+    assert_equal boards(:private), card.reload.board
+    assert_empty card_events - card.events.ids
+    assert_equal note_events, note.events.ids
+    assert card.events.exists?(action: "card_board_changed")
   end
 
   test "a card is filled if it has either the title or the description set" do

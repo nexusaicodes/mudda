@@ -4,22 +4,11 @@ class Note::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
   setup do
-    @card = @board.cards.create!(title: "Test Card", status: "published", due_on: 1.week.from_now, creator: @user)
-  end
-
-  test "searchable? returns true for notes on published cards" do
-    note = @card.notes.create!(body: "test note", creator: @user)
-    assert note.searchable?
-  end
-
-  test "searchable? returns false for notes on draft cards" do
-    draft_card = @board.cards.create!(title: "Draft Card", status: "drafted", creator: @user)
-    note = draft_card.notes.build(body: "test note", creator: @user)
-    assert_not note.searchable?
+    @card = @board.cards.create!(title: "Test Card", due_on: 1.week.from_now, creator: @user)
   end
 
   test "note search" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
     # Note is indexed on create
     note = @card.notes.create!(body: "searchable note text", creator: @user)
     record = search_record_class.find_by(searchable_type: "Note", searchable_id: note.id)
@@ -51,17 +40,29 @@ class Note::SearchableTest < ActiveSupport::TestCase
     end
 
     # Finding cards via note search
-    card_with_note = @board.cards.create!(title: "Card One", status: "published", due_on: 1.week.from_now, creator: @user)
+    card_with_note = @board.cards.create!(title: "Card One", due_on: 1.week.from_now, creator: @user)
     card_with_note.notes.create!(body: "unique searchable phrase", creator: @user)
-    card_without_note = @board.cards.create!(title: "Card Two", status: "published", due_on: 1.week.from_now, creator: @user)
+    card_without_note = @board.cards.create!(title: "Card Two", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_with_note
     assert_not_includes results, card_without_note
 
-    # Note stores parent card_id and board_id
+    # Note stores its parent card, and reaches the board through it
     new_note = @card.notes.create!(body: "test note", creator: @user)
     record = search_record_class.find_by(searchable_type: "Note", searchable_id: new_note.id)
     assert_equal @card.id, record.card_id
-    assert_equal @board.id, record.board_id
+  end
+
+  # A record reaches its board through its card, so a moved card's notes stay findable after
+  # the board it left is gone, with nothing to reindex.
+  test "a moved card's notes are still found once the board it left is deleted" do
+    old_board = @board
+    card = old_board.cards.create!(title: "Wandering card", due_on: 1.week.from_now, creator: @user)
+    card.notes.create!(body: "peregrination", creator: @user)
+
+    card.update!(board: Board.create!(name: "New Home", account: @account, creator: @user))
+    old_board.destroy!
+
+    assert_includes Card.mentioning("peregrination", user: @user), card
   end
 end

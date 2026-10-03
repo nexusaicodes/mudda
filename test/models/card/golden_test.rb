@@ -4,6 +4,7 @@ class Card::GoldenTest < ActiveSupport::TestCase
   setup do
     Current.session = sessions(:david)
     @golden, @non_golden = cards(:logo), cards(:text)
+    @golden.gild
   end
 
   test "check whether a card is golden" do

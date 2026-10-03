@@ -1,17 +1,15 @@
 # Every board has the same five fixed lanes (flat kanban). Triage/Backlog/Done
 # are ordinary columns now — there are no lifecycle states.
-<% { "writebook" => "37s", "private" => "37s", "miltons_wish_list" => "initech" }.each do |board, account| %>
+<% %w[ writebook private miltons_wish_list ].each do |board| %>
 <% [ [ "triage", "Triage", "var(--color-card-1)" ],
      [ "backlog", "Backlog", "var(--color-card-2)" ],
      [ "todo", "Todo", "var(--color-card-3)" ],
      [ "doing", "Doing", "var(--color-card-5)" ],
      [ "done", "Done", "var(--color-card-4)" ] ].each_with_index do |(slug, name, color), position| %>
 <%= board %>_<%= slug %>:
-  id: <%= ActiveRecord::FixtureSet.identify("#{board}_#{slug}", :uuid) %>
   name: <%= name %>
   color: "<%= color %>"
-  board: <%= board %>_uuid
+  board: <%= board %>
   position: <%= position %>
-  account: <%= account %>_uuid
 <% end %>
 <% end %>

@@ -36,10 +36,8 @@ module Mudda
       Rails.event.debug_mode = true
     end
 
-    # Use UUID primary keys for all new tables
-    config.generators do |g|
-      g.orm :active_record, primary_key_type: :uuid
-    end
+    # Resolved per request, since lib/ isn't autoloadable while this file is read.
+    config.exceptions_app = ->(env) { JsonPublicExceptions.new(Rails.public_path).call(env) }
 
     config.action_pack.passkey.draw_routes = false
     config.action_pack.passkey.challenge_url = -> { my_passkey_challenge_path }

@@ -2,16 +2,16 @@ module CardScoped
   extend ActiveSupport::Concern
 
   included do
-    before_action :set_card, :set_board
+    before_action :set_board, :set_card
   end
 
   private
-    def set_card
-      @card = Current.user.accessible_cards.find_by!(number: params[:card_id])
+    def set_board
+      @board = Current.user.boards.find(params[:board_id])
     end
 
-    def set_board
-      @board = @card.board
+    def set_card
+      @card = @board.cards.find_by!(number: params[:card_id])
     end
 
     def render_card_replacement

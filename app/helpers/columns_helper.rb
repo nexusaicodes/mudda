@@ -3,7 +3,7 @@ module ColumnsHelper
     current = column == card.column
     button_to \
       tag.span(column.name, class: "overflow-ellipsis"),
-      card_column_path(card, column_id: column.id),
+      board_card_column_path(card.board, card, column_id: column.id),
       method: :patch,
       class: [ "card__column-name btn", { "card__column-name--current": current } ],
       disabled: current,

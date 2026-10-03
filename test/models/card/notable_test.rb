@@ -6,7 +6,7 @@ class Card::NotableTest < ActiveSupport::TestCase
   end
 
   test "a new card has no notes" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "New"
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "New", due_on: 1.week.from_now
 
     assert_empty card.notes
   end
@@ -17,10 +17,5 @@ class Card::NotableTest < ActiveSupport::TestCase
     end
 
     assert_equal "Agreed.", cards(:logo).notes.last.body.to_plain_text.chomp
-  end
-
-  test "notable? is true for published cards, false for drafts" do
-    assert cards(:logo).notable?
-    assert_not cards(:unfinished_thoughts).notable?
   end
 end

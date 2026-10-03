@@ -15,17 +15,11 @@ module Searchable
 
   private
     def create_in_search_index
-      if searchable?
-        search_record_class.create!(search_record_attributes)
-      end
+      search_record_class.create!(search_record_attributes)
     end
 
     def update_in_search_index
-      if searchable?
-        search_record_class.upsert!(search_record_attributes)
-      else
-        remove_from_search_index
-      end
+      search_record_class.upsert!(search_record_attributes)
     end
 
     def remove_from_search_index
@@ -34,11 +28,9 @@ module Searchable
 
     def search_record_attributes
       {
-        account_id: account_id,
         searchable_type: self.class.name,
         searchable_id: id,
         card_id: search_card_id,
-        board_id: search_board_id,
         title: search_title,
         content: search_record_content,
         created_at: created_at
@@ -50,14 +42,11 @@ module Searchable
     end
 
     def search_record_class
-      Search::Record.for(account_id)
+      Search::Record
     end
 
   # Models must implement these methods:
-  # - account_id: returns the account id
   # - search_title: returns title string or nil
   # - search_content: returns content string
   # - search_card_id: returns the card id (self.id for cards, card_id for notes)
-  # - search_board_id: returns the board id
-  # - searchable?: returns whether this record should be indexed
 end

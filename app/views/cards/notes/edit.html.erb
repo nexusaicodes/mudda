@@ -6,7 +6,7 @@
 
     <div class="note__content flex flex-column flex-item-grow full-width">
       <div class="note__body" data-turbo-permanent>
-        <%= form_with model: [ @card, @note ], class: "flex flex-column gap full-width",
+        <%= form_with model: [ @card.board, @card, @note ], class: "flex flex-column gap full-width",
               data: { controller: "form", action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
           <%= form.rich_textarea :body, required: true, autofocus: true, placeholder: new_note_placeholder(@card) do %>
             <%= general_prompts(@card.board) %>
@@ -15,7 +15,7 @@
             <%= form.button class: "btn btn--reversed", type: :submit, title: "Save changes (#{ hotkey_label(["ctrl", "enter"]) })" do %>
               <span>Save</span>
             <% end %>
-            <%= link_to card_note_path(@card, @note), class: "btn", data: { form_target: "cancel" },title: "Cancel (#{ hotkey_label(["esc"]) })" do %>
+            <%= link_to board_card_note_path(@card.board, @card, @note), class: "btn", data: { form_target: "cancel" },title: "Cancel (#{ hotkey_label(["esc"]) })" do %>
               <span>Cancel</span>
             <% end %>
 
@@ -27,7 +27,7 @@
           </div>
         <% end %>
 
-        <%= form_with url: card_note_path(@card, @note), method: :delete, id: dom_id(@note, :delete_form), data: { turbo_frame: "_top" } %>
+        <%= form_with url: board_card_note_path(@card.board, @card, @note), method: :delete, id: dom_id(@note, :delete_form), data: { turbo_frame: "_top" } %>
       </div>
     </div>
   </div>

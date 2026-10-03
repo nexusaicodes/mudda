@@ -433,22 +433,6 @@
   /* Misc bits
   /* ------------------------------------------------------------------------ */
 
-  .card__background {
-    inset: 0;
-    position: absolute;
-    z-index: -1;
-
-    img {
-      block-size: 100%;
-      border-radius: var(--border-radius);
-      inline-size: 100%;
-      object-fit: cover;
-      object-position: center;
-      opacity: 1;
-      transition: filter 0.2s ease-in-out, opacity 0.2s ease-in-out;
-    }
-  }
-
   .card__link {
     content: "";
     inset: 0;

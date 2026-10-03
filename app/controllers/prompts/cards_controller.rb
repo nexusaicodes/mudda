@@ -1,11 +1,12 @@
+# The #-mention autocomplete: a fragment for the text editor, not a card index.
 class Prompts::CardsController < ApplicationController
   MAX_RESULTS = 10
 
   def index
     @cards = if filter_param.present?
-      prepending_exact_matches_by_id(search_cards)
+      prepending_exact_matches_by_number(search_cards)
     else
-      published_cards.latest
+      accessible_cards.latest
     end
 
     if stale? etag: @cards
@@ -19,21 +20,18 @@ class Prompts::CardsController < ApplicationController
     end
 
     def search_cards
-      published_cards
+      accessible_cards
         .mentioning(params[:filter], user: Current.user)
         .reverse_chronologically
         .limit(MAX_RESULTS)
     end
 
-    def published_cards
-      Current.user.accessible_cards.published
+    def accessible_cards
+      Current.user.accessible_cards
     end
 
-    def prepending_exact_matches_by_id(cards)
-      if card_by_id = Current.user.accessible_cards.find_by(number: params[:filter])
-        [ card_by_id ] + cards
-      else
-        cards
-      end
+    # Numbers run per board, so a number can match one card on each of them.
+    def prepending_exact_matches_by_number(cards)
+      accessible_cards.where(number: params[:filter]).to_a + cards
     end
 end

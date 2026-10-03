@@ -1,6 +1,8 @@
 class Account::SettingsController < ApplicationController
   wrap_parameters :account, include: %i[ name ]
 
+  serves_json :show, :update
+
   before_action :set_account
 
   def show

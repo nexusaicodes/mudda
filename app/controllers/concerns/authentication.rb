@@ -9,7 +9,7 @@ module Authentication
     before_action :require_authentication
     helper_method :authenticated?
 
-    etag { Current.identity.id if authenticated? }
+    etag { Current.user.id if authenticated? }
 
     include LoginHelper
   end
@@ -29,7 +29,7 @@ module Authentication
 
   private
     def authenticated?
-      Current.identity.present?
+      Current.user.present?
     end
 
     def require_authentication
@@ -53,15 +53,18 @@ module Authentication
       end
     end
 
+    # Each channel accepts only its own kind of session. A browser session's id never expires,
+    # so presenting it as a bearer token must not turn it into a token that can't be listed,
+    # revoked by label, or timed out; and a token never rides in a cookie.
     def find_session_by_cookie
-      Session.find_signed(cookies.signed[:session_token])
+      Session.browser.find_signed(cookies.signed[:session_token])
     end
 
     # Non-browser clients present the same signed id the JSON sign-in hands back, as
     # `Authorization: Bearer <token>`. See API.md.
     def find_session_by_bearer_token
       authenticate_with_http_token do |token, _options|
-        Session.find_signed(token)
+        Session.token.find_signed(token)
       end
     end
 
@@ -100,23 +103,25 @@ module Authentication
       request.post? && request.format.json?
     end
 
-    def start_new_session_for(identity, label: nil)
-      return_to = session[:return_to_after_authenticating]
-      reset_session
-      session[:return_to_after_authenticating] = return_to
+    def start_new_session_for(user, label: nil)
+      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip,
+        kind: session_kind, label: session_label(label) }
 
-      attributes = { user_agent: request.user_agent, ip_address: request.remote_ip, label: session_label(label) }
-
-      identity.sessions.create!(attributes).tap do |session|
-        set_current_session session
-        cookies.signed.permanent[:session_token] = { value: session.token, httponly: true, same_site: :lax }
+      user.sessions.create!(attributes).tap do |new_session|
+        set_current_session new_session
+        sign_in_browser new_session if new_session.browser?
       end
     end
 
-    # A token handed to a JSON client is labelled so auth:tokens and auth:revoke can reach it;
-    # a browser session carries no label. A client may name itself, so two of them can hold
-    # tokens at once — a label holds one live token, and a shared default would have them
-    # revoking each other on every sign-in.
+    # A JSON sign-in is a script or an agent asking for a token; a browser asking for HTML
+    # gets a cookie session.
+    def session_kind
+      request.format.json? ? :token : :browser
+    end
+
+    # A token is labelled so auth:tokens and auth:revoke can reach it. A client may name
+    # itself, so two of them can hold tokens at once — a label holds one live token, and a
+    # shared default would have them revoking each other on every sign-in.
     def session_label(label)
       if request.format.json?
         label.presence || "json-sign-in"
@@ -127,9 +132,19 @@ module Authentication
       Current.session = session
     end
 
+    # A token goes back in the response body; only a browser keeps its session in a cookie. So
+    # a JSON sign-in leaves the browser's own sign-in, and its Rails session, alone.
+    def sign_in_browser(new_session)
+      return_to = session[:return_to_after_authenticating]
+      reset_session
+      session[:return_to_after_authenticating] = return_to
+
+      cookies.signed.permanent[:session_token] = { value: new_session.token, httponly: true, same_site: :lax }
+    end
+
     def terminate_session
+      cookies.delete(:session_token) if Current.session&.browser?
       Current.session&.destroy
-      cookies.delete(:session_token)
     end
 
     # The credential a non-browser client presents as `Authorization: Bearer <token>`. This is

@@ -20,8 +20,7 @@ class SearchReindexJob < ApplicationJob
   def perform(batch_size: 100, log_every: 1000, rich_text_limit: 100_000)
     step :cards do |step|
       processed = 0
-      Card.published
-          .left_joins(:rich_text_description)
+      Card.left_joins(:rich_text_description)
           .where("action_text_rich_texts.body IS NULL OR OCTET_LENGTH(action_text_rich_texts.body) <= ?", rich_text_limit)
           .includes(:rich_text_description)
           .find_each(start: step.cursor, batch_size: batch_size) do |card|
@@ -34,8 +33,7 @@ class SearchReindexJob < ApplicationJob
 
     step :notes do |step|
       processed = 0
-      Note.joins(:card).merge(Card.published)
-             .left_joins(:rich_text_body)
+      Note.left_joins(:rich_text_body)
              .where("action_text_rich_texts.body IS NULL OR OCTET_LENGTH(action_text_rich_texts.body) <= ?", rich_text_limit)
              .includes(:rich_text_body, :card)
              .find_each(start: step.cursor, batch_size: batch_size) do |note|

@@ -3,30 +3,20 @@ require "test_helper"
 class Card::SearchableTest < ActiveSupport::TestCase
   include SearchTestHelper
 
-  test "searchable? returns true for published cards" do
-    card = @board.cards.create!(title: "Published Card", status: "published", due_on: 1.week.from_now, creator: @user)
-    assert card.searchable?
-  end
-
-  test "searchable? returns false for draft cards" do
-    card = @board.cards.create!(title: "Draft Card", status: "drafted", creator: @user)
-    assert_not card.searchable?
-  end
-
   test "card search" do
     # Searching by title
-    card = @board.cards.create!(title: "layout is broken", status: "published", due_on: 1.week.from_now, creator: @user)
+    card = @board.cards.create!(title: "layout is broken", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("layout", user: @user)
     assert_includes results, card
 
     # Searching by note
-    card_with_note = @board.cards.create!(title: "Some card", status: "published", due_on: 1.week.from_now, creator: @user)
+    card_with_note = @board.cards.create!(title: "Some card", due_on: 1.week.from_now, creator: @user)
     card_with_note.notes.create!(body: "overflowing text", creator: @user)
     results = Card.mentioning("overflowing", user: @user)
     assert_includes results, card_with_note
 
     # Sanitizing search query
-    card_broken = @board.cards.create!(title: "broken layout", status: "published", due_on: 1.week.from_now, creator: @user)
+    card_broken = @board.cards.create!(title: "broken layout", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("broken \"", user: @user)
     assert_includes results, card_broken
 
@@ -35,19 +25,19 @@ class Card::SearchableTest < ActiveSupport::TestCase
 
     # Searching spans every board in the account
     other_board = Board.create!(name: "Other Board", account: @account, creator: @user)
-    card_in_board = @board.cards.create!(title: "searchable content", status: "published", due_on: 1.week.from_now, creator: @user)
-    card_in_other_board = other_board.cards.create!(title: "searchable content", status: "published", due_on: 1.week.from_now, creator: @user)
+    card_in_board = @board.cards.create!(title: "searchable content", due_on: 1.week.from_now, creator: @user)
+    card_in_other_board = other_board.cards.create!(title: "searchable content", due_on: 1.week.from_now, creator: @user)
     results = Card.mentioning("searchable", user: @user)
     assert_includes results, card_in_board
     assert_includes results, card_in_other_board
   end
 
   test "search content is truncated to a reasonable limit" do
-    search_record_class = Search::Record.for(@user.account_id)
+    search_record_class = Search::Record
 
     # Create a card with unreasonably long content
     long_content = "asdf " * Searchable::SEARCH_CONTENT_LIMIT
-    card = @board.cards.create!(title: "Card with long description", status: "published", due_on: 1.week.from_now, creator: @user)
+    card = @board.cards.create!(title: "Card with long description", due_on: 1.week.from_now, creator: @user)
     card.description = ActionText::Content.new(long_content)
     card.save!
 
@@ -61,8 +51,8 @@ class Card::SearchableTest < ActiveSupport::TestCase
   end
 
   test "deleting card removes search record and FTS entry" do
-    search_record_class = Search::Record.for(@user.account_id)
-    card = @board.cards.create!(title: "Card to delete", status: "published", due_on: 1.week.from_now, creator: @user)
+    search_record_class = Search::Record
+    card = @board.cards.create!(title: "Card to delete", due_on: 1.week.from_now, creator: @user)
 
     # Verify search record exists
     search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
@@ -89,45 +79,11 @@ class Card::SearchableTest < ActiveSupport::TestCase
     end
   end
 
-  test "updating a draft card does not index it" do
-    search_record_class = Search::Record.for(@user.account_id)
+  # Every card is indexed the moment it exists, so a card is findable as soon as it is real.
+  test "a card is indexed on create" do
+    card = @board.cards.create!(title: "Findable immediately", creator: @user, due_on: 1.week.from_now)
 
-    card = @board.cards.create!(title: "Draft card", creator: @user, status: "drafted")
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
-
-    card.update!(title: "Updated draft card")
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id),
-      "Draft card should not be indexed after update"
-
-    results = Card.mentioning("Updated", user: @user)
-    assert_not_includes results, card
-  end
-
-  test "publishing a draft card indexes it" do
-    search_record_class = Search::Record.for(@user.account_id)
-
-    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "drafted", due_on: 1.week.from_now)
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
-
-    card.publish
-    search_record = search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
-    assert_not_nil search_record, "Published card should be indexed"
-    assert_equal card.id, search_record.card_id
-
-    results = Card.mentioning("publish", user: @user)
-    assert_includes results, card
-  end
-
-  test "unpublishing a draft card removes it from the search index" do
-    search_record_class = Search::Record.for(@user.account_id)
-
-    card = @board.cards.create!(title: "Draft to publish", creator: @user, status: "published", due_on: 1.week.from_now)
-    assert_not_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
-
-    card.update!(status: "drafted")
-
-    assert_nil search_record_class.find_by(searchable_type: "Card", searchable_id: card.id)
-    results = Card.mentioning("publish", user: @user)
-    assert_not_includes results, card
+    assert_not_nil Search::Record.find_by(searchable_type: "Card", searchable_id: card.id)
+    assert_includes Card.mentioning("Findable", user: @user), card
   end
 end

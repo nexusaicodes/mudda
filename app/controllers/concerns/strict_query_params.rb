@@ -12,8 +12,9 @@
 module StrictQueryParams
   extend ActiveSupport::Concern
 
-  # The controls that page and shape a response, which every index shares.
-  PAGINATION_PARAMS = %w[ page previous expand_all target ]
+  # The controls that page and shape a response, which every index shares — and `format`,
+  # which Rails reads from the query as readily as from the path's extension.
+  PAGINATION_PARAMS = %w[ page previous expand_all format ]
 
   included do
     include JsonErrors

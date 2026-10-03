@@ -1,7 +1,6 @@
 <div class="board-tools card">
-  <%= button_to board_cards_path(board), method: :post, class: "btn btn--link",
-        form: { data: { turbo_frame: "_top" } },
-        data: { controller: "hotkey", action: "keydown.c@document->hotkey#click" } do %>
+  <%= link_to new_board_card_path(board), class: "btn btn--link",
+        data: { turbo_frame: "_top", controller: "hotkey", action: "keydown.c@document->hotkey#click" } do %>
     <%= icon_tag "add", class: "show-on-touch" %>
     <span>Add a card</span>
     <kbd class="hide-on-touch">C</kbd>
