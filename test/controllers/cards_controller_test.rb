@@ -15,6 +15,40 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  # The next-page link is auto-loaded on scroll and its HTML rendered into the page, so a
+  # crafted ?host= must not be able to point it at another server. Strict query params only
+  # hold JSON requests to their contract, so the HTML index needs its own guard.
+  test "the pagination link cannot be pointed at another host" do
+    Current.user = users(:david)
+    16.times { |i| boards(:writebook).cards.create! title: "Filler #{i}", due_on: 1.week.from_now }
+
+    get cards_path(params: { host: "evil.example.com" })
+
+    assert_response :success
+    assert_select "a.pagination-link" do |links|
+      assert_predicate links, :any?, "expected a next-page link to assert about"
+      links.each do |link|
+        # host= survives as an ordinary query param, which is inert. What must not happen is
+        # the link gaining an authority of its own.
+        assert_no_match %r{\A(?:[a-z+.-]+:)?//}, link["href"], "the link must stay on this host"
+        assert_match %r{\A/cards\?}, link["href"]
+      end
+    end
+  end
+
+  test "the pagination link carries the filter it was built under" do
+    Current.user = users(:david)
+    16.times { |i| boards(:writebook).cards.create! title: "Filler #{i}", due_on: 1.week.from_now }
+
+    get cards_path(params: { sorted_by: "oldest" })
+
+    assert_select "a.pagination-link" do |links|
+      assert_predicate links, :any?
+      assert_match %r{sorted_by=oldest}, links.first["href"]
+      assert_match %r{page=2}, links.first["href"]
+    end
+  end
+
   test "index as JSON can filter by workflow column id" do
     get cards_path(format: :json), params: { column_ids: [ columns(:writebook_doing).id ] }
     assert_response :success
