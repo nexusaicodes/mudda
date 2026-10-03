@@ -59,6 +59,23 @@ Rails.application.routes.draw do
 
   resource :landing, only: :show
 
+  # Mudda as an OAuth 2.1 authorization server for MCP clients; see MCP.md → OAuth.
+  use_doorkeeper do
+    controllers authorizations: "oauth/authorizations"
+    skip_controllers :applications, :authorized_applications, :token_info
+  end
+
+  namespace :oauth do
+    resources :registrations, only: :create
+  end
+
+  # Discovery. A client may ask for either document at the root or with the resource's path
+  # appended (/.well-known/oauth-protected-resource/mcp), and gets the same answer.
+  get ".well-known/oauth-protected-resource(/*resource)", to: "oauth/protected_resources#show", format: false,
+    as: :oauth_protected_resource
+  get ".well-known/oauth-authorization-server(/*issuer)", to: "oauth/authorization_servers#show", format: false,
+    as: :oauth_authorization_server
+
   namespace :my do
     resource :passkey_challenge, only: :create
     resource :user, only: :show

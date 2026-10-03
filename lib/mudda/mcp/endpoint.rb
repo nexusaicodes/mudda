@@ -39,7 +39,7 @@ module Mudda::Mcp
         if identity.success?
           transport_for(api, scopes: identity.body.dig("token", "scopes").to_a).call(env)
         else
-          refusal_for identity
+          refusal_for identity, env
         end
       end
 
@@ -62,10 +62,20 @@ module Mudda::Mcp
         Rails.error.report exception, handled: true, context: context, source: "mudda.mcp"
       end
 
-      # The API's own refusal, unchanged: a 401 for no credential or a bad one, a 403 for a
-      # deactivated user.
-      def refusal_for(response)
-        [ response.status, { "content-type" => "application/json" }, [ JSON.generate(response.body || {}) ] ]
+      # The API's own refusal: a 401 for no credential or a bad one, a 403 for a deactivated
+      # user. A 401 also points the client at the OAuth metadata (RFC 9728), which is how an MCP
+      # client finds out it can connect by sending the user to sign in, and asks for the scopes a
+      # token gets by default — deleting is something the user has to be asked for separately.
+      def refusal_for(response, env)
+        headers = { "content-type" => "application/json" }
+        headers["www-authenticate"] = authenticate_header(env) if response.status == 401
+
+        [ response.status, headers, [ JSON.generate(response.body || {}) ] ]
+      end
+
+      def authenticate_header(env)
+        metadata_url = "#{Rack::Request.new(env).base_url}/.well-known/oauth-protected-resource#{PATH}"
+        %(Bearer resource_metadata="#{metadata_url}", scope="#{Session::DEFAULT_SCOPES.join(" ")}")
       end
   end
 end

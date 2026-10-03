@@ -5,8 +5,12 @@
       <strong class="overflow-ellipsis"><%= token.label %></strong>
       <span class="txt-small txt-subtle overflow-ellipsis">
         <%= token.scopes.join(" · ") %> ·
-        <% expires_at = token.created_at + Session::API_TOKEN_EXPIRY %>
-        <%= expires_at.past? ? "expired" : "expires #{expires_at.to_date.to_fs(:long)}" %>
+        <% if token.oauth? %>
+          connected <%= token.created_at.to_date.to_fs(:long) %>
+        <% else %>
+          <% expires_at = token.created_at + Session::API_TOKEN_EXPIRY %>
+          <%= expires_at.past? ? "expired" : "expires #{expires_at.to_date.to_fs(:long)}" %>
+        <% end %>
       </span>
     </div>
     <%= button_to my_token_path(token), method: :delete, class: "btn txt-negative borderless txt-small",

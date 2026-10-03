@@ -3,6 +3,8 @@ namespace :auth do
   task reset: :environment do
     passkeys = ActionPack::Passkey.delete_all
     sessions = Session.delete_all
+    Doorkeeper::AccessToken.delete_all
+    Doorkeeper::AccessGrant.delete_all
 
     puts "Deleted #{passkeys} passkey(s) and #{sessions} session(s)."
     puts "Sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD; enrolling a passkey again is optional."
@@ -29,7 +31,7 @@ namespace :auth do
       puts "LABEL\tSCOPES\tMINTED\tEXPIRES"
       sessions.each do |session|
         expires_at = session.created_at + Session::API_TOKEN_EXPIRY
-        expiry = expires_at.past? ? "expired" : expires_at.to_s
+        expiry = if session.oauth? then "connected over OAuth" elsif expires_at.past? then "expired" else expires_at.to_s end
 
         puts "#{session.label}\t#{session.scopes.join(" ")}\t#{session.created_at}\t#{expiry}"
       end
@@ -42,7 +44,7 @@ namespace :auth do
   task revoke: :environment do
     label = ENV["LABEL"].presence or abort "Set LABEL to the token label you want revoked."
 
-    count = Session.token.where(label: label).destroy_all.size
+    count = Session.token.where(label: label).destroy_all.size # an OAuth client's tokens go with its session
     puts "Revoked #{count} token(s) labelled #{label.inspect}."
   end
 end

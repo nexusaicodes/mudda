@@ -9,6 +9,8 @@ class Session < ApplicationRecord
   SCOPES = %w[ read write delete ]
   DEFAULT_SCOPES = %w[ read write ]
 
+  include Oauth
+
   belongs_to :user
 
   enum :kind, %w[ browser token ].index_by(&:itself), default: :browser, validate: true
@@ -60,10 +62,12 @@ class Session < ApplicationRecord
     end
 
     # A label names one client, and make revoke LABEL=… revokes every session carrying it.
-    # Minting is a replacement, so an agent signing in on each run holds one live token.
+    # Minting is a replacement, so an agent signing in on each run holds one live token. An
+    # OAuth client's session is its own: it neither replaces a minted token that happens to
+    # share its name nor is replaced by one.
     def revoke_others_sharing_its_label
       if token?
-        user.sessions.token.where(label: label).where.not(id: id).destroy_all
+        user.sessions.token.where(label: label, oauth_application_id: oauth_application_id).where.not(id: id).destroy_all
       end
     end
 end

@@ -11,7 +11,9 @@ follows whoever the credential belongs to. See [AGENTS.md](AGENTS.md).
 
 ## Authenticating
 
-Two credentials work, and both resolve to the same `Session`.
+Two credentials work, and both resolve to the same `Session`. (A third, an OAuth access
+token, is how MCP clients connect; it resolves to a token session too and behaves like one
+everywhere below. See [MCP.md → OAuth](MCP.md#oauth).)
 
 **A token** — for scripts, agents, and anything without a cookie jar. Mint one from the
 browser under **My profile → API tokens** (the token is shown once), or, with shell access to

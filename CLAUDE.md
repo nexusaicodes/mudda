@@ -6,8 +6,8 @@ The authoritative architecture and conventions live in these files, which you sh
 
 - **[AGENTS.md](AGENTS.md)** — what Mudda is, dev/test commands, and the big-picture architecture (single account resolved from the signed-in user, owner-password auth + optional passkeys, core domain models, the fixed-column card lifecycle, due dates, per-board card numbers, in-process background jobs, SQLite full-text search).
 - **[API.md](API.md)** — the JSON API a script or agent drives: bearer tokens, the resource table, the error envelope, pagination.
-- **[MCP.md](MCP.md)** — the MCP endpoint at `/mcp`: connecting an agent, the tool catalogue, and
-  how each tool runs as a JSON API request.
+- **[MCP.md](MCP.md)** — the MCP endpoint at `/mcp`: connecting an agent (OAuth 2.1 or a minted
+  token), the tool catalogue and scopes, the OAuth server, and how each tool runs as a JSON API request.
 - **[ERD.md](ERD.md)** — the full database schema: every table, column, index, and
   relationship, plus the enumerated values.
 - **[STYLE.md](STYLE.md)** — house style (conditional returns over guard clauses, method/invocation ordering, bang conventions, CRUD-only controllers, vanilla Rails, `_later`/`_now` job naming).

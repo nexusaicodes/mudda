@@ -37,6 +37,7 @@ module ActiveSupport
       # test starts from an unspent allowance.
       Sessions::PasswordsController::RATE_LIMIT_STORE.clear
       TokenRateLimit::STORE.clear
+      Oauth::RegistrationsController::RATE_LIMIT_STORE.clear
     end
 
     teardown do
