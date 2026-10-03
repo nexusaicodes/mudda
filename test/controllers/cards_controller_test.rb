@@ -49,6 +49,20 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "the pagination link keeps every value of a repeated filter" do
+    Current.user = users(:david)
+    16.times { |i| boards(:writebook).cards.create! title: "Filler #{i}", due_on: 1.week.from_now }
+    board_ids = [ boards(:writebook).id, boards(:private).id ]
+
+    get cards_path(params: { board_ids: board_ids })
+
+    assert_select "a.pagination-link" do |links|
+      assert_predicate links, :any?
+      query = Rack::Utils.parse_nested_query(URI.parse(links.first["href"]).query)
+      assert_equal board_ids.map(&:to_s).sort, query["board_ids"].sort
+    end
+  end
+
   test "index as JSON can filter by workflow column id" do
     get cards_path(format: :json), params: { column_ids: [ columns(:writebook_doing).id ] }
     assert_response :success

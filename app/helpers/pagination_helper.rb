@@ -29,7 +29,7 @@ module PaginationHelper
   end
 
   def pagination_link(namespace, page_number, activate_when_observed: false, label: default_pagination_label(activate_when_observed), data: {}, **attributes)
-    link_to label, page_url(request.fullpath, page_number),
+    link_to label, page_url(request.path, page_number),
       "aria-label": "Load page #{page_number}",
       id: "#{namespace}-pagination-link-#{page_number}",
       class: class_names(attributes.delete(:class), "pagination-link", { "pagination-link--active-when-observed" => activate_when_observed }),
@@ -59,18 +59,18 @@ module PaginationHelper
     # Absolute, since a client reads it out of the body and follows it later. This is how
     # geared_pagination builds the Link header.
     def next_page_url(page)
-      page_url(request.url, page.next_param)
+      page_url(request.base_url + request.path, page.next_param)
     end
 
-    # Built by editing the request's own URL rather than by passing its params back through
-    # url_for, which reads :host, :protocol and :port as options — so a request carrying
+    # Built from the request's own path and query rather than by passing its params back
+    # through url_for, which reads :host, :protocol and :port as options — so a request carrying
     # `?host=` in the query would be handed a link pointing at someone else's server. A JSON
     # client following it would send its bearer token there; a browser auto-loads the next
-    # page on scroll and would render that server's HTML into this page.
+    # page on scroll and would render that server's HTML into this page. The query is
+    # re-encoded the way Rack read it, so a repeated `board_ids[]` keeps every value and page
+    # two answers the same question as page one.
     def page_url(base, page_number)
-      Addressable::URI.parse(base).tap do |uri|
-        uri.query_values = (uri.query_values || {}).merge("page" => page_number.to_s)
-      end.to_s
+      "#{base}?#{request.query_parameters.merge("page" => page_number.to_s).to_query}"
     end
 
     def pagination_list(name, tag_element: :div, paginate_on_scroll: false, **properties, &block)

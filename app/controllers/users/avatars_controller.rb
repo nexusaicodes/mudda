@@ -2,7 +2,8 @@ class Users::AvatarsController < ApplicationController
   allow_unauthenticated_access only: :show
   serves_json :destroy
 
-  before_action :set_user
+  before_action :set_user, only: :show
+  before_action :set_account_user, only: :destroy
 
   def show
     if @user.avatar.attached?
@@ -26,6 +27,11 @@ class Users::AvatarsController < ApplicationController
     # or a monogram — is what the sign-in page already shows, so an enumerable id costs nothing.
     def set_user
       @user = User.find(params[:user_id])
+    end
+
+    # Removing an avatar is a write, so it reaches only the caller's own account.
+    def set_account_user
+      @user = Current.account.users.find(params[:user_id])
     end
 
     def cache_control

@@ -482,6 +482,26 @@ class ApiTest < ActionDispatch::IntegrationTest
       response.headers["X-Total-Count"]
   end
 
+  # The next page has to answer the same question as this one, so a filter given several
+  # values keeps every one of them.
+  test "the next page keeps every value of a repeated filter" do
+    Current.user = @user
+    16.times { |i| boards(:writebook).cards.create!(title: "Filler #{i}", due_on: 1.week.from_now) }
+    board_ids = [ boards(:writebook).id, boards(:private).id ]
+
+    get cards_path(format: :json), params: { board_ids: board_ids }, headers: bearer_headers_for(@user)
+
+    next_page = URI.parse(@response.parsed_body.dig("paging", "next"))
+    assert_equal board_ids.map(&:to_s).sort, Rack::Utils.parse_nested_query(next_page.query)["board_ids"].sort
+    assert_equal "2", Rack::Utils.parse_nested_query(next_page.query)["page"]
+  end
+
+  test "format may be given in the query" do
+    get boards_path, params: { format: "json" }, headers: bearer_headers_for(@user)
+
+    assert_response :success
+  end
+
   # Paging travels in the body, in the same shape on every index, paginated or not.
   test "every index answers with data and paging" do
     headers = bearer_headers_for(@user)
