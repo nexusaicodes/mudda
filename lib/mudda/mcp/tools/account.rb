@@ -4,7 +4,7 @@ module Mudda::Mcp::Tools
     title "Who am I"
     description "The signed-in user (id, name, email) and their account."
     arguments
-    annotations READ
+    kind :read
 
     def self.call(server_context:)
       respond api(server_context).get("/my/user")
@@ -26,7 +26,7 @@ module Mudda::Mcp::Tools
       },
       required: %w[ q ]
     )
-    annotations READ
+    kind :read
 
     def self.call(q:, page: nil, server_context:)
       respond api(server_context).get("/search", { q: q }.merge(page_query(page)))

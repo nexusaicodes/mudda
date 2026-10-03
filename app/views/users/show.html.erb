@@ -27,6 +27,11 @@
           <span>Manage passkeys</span>
         <% end %>
 
+        <%= link_to my_tokens_path, class: "btn txt-x-small" do %>
+          <%= icon_tag "bolt" %>
+          <span>API tokens</span>
+        <% end %>
+
         <%= button_to session_path, method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
           <span>Sign out of Mudda on this device</span>
         <% end %>

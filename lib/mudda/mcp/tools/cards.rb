@@ -27,7 +27,7 @@ module Mudda::Mcp::Tools
         page: { type: "integer", minimum: 1 }
       }
     )
-    annotations READ
+    kind :read
 
     def self.call(board_id: nil, server_context:, **filters)
       respond api(server_context).get(index_path(board_id), filters.slice(*FILTERS).compact)
@@ -47,7 +47,7 @@ module Mudda::Mcp::Tools
       `notes_truncated` is true, `list_notes` pages through the rest.
     TEXT
     arguments(properties: CARD_ADDRESS, required: %w[ board_id number ])
-    annotations READ
+    kind :read
 
     def self.call(board_id:, number:, server_context:)
       respond api(server_context).get("/boards/#{Integer(board_id)}/cards/#{Integer(number)}")
@@ -73,7 +73,7 @@ module Mudda::Mcp::Tools
       },
       required: %w[ board_id title due_on ]
     )
-    annotations CREATE
+    kind :create
 
     def self.call(board_id:, steps: [], server_context:, **attributes)
       card = attributes.slice(:title, :due_on, :description, :golden)
@@ -117,7 +117,7 @@ module Mudda::Mcp::Tools
       ),
       required: %w[ board_id number ]
     )
-    annotations UPDATE
+    kind :update
 
     def self.call(board_id:, number:, to_board_id: nil, steps: nil, server_context:, **attributes)
       card = attributes.slice(:title, :due_on, :description, :golden, :column_id)
@@ -132,5 +132,20 @@ module Mudda::Mcp::Tools
       step.slice(:id, :content, :completed).merge(step[:remove] ? { _destroy: true } : {})
     end
     private_class_method :step_attributes
+  end
+
+  class DeleteCard < Mudda::Mcp::Tool
+    tool_name "delete_card"
+    title "Delete a card"
+    description <<~TEXT
+      Permanently deletes a card with its steps and notes. This can't be undone; to put a card
+      aside, move it to Backlog or Done with `update_card` instead.
+    TEXT
+    arguments(properties: CARD_ADDRESS, required: %w[ board_id number ])
+    kind :delete
+
+    def self.call(board_id:, number:, server_context:)
+      respond api(server_context).delete("/boards/#{Integer(board_id)}/cards/#{Integer(number)}")
+    end
   end
 end

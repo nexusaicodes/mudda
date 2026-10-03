@@ -4,7 +4,7 @@ module Mudda::Mcp::Tools
     title "List boards"
     description "Every board in the account. Paged: follow paging.next or pass `page`."
     arguments(properties: { page: { type: "integer", minimum: 1 } })
-    annotations READ
+    kind :read
 
     def self.call(page: nil, server_context:)
       respond api(server_context).get("/boards", page_query(page))
@@ -20,7 +20,7 @@ module Mudda::Mcp::Tools
       `column_ids`.
     TEXT
     arguments(properties: { board_id: { type: "integer" } }, required: %w[ board_id ])
-    annotations READ
+    kind :read
 
     def self.call(board_id:, server_context:)
       respond api(server_context).get("/boards/#{Integer(board_id)}")
@@ -32,7 +32,7 @@ module Mudda::Mcp::Tools
     title "Create a board"
     description "Creates a board. It comes with the five fixed columns; they can't be added, removed, or renamed."
     arguments(properties: { name: { type: "string" } }, required: %w[ name ])
-    annotations CREATE
+    kind :create
 
     def self.call(name:, server_context:)
       respond api(server_context).post("/boards", { name: name })
@@ -47,10 +47,22 @@ module Mudda::Mcp::Tools
       properties: { board_id: { type: "integer" }, name: { type: "string" } },
       required: %w[ board_id name ]
     )
-    annotations UPDATE
+    kind :update
 
     def self.call(board_id:, name:, server_context:)
       respond api(server_context).put("/boards/#{Integer(board_id)}", { name: name })
+    end
+  end
+
+  class DeleteBoard < Mudda::Mcp::Tool
+    tool_name "delete_board"
+    title "Delete a board"
+    description "Permanently deletes a board and every card and note on it. This can't be undone."
+    arguments(properties: { board_id: { type: "integer" } }, required: %w[ board_id ])
+    kind :delete
+
+    def self.call(board_id:, server_context:)
+      respond api(server_context).delete("/boards/#{Integer(board_id)}")
     end
   end
 end

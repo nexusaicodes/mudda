@@ -111,7 +111,19 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   after `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not. **Each channel accepts
   only its own kind:** the cookie resolves `Session.browser`, a bearer header `Session.token`,
   so a browser session's never-expiring id can't be replayed as a token. A JSON sign-in mints
-  a token and sets no cookie.
+  a token and sets no cookie. Tokens are also minted, listed, and revoked from the browser at
+  `my/tokens` (`My::TokensController`), which refuses token sessions outright.
+- **Token scopes** — `Session#scopes` (`read`, `write`, `delete`; stored space-separated, absent
+  on browser sessions) bound what a token may do. `Authorization#ensure_token_permits_request`
+  reads the scope off the HTTP verb (GET → read, DELETE → delete, anything else → write) and
+  403s before the action runs; `allow_any_token_scope` opts an action out (only
+  `SessionsController#destroy`). New tokens default to `Session::DEFAULT_SCOPES` (`read write`),
+  so `delete` is only ever granted on request.
+- **Agent attribution** — every token is the same single user, so `creator` stays that user;
+  `Current.agent_name` (the token's label, `nil` for a browser) is written to
+  `events.agent_name` by `Eventable#track_event`. There is no per-agent actor model.
+- **Token rate limit** — `TokenRateLimit` gives each token 600 requests a minute across all
+  endpoints (its own `MemoryStore`, cleared in `test_helper.rb`); browsers aren't limited.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 

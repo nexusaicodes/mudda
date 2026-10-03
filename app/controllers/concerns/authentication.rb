@@ -103,9 +103,9 @@ module Authentication
       request.post? && request.format.json?
     end
 
-    def start_new_session_for(user, label: nil)
+    def start_new_session_for(user, label: nil, scopes: nil)
       attributes = { user_agent: request.user_agent, ip_address: request.remote_ip,
-        kind: session_kind, label: session_label(label) }
+        kind: session_kind, label: session_label(label), scopes: session_scopes(scopes) }
 
       user.sessions.create!(attributes).tap do |new_session|
         set_current_session new_session
@@ -125,6 +125,14 @@ module Authentication
     def session_label(label)
       if request.format.json?
         label.presence || "json-sign-in"
+      end
+    end
+
+    # A token gets what the client asked for, or Session::DEFAULT_SCOPES when it didn't say;
+    # a browser session carries none, because nothing limits it.
+    def session_scopes(scopes)
+      if request.format.json?
+        scopes.presence
       end
     end
 

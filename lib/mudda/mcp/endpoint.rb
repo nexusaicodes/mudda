@@ -37,7 +37,7 @@ module Mudda::Mcp
         identity = api.get("/my/user")
 
         if identity.success?
-          transport_for(api).call(env)
+          transport_for(api, scopes: identity.body.dig("token", "scopes").to_a).call(env)
         else
           refusal_for identity
         end
@@ -46,15 +46,15 @@ module Mudda::Mcp
       # Bearer tokens are the only credential /mcp accepts (Api never forwards a cookie), so a
       # page a browser was tricked into loading has nothing to present. The transport's Host
       # allow-list would only repeat the app's own host checks, so it is left to them.
-      def transport_for(api)
-        MCP::Server::Transports::StreamableHTTPTransport.new server_for(api),
+      def transport_for(api, scopes:)
+        MCP::Server::Transports::StreamableHTTPTransport.new server_for(api, scopes:),
           stateless: true, enable_json_response: true, serve_subscriptions_listen: false,
           dns_rebinding_protection: false
       end
 
-      def server_for(api)
+      def server_for(api, scopes:)
         MCP::Server.new name: "mudda", title: "Mudda", version: Mudda::Mcp::VERSION,
-          instructions: INSTRUCTIONS, tools: Tools::ALL, server_context: { api: api },
+          instructions: INSTRUCTIONS, tools: Tools.granted(scopes), server_context: { api: api },
           configuration: MCP::Configuration.new(exception_reporter: method(:report_exception))
       end
 

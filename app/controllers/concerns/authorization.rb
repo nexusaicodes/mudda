@@ -5,11 +5,18 @@ module Authorization
     include JsonErrors
 
     before_action :ensure_can_access_account, if: :authenticated?
+    before_action :ensure_token_permits_request, if: :authenticated?
   end
 
   class_methods do
     def allow_unauthorized_access(**options)
       skip_before_action :ensure_can_access_account, **options
+      skip_before_action :ensure_token_permits_request, **options
+    end
+
+    # For an action any token may take whatever it was granted — ending its own session.
+    def allow_any_token_scope(**options)
+      skip_before_action :ensure_token_permits_request, **options
     end
   end
 
@@ -26,6 +33,24 @@ module Authorization
           terminate_session
           refuse_signed_out_browser
         end
+      end
+    end
+
+    # A token does what its scopes grant, read off the verb: reading is a GET, deleting a
+    # DELETE, and everything else writes. A browser session is never limited.
+    def ensure_token_permits_request
+      unless Current.session.permits?(scope_for_request)
+        render_forbidden "This token is not granted the #{scope_for_request} scope"
+      end
+    end
+
+    def scope_for_request
+      if request.get? || request.head?
+        "read"
+      elsif request.delete?
+        "delete"
+      else
+        "write"
       end
     end
 

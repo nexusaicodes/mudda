@@ -1,0 +1,18 @@
+<li class="credential">
+  <div class="credential__link">
+    <%= icon_tag "bolt", class: "flex-item-no-shrink" %>
+    <div class="flex flex-column min-width flex-item-grow">
+      <strong class="overflow-ellipsis"><%= token.label %></strong>
+      <span class="txt-small txt-subtle overflow-ellipsis">
+        <%= token.scopes.join(" · ") %> ·
+        <% expires_at = token.created_at + Session::API_TOKEN_EXPIRY %>
+        <%= expires_at.past? ? "expired" : "expires #{expires_at.to_date.to_fs(:long)}" %>
+      </span>
+    </div>
+    <%= button_to my_token_path(token), method: :delete, class: "btn txt-negative borderless txt-small",
+          data: { turbo_confirm: "Revoke #{token.label}? Anything using it stops working." } do %>
+      <%= icon_tag "trash" %>
+      <span class="for-screen-reader">Revoke <%= token.label %></span>
+    <% end %>
+  </div>
+</li>

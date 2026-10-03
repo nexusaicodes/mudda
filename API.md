@@ -13,8 +13,9 @@ follows whoever the credential belongs to. See [AGENTS.md](AGENTS.md).
 
 Two credentials work, and both resolve to the same `Session`.
 
-**A token** — for scripts, agents, and anything without a cookie jar. Mudda runs through
-Docker Compose, so the task runs in the app's container:
+**A token** — for scripts, agents, and anything without a cookie jar. Mint one from the
+browser under **My profile → API tokens** (the token is shown once), or, with shell access to
+the box, in the app's container:
 
 ```bash
 make token LABEL=claude               # prints the token on the last line
@@ -59,14 +60,51 @@ would revoke each other on every sign-in:
 -d '{"email_address":"you@example.com","password":"…","label":"claude"}'
 ```
 
+Add `"scopes"` to choose what the token may do (below); without it a token reads and writes.
+
 Sign-in is rate limited to 10 attempts every 3 minutes.
+
+### Scopes
+
+A token does what its scopes grant, decided by the request's verb:
+
+| Scope | Allows |
+|---|---|
+| `read` | `GET` — anything |
+| `write` | `POST`, `PUT`, `PATCH` — creating and changing |
+| `delete` | `DELETE` — permanently removing |
+
+A token is granted `read write` unless asked otherwise; **`delete` is only ever granted on
+request** — tick it on the API tokens page, pass `SCOPES="read write delete"` to `make token`,
+or send `"scopes": "read write delete"` (a string or a list) to the JSON sign-in. A request
+outside a token's scopes is a `403` before the action runs, so nothing is written:
+
+```json
+{ "errors": { "base": ["This token is not granted the write scope"] } }
+```
+
+`DELETE /session.json`, ending the token's own session, is open to every token. A browser
+session is never limited by scope. `GET /my/user.json` reports the token making the request,
+as `"token": { "label": "claude", "scopes": ["read", "write"] }`.
+
+Tokens minted before scopes existed hold all three.
+
+### Rate limit
+
+Each token may make **600 requests a minute**, across every endpoint together; past that, a
+`429` with `Retry-After: 60` and the error envelope. Each token counts on its own, and browser
+sessions aren't limited.
 
 ### Managing tokens
 
+**My profile → API tokens** lists every token with its scopes and expiry, mints new ones, and
+revokes them — no shell needed. A token can't reach that page: tokens are managed only from a
+signed-in browser. The same is available from a shell:
+
 | Command | What it does |
 |---|---|
-| `make token LABEL=claude` | Mint a token and print it (unlabelled mints as `api`) |
-| `make tokens` | List minted tokens, when they were created, and when they expire |
+| `make token LABEL=claude` | Mint a token and print it (unlabelled mints as `api`). `SCOPES="read write delete"` grants more than the default `read write` |
+| `make tokens` | List minted tokens, their scopes, when they were created, and when they expire |
 | `make revoke LABEL=claude` | Revoke every token with that label |
 | `make reset-auth` | Revoke everything, tokens and browser sessions alike |
 
@@ -80,7 +118,11 @@ agent its own label — everything sharing one label is revoked together, so
 **A label holds one live token.** Minting under a label revokes whatever token that label
 already had, so an agent that signs in on every run replaces its credential rather than
 leaving a pile of them behind. `DELETE /session.json` ends the token making the request;
-revoking any *other* token needs shell access to the box.
+revoking any *other* token is done from the API tokens page or a shell.
+
+**What a token does is attributed to it.** Every token acts as the account's one user, so the
+user is still who created a card or wrote a note; the audit trail (`events`) additionally
+records the token's label as `agent_name`. Name tokens after the agent holding them.
 
 A bearer request is never handed a session cookie, and neither is a JSON sign-in: the token
 comes back in the body only. A browser's own session is never accepted as a bearer token. An
@@ -254,11 +296,11 @@ the response to find out what went wrong:
 |---|---|
 | `400` | The body is missing the object a write needs; the key names it |
 | `401` | No credential, or a token that has been revoked or expired |
-| `403` | The user is deactivated, or the note isn't yours to edit |
+| `403` | The user is deactivated, the note isn't yours to edit, or the token lacks the scope (see [Scopes](#scopes)) |
 | `404` | No such record or route — including a `column_id` that isn't on the board the card ends on |
 | `406` | The endpoint doesn't answer JSON (see [What isn't here](#what-isnt-here)) |
 | `422` | Validation failed, a required field was sent as `null`, or an unrecognised query parameter; the keys name the fields |
-| `429` | Sign-in rate limit |
+| `429` | Sign-in rate limit, or the token's request allowance (see [Rate limit](#rate-limit)) |
 | `500` | A bug — still in the envelope, under `base` |
 
 ## Pagination

@@ -63,6 +63,7 @@ Rails.application.routes.draw do
     resource :passkey_challenge, only: :create
     resource :user, only: :show
     resources :passkeys, except: %i[ show new ]
+    resources :tokens, only: %i[ index create destroy ]
     resource :timezone, only: :update
     resource :menu, only: :show
   end

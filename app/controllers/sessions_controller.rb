@@ -4,6 +4,7 @@ class SessionsController < ApplicationController
   serves_json :destroy
 
   require_unauthenticated_access except: :destroy
+  allow_any_token_scope only: :destroy
 
   layout "public"
 

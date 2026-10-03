@@ -2,11 +2,25 @@ module Mudda::Mcp
   # A tool is one API call. It names the call and its arguments; what the call does, and whether
   # it is allowed, is decided by the endpoint it reaches.
   class Tool < MCP::Tool
-    READ = { read_only_hint: true, destructive_hint: false, idempotent_hint: true, open_world_hint: false }
-    CREATE = { read_only_hint: false, destructive_hint: false, idempotent_hint: false, open_world_hint: false }
-    UPDATE = { read_only_hint: false, destructive_hint: false, idempotent_hint: true, open_world_hint: false }
+    # What each kind of call is, as MCP hints, and the token scope (Session::SCOPES) it needs.
+    KINDS = {
+      read: { scope: "read", read_only_hint: true, destructive_hint: false, idempotent_hint: true },
+      create: { scope: "write", read_only_hint: false, destructive_hint: false, idempotent_hint: false },
+      update: { scope: "write", read_only_hint: false, destructive_hint: false, idempotent_hint: true },
+      delete: { scope: "delete", read_only_hint: false, destructive_hint: true, idempotent_hint: true }
+    }
 
     class << self
+      attr_reader :scope
+
+      # Mudda reaches nothing outside itself, so no tool is open-world.
+      def kind(name)
+        hints = KINDS.fetch(name)
+
+        @scope = hints[:scope]
+        annotations hints.except(:scope).merge(open_world_hint: false)
+      end
+
       # An argument the tool doesn't name is refused by name, rather than reaching a call
       # signature that has no place for it.
       def arguments(properties: {}, required: [])

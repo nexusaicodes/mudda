@@ -19,4 +19,32 @@ class SessionTest < ActiveSupport::TestCase
     assert_nil Session.new(kind: :browser).token_expiry
     assert_equal Session::API_TOKEN_EXPIRY, Session.new(kind: :token).token_expiry
   end
+
+  test "a token reads and writes unless it is granted more, and never deletes by default" do
+    token = users(:david).sessions.create!(kind: :token, label: "agent")
+
+    assert_equal %w[ read write ], token.scopes
+    assert token.permits?(:write)
+    assert_not token.permits?(:delete)
+  end
+
+  test "scopes are accepted as a list or a space-separated string, and stored in order" do
+    assert_equal Session::SCOPES, users(:david).sessions.create!(kind: :token, label: "a", scopes: "delete read write").scopes
+    assert_equal %w[ read ], users(:david).sessions.create!(kind: :token, label: "b", scopes: [ "read", "" ]).scopes
+  end
+
+  test "an unknown scope is refused" do
+    session = users(:david).sessions.build(kind: :token, label: "agent", scopes: "read admin")
+
+    assert_not session.valid?
+    assert_match "admin", session.errors[:scopes].first
+  end
+
+  test "a browser session carries no scopes and is limited by none" do
+    browser = users(:david).sessions.create!
+
+    assert_empty browser.scopes
+    assert browser.permits?(:delete)
+    assert_raises(ActiveRecord::RecordInvalid) { users(:david).sessions.create!(scopes: "read") }
+  end
 end

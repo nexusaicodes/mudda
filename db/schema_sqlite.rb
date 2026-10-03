@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_04_000000) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", limit: 255, null: false
@@ -118,6 +118,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
 
   create_table "events", force: :cascade do |t|
     t.string "action", limit: 255, null: false
+    t.string "agent_name", limit: 255
     t.datetime "created_at", null: false
     t.bigint "creator_id", null: false
     t.bigint "eventable_id", null: false
@@ -171,6 +172,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
     t.string "ip_address", limit: 255
     t.string "kind", limit: 255, default: "browser", null: false
     t.string "label", limit: 255
+    t.string "scopes", limit: 255
     t.datetime "updated_at", null: false
     t.string "user_agent", limit: 4096
     t.bigint "user_id", null: false

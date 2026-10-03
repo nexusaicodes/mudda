@@ -1,5 +1,5 @@
 class Sessions::PasswordsController < ApplicationController
-  wrap_parameters :session, include: %i[ email_address password label ]
+  wrap_parameters :session, include: %i[ email_address password label scopes ]
 
   # Its own store, because the general cache is the null store in test and in development
   # without caching — where a shared one would count nothing while still reading as a limit.
@@ -14,11 +14,11 @@ class Sessions::PasswordsController < ApplicationController
 
   def create
     if user = OwnerPassword.authenticate(email_address, password)
-      start_new_session_for user, label: credentials[:label]
+      start_new_session_for user, label: credentials[:label], scopes: credentials[:scopes]
 
       respond_to do |format|
         format.html { redirect_to after_authentication_url }
-        format.json { render json: { session_token: session_token } }
+        format.json { render json: { session_token: session_token, scopes: Current.session.scopes } }
       end
     else
       respond_to do |format|

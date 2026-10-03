@@ -42,12 +42,36 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_match "Triage, Backlog", result["instructions"]
   end
 
-  test "tools/list offers every tool, read-only ones marked as such" do
+  test "tools/list offers every tool to a token holding every scope, each marked for what it does" do
     tools = mcp("tools/list")["tools"].index_by { it["name"] }
 
     assert_equal Mudda::Mcp::Tools::ALL.map(&:name_value).sort, tools.keys.sort
     assert tools.dig("get_card", "annotations", "readOnlyHint")
     assert_not tools.dig("update_card", "annotations", "readOnlyHint")
+    assert tools.dig("delete_card", "annotations", "destructiveHint")
+  end
+
+  test "tools/list offers only the tools a token's scopes allow" do
+    @headers = bearer_headers_for(:david, scopes: %w[ read write ])
+    names = mcp("tools/list")["tools"].pluck("name")
+
+    assert_includes names, "update_card"
+    assert_not_includes names, "delete_card"
+
+    @headers = bearer_headers_for(:david, scopes: %w[ read ])
+    names = mcp("tools/list")["tools"].pluck("name")
+
+    assert_includes names, "get_card"
+    assert_not_includes names, "create_card"
+  end
+
+  test "a tool outside the token's scopes can't be called" do
+    @headers = bearer_headers_for(:david, scopes: %w[ read ])
+
+    post "/mcp", params: rpc("tools/call", name: "create_board", arguments: { name: "Nope" }).to_json, headers: mcp_headers(@headers)
+
+    assert_not_nil @response.parsed_body["error"]
+    assert_not Board.exists?(name: "Nope")
   end
 
   # Tools
@@ -82,6 +106,16 @@ class McpTest < ActionDispatch::IntegrationTest
 
     assert_equal doing, card.reload.column
     assert card.golden?
+  end
+
+  test "what a tool does is recorded under the token's label" do
+    @headers = bearer_headers_for(:david, label: "claude")
+
+    card = call_tool("create_card", board_id: @board.id, title: "Attributed", due_on: "2026-12-01")
+
+    event = Card.find(card["id"]).events.find_by!(action: "card_created")
+    assert_equal "claude", event.agent_name
+    assert_equal users(:david), event.creator
   end
 
   test "update_card edits and removes steps" do
@@ -119,6 +153,29 @@ class McpTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "delete_card deletes the card" do
+    card = cards(:logo)
+
+    assert_equal "Done.", call_tool_text("delete_card", board_id: @board.id, number: card.number)
+    assert_not Card.exists?(card.id)
+  end
+
+  test "delete_note deletes the note" do
+    note = call_tool("add_note", board_id: @board.id, number: cards(:logo).number, body: "Temporary")
+
+    call_tool_text("delete_note", board_id: @board.id, number: cards(:logo).number, note_id: note["id"])
+
+    assert_not Note.exists?(note["id"])
+  end
+
+  test "delete_board deletes the board" do
+    board = call_tool("create_board", name: "Short-lived")
+
+    call_tool_text("delete_board", board_id: board["id"])
+
+    assert_not Board.exists?(board["id"])
+  end
+
   # Errors
 
   test "an API refusal is a tool error carrying the status and the envelope" do
@@ -151,10 +208,14 @@ class McpTest < ActionDispatch::IntegrationTest
 
   private
     def call_tool(name, **arguments)
+      JSON.parse(call_tool_text(name, **arguments))
+    end
+
+    def call_tool_text(name, **arguments)
       result = mcp("tools/call", name: name, arguments: arguments)
 
       assert_not result["isError"], "#{name} failed: #{result.dig("content", 0, "text")}"
-      JSON.parse(result.dig("content", 0, "text"))
+      result.dig("content", 0, "text")
     end
 
     def mcp(method, **params)

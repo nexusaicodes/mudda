@@ -88,6 +88,7 @@ erDiagram
         bigint user_id FK "NOT NULL"
         string kind "limit 255 default browser NOT NULL — browser or token"
         string label "limit 255 — present iff kind is token"
+        string scopes "limit 255 — space-separated read write delete; present iff kind is token"
         string ip_address "limit 255"
         string user_agent "limit 4096"
         datetime created_at "NOT NULL — no expiry column; it is signed into the token"
@@ -166,6 +167,7 @@ erDiagram
         bigint eventable_id FK "NOT NULL"
         string eventable_type "limit 255 NOT NULL — Card or Note"
         string action "limit 255 NOT NULL"
+        string agent_name "limit 255 — the acting token's label; null from a browser"
         json particulars "default json_object()"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -382,6 +384,9 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 ## Enumerated values
 
 **`sessions.kind`** — `browser` (default, a cookie) · `token` (an API token, always labelled).
+
+**`sessions.scopes`** — space-separated, any of `read` · `write` · `delete`. Tokens only;
+defaults to `read write`.
 
 **`columns.name`** — `Triage` · `Backlog` · `Todo` · `Doing` · `Done`. Created together by
 `Board::Triageable` on every board; not creatable, reorderable, or deletable.

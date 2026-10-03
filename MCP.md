@@ -7,11 +7,13 @@ so what an agent may do and what it gets back are exactly what the API says.
 
 ## Connecting
 
-Mint a token for the agent — give each agent its own label, so it can be revoked on its own
+Mint a token for the agent under **My profile → API tokens**, or from a shell — give each
+agent its own name, so what it does is attributed to it and it can be revoked on its own
 (see API.md → Managing tokens):
 
 ```bash
-make token LABEL=claude
+make token LABEL=claude                              # reads and writes
+make token LABEL=claude SCOPES="read write delete"   # may also delete
 ```
 
 Then point the client at `/mcp` with the token as a bearer header. For Claude Code:
@@ -42,8 +44,24 @@ API's own: `401` with no token or a revoked or expired one, `403` for a deactiva
 | `list_notes` | `GET /boards/:board_id/cards/:number/notes` |
 | `add_note` | `POST /boards/:board_id/cards/:number/notes` |
 | `update_note` | `PUT /boards/:board_id/cards/:number/notes/:id` |
+| `delete_board` | `DELETE /boards/:id` |
+| `delete_card` | `DELETE /boards/:board_id/cards/:number` |
+| `delete_note` | `DELETE /boards/:board_id/cards/:number/notes/:id` |
 
-Nothing deletes yet. Cards are addressed by board id and per-board `number`, as in the API.
+Cards are addressed by board id and per-board `number`, as in the API.
+
+**A client is offered only the tools its token's scopes allow** (API.md → Scopes): reading
+tools need `read`, the create and update tools `write`, and the three delete tools `delete` —
+which a token holds only when it was asked for. A tool that isn't offered can't be called, and
+the API refuses an out-of-scope call regardless. Each tool carries MCP annotations
+(`readOnlyHint`, `destructiveHint`, `idempotentHint`), so a client can ask before running the
+destructive ones.
+
+**What an agent does is attributed to it.** The token acts as the account's one user, and the
+audit trail records the token's label as the event's `agent_name`.
+
+Every tool call counts against the token's rate limit twice — once to check the credential,
+once for the call — so a token's 600 requests a minute are 300 tool calls.
 
 A tool's result is the API's JSON response as text. A failed call is a tool error (`isError`)
 whose text is the API's error envelope plus the HTTP status, so an agent can tell a missing
@@ -62,9 +80,11 @@ the API.
 `ActionDispatch::Executor` by `config/initializers/mcp.rb`. On a request to `/mcp` it:
 
 1. Checks the credential by calling `GET /my/user.json` as the client — the same
-   `Authentication` concern as every API request decides it.
-2. Builds a stateless MCP server over the official `mcp` gem's Streamable HTTP transport, which
-   answers in plain JSON and keeps no sessions, so any process can answer any call.
+   `Authentication` concern as every API request decides it — which also reports the token's
+   scopes.
+2. Builds a stateless MCP server over the official `mcp` gem's Streamable HTTP transport, with
+   the tools those scopes allow (`Mudda::Mcp::Tools.granted`). It answers in plain JSON and
+   keeps no sessions, so any process can answer any call.
 3. Runs each tool call as an in-process request to the JSON API (`Mudda::Mcp::Api`), carrying
    the client's `Authorization` header and host but never its cookie.
 

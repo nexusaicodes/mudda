@@ -24,8 +24,9 @@ module SessionTestHelper
   # hands back and what bin/rails auth:token prints. The label is unique per call because a
   # label holds one live token — a shared default would have two tokens in one test revoke
   # each other.
-  def bearer_headers_for(user, label: "test-#{SecureRandom.hex(4)}")
-    session = resolve_user(user).sessions.create!(kind: :token, label: label)
+  # Every scope by default, so a test of an endpoint isn't a test of the token's grant.
+  def bearer_headers_for(user, label: "test-#{SecureRandom.hex(4)}", scopes: Session::SCOPES)
+    session = resolve_user(user).sessions.create!(kind: :token, label: label, scopes: scopes)
 
     { "Authorization" => "Bearer #{session.token}" }
   end
