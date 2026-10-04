@@ -83,4 +83,16 @@ class Card::EventableTest < ActiveSupport::TestCase
       assert_equal Time.current, event.reload.updated_at
     end
   end
+
+  test "an event names the agent whose token made the change, and only a token" do
+    token = users(:david).sessions.create!(kind: :token, label: "claude")
+    card = Current.set(session: token) { boards(:writebook).cards.create!(title: "Via agent", due_on: Date.tomorrow, creator: users(:david)) }
+
+    event = card.events.find_by!(action: "card_created")
+    assert_equal "claude", event.agent_name
+    assert_equal users(:david), event.creator
+
+    Current.set(session: users(:david).sessions.create!) { card.update!(title: "By hand") }
+    assert_nil card.events.find_by!(action: "card_title_changed").agent_name
+  end
 end

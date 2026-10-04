@@ -111,7 +111,32 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
   after `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not. **Each channel accepts
   only its own kind:** the cookie resolves `Session.browser`, a bearer header `Session.token`,
   so a browser session's never-expiring id can't be replayed as a token. A JSON sign-in mints
-  a token and sets no cookie.
+  a token and sets no cookie. Tokens are also minted, listed, and revoked from the browser at
+  `my/tokens` (`My::TokensController`), which — like `my/passkeys` — refuses token sessions
+  outright (`Authorization.require_browser_session`), so a token can't make itself a browser.
+- **Token scopes** — `Session#scopes` (`read`, `write`, `delete`; stored space-separated, absent
+  on browser sessions) bound what a token may do. `Authorization#ensure_token_permits_request`
+  reads the scope off the HTTP verb (GET → read, DELETE or a body with a truthy `_destroy` →
+  delete, anything else → write) and 403s before the action runs; `allow_any_token_scope` opts
+  an action out (`SessionsController#destroy` and `My::UsersController#show`). New tokens default to `Session::DEFAULT_SCOPES` (`read write`),
+  so `delete` is only ever granted on request.
+- **Agent attribution** — every token is the same single user, so `creator` stays that user;
+  `Current.agent_name` (the token's label, `nil` for a browser) is written to
+  `events.agent_name` by `Eventable#track_event`. There is no per-agent actor model.
+- **OAuth 2.1** — Mudda is its own authorization server (Doorkeeper, `config/initializers/doorkeeper.rb`)
+  so MCP clients connect by consent: discovery (`Oauth::ProtectedResourcesController`,
+  `Oauth::AuthorizationServersController` under `/.well-known/`), dynamic client registration
+  (`Oauth::RegistrationsController`), consent (`Oauth::AuthorizationsController`, a subclass of
+  Doorkeeper's whose base is `ApplicationController`, so a signed-out browser is sent to sign in),
+  and Doorkeeper's token/revoke endpoints. PKCE S256 is forced for every client (confidential ones
+  too, via a `PreAuthorization` override in the initializer), consent is never skipped, and a
+  refresh token idle for 90 days is refused. Consent creates or updates one
+  token `Session` per client (`Session::Oauth`, `sessions.oauth_application_id`); a bearer that
+  isn't a minted token's signed id is looked up as a Doorkeeper access token and resolves to
+  that session. Destroying the session revokes the client's tokens. A minted token is
+  `Session.token.minted` — an OAuth session's own signed id is never a credential. See MCP.md → OAuth.
+- **Token rate limit** — `TokenRateLimit` gives each token 600 requests a minute across all
+  endpoints (its own `MemoryStore`, cleared in `test_helper.rb`); browsers aren't limited.
 - **No roles, no per-board access control.** The single user can reach every board and card
   in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
 
@@ -285,6 +310,14 @@ Queue, no Redis, no separate worker process.
 which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spans every board
 in the account. Stemming is handled by the FTS5 `porter` tokenizer; highlighting and query
 sanitizing live in `Search::Highlighter` and `Search::Query`.
+
+### MCP
+
+`/mcp` serves the JSON API to AI agents as MCP tools (Streamable HTTP, stateless, bearer
+token only). `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`) is a middleware ahead of
+`ActionDispatch::Executor`; each tool is one in-process JSON API request made with the
+client's token, so tools carry no business logic. `lib/mudda` is required, not autoloaded —
+restart after changing it. See [MCP.md](MCP.md).
 
 ## Tools
 

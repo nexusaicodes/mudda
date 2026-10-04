@@ -16,6 +16,12 @@ class Current < ActiveSupport::CurrentAttributes
       end
   end
 
+  # The label of the token making the request — which agent acted for the user. The user is
+  # still who acted; a browser session names no agent.
+  def agent_name
+    session.label if session&.token?
+  end
+
   # Jobs carry their tenant explicitly; see AccountTenanted.
   def with_account(value, &)
     with(account: value, &)

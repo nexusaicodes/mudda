@@ -88,6 +88,8 @@ erDiagram
         bigint user_id FK "NOT NULL"
         string kind "limit 255 default browser NOT NULL — browser or token"
         string label "limit 255 — present iff kind is token"
+        string scopes "limit 255 — space-separated read write delete; present iff kind is token"
+        bigint oauth_application_id FK "the OAuth client a token session was granted to; null for minted tokens"
         string ip_address "limit 255"
         string user_agent "limit 4096"
         datetime created_at "NOT NULL — no expiry column; it is signed into the token"
@@ -166,6 +168,7 @@ erDiagram
         bigint eventable_id FK "NOT NULL"
         string eventable_type "limit 255 NOT NULL — Card or Note"
         string action "limit 255 NOT NULL"
+        string agent_name "limit 255 — the acting token's label; null from a browser"
         json particulars "default json_object()"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -282,6 +285,14 @@ There is **no password column anywhere** — the owner secret lives only in
 `make token LABEL=…` or the JSON sign-in. A token carries a `label`, and a browser session
 never does; the label is the unit of revocation, and one label holds one live token.
 
+A token session with an `oauth_application_id` belongs to an MCP client connected over OAuth
+(`Session::Oauth`) — one per user and client. Doorkeeper's `oauth_applications` (registered
+clients; secrets hashed), `oauth_access_grants` (authorization codes, with the PKCE challenge),
+and `oauth_access_tokens` (hour-long access tokens and rotating refresh tokens, hashed) hold the
+protocol's state; `resource_owner_id` is a `users.id`. An access token is honoured only while
+its client's session exists. Like the rest of the schema, none of it is held together by
+foreign keys.
+
 ### Card lifecycle
 
 `column_id` is the single source of truth — there are no closed/postponed/triage state tables.
@@ -354,6 +365,12 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `users` | `index_users_on_account_id` | `account_id` | |
 | `user_settings` | `index_user_settings_on_user_id` | `user_id` | ✓ |
 | `sessions` | `index_sessions_on_user_id_and_kind` | `user_id, kind` | |
+| `sessions` | `index_sessions_on_oauth_application_id` | `oauth_application_id` | |
+| `sessions` | `index_sessions_on_user_id_and_oauth_application_id` | `user_id, oauth_application_id` | ✓ (where `oauth_application_id` is set) |
+| `oauth_applications` | `..._on_uid` | `uid` | ✓ |
+| `oauth_access_grants` | `..._on_token` / `..._on_resource_owner_id` / `..._on_application_id` | `token` / `resource_owner_id` / `application_id` | ✓ / / |
+| `oauth_access_tokens` | `..._on_token` / `..._on_refresh_token` | `token` / `refresh_token` | ✓ / ✓ |
+| `oauth_access_tokens` | `..._on_resource_owner_id` / `..._on_application_id` | `resource_owner_id` / `application_id` | |
 | `action_pack_passkeys` | `..._on_credential_id` | `credential_id` | ✓ |
 | `action_pack_passkeys` | `..._on_holder_type_and_holder_id` | `holder_type, holder_id` | |
 | `boards` | `..._on_account_id` / `..._on_creator_id` | `account_id` / `creator_id` | |
@@ -383,6 +400,9 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 
 **`sessions.kind`** — `browser` (default, a cookie) · `token` (an API token, always labelled).
 
+**`sessions.scopes`** — space-separated, any of `read` · `write` · `delete`. Tokens only;
+defaults to `read write`.
+
 **`columns.name`** — `Triage` · `Backlog` · `Todo` · `Doing` · `Done`. Created together by
 `Board::Triageable` on every board; not creatable, reorderable, or deletable.
 
@@ -410,6 +430,8 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
   against production. Never edit it.
 - **`sqlite_sequence`** holds the autoincrement high-water mark for every table with an
   integer primary key. SQLite maintains it; nothing in the app reads it.
+- **`oauth_applications`**, **`oauth_access_grants`**, **`oauth_access_tokens`** are
+  Doorkeeper's, in its standard shape plus PKCE columns; see Authentication chain above.
 - **`boards_filters`** is a classic HABTM join with `id: false` — no primary key, two indexes.
 
 ## Regenerating

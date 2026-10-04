@@ -36,6 +36,8 @@ module ActiveSupport
       # The sign-in rate limit keeps its own store, which outlives a single test — so every
       # test starts from an unspent allowance.
       Sessions::PasswordsController::RATE_LIMIT_STORE.clear
+      TokenRateLimit::STORE.clear
+      Oauth::RegistrationsController::RATE_LIMIT_STORE.clear
     end
 
     teardown do

@@ -57,8 +57,10 @@ password column in the database.
 Lost or broken passkeys? `make reset-auth` removes all passkeys and signs out every session; sign
 back in with your password.
 
-Driving the app from a script or agent? `make token LABEL=claude` mints an API token,
-`make tokens` lists them, and `make revoke LABEL=claude` revokes one. See [API.md](API.md).
+Driving the app from a script or agent? `make token LABEL=claude` mints an API token
+(`SCOPES="read write delete"` to let it delete), `make tokens` lists them, and
+`make revoke LABEL=claude` revokes one — or do all three from **My profile → API tokens**.
+See [API.md](API.md), and [MCP.md](MCP.md) for AI agents.
 
 ## Everyday commands
 

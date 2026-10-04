@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_04_000002) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", limit: 255, null: false
@@ -118,6 +118,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
 
   create_table "events", force: :cascade do |t|
     t.string "action", limit: 255, null: false
+    t.string "agent_name", limit: 255
     t.datetime "created_at", null: false
     t.bigint "creator_id", null: false
     t.bigint "eventable_id", null: false
@@ -146,6 +147,50 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
     t.index ["creator_id"], name: "index_notes_on_creator_id"
   end
 
+  create_table "oauth_access_grants", force: :cascade do |t|
+    t.bigint "application_id", null: false
+    t.string "code_challenge", limit: 255
+    t.string "code_challenge_method", limit: 255
+    t.datetime "created_at", null: false
+    t.integer "expires_in", null: false
+    t.text "redirect_uri", limit: 65535, null: false
+    t.bigint "resource_owner_id", null: false
+    t.datetime "revoked_at"
+    t.string "scopes", limit: 255, default: "", null: false
+    t.string "token", limit: 255, null: false
+    t.index ["application_id"], name: "index_oauth_access_grants_on_application_id"
+    t.index ["resource_owner_id"], name: "index_oauth_access_grants_on_resource_owner_id"
+    t.index ["token"], name: "index_oauth_access_grants_on_token", unique: true
+  end
+
+  create_table "oauth_access_tokens", force: :cascade do |t|
+    t.bigint "application_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "expires_in"
+    t.string "previous_refresh_token", limit: 255, default: "", null: false
+    t.string "refresh_token", limit: 255
+    t.bigint "resource_owner_id"
+    t.datetime "revoked_at"
+    t.string "scopes", limit: 255
+    t.string "token", limit: 255, null: false
+    t.index ["application_id"], name: "index_oauth_access_tokens_on_application_id"
+    t.index ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
+    t.index ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id"
+    t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
+  end
+
+  create_table "oauth_applications", force: :cascade do |t|
+    t.boolean "confidential", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "name", limit: 255, null: false
+    t.text "redirect_uri", limit: 65535, null: false
+    t.string "scopes", limit: 255, default: "", null: false
+    t.string "secret", limit: 255, null: false
+    t.string "uid", limit: 255, null: false
+    t.datetime "updated_at", null: false
+    t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
+  end
+
   create_table "search_queries", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "terms", limit: 2000, null: false
@@ -171,10 +216,14 @@ ActiveRecord::Schema[8.2].define(version: 2026_08_28_000000) do
     t.string "ip_address", limit: 255
     t.string "kind", limit: 255, default: "browser", null: false
     t.string "label", limit: 255
+    t.bigint "oauth_application_id"
+    t.string "scopes", limit: 255
     t.datetime "updated_at", null: false
     t.string "user_agent", limit: 4096
     t.bigint "user_id", null: false
+    t.index ["oauth_application_id"], name: "index_sessions_on_oauth_application_id"
     t.index ["user_id", "kind"], name: "index_sessions_on_user_id_and_kind"
+    t.index ["user_id", "oauth_application_id"], name: "index_sessions_on_user_id_and_oauth_application_id", unique: true, where: "oauth_application_id IS NOT NULL"
   end
 
   create_table "steps", force: :cascade do |t|

@@ -1,0 +1,35 @@
+<% @page_title = "Token minted" %>
+
+<% content_for :header do %>
+  <div class="header__actions header__actions--start">
+    <%= back_link_to "API tokens", my_tokens_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
+  </div>
+
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+  <p class="margin-none">
+    <strong><%= @token.label %></strong> can <strong><%= @token.scopes.to_sentence %></strong>.
+    Copy the token now — it won't be shown again. It stops working on
+    <%= @token.expires_at.to_date.to_fs(:long) %>, or when you revoke it.
+  </p>
+
+  <div class="flex align-center gap-half" data-controller="clipboard">
+    <%= text_field_tag :token, @token.token, readonly: true, class: "input", style: "font-family: var(--font-mono)", data: { clipboard_target: "source", action: "focus->clipboard#select" } %>
+    <button type="button" class="btn" data-action="clipboard#copy">
+      <%= icon_tag "copy-paste" %>
+      <span class="for-screen-reader">Copy</span>
+    </button>
+  </div>
+
+  <div class="flex flex-column gap-half">
+    <strong>Connect an MCP client</strong>
+    <code class="txt-small" style="overflow-wrap: anywhere">claude mcp add --transport http mudda <%= request.base_url %>/mcp --header "Authorization: Bearer &lt;token&gt;"</code>
+  </div>
+
+  <div class="flex flex-column gap-half">
+    <strong>Or call the API</strong>
+    <code class="txt-small" style="overflow-wrap: anywhere">curl -H "Authorization: Bearer &lt;token&gt;" <%= request.base_url %>/boards.json</code>
+  </div>
+</section>

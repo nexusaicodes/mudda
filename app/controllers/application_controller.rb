@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   include BlockSearchEngineIndexing
   include CurrentRequest, CurrentTimezone, SetPlatform
   include JsonErrors, ServesJson
-  include RequestForgeryProtection
+  include RequestForgeryProtection, TokenRateLimit
   include TurboFlash, ViewTransitions
 
   etag { "v1" }

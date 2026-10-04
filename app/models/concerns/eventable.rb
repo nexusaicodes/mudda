@@ -7,7 +7,7 @@ module Eventable
 
   def track_event(action, creator: Current.user, particulars: {})
     if should_track_event?
-      events.create!(action: "#{eventable_prefix}_#{action}", creator:, particulars:)
+      events.create!(action: "#{eventable_prefix}_#{action}", creator:, agent_name: Current.agent_name, particulars:)
     end
   end
 

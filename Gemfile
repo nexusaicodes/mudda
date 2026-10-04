@@ -25,6 +25,8 @@ gem "lexxy", "0.9.14.beta"
 gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "useragent", bc: "useragent"
+gem "mcp", "~> 1.6"
+gem "doorkeeper", "~> 5.9"
 
 # Operations
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings

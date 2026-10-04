@@ -89,8 +89,8 @@ reset-auth: ## Remove all passkeys and sign out every session (passkey recovery)
 	$(RUN) bin/rails auth:reset
 
 .PHONY: token
-token: ## Mint an API token for a script or agent (make token LABEL=claude)
-	$(COMPOSE) run --rm -e LABEL="$(LABEL)" $(SERVICE) bin/rails auth:token
+token: ## Mint an API token for a script or agent (make token LABEL=claude [SCOPES="read write delete"])
+	$(COMPOSE) run --rm -e LABEL="$(LABEL)" -e SCOPES="$(SCOPES)" $(SERVICE) bin/rails auth:token
 
 .PHONY: tokens
 tokens: ## List the API tokens that have been minted

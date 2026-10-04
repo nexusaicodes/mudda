@@ -7,7 +7,7 @@ module Event::Promptable
         ## Event #{action} (#{eventable_type} #{eventable_id}))
 
         * Created at: #{created_at}
-        * Created by: #{creator.name}
+        * Created by: #{creator.name}#{" (via #{agent_name})" if agent_name}
 
         #{eventable.to_prompt}
         END OF EVENT #{id}

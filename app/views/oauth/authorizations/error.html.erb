@@ -1,0 +1,11 @@
+<% @page_title = "Can't connect" %>
+
+<div class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+  <h1 class="txt-large margin-none">This app can't be connected</h1>
+
+  <p class="margin-none">
+    <%= local_assigns[:message] || (local_assigns[:error_response] || @pre_auth.error_response).body[:error_description] %>
+  </p>
+
+  <p class="txt-small txt-subtle margin-none">Try connecting it again from the app. <%= link_to "Back to Mudda", root_path %></p>
+</div>

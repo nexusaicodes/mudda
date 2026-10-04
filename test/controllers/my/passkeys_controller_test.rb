@@ -52,4 +52,17 @@ class My::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to my_passkeys_path
   end
+
+  test "a token can't enroll a passkey" do
+    challenge = request_webauthn_challenge(purpose: "registration")
+    headers = bearer_headers_for(:kevin)
+
+    get my_passkeys_path, headers: headers
+    assert_response :forbidden
+
+    assert_no_difference -> { users(:kevin).passkeys.count } do
+      post my_passkeys_path, params: build_attestation_params(challenge: challenge), headers: headers
+    end
+    assert_response :forbidden
+  end
 end
