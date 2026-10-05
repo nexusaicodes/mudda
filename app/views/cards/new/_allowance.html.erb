@@ -1,0 +1,14 @@
+<%# Shown only under a card ceiling (MUDDA_CARD_LIMIT), and only once it's close. %>
+<% if account.card_limit_near? %>
+  <p class="txt-small <%= "txt-negative" if account.card_limit_reached? %>">
+    <% if account.card_limit_reached? %>
+      You’ve used all <%= account.card_limit %> cards on this plan.
+    <% else %>
+      <%= pluralize account.cards_remaining, "card" %> left of <%= account.card_limit %> on this plan.
+    <% end %>
+
+    <% if account.upgrade_url %>
+      <%= link_to "Upgrade for unlimited cards", account.upgrade_url, class: "btn btn--link", data: { turbo: false } %>
+    <% end %>
+  </p>
+<% end %>

@@ -60,6 +60,7 @@ erDiagram
     ACCOUNTS {
         bigint id PK
         string name "limit 255 NOT NULL"
+        integer cards_created_count "NOT NULL DEFAULT 0 — only goes up (MUDDA_CARD_LIMIT)"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }

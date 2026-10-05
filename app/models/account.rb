@@ -1,5 +1,5 @@
 class Account < ApplicationRecord
-  include Searchable
+  include CardLimited, Searchable
 
   has_many :users, dependent: :destroy
   has_many :boards, dependent: :destroy

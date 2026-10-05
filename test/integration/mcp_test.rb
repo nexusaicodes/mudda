@@ -213,6 +213,17 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal 422, JSON.parse(result.dig("content", 0, "text"))["status"]
   end
 
+  test "a card past the account's ceiling is a tool error saying so" do
+    accounts("37s").update_column :cards_created_count, 100
+
+    result = with_env("MUDDA_CARD_LIMIT" => "100") do
+      mcp("tools/call", name: "create_card", arguments: { board_id: @board.id, title: "Over", due_on: "2026-12-01" })
+    end
+
+    assert result["isError"]
+    assert_match "used all 100 of its cards", result.dig("content", 0, "text")
+  end
+
   test "an argument outside the schema is refused before any request" do
     result = mcp("tools/call", name: "list_cards", arguments: { sorted_by: "sideways" })
 

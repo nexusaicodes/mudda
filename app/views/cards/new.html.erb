@@ -55,6 +55,8 @@
           <span>Add a step</span>
         </button>
 
+        <%= render "cards/new/allowance", account: @board.account %>
+
         <div class="card-perma__notch card-perma__notch--bottom flex-column">
           <div class="card-perma__notch-new-card-buttons">
             <%= form.submit "Create card", class: "btn",

@@ -142,8 +142,13 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
 
 ### Core Domain Models
 
-**Account** → the tenant/organization. Concerns: `Searchable`. Has users and boards;
+**Account** → the tenant/organization. Concerns: `CardLimited`, `Searchable`. Has users and boards;
 `#cards` reaches them through the boards. `create_with_owner` provisions the single user.
+`CardLimited` applies the optional `MUDDA_CARD_LIMIT` ceiling: `accounts.cards_created_count`
+only goes up, a `Card` `before_create` claims a slot in one conditional `UPDATE` (so two
+creates can't both take the last one) and raises `RecordInvalid` past the ceiling, which is a
+`422` for JSON and MCP. The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL`
+once the ceiling is reached. Unset, there is no ceiling.
 
 **User** → the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`,
 `has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`.

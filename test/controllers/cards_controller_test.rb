@@ -126,6 +126,42 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form#card_form"
   end
 
+  test "create past the card ceiling renders the form with the upgrade link" do
+    accounts("37s").update_column :cards_created_count, 100
+
+    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => "https://example.com/upgrade") do
+      assert_no_difference -> { Card.count } do
+        post board_cards_path(boards(:writebook)), params: { card: { title: "Over", due_on: 1.week.from_now.to_date } }
+      end
+
+      assert_response :unprocessable_entity
+      assert_select "p", text: /used all 100 cards/
+      assert_select "a[href='https://example.com/upgrade']"
+    end
+  end
+
+  test "the board swaps Add a card for an upgrade link at the card ceiling" do
+    accounts("37s").update_column :cards_created_count, 100
+
+    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => "https://example.com/upgrade") do
+      get board_path(boards(:writebook))
+
+      assert_select "a[href='#{new_board_card_path(boards(:writebook))}']", count: 0
+      assert_select ".board-tools a[href='https://example.com/upgrade']"
+    end
+  end
+
+  test "create past the card ceiling is a 422 for JSON" do
+    accounts("37s").update_column :cards_created_count, 100
+
+    with_env("MUDDA_CARD_LIMIT" => "100") do
+      post board_cards_path(boards(:writebook)), params: { title: "Over", due_on: 1.week.from_now.to_date }, as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal [ "This account has used all 100 of its cards" ], @response.parsed_body.dig("errors", "base")
+  end
+
   test "show renders inline code in title" do
     card = cards(:logo)
     card.update_column :title, "Fix the `bug` in production"

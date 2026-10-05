@@ -85,6 +85,7 @@ card (`404`) from a bad field (`422`):
 
 ```json
 { "status": 422, "errors": { "due_on": ["can't be blank"] } }
+{ "status": 422, "errors": { "base": ["This account has used all 100 of its cards"] } }
 ```
 
 Arguments are checked against each tool's schema first, so an unknown enum value never reaches

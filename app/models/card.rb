@@ -10,7 +10,7 @@ class Card < ApplicationRecord
 
   before_validation :land_in_destination_triage, on: :update, if: :board_id_changed?
   before_save :set_default_title
-  before_create :assign_number
+  before_create :claim_card_slot, :assign_number
   before_update :renumber_for_new_board, if: :board_id_changed?
 
   after_save   -> { board.touch }
@@ -70,6 +70,15 @@ class Card < ApplicationRecord
 
     def track_board_change
       track_event "board_changed", particulars: { old_board: Board.find_by(id: tracked_change_was("board_id"))&.name, new_board: board.name }
+    end
+
+    # Raised rather than thrown, so save answers false with the error on the card and save!
+    # raises RecordInvalid, which JSON clients receive as the usual 422 envelope.
+    def claim_card_slot
+      unless board.account.claim_card_slot
+        errors.add :base, "This account has used all #{board.account.card_limit} of its cards"
+        raise ActiveRecord::RecordInvalid, self
+      end
     end
 
     # Numbers run per board, so a card's number and its board together address it.

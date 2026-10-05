@@ -54,6 +54,14 @@ optional: a convenience for biometric or device sign-in that never disables pass
 password is verified at runtime against the env var with a constant-time compare; there is no
 password column in the database.
 
+Two optional variables cap how many cards the account may create, for a deployment that sells
+more (a self-hoster leaves both unset):
+
+| Variable            | Purpose                                                                 |
+| ------------------- | ----------------------------------------------------------------------- |
+| `MUDDA_CARD_LIMIT`  | Cards the account may ever create; deleting one doesn't free its slot. Unset, blank, or not a whole number: no limit |
+| `MUDDA_UPGRADE_URL` | Where the "Upgrade" link points once the limit is near or reached       |
+
 Lost or broken passkeys? `make reset-auth` removes all passkeys and signs out every session; sign
 back in with your password.
 

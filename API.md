@@ -225,7 +225,9 @@ the card in board 7's lane 31, and a lane from anywhere else is a `404`); with n
 the card lands in the destination's Triage.
 
 A card is created in Triage, and lands complete: there is no draft state and nothing to
-publish. `due_on` is required, so a create without one is a `422`. Every card in an index
+publish. `due_on` is required, so a create without one is a `422`. On a deployment with a card
+limit (`MUDDA_CARD_LIMIT`, see DOCKER.md), a create past it is a `422` too, with the reason under
+`base`: `{ "errors": { "base": ["This account has used all 100 of its cards"] } }`. Every card in an index
 carries its own `url`, which is the reliable way to reach it again.
 
 Both card indexes take the same filters; nesting one under a board narrows it to that board
