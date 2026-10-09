@@ -9,6 +9,7 @@
 <div class="settings margin-block-start-half">
   <div class="settings__panel settings__panel--users panel shadow center">
     <%= render "account/settings/name", account: @account %>
+    <%= render "account/settings/plan", account: @account if @account.card_limited? %>
   </div>
 
 </div>

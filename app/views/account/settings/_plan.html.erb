@@ -1,0 +1,11 @@
+<%# Shown only under a card ceiling (MUDDA_CARD_LIMIT), with the way to lift it when MUDDA_UPGRADE_URL is set. %>
+<section class="settings__section">
+  <h2>Plan</h2>
+  <p>
+    <%= pluralize account.cards_created_count, "card" %> of <%= account.card_limit %> used.
+    Deleting one doesn’t free its slot.
+  </p>
+  <% if account.upgrade_url %>
+    <%= link_to "Upgrade for unlimited cards", account_upgrade_path, class: "btn", data: { turbo: false } %>
+  <% end %>
+</section>

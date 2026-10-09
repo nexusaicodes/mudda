@@ -148,7 +148,9 @@ canonical path for every resource, which is what lets a fixed API/MCP endpoint w
 only goes up, a `Card` `before_create` claims a slot in one conditional `UPDATE` (so two
 creates can't both take the last one) and raises `RecordInvalid` past the ceiling, which is a
 `422` for JSON and MCP. The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL`
-once the ceiling is reached. Unset, there is no ceiling. `GET /account/upgrade` hands the
+once the ceiling is reached. Under a ceiling, Account Settings shows a Plan section (cards used
+of the limit), and while `MUDDA_UPGRADE_URL` is set, it and the Settings menu link to
+`/account/upgrade` at any time. Unset, there is no ceiling. `GET /account/upgrade` hands the
 signed-in owner to `MUDDA_UPGRADE_URL` (signing in first if needed), passing on `billing`
 (`monthly`/`yearly`), or back to the board when it
 has none: the platform's "Go Premium" sends returning customers there.

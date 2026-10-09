@@ -8,6 +8,24 @@ class Account::SettingsControllerTest < ActionDispatch::IntegrationTest
   test "show" do
     get account_settings_path
     assert_response :success
+    assert_select "h2", text: "Plan", count: 0
+  end
+
+  test "under a card limit, show says how many cards are used and links to upgrading" do
+    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => "https://mudda.example/upgrade/new?token=signed") do
+      get account_settings_path
+    end
+
+    assert_select "h2", text: "Plan"
+    assert_select "p", /#{accounts("37s").cards_created_count} cards? of 100 used/
+    assert_select "a[href=?]", account_upgrade_path, text: "Upgrade for unlimited cards"
+  end
+
+  test "under a card limit with nowhere to upgrade, show has no upgrade link" do
+    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => nil) { get account_settings_path }
+
+    assert_select "h2", text: "Plan"
+    assert_select "a[href=?]", account_upgrade_path, count: 0
   end
 
   test "update" do

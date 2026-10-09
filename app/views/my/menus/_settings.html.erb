@@ -1,6 +1,7 @@
 <%= nav_section "Settings" do %>
   <%= filter_place_menu_item account_settings_path, "Account Settings", "settings" %>
   <%= filter_place_menu_item user_path(Current.user), "My Profile", "person" %>
+  <%= filter_place_menu_item account_upgrade_path, "Upgrade for unlimited cards", "arrow-up", turbo: false if Current.account.upgrade_url %>
 
   <%= tag.li class: "popup__item", data: { filter_target: "item", navigable_list_target: "item" } do %>
     <%= icon_tag "logout", class: "popup__icon" %>
