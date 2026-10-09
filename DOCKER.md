@@ -60,7 +60,7 @@ more (a self-hoster leaves both unset):
 | Variable            | Purpose                                                                 |
 | ------------------- | ----------------------------------------------------------------------- |
 | `MUDDA_CARD_LIMIT`  | Cards the account may ever create; deleting one doesn't free its slot. Unset, blank, or not a whole number: no limit |
-| `MUDDA_UPGRADE_URL` | Where the "Upgrade" link points once the limit is near or reached       |
+| `MUDDA_UPGRADE_URL` | Where the "Upgrade" link and `/account/upgrade` (after sign-in) send the owner |
 
 Lost or broken passkeys? `make reset-auth` removes all passkeys and signs out every session; sign
 back in with your password.

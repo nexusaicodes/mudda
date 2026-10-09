@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   namespace :account do
     resource :settings, only: %i[ show update ]
+    resource :upgrade, only: :show
   end
 
   resources :users, only: %i[ show edit update ] do
