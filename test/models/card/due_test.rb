@@ -17,6 +17,22 @@ class Card::DueTest < ActiveSupport::TestCase
     assert card.update(column: columns(:writebook_done)), "Done refused an undated card"
   end
 
+  test "anything but a date is refused as invalid, and only that" do
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Someday"
+
+    [ "2026-02-30", "next friday", 20261201, true, false ].each do |value|
+      assert_not card.update(due_on: value), "Backlog took #{value.inspect}"
+      assert_equal [ "is invalid" ], card.errors[:due_on], "for #{value.inspect}"
+
+      assert_not card.update(due_on: value, column: columns(:writebook_doing)), "Doing took #{value.inspect}"
+      assert_equal [ "is invalid" ], card.errors[:due_on], "for #{value.inspect} in Doing"
+      card.reload
+    end
+
+    assert card.update(due_on: ""), "Backlog refused a cleared date"
+    assert_nil card.due_on
+  end
+
   test "a card is overdue once its due date has passed" do
     card = cards(:logo)
 

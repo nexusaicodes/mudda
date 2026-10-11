@@ -1,4 +1,5 @@
 <% @page_title = @user_filtering.selected_boards_label %>
+<% single_board = @board || @filter.single_board %>
 <% turbo_exempts_page_from_cache %>
 
 <% content_for :header do %>
@@ -11,8 +12,8 @@
   </h1>
 
   <div class="header__actions header__actions--end">
-    <% if board = @filter.single_board %>
-      <%= link_to_edit_board board %>
+    <% if single_board %>
+      <%= link_to_edit_board single_board %>
     <% end %>
   </div>
 <% end %>
@@ -21,7 +22,7 @@
   <section class="cards cards--grid">
     <div class="cards__list hide-scrollbar">
       <%= with_automatic_pagination :cards_paginated_container, @page do %>
-        <%= render "cards/display/previews", cards: @page.records, draggable: true, show_board: @filter.single_board.nil? %>
+        <%= render "cards/display/previews", cards: @page.records, draggable: true, show_board: single_board.nil? %>
       <% end %>
       <div class="blank-slate">No cards match this filter</div>
     </div>

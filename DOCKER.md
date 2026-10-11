@@ -79,7 +79,7 @@ make logs         # tail logs
 make console      # Rails console
 make shell        # bash shell in the container
 make test         # run the unit tests
-make test-system  # run the system tests (starts the selenium service)
+make test-system  # run the system tests (starts, then removes, the selenium service)
 make lint         # RuboCop
 make down         # stop, keep data
 ```
@@ -113,7 +113,8 @@ Override per-invocation, e.g. `PORT=4000 make up`, or drop a `.env` file next to
 
 The `Dockerfile`'s `production` target is the deployable image. `.github/workflows/build.yml`
 builds it on every push to `main` and pushes it to `ghcr.io/<owner>/<repo>`, tagged with the
-commit SHA and `latest`. Nothing deploys it; a host pulls the image and runs it.
+commit SHA and `latest`. A manual dispatch on any other branch pushes only the SHA tag, so
+`latest` always tracks `main`. Nothing deploys it; a host pulls the image and runs it.
 
 To run it:
 

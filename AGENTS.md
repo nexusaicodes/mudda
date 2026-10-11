@@ -164,7 +164,7 @@ Owns filters and notes. `deactivate` sets `active: false` and leaves the session
 fixed columns** (see below). All of the account's boards are visible to the user.
 
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
-fixed; only color is editable.
+fixed (`attr_readonly :name`, since lane predicates key off them); only color is editable.
 
 **Card** → the main work item. Sequential per-board `number` (via
 `board.increment!(:cards_count)`), rich-text description, steps, and **notes**. A card is created complete — there is no draft state and nothing to publish; the
@@ -244,8 +244,9 @@ Cards carry an explicit **`due_on`** date (`Card::Due`):
   can move a card into Todo or Doing, or keep one there, without a date, while an unscheduled idea
   can still be closed as-is. The error reads "can't be blank in Todo or Doing"
   (`activerecord.errors.models.card.attributes.due_on.blank_while_active` in `config/locales/en.yml`).
-- A `due_on` that doesn't parse (`"2026-02-30"`, `"next friday"`) casts to `nil`; `Card::Due`
-  refuses it as `invalid` in every lane rather than saving the card undated.
+- A `due_on` that isn't a date — a string that doesn't parse (`"2026-02-30"`, `"next friday"`),
+  or a non-string such as `20261201` or `true` — is refused as `invalid` in every lane, and only
+  as `invalid` (never also "can't be blank"), rather than saved undated or as a non-date.
 - `overdue?` is true for a card whose `due_on` is in the past.
 
 This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),

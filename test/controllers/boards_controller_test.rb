@@ -25,6 +25,20 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a change to one of its cards invalidates the board's etag" do
+    get board_path(boards(:writebook))
+    etag = response.headers["ETag"]
+
+    get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :not_modified
+
+    travel 1.second
+    cards(:logo).update!(due_on: 1.week.from_now)
+
+    get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
+
   test "create" do
     assert_difference -> { Board.count }, +1 do
       post boards_path, params: { board: { name: "Remodel Punch List" } }

@@ -34,8 +34,8 @@ password always works. See [DOCKER.md](DOCKER.md) for the full reference, and ru
 
 Mudda is a single-container app (SQLite + local-disk uploads + in-process jobs). Every push to
 `main` builds the production image and pushes it to GHCR (`ghcr.io/<owner>/<repo>:latest`, plus
-a tag per commit). There is no deploy pipeline: pull the image, run `bin/rails db:prepare` once
-before it boots, mount `/rails/storage`, and pass the env vars listed in
+a tag per commit). There is no deploy pipeline: pull the image, run `bin/rails db:prepare` before
+each new image boots (it applies that image's migrations), mount `/rails/storage`, and pass the env vars listed in
 [DOCKER.md](DOCKER.md) → Production image.
 
 

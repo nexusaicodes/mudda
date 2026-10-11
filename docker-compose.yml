@@ -37,9 +37,10 @@ services:
       start_period: 90s
 
   # The browser for system tests (`make test-system`). The dev image has no Chrome, so the
-  # tests drive this one over SELENIUM_REMOTE_URL. Started only under the `system` profile.
+  # tests drive this one over SELENIUM_REMOTE_URL. Started only under the `system` profile, and
+  # pinned by digest so a new Chromium release can't change the tests under an unchanged repo.
   selenium:
-    image: selenium/standalone-chromium:latest
+    image: selenium/standalone-chromium:latest@sha256:3400b92f1cddb2dfaaf358654e8f7d83d7be45192fb73c5f28c25faa28d36504
     profiles: [ system ]
     shm_size: 2gb
 

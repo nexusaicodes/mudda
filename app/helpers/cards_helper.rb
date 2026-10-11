@@ -6,7 +6,7 @@ module CardsHelper
       ("card--active" if card.active?)
     ].compact.join(" ")
 
-    data[:drag_and_drop_top] = true if card.golden? && !card.closed? && !card.backlogged?
+    data[:drag_and_drop_top] = true if card.golden? && !card.closed?
 
     tag.article \
       id: id,

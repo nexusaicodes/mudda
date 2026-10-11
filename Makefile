@@ -109,7 +109,8 @@ test: ## Run the unit test suite
 .PHONY: test-system
 test-system: ## Run the system tests in a Selenium Chromium container
 	$(COMPOSE) --profile system up -d --wait selenium
-	$(COMPOSE) run --rm -e SELENIUM_REMOTE_URL=http://selenium:4444 $(SERVICE) bin/rails test:system
+	$(COMPOSE) run --rm -e SELENIUM_REMOTE_URL=http://selenium:4444 $(SERVICE) bin/rails test:system; \
+	  status=$$?; $(COMPOSE) --profile system rm -sf selenium; exit $$status
 
 .PHONY: lint
 lint: ## Run RuboCop

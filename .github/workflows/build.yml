@@ -1,8 +1,8 @@
 name: Build
 
-# Build the production image and push it to GHCR, tagged with the commit SHA and `latest`.
-# Runs on pushes to main and on manual dispatch. Nothing is deployed from here; hosts pull
-# the image themselves.
+# Build the production image and push it to GHCR, tagged with the commit SHA. Only a build of
+# main also moves `latest`, so a manual dispatch on another branch never replaces the image hosts
+# pull. Nothing is deployed from here; hosts pull the image themselves.
 on:
   push:
     branches: [ main ]
@@ -41,6 +41,6 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.IMAGE_NAME }}:latest
+            ${{ github.ref == 'refs/heads/main' && format('{0}:latest', env.IMAGE_NAME) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

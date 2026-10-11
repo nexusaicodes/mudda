@@ -16,6 +16,13 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".card .card__details-board", text: boards(:writebook).name
   end
 
+  test "a board's own index leaves the board name off its cards" do
+    get board_cards_path(boards(:writebook))
+
+    assert_select ".card"
+    assert_select ".card .card__details-board", count: 0
+  end
+
   test "filtered index" do
     get cards_path(filters(:newest_first).as_params.merge(term: "haggis"))
     assert_response :success
