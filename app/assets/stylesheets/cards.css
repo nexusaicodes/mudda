@@ -271,13 +271,6 @@
     }
   }
 
-  /* Due-date footer: profile circle beside a single boxed due date */
-  .card__meta--due {
-    display: flex;
-    grid-template-areas: none;
-    text-transform: none;
-  }
-
   /* Assign grid areas */
   .card__meta-avatars--author { grid-area: avatars-author; }
   .card__meta-avatars--assignees { grid-area: avatars-assignees; }

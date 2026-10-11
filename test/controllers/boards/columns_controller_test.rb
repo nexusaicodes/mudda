@@ -10,6 +10,13 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a lane's cards don't name the board they are already on" do
+    get board_column_path(boards(:writebook), columns(:writebook_doing))
+
+    assert_select ".card .card__title"
+    assert_select ".card .card__details-board", count: 0
+  end
+
   # A board's columns are fixed, so they have no JSON representation of their own — they
   # travel with the board, and each one names the card index that answers for it.
   test "a lane's JSON lives on its board" do

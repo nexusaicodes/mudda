@@ -1,4 +1,4 @@
-<div class="board-tools card">
+<div class="board-tools">
   <% if board.account.card_limit_reached? %>
     <span class="txt-small">All <%= board.account.card_limit %> cards used</span>
     <% if upgrade_url = board.account.upgrade_url %>

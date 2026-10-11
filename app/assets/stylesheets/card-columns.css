@@ -41,8 +41,9 @@
     --column-gap: 8px;
     --column-padding: calc(var(--column-gap) * 2);
     --column-transition-duration: 300ms;
+    --column-height-collapsed: 11rem;
     --column-width-collapsed: 40px;
-    --column-width-expanded: 450px;
+    --column-width-expanded: 360px;
     --progress-increment: var(--progress-max-height) / var(--progress-max-cards);
     --progress-max-cards: 15; /* should match first geared pagination page size */
     --progress-max-height: 50dvh;
@@ -61,12 +62,14 @@
 
     &:has(.cards) {
       block-size: 100%;
-      min-block-size: 20lh;
+      min-block-size: min(20lh, 50dvh);
     }
 
+    /* A centred lane leaves room for a neighbouring lane on each side. */
     @media (max-width: 639px) {
-      --column-width-expanded: calc(100vw - var(--column-gap) * 4);
+      --column-width-expanded: calc(100vw - 2 * (var(--column-width-collapsed) + var(--column-gap)));
 
+      padding-inline: var(--column-gap);
       scroll-snap-type: inline mandatory;
     }
 
@@ -268,16 +271,14 @@
       inline-size: calc((100% - var(--cards-gap) * (var(--card-grid-columns) - 1) ) / var(--card-grid-columns));
     }
 
-    .card__header .card__column-name--current {
-      --btn-padding: 0.1em 0.5em;
-
-      background: none;
+    .card__details-lane {
       border: 1px solid currentColor;
+      border-radius: 0.2em;
       color: var(--card-color);
-      display: inline-flex;
-      flex: 0 1 auto;
-      inline-size: fit-content;
-      margin: 0 0 0 auto;
+      display: block;
+      margin-inline-start: auto;
+      padding: 0.05em 0.5em;
+      text-transform: uppercase;
     }
 
     .blank-slate--drag {
@@ -288,8 +289,15 @@
   /* Column Elements
   /* ------------------------------------------------------------------------ */
 
+  /* A collapsed lane is a short pill — bead and label — rather than a track the height of the
+     page. While a card is being dragged, the tracks run full height as drop targets. */
   .cards__header {
     .cards.is-collapsed & {
+      block-size: var(--column-height-collapsed);
+      transition: block-size var(--column-transition-duration) var(--ease-out-overshoot-subtle);
+    }
+
+    .card-columns:has(.drag-and-drop__dragged-item) .cards.is-collapsed & {
       block-size: 100%;
     }
 
@@ -477,56 +485,26 @@
   }
 
   /* Override card styles within columns
-  /* Adding .board-tools here since it sits outside the cards container on mobile */
   /* ------------------------------------------------------------------------ */
 
-  .cards .card,
-  .board-tools {
+  /* A lane already says which lane its cards are in; only grids name it. */
+  .cards:not(.cards--grid) .card__details-lane {
+    display: none;
+  }
+
+  .cards .card {
     --block-space: 1em;
     --block-space-half: 0.5em;
+    --card-padding-block: 0.85em;
     --card-padding-inline: 1em;
-    --text-xx-large: 1.6em;
+    --text-xx-large: 1.5em;
     --text-x-small: 1em;
+
+    /* The lane's colour runs down the leading edge; the card carries no header. */
+    border-inline-start: 3px solid var(--card-color);
 
     /* Set lower limit for font size */
     font-size: clamp(0.6rem, 0.85cqi, 100px);
-
-    .card__counts {
-      --gap: 0.5ch;
-
-      align-items: flex-end;
-      display: flex;
-      flex-shrink: 0;
-      gap: calc(2 * var(--gap));
-      margin-inline: auto calc(var(--card-padding-inline) * -0.5);
-      padding-inline-start: var(--gap);
-    }
-
-    .card__boosts,
-    .card__notes {
-      --icon-size: 1.6em;
-
-      align-items: center;
-      display: flex;
-      flex-shrink: 0;
-      font-weight: 600;
-      gap: var(--gap);
-
-      img {
-        block-size: var(--icon-size);
-        inline-size: var(--icon-size);
-      }
-
-      .icon--comment {
-        color: var(--card-color);
-      }
-    }
-
-    .card__steps {
-      --column-gap: 0.8ch;
-
-      display: flex;
-    }
 
     .card__title {
       pointer-events: none;
@@ -542,20 +520,56 @@
     }
 
     .card__body {
-      padding-block: calc(var(--card-padding-block) * 0.75) var(--card-padding-block);
+      padding-block: 0;
     }
 
-    .card__meta {
+    .card__excerpt {
+      --lines: 2;
+
+      color: var(--color-ink-medium);
+      font-size: 1.1em;
+      line-height: 1.35;
+      margin-block: 0.35em 0;
+    }
+
+    .card__details {
+      --icon-size: 1.1em;
+
+      align-items: center;
+      color: var(--color-ink-medium);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 1.05em;
       font-weight: 600;
+      gap: 0.4em 1.4ch;
+      margin-block-start: 0.7em;
+      min-inline-size: 0;
 
-      strong,
-      .local-time-value {
-        font-weight: inherit;
+      &:not(:has(*)) {
+        display: none;
       }
+    }
 
-      @media (max-width: 639px) {
-        inline-size: auto;
-      }
+    .card__when,
+    .card__steps,
+    .card__notes {
+      align-items: center;
+      display: inline-flex;
+      flex-shrink: 0;
+      gap: 0.4ch;
+    }
+
+    .card__when--overdue { color: var(--color-negative); }
+    .card__when--soon { color: oklch(var(--lch-yellow-dark)); }
+    .card__steps--complete { color: var(--color-positive); }
+
+    .card__details-board {
+      color: var(--card-text-color);
+      max-inline-size: 16ch;
+    }
+
+    .card__notes .icon--comment {
+      color: var(--card-color);
     }
 
     .bubble {
@@ -567,45 +581,21 @@
   /* Board tools
   /* -------------------------------------------------------------------------- */
 
-  .board-tools.card {
-    --card-padding-block: var(--block-space);
-
-    /* Cards inherit a `cqi`-based font-size from the column container. The add-card
-       tool sits outside that container, so its `cqi` falls back to the viewport —
-       drifting out of proportion with the cards and not tracking browser zoom like
-       the rest of the rem-based chrome. Anchor it to the rem type scale instead. */
+  /* A content-width pill centred above the columns at every width. It sits outside the
+     column container, so it keeps the rem type scale rather than the columns' `cqi` one. */
+  .board-tools {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
     font-size: var(--text-normal);
-
-    border: none;
-    inline-size: auto;
-    text-align: center;
-
-    /* The add-card sits above the columns at every width. */
-    @media (max-width: 639px) {
-      #cards_container > & {
-        margin: 0 3ch 1ch;
-      }
-    }
-
-    @media (min-width: 800px) {
-      margin: var(--column-padding) var(--column-padding) 0;
-    }
-
-    &:has(dialog[open]) {
-      z-index: 5;
-    }
-
-    .divider {
-      --divider-color: oklch(var(--lch-blue-light));
-    }
+    gap: 0.5em 1ch;
+    justify-content: center;
+    padding: var(--block-space) var(--inline-space) var(--block-space-half);
 
     .btn--link {
-      font-size: 1.15em;
-    }
+      --btn-padding: 0.55em 1.5em;
 
-    .btn:not(.btn--link, .btn--circle) {
-      border: 0;
-      color: var(--color-link);
+      font-size: 1.05em;
     }
   }
 

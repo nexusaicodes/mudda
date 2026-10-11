@@ -10,6 +10,12 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index names each card's board, since it spans boards" do
+    get cards_path
+
+    assert_select ".card .card__details-board", text: boards(:writebook).name
+  end
+
   test "filtered index" do
     get cards_path(filters(:newest_first).as_params.merge(term: "haggis"))
     assert_response :success

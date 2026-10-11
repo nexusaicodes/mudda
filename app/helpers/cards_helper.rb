@@ -46,6 +46,32 @@ module CardsHelper
     end
   end
 
+  # The preview's tone: only a card that is late or due within a day asks for attention.
+  def card_due_tone(card)
+    days = (card.due_on - Date.current).to_i
+
+    if days.negative?
+      "overdue"
+    elsif days <= 1
+      "soon"
+    else
+      "later"
+    end
+  end
+
+  # Relative while it's close, then the date: "Overdue 2d", "Today", "Tomorrow", "Fri", "Oct 24".
+  def card_due_relative_label(card)
+    days = (card.due_on - Date.current).to_i
+
+    case days
+    when ...0 then "Overdue #{-days}d"
+    when 0    then "Today"
+    when 1    then "Tomorrow"
+    when 2..6 then card.due_on.strftime("%a")
+    else           card_due_label(card)
+    end
+  end
+
   def card_social_tags(card)
     tag.meta(property: "og:title", content: "#{card.title} | #{card.board.name}") +
     tag.meta(property: "og:description", content: format_excerpt(card&.description, length: 200)) +
