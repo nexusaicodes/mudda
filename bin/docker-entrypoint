@@ -2,11 +2,11 @@
 
 # Clear a stale Puma pidfile left by an unclean shutdown. Database preparation and
 # migrations run as an explicit pre-boot step — `make setup`/`make fresh` in
-# development, deploy/remote-deploy.sh in production — never here, so container
-# restarts don't race on the schema. Dev and prod share this one entrypoint.
+# development, `bin/rails db:prepare` run by the host in production — never here, so
+# container restarts don't race on the schema. Dev and prod share this one entrypoint.
 rm -f tmp/pids/server.pid
 
-# The production deploy ships the owner password base64-encoded (MUDDA_OWNER_PASSWORD_B64)
+# A production host may pass the owner password base64-encoded (MUDDA_OWNER_PASSWORD_B64)
 # so arbitrary characters ($, #, quotes) survive docker compose's env-file parsing intact.
 # Decode it into the plain value the app reads. Dev sets MUDDA_OWNER_PASSWORD directly, so
 # this is skipped there.

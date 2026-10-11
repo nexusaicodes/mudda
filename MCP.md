@@ -141,7 +141,7 @@ revokes its access and refresh tokens; consenting again brings it back. `make re
 every OAuth grant along with everything else.
 
 The issuer and every URL here come from the request's host and scheme. Behind a TLS-terminating
-proxy, keep `ASSUME_SSL` on — production's default, see [DEPLOY.md](DEPLOY.md) → TLS — so they
+proxy, keep `ASSUME_SSL` on — production's default, see [DOCKER.md](DOCKER.md) → Production image — so they
 read `https://`; clients refuse an issuer that doesn't match the URL they reached.
 
 Browser-only clients that call the token endpoint directly from a page are not supported —

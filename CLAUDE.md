@@ -50,8 +50,9 @@ Everything goes through Docker Compose — run `make` to list targets:
   reached over `SELENIUM_REMOTE_URL`, since the dev image has no browser
 
 There is no `bin/ci` and no CI test workflow — quality is just RuboCop + the test suite,
-both run locally. The one GitHub Actions workflow, `.github/workflows/deploy.yml`, only
-builds and deploys (the `Dockerfile`'s `production` target → GHCR → the box over SSH); see [DEPLOY.md](DEPLOY.md).
+both run locally. The one GitHub Actions workflow, `.github/workflows/build.yml`, only builds the
+`Dockerfile`'s `production` target and pushes it to GHCR; nothing deploys it. See
+[DOCKER.md](DOCKER.md) → Production image.
 
 ## Toolchain
 

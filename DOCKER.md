@@ -23,8 +23,8 @@ make setup
 
 First boot builds the image, then — as an explicit step *before* the app starts —
 runs `db:prepare` (creates the SQLite databases, loads the schema, runs migrations,
-and seeds the development account), then brings the container up. This mirrors the
-production deploy (`deploy/remote-deploy.sh` prepares the database before booting),
+and seeds the development account), then brings the container up. Production works
+the same way (the host runs `db:prepare` before booting; see Production image below),
 so dev and prod share **one** container entrypoint that only clears a stale Puma
 pidfile — neither migrates on boot. When it's up, open:
 
@@ -108,6 +108,36 @@ bind-mounted in.
 
 Override per-invocation, e.g. `PORT=4000 make up`, or drop a `.env` file next to
 `docker-compose.yml` (it is gitignored).
+
+## Production image
+
+The `Dockerfile`'s `production` target is the deployable image. `.github/workflows/build.yml`
+builds it on every push to `main` and pushes it to `ghcr.io/<owner>/<repo>`, tagged with the
+commit SHA and `latest`. Nothing deploys it; a host pulls the image and runs it.
+
+To run it:
+
+1. **Prepare the database first.** Run `bin/rails db:prepare` in a one-off container before the
+   server boots. This creates the SQLite databases, migrates, and seeds the owner. The entrypoint
+   never migrates.
+2. **Mount `/rails/storage`** on a persistent volume. It holds `production.sqlite3` and every
+   upload. Keep it off network filesystems (NFS/EFS), where SQLite's locking is unreliable.
+3. **Pass the runtime env.** Nothing secret is baked into the image.
+
+| Variable                   | Purpose                                                              |
+| -------------------------- | -------------------------------------------------------------------- |
+| `RAILS_ENV`                | `production`                                                         |
+| `SECRET_KEY_BASE`          | Rails secret; any long random string, stable across restarts.        |
+| `MUDDA_OWNER_EMAIL`        | The owner's sign-in email; seeded by `db:prepare`.                   |
+| `MUDDA_OWNER_NAME`         | The owner's display name.                                            |
+| `MUDDA_OWNER_PASSWORD`     | The standing owner password.                                         |
+| `MUDDA_OWNER_PASSWORD_B64` | Alternative to the above, base64-encoded so any character survives an env file; the entrypoint decodes it. |
+| `BASE_URL`                 | Public URL (`https://mudda.example.com`) for links built outside a request. |
+| `ASSUME_SSL` / `FORCE_SSL` | Both default to `true`: secure cookies and HSTS behind a TLS-terminating proxy that sends `X-Forwarded-Proto: https`. `DISABLE_SSL=true` turns both off. |
+| `MUDDA_CARD_LIMIT`         | Optional ceiling on cards ever created (see AGENTS.md → Account).    |
+| `MUDDA_UPGRADE_URL`        | Optional; where "upgrade" links send the owner under a ceiling.      |
+
+Passkeys need the app served over HTTPS at a real hostname. Password sign-in works either way.
 
 ## After changing the Gemfile
 

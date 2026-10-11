@@ -46,15 +46,13 @@ docker compose exec web bin/rails db:migrate   # Run migrations
 make reset-db                                  # Drop, recreate, and reseed
 ```
 
-## Deploy
+## Production image
 
-Runs on a **single VPS box** via Docker: the `Dockerfile`'s `production` target, `docker-compose.prod.yml`
-(app behind Caddy for auto-HTTPS over an `*.sslip.io` name), and a GitHub Actions workflow
-(`.github/workflows/deploy.yml`) that builds/pushes to GHCR and deploys over **SSH** (streams the
-compose file, Caddyfile, and a rendered `.env` over the SSH exec channel, then runs
-`deploy/remote-deploy.sh` on the box). See
-[DEPLOY.md](DEPLOY.md). Kamal and the SaaS engine remain removed. For local runs, use the
-Compose setup in [DOCKER.md](DOCKER.md).
+There is no deploy pipeline. `.github/workflows/build.yml` builds the `Dockerfile`'s `production`
+target on every push to `main` and pushes it to GHCR (`:<sha>` and `:latest`); hosts pull and run
+it themselves, running `db:prepare` before boot. The runtime env contract is in
+[DOCKER.md](DOCKER.md) → Production image. Kamal and the SaaS engine remain removed. For local
+runs, use the Compose setup in [DOCKER.md](DOCKER.md).
 
 ## Architecture Overview
 
