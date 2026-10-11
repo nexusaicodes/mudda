@@ -1,8 +1,7 @@
-# Every board has the same five fixed lanes (flat kanban). Triage/Backlog/Done
-# are ordinary columns now — there are no lifecycle states.
+# Every board has the same four fixed lanes (flat kanban). Backlog/Done are
+# ordinary columns — there are no lifecycle states.
 <% %w[ writebook private miltons_wish_list ].each do |board| %>
-<% [ [ "triage", "Triage", "var(--color-card-1)" ],
-     [ "backlog", "Backlog", "var(--color-card-2)" ],
+<% [ [ "backlog", "Backlog", "var(--color-card-2)" ],
      [ "todo", "Todo", "var(--color-card-3)" ],
      [ "doing", "Doing", "var(--color-card-5)" ],
      [ "done", "Done", "var(--color-card-4)" ] ].each_with_index do |(slug, name, color), position| %>

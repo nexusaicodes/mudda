@@ -173,7 +173,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     # The board names its own lanes, so nothing has to be guessed.
     get board_path(board_id, format: :json), headers: headers
     columns = @response.parsed_body["columns"]
-    assert_equal %w[ Triage Backlog Todo Doing Done ], columns.pluck("name")
+    assert_equal %w[ Backlog Todo Doing Done ], columns.pluck("name")
 
     post board_cards_path(board_id, format: :json),
       params: { title: "Ship the API", due_on: 1.week.from_now.to_date }, headers: headers, as: :json
@@ -185,7 +185,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     get board_card_path(board, number, format: :json), headers: headers
     assert_equal 1.week.from_now.to_date.to_s, @response.parsed_body["due_on"]
     assert_not @response.parsed_body["overdue"]
-    assert_equal "Triage", @response.parsed_body["column"]["name"]
+    assert_equal "Backlog", @response.parsed_body["column"]["name"]
 
     %w[ Todo Doing Done ].each do |name|
       column_id = columns.find { |column| column["name"] == name }["id"]
@@ -226,14 +226,29 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert @response.parsed_body["errors"].present?
   end
 
-  test "creating a card without a due date is a JSON 422 naming the field" do
+  test "a card created without a due date lands in Backlog" do
     headers = bearer_headers_for(@user)
 
     post board_cards_path(boards(:writebook), format: :json),
       params: { title: "No due date" }, headers: headers, as: :json
 
+    assert_response :created
+    assert_equal "Backlog", @response.parsed_body.dig("column", "name")
+    assert_nil @response.parsed_body["due_on"]
+  end
+
+  test "moving an undated card out of Backlog is a JSON 422 naming the field" do
+    headers = bearer_headers_for(@user)
+    post board_cards_path(boards(:writebook), format: :json),
+      params: { title: "No due date" }, headers: headers, as: :json
+    card = boards(:writebook).cards.find_by!(number: @response.parsed_body["number"])
+
+    put board_card_path(card.board, card, format: :json),
+      params: { column_id: columns(:writebook_doing).id }, headers: headers, as: :json
+
     assert_response :unprocessable_entity
-    assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "due_on")
+    assert_equal [ "can't be blank outside Backlog" ], @response.parsed_body.dig("errors", "due_on")
+    assert card.reload.backlogged?
   end
 
   # A bang method's RecordInvalid has to reach the client as the JSON error envelope, and a
@@ -271,7 +286,7 @@ class ApiTest < ActionDispatch::IntegrationTest
       params: { column_id: columns(:private_todo).id }, headers: headers, as: :json
 
     assert_response :not_found
-    assert_equal "Triage", card.reload.column.name
+    assert_equal "Backlog", card.reload.column.name
   end
 
   # Token lifetime and labels
@@ -867,7 +882,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :not_found
-    assert_equal [ boards(:writebook), columns(:writebook_triage) ], [ card.reload.board, card.column ]
+    assert_equal [ boards(:writebook), columns(:writebook_backlog) ], [ card.reload.board, card.column ]
   end
 
   # One request, one event per thing it changed — however many things that is.

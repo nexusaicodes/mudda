@@ -395,9 +395,7 @@
   }
 
   .card:has(.card__closed),
-  .card:is(.card--postponed),
-  .card-perma:has(.card__closed),
-  .card-perma:has(.card--postponed) {
+  .card-perma:has(.card__closed) {
     --card-color: var(--color-card-complete) !important;
 
     .bubble {

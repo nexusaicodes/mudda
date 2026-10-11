@@ -65,10 +65,10 @@ class BoardsController < ApplicationController
       set_page_and_extract_portion_from @filter.cards.where(board: @board)
     end
 
+    # Each lane loads its own cards in a frame; a card's save touches the board, so the board
+    # stands in for them in the etag.
     def show_columns
-      cards = @board.cards.awaiting_triage.by_due_date.with_golden_first.preloaded
-      set_page_and_extract_portion_from cards
-      fresh_when etag: [ @board, @page.records, @user_filtering, Current.account, Date.current ]
+      fresh_when etag: [ @board, @user_filtering, Current.account, Date.current ]
     end
 
     def board_params

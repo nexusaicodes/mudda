@@ -5,12 +5,14 @@ class Card::DueTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
   end
 
-  # A card lands complete, so there is no state in which it can be saved without a date.
-  test "a card requires a due date" do
-    card = boards(:writebook).cards.new creator: users(:kevin), title: "Needs a date"
+  test "a date is optional in Backlog and required in every other lane" do
+    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Someday"
+    assert card.backlogged?
 
-    assert_not card.save
-    assert card.errors.added?(:due_on, :blank)
+    %w[ todo doing done ].each do |lane|
+      assert_not card.update(column: columns(:"writebook_#{lane}")), "#{lane} took an undated card"
+      assert card.errors.added?(:due_on, :blank, message: "can't be blank outside Backlog")
+    end
   end
 
   test "a card is overdue once its due date has passed" do

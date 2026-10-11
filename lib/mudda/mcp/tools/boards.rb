@@ -15,7 +15,7 @@ module Mudda::Mcp::Tools
     tool_name "get_board"
     title "Get a board"
     description <<~TEXT
-      One board with its five fixed columns, in order: Triage, Backlog, Todo, Doing, Done.
+      One board with its four fixed columns, in order: Backlog, Todo, Doing, Done.
       Column ids from here are what `update_card` takes as `column_id` and `list_cards` as
       `column_ids`.
     TEXT

@@ -3,11 +3,10 @@ module CardsHelper
     classes = [
       options.delete(:class),
       ("golden-effect" if card.golden?),
-      ("card--postponed" if card.postponed?),
       ("card--active" if card.active?)
     ].compact.join(" ")
 
-    data[:drag_and_drop_top] = true if card.golden? && !card.closed? && !card.postponed?
+    data[:drag_and_drop_top] = true if card.golden? && !card.closed? && !card.backlogged?
 
     tag.article \
       id: id,

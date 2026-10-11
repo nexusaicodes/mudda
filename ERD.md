@@ -125,8 +125,8 @@ erDiagram
     COLUMNS {
         bigint id PK
         bigint board_id FK "NOT NULL"
-        string name "limit 255 NOT NULL — Triage Backlog Todo Doing Done"
-        integer position "default 0 NOT NULL — 0..4"
+        string name "limit 255 NOT NULL — Backlog Todo Doing Done"
+        integer position "default 0 NOT NULL — ascending in lane order"
         string color "limit 255 NOT NULL — the only editable field"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -139,7 +139,7 @@ erDiagram
         bigint creator_id FK "NOT NULL — User"
         bigint number "NOT NULL — per-board sequence the API addresses"
         string title "limit 255 NULLABLE"
-        date due_on "NULLABLE in DB — required by the model"
+        date due_on "NULLABLE — required by the model outside Backlog"
         boolean golden "default false NOT NULL — the pin"
         datetime last_active_at "NOT NULL"
         datetime created_at "NOT NULL"
@@ -296,23 +296,25 @@ foreign keys.
 
 ### Card lifecycle
 
-`column_id` is the single source of truth — there are no closed/postponed/triage state tables.
+`column_id` is the single source of truth — there are no closed/backlog state tables.
 
 ```mermaid
 erDiagram
-    BOARDS ||--o{ COLUMNS : "exactly 5, fixed, positions 0-4"
+    BOARDS ||--o{ COLUMNS : "exactly 4, fixed, in lane order"
     COLUMNS ||--o{ CARDS : "a card is in exactly one"
     CARDS ||--o{ STEPS : "checklist"
     CARDS ||--o{ NOTES : "rich-text log"
 ```
 
-| Position | Column | Predicate derived in `Card::Triageable` |
+| Order | Column | Predicate derived in `Card::Triageable` |
 |---|---|---|
-| 0 | Triage | `awaiting_triage?` — default for new cards |
-| 1 | Backlog | `postponed?` |
-| 2 | Todo | triaged, queued |
+| 1 | Backlog | `backlogged?` — default for new cards; `due_on` optional |
+| 2 | Todo | queued |
 | 3 | Doing | in progress |
 | 4 | Done | `closed?` |
+
+`position` only orders a board's lanes; its values aren't contiguous on boards that once had
+a Triage lane (folded into Backlog by `20261011000000_fold_triage_into_backlog`).
 
 `active?` = in neither Done nor Backlog. `open?` = not Done. `golden?` is the
 pin, and it is a column on the card.
@@ -404,7 +406,7 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 **`sessions.scopes`** — space-separated, any of `read` · `write` · `delete`. Tokens only;
 defaults to `read write`.
 
-**`columns.name`** — `Triage` · `Backlog` · `Todo` · `Doing` · `Done`. Created together by
+**`columns.name`** — `Backlog` · `Todo` · `Doing` · `Done`. Created together by
 `Board::Triageable` on every board; not creatable, reorderable, or deletable.
 
 **`events.action`** — written by `Eventable#track_event` as `<type>_<action>`:

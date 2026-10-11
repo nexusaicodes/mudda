@@ -65,10 +65,10 @@ class CardTest < ActiveSupport::TestCase
     assert_equal "Untitled", card.reload.title
   end
 
-  test "send back to triage when moved to a new board" do
+  test "send back to backlog when moved to a new board" do
     cards(:logo).update! column: columns(:writebook_doing)
 
-    assert_changes -> { cards(:logo).reload.triaged? }, from: true, to: false do
+    assert_changes -> { cards(:logo).reload.backlogged? }, from: false, to: true do
       cards(:logo).update! board: boards(:private)
     end
   end
@@ -86,7 +86,7 @@ class CardTest < ActiveSupport::TestCase
 
     assert_raises(ActiveRecord::RecordInvalid) { card.update! board: boards(:private), column: columns(:writebook_done) }
     assert_raises(ActiveRecord::RecordInvalid) { card.reload.update! column: columns(:private_done) }
-    assert_equal [ boards(:writebook), columns(:writebook_triage) ], [ card.reload.board, card.column ]
+    assert_equal [ boards(:writebook), columns(:writebook_backlog) ], [ card.reload.board, card.column ]
   end
 
   # Each change is recorded from a snapshot taken before the UPDATE, so a nested write during

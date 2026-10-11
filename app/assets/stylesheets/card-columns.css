@@ -487,11 +487,6 @@
   /* Override card styles within columns
   /* ------------------------------------------------------------------------ */
 
-  /* A lane already says which lane its cards are in; only grids name it. */
-  .cards:not(.cards--grid) .card__details-lane {
-    display: none;
-  }
-
   .cards .card {
     --block-space: 1em;
     --block-space-half: 0.5em;

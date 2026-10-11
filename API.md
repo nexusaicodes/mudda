@@ -151,13 +151,13 @@ and answers `204`.
 |---|---|---|
 | `GET` | `/boards.json` | Every board |
 | `POST` | `/boards.json` | `name` |
-| `GET` | `/boards/:id.json` | Includes the board's five columns, in order |
+| `GET` | `/boards/:id.json` | Includes the board's four columns, in order |
 | `PUT` | `/boards/:id.json` | `name` |
 | `DELETE` | `/boards/:id.json` | |
 
 ### Columns
 
-Every board has the same five fixed lanes — Triage, Backlog, Todo, Doing, Done. They can't be
+Every board has the same four fixed lanes — Backlog, Todo, Doing, Done. They can't be
 created, reordered, or deleted, so **they have no endpoints of their own**: they travel with
 the board, in order, under `columns`. Each one names the card index that answers for it —
 `cards_url`, which is the board's card index narrowed by `column_ids[]`. (Lane colour is a
@@ -174,7 +174,7 @@ another board is renumbered on arrival.
 |---|---|---|
 | `GET` | `/cards.json` | Every board — filterable, see below |
 | `GET` | `/boards/:board_id/cards.json` | That board only — same filters |
-| `POST` | `/boards/:board_id/cards.json` | The whole card in one payload — see below. **`due_on` is required** |
+| `POST` | `/boards/:board_id/cards.json` | The whole card in one payload — see below. Lands in Backlog; `due_on` optional |
 | `GET` | `/boards/:board_id/cards/:number.json` | The whole card — see below |
 | `PUT` | `/boards/:board_id/cards/:number.json` | `title`, `description`, `due_on`, `golden`, `board_id`, `column_id`, `steps_attributes` |
 | `DELETE` | `/boards/:board_id/cards/:number.json` | |
@@ -214,7 +214,9 @@ changed is recorded as its own event (`card_title_changed`, `card_triaged`,
 `card_board_changed`), however many it changed at once.
 
 Moving between lanes with `column_id` records the same `card_triaged` event the UI does; a
-`column_id` from another board is a `404`, not a silent no-op.
+`column_id` from another board is a `404`, not a silent no-op. Outside Backlog a card needs a
+`due_on`, so moving an undated card out is a `422` —
+`{ "errors": { "due_on": ["can't be blank outside Backlog"] } }` — unless the same `PUT` sets one.
 
 Moving to another **board** with `board_id` **renumbers** the card there and takes its events
 with it — so the number and the URL you used to reach it are both stale afterwards. The
@@ -222,10 +224,10 @@ response names the new address in its `Location` header (the same as the body's 
 update that leaves the card where it is sends no `Location`. A `board_id` the caller can't
 reach is a `404`. A `column_id` sent alongside it names a lane on the **destination** (`{ "board_id": 7, "column_id": 31 }` lands
 the card in board 7's lane 31, and a lane from anywhere else is a `404`); with no `column_id`,
-the card lands in the destination's Triage.
+the card lands in the destination's Backlog.
 
-A card is created in Triage, and lands complete: there is no draft state and nothing to
-publish. `due_on` is required, so a create without one is a `422`. On a deployment with a card
+A card is created in Backlog, and lands complete: there is no draft state and nothing to
+publish. `due_on` is optional while it stays in Backlog. On a deployment with a card
 limit (`MUDDA_CARD_LIMIT`, see DOCKER.md), a create past it is a `422` too, with the reason under
 `base`: `{ "errors": { "base": ["This account has used all 100 of its cards"] } }`. Every card in an index
 carries its own `url`, which is the reliable way to reach it again.
@@ -248,7 +250,7 @@ parameter and a `422` on `/cards.json`, `column_ids[]` is a card filter and a `4
 `/search.json`, and the one index that takes no filters at all — a card's notes — accepts
 only `page`.
 
-Cards report `closed` (in Done), `postponed` (in Backlog), `overdue`, `golden`, `due_on`,
+Cards report `closed` (in Done), `backlogged` (in Backlog), `overdue`, `golden`, `due_on`,
 and `color`.
 
 ### Notes
@@ -294,7 +296,7 @@ that never reach a controller (an unknown route, a crash), so a client never has
 the response to find out what went wrong:
 
 ```json
-{ "errors": { "due_on": ["can't be blank"] } }
+{ "errors": { "due_on": ["can't be blank outside Backlog"] } }
 ```
 
 | Status | When |

@@ -8,7 +8,7 @@ class Column::ColoredTest < ActiveSupport::TestCase
   end
 
   test "reads color from legacy export format" do
-    column = columns(:writebook_triage)
+    column = columns(:writebook_backlog)
     # Broken exports serialized Color structs as JSON
     column.update_column(:color, { "name" => "Lime", "value" => "var(--color-card-4)" }.to_json)
 
@@ -16,9 +16,9 @@ class Column::ColoredTest < ActiveSupport::TestCase
   end
 
   test "update the column color" do
-    columns(:writebook_triage).update!(color: "var(--color-card-3)")
+    columns(:writebook_backlog).update!(color: "var(--color-card-3)")
 
-    assert_not_nil columns(:writebook_triage).color
-    assert_equal Color.for_value("var(--color-card-3)"), columns(:writebook_triage).color
+    assert_not_nil columns(:writebook_backlog).color
+    assert_equal Color.for_value("var(--color-card-3)"), columns(:writebook_backlog).color
   end
 end

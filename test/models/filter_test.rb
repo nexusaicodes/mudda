@@ -117,11 +117,11 @@ class FilterTest < ActiveSupport::TestCase
 
   test "column ids filter cards by workflow columns" do
     assert_equal [ cards(:text) ], users(:david).filters.new(column_ids: [ columns(:writebook_doing).id ]).cards.to_a
-    assert_equal [ cards(:logo), cards(:layout), cards(:buy_domain) ].sort_by(&:id), users(:david).filters.new(column_ids: [ columns(:writebook_triage).id ]).cards.to_a.sort_by(&:id)
+    assert_equal [ cards(:logo), cards(:layout), cards(:buy_domain) ].sort_by(&:id), users(:david).filters.new(column_ids: [ columns(:writebook_backlog).id ]).cards.to_a.sort_by(&:id)
   end
 
   test "column ids are ORed together" do
-    filter = users(:david).filters.new(column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ])
+    filter = users(:david).filters.new(column_ids: [ columns(:writebook_backlog).id, columns(:writebook_doing).id ])
 
     assert_equal [ cards(:logo), cards(:layout), cards(:buy_domain), cards(:text) ].sort_by(&:id), filter.cards.to_a.sort_by(&:id)
   end

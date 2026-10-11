@@ -39,7 +39,7 @@ class McpTest < ActionDispatch::IntegrationTest
     result = mcp("initialize", protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "test", version: "1" })
 
     assert_equal "mudda", result.dig("serverInfo", "name")
-    assert_match "Triage, Backlog", result["instructions"]
+    assert_match "Backlog, Todo, Doing, Done", result["instructions"]
   end
 
   test "tools/list offers every tool to a token holding every scope, each marked for what it does" do
@@ -109,11 +109,11 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal [ cards(:text).number ], cards.pluck("number")
   end
 
-  test "create_card creates the card with its steps, in Triage" do
+  test "create_card creates the card with its steps, in Backlog" do
     card = call_tool("create_card", board_id: @board.id, title: "From an agent", due_on: "2026-12-01",
       steps: [ "First", "Second" ])
 
-    assert_equal "Triage", card.dig("column", "name")
+    assert_equal "Backlog", card.dig("column", "name")
     assert_equal %w[ First Second ], card["steps"].pluck("content")
   end
 
@@ -155,7 +155,7 @@ class McpTest < ActionDispatch::IntegrationTest
     card = call_tool("update_card", board_id: @board.id, number: cards(:logo).number, to_board_id: other.id)
 
     assert_equal other.id, card.dig("board", "id")
-    assert_equal "Triage", card.dig("column", "name")
+    assert_equal "Backlog", card.dig("column", "name")
   end
 
   test "update_card refuses a board in another account" do
@@ -207,10 +207,12 @@ class McpTest < ActionDispatch::IntegrationTest
   end
 
   test "a validation failure names the field" do
-    result = mcp("tools/call", name: "create_card", arguments: { board_id: @board.id, title: "x", due_on: "not a date" })
+    result = mcp("tools/call", name: "update_card", arguments: { board_id: @board.id, number: cards(:text).number, due_on: "not a date" })
+    refusal = JSON.parse(result.dig("content", 0, "text"))
 
     assert result["isError"]
-    assert_equal 422, JSON.parse(result.dig("content", 0, "text"))["status"]
+    assert_equal 422, refusal["status"]
+    assert_includes refusal.to_s, "due_on"
   end
 
   test "a card past the account's ceiling is a tool error saying so" do

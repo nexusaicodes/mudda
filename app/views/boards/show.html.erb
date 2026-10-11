@@ -26,6 +26,6 @@
     <%= render "boards/show/filtered_cards", page: @page %>
   <% else %>
     <%= render "columns/show/add_card_button", board: @board %>
-    <%= render "boards/show/columns", page: @page, board: @board %>
+    <%= render "boards/show/columns", board: @board %>
   <% end %>
 <% end %>

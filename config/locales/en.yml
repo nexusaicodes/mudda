@@ -29,3 +29,8 @@
 
 en:
   hello: "Hello world"
+
+  activerecord:
+    attributes:
+      card:
+        due_on: "Due date"

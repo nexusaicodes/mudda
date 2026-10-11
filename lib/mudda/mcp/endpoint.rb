@@ -12,11 +12,13 @@ module Mudda::Mcp
     PATH = "/mcp"
 
     INSTRUCTIONS = <<~TEXT
-      Mudda is a single-person kanban app. Boards hold cards; every board has the same five
-      fixed columns, in order: Triage, Backlog (postponed), Todo, Doing, Done (closed). A card is
-      addressed by its board id and its per-board `number`, never its id alone. Every card needs
-      a `due_on` date. Moving a card to another board renumbers it, so use the address the
-      result reports. Errors carry the HTTP status and `{ "errors": { field: [messages] } }`.
+      Mudda is a single-person kanban app. Boards hold cards; every board has the same four
+      fixed columns, in order: Backlog, Todo, Doing, Done (closed). New cards land in Backlog. A
+      card is addressed by its board id and its per-board `number`, never its id alone. A
+      `due_on` date is optional in Backlog and required in every other column, so give a card
+      one before (or while) moving it out. Moving a card to another board renumbers it, so use
+      the address the result reports. Errors carry the HTTP status and
+      `{ "errors": { field: [messages] } }`.
     TEXT
 
     def initialize(app)

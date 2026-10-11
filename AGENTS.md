@@ -161,7 +161,7 @@ Owns filters and notes. `deactivate` sets `active: false` and leaves the session
 `Authorization` still has a credential to refuse.
 
 **Board** → primary organizational unit. Concerns: `Cards`, `Filterable`,
-`Triageable`. **Every board has the same five
+`Triageable`. **Every board has the same four
 fixed columns** (see below). All of the account's boards are visible to the user.
 
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
@@ -198,31 +198,33 @@ app lands on your last-opened board instead).
 ### Card Lifecycle — Fixed Columns
 
 A card **always lives in exactly one column**, and `column_id` is the **single source of
-truth** for its lifecycle. There are no separate closed/not-now/triage state tables.
+truth** for its lifecycle. There are no separate closed/backlog state tables.
 
-Every board is created (`Board::Triageable`) with five fixed lanes, in order:
+Every board is created (`Board::Triageable`) with four fixed lanes, in order:
 
-| Column  | Meaning                                  |
-|---------|------------------------------------------|
-| Triage  | Awaiting triage (default for new cards)  |
-| Backlog | Postponed / "not now"                    |
-| Todo    | Triaged, queued                          |
-| Doing   | In progress                              |
-| Done    | Closed                                    |
+| Column  | Meaning                                                      |
+|---------|--------------------------------------------------------------|
+| Backlog | Unscheduled work; every new card lands here (date optional)  |
+| Todo    | Queued                                                       |
+| Doing   | In progress                                                  |
+| Done    | Closed                                                       |
+
+People and agents create and move cards the same way; there is no review lane.
 
 `Card::Triageable` derives predicates and scopes from the column name:
 - `closed?` = in **Done**; `open?` = not Done.
-- `postponed?` = in **Backlog**.
-- `awaiting_triage?` = in **Triage**; `triaged?` = not Triage.
+- `backlogged?` = in **Backlog**.
 - `active?` = not Done/Backlog.
 
 `triage_into(column)` moves a card between lanes. The `card_triaged` event is recorded by an
 `after_update` on `column_id`, so **every** lane change is audited whichever door it comes
-through — the drop target, the picker, or a `PUT` to the card with a `column_id`.
+through — the drop target, the picker, or a `PUT` to the card with a `column_id`. A move the
+card can't make (an undated card leaving Backlog) is refused: a `422` for JSON, and in the
+browser the card stays where it was with the reason in the flash.
 
 Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
 the card with a `board_id` — and a lane may be named in the same write. Before validation a
-move with no lane named lands in the destination's Triage (`Card#land_in_destination_triage`);
+move with no lane named lands in the destination's Backlog (`Card#land_in_destination_backlog`);
 `Card::Triageable` validates that a card's column is on its board, so no door can leave it in
 another board's lane. The card is **renumbered** (numbers run per board) in the same UPDATE;
 its events and search rows reach their board through the card, so they follow it with nothing
@@ -238,8 +240,10 @@ used to record only one.
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
 Cards carry an explicit **`due_on`** date (`Card::Due`):
-- `due_on` is required on every card (`validates :due_on, presence: true`), so no save path —
-  including the JSON create/update — can persist one without it.
+- `due_on` is optional in **Backlog** and required in every other lane (`validates :due_on,
+  presence: …, unless: :backlogged?`), so no save path — including the JSON create/update — can
+  move a card out of Backlog, or keep one outside it, without a date. The error reads
+  "can't be blank outside Backlog".
 - `overdue?` is true for a card whose `due_on` is in the past.
 
 This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),
@@ -269,7 +273,7 @@ index for the rest.
 The card index answers at both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
 same filters apply to either — including `column_ids[]`, which is how a single lane is read
 now that columns have no endpoints of their own. `/prompts/cards` (the mention autocomplete)
-stays cross-board. A board's five fixed columns travel with the board itself
+stays cross-board. A board's four fixed columns travel with the board itself
 (`boards/show.json.jbuilder`); what is left under `boards/:id/columns` is the browser's lane
 frame and colour picker.
 

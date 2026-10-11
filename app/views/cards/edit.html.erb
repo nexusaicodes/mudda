@@ -24,7 +24,7 @@
 
     <div class="card-field__due flex align-center">
       <%= form.label :due_on, "Due date", class: "card-field__due-label" %>
-      <%= form.date_field :due_on, required: true, class: "card-field__due-input input",
+      <%= form.date_field :due_on, required: !@card.backlogged?, class: "card-field__due-input input",
             data: { action: "change->form#submit" } %>
     </div>
 

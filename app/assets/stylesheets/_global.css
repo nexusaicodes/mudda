@@ -215,7 +215,7 @@
    * is the warm one. Lightness stays ≤ ~72% so the white bead count stays legible. */
   --color-card-default: oklch(var(--lch-blue-dark));
   --color-card-complete: var(--color-ink-darker);
-  --color-card-1: oklch(71% 0.12 280);  /* Triage · Periwinkle */
+  --color-card-1: oklch(71% 0.12 280);  /* Periwinkle */
   --color-card-2: oklch(62% 0.16 268);  /* Backlog · Indigo */
   --color-card-3: oklch(70% 0.14 233);  /* Todo · Azure */
   --color-card-4: oklch(70% 0.15 160);  /* Done · Emerald */

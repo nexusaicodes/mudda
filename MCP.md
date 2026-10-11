@@ -48,12 +48,12 @@ API's own: `401` with no token or a revoked or expired one, `403` for a deactiva
 | `whoami` | `GET /my/user` |
 | `search_cards` | `GET /search?q=` |
 | `list_boards` | `GET /boards` |
-| `get_board` | `GET /boards/:id` — includes the five columns and their ids |
+| `get_board` | `GET /boards/:id` — includes the four columns and their ids |
 | `create_board` | `POST /boards` |
 | `rename_board` | `PUT /boards/:id` |
 | `list_cards` | `GET /cards` or `GET /boards/:board_id/cards`, with the API's filters |
 | `get_card` | `GET /boards/:board_id/cards/:number` |
-| `create_card` | `POST /boards/:board_id/cards` — `due_on` required, `steps` as a list of strings |
+| `create_card` | `POST /boards/:board_id/cards` — lands in Backlog; `due_on` optional there, `steps` as a list of strings |
 | `update_card` | `PUT /boards/:board_id/cards/:number` — lane, board (`to_board_id`), golden, steps |
 | `list_notes` | `GET /boards/:board_id/cards/:number/notes` |
 | `add_note` | `POST /boards/:board_id/cards/:number/notes` |
@@ -84,7 +84,7 @@ whose text is the API's error envelope plus the HTTP status, so an agent can tel
 card (`404`) from a bad field (`422`):
 
 ```json
-{ "status": 422, "errors": { "due_on": ["can't be blank"] } }
+{ "status": 422, "errors": { "due_on": ["can't be blank outside Backlog"] } }
 { "status": 422, "errors": { "base": ["This account has used all 100 of its cards"] } }
 ```
 

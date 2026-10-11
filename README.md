@@ -1,7 +1,7 @@
 # Mudda
 
 **Mudda** is a personal Kanban tool for tracking your own issues and ideas — boards, cards,
-notes, and a simple fixed workflow (Triage → Backlog → Todo → Doing → Done) to move work
+notes, and a simple fixed workflow (Backlog → Todo → Doing → Done) to move work
 without ceremony.
 
 Mudda is built and maintained by **Nexus AI**. It is a fork of
