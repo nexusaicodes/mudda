@@ -84,7 +84,7 @@ whose text is the API's error envelope plus the HTTP status, so an agent can tel
 card (`404`) from a bad field (`422`):
 
 ```json
-{ "status": 422, "errors": { "due_on": ["can't be blank outside Backlog"] } }
+{ "status": 422, "errors": { "due_on": ["can't be blank in Todo or Doing"] } }
 { "status": 422, "errors": { "base": ["This account has used all 100 of its cards"] } }
 ```
 

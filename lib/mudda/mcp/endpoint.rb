@@ -15,8 +15,8 @@ module Mudda::Mcp
       Mudda is a single-person kanban app. Boards hold cards; every board has the same four
       fixed columns, in order: Backlog, Todo, Doing, Done (closed). New cards land in Backlog. A
       card is addressed by its board id and its per-board `number`, never its id alone. A
-      `due_on` date is optional in Backlog and required in every other column, so give a card
-      one before (or while) moving it out. Moving a card to another board renumbers it, so use
+      `due_on` date is required in Todo and Doing and optional in Backlog and Done, so give a
+      card one before (or while) moving it into Todo or Doing. Moving a card to another board renumbers it, so use
       the address the result reports. Errors carry the HTTP status and
       `{ "errors": { field: [messages] } }`.
     TEXT

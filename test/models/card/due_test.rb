@@ -5,14 +5,16 @@ class Card::DueTest < ActiveSupport::TestCase
     Current.session = sessions(:david)
   end
 
-  test "a date is optional in Backlog and required in every other lane" do
+  test "a date is required in Todo and Doing, and optional in Backlog and Done" do
     card = boards(:writebook).cards.create! creator: users(:kevin), title: "Someday"
     assert card.backlogged?
 
-    %w[ todo doing done ].each do |lane|
+    %w[ todo doing ].each do |lane|
       assert_not card.update(column: columns(:"writebook_#{lane}")), "#{lane} took an undated card"
-      assert card.errors.added?(:due_on, :blank, message: "can't be blank outside Backlog")
+      assert_equal [ "can't be blank in Todo or Doing" ], card.errors[:due_on]
     end
+
+    assert card.update(column: columns(:writebook_done)), "Done refused an undated card"
   end
 
   test "a card is overdue once its due date has passed" do

@@ -1,6 +1,4 @@
 <% draggable = local_assigns.fetch(:draggable, false) %>
-<% show_board = local_assigns.fetch(:show_board, true) %>
-<% show_lane = local_assigns.fetch(:show_lane, true) %>
 
 <% card_data = {
   id: card.number,
@@ -33,5 +31,5 @@
     <%= render "cards/display/common/stamp", card: card %>
   </div>
 
-  <%= render "cards/display/preview/meta", card: card, show_board: show_board, show_lane: show_lane %>
+  <%= render "cards/display/preview/meta", card: card, **local_assigns.slice(:show_board, :show_lane) %>
 <% end %>

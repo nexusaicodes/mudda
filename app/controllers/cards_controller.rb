@@ -18,7 +18,7 @@ class CardsController < ApplicationController
     @card = @board.cards.new
   end
 
-  # The board comes from the path, and a new card always starts in that board's Triage column,
+  # The board comes from the path, and a new card always starts in that board's Backlog column,
   # so neither id is read from the body.
   def create
     @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user)
@@ -106,7 +106,7 @@ class CardsController < ApplicationController
     # rather than assigned by id, so neither can name a record the caller can't reach; a blank
     # one leaves the card where it is. A column_id names a lane on the board the card ends on —
     # the destination when board_id is sent too, which with no column_id lands the card in that
-    # board's Triage (Card#land_in_destination_triage).
+    # board's Backlog (Card#land_in_destination_backlog).
     def card_attributes
       card_params.except(:board_id, :column_id).merge(destination_board).merge(destination_column)
     end

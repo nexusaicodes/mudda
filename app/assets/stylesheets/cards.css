@@ -78,11 +78,11 @@
     white-space: nowrap;
   }
 
-  .card__due--urgent { --due-color: var(--color-negative); }
-  .card__due--soon   { --due-color: oklch(var(--lch-yellow-dark)); }
-  .card__due--later  { --due-color: var(--color-positive); }
+  .card__due--overdue { --due-color: var(--color-negative); }
+  .card__due--soon    { --due-color: oklch(var(--lch-yellow-dark)); }
+  .card__due--later   { --due-color: var(--color-positive); }
 
-  .card__due--urgent,
+  .card__due--overdue,
   .card__due--soon,
   .card__due--later {
     border-color: color-mix(in srgb, var(--due-color) 30%, transparent);

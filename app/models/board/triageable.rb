@@ -18,7 +18,7 @@ module Board::Triageable
   end
 
   def backlog_column
-    columns.find_by(name: Card::Triageable::BACKLOG_COLUMN) || columns.sorted.first
+    columns.find_by(name: Card::Triageable::BACKLOG_COLUMN)
   end
 
   def done_column

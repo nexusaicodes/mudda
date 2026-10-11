@@ -19,43 +19,53 @@ class Card::TriageableTest < ActiveSupport::TestCase
     assert_nil undated.due_on
   end
 
-  test "a card needs a due date to leave Backlog" do
+  test "a card needs a due date to enter Todo or Doing" do
     card = boards(:writebook).cards.create!(creator: users(:david))
 
     assert_not card.update(column: columns(:writebook_doing))
-    assert_equal [ "can't be blank outside Backlog" ], card.errors[:due_on]
+    assert_equal [ "can't be blank in Todo or Doing" ], card.errors[:due_on]
     assert_equal columns(:writebook_backlog), card.reload.column
 
     assert card.update(column: columns(:writebook_doing), due_on: Date.tomorrow)
   end
 
-  test "a card outside Backlog can't drop its due date" do
+  test "an undated card can go straight to Done" do
+    card = boards(:writebook).cards.create!(creator: users(:david))
+
+    assert card.update(column: columns(:writebook_done))
+    assert card.reload.closed?
+  end
+
+  test "a card in Todo or Doing can't drop its due date" do
     card = cards(:text)
 
     assert_not card.update(due_on: nil)
     assert card.update(due_on: nil, column: columns(:writebook_backlog))
   end
 
-  test "triage a card into a column" do
+  test "a due date that doesn't parse is refused, even in Backlog" do
+    card = cards(:logo)
+    due_on = card.due_on
+
+    assert_not card.update(due_on: "2026-02-30")
+    assert_equal [ "is invalid" ], card.errors[:due_on]
+    assert_equal due_on, card.reload.due_on
+
+    assert_not boards(:writebook).cards.new(creator: users(:david), due_on: "next friday").valid?
+    assert boards(:writebook).cards.new(creator: users(:david), due_on: "").valid?
+  end
+
+  # The event follows column_id itself, so a plain attribute write is audited.
+  test "a lane change is audited" do
     card = cards(:logo)
     column = columns(:writebook_doing)
 
     assert_difference -> { card.reload.events.where(action: "card_triaged").count }, +1 do
-      card.triage_into(column)
+      card.update! column: column
     end
 
     assert_equal column, card.reload.column
     assert_not card.backlogged?
-  end
-
-  # The event follows column_id itself, not the method that changed it, so a plain attribute
-  # write is audited the same as triage_into.
-  test "any lane change is audited" do
-    card = cards(:logo)
-
-    assert_difference -> { card.reload.events.where(action: "card_triaged").count }, +1 do
-      card.update! column: columns(:writebook_done)
-    end
   end
 
   # A board change lands the card in the destination's Backlog, which is a lane change like

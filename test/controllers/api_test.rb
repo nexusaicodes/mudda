@@ -247,8 +247,26 @@ class ApiTest < ActionDispatch::IntegrationTest
       params: { column_id: columns(:writebook_doing).id }, headers: headers, as: :json
 
     assert_response :unprocessable_entity
-    assert_equal [ "can't be blank outside Backlog" ], @response.parsed_body.dig("errors", "due_on")
+    assert_equal [ "can't be blank in Todo or Doing" ], @response.parsed_body.dig("errors", "due_on")
     assert card.reload.backlogged?
+  end
+
+  test "a due date that doesn't parse is a JSON 422, not a silently undated card" do
+    headers = bearer_headers_for(@user)
+
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook), format: :json),
+        params: { title: "Bad date", due_on: "2026-02-30" }, headers: headers, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal [ "is invalid" ], @response.parsed_body.dig("errors", "due_on")
+
+    card = cards(:logo)
+    assert_no_changes -> { card.reload.due_on } do
+      put board_card_path(card.board, card, format: :json),
+        params: { due_on: "garbage" }, headers: headers, as: :json
+    end
+    assert_response :unprocessable_entity
   end
 
   # A bang method's RecordInvalid has to reach the client as the JSON error envelope, and a

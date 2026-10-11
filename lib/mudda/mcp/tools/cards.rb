@@ -59,7 +59,7 @@ module Mudda::Mcp::Tools
     title "Create a card"
     description <<~TEXT
       Creates a card, complete, in the board's Backlog column. `due_on` is optional there, and
-      required before the card moves to any other column. Steps are created with it, in order.
+      required before the card moves to Todo or Doing. Steps are created with it, in order.
       The result carries the card's `number`, which together with the board addresses it from
       now on.
     TEXT
@@ -91,8 +91,8 @@ module Mudda::Mcp::Tools
       Changes any of a card's fields in one write — all of it applies or none of it does. Move
       it between lanes with `column_id` (a column of the board it ends up on). Move it to
       another board with `to_board_id`: it is renumbered there, so use the `number` and `url`
-      in the result from then on; with no `column_id` it lands in that board's Backlog. Outside
-      Backlog a card needs a `due_on`, so set one in the same write that moves it out. Steps:
+      in the result from then on; with no `column_id` it lands in that board's Backlog. In Todo
+      and Doing a card needs a `due_on`, so set one in the same write that moves it there. Steps:
       an entry with no `id` adds one; with an `id` it edits that step, or removes it when
       `remove` is true.
     TEXT

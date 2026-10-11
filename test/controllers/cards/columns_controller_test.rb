@@ -21,7 +21,7 @@ class Cards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     patch board_card_column_path(card.board, card, column_id: columns(:writebook_doing).id)
 
     assert_redirected_to board_card_path(card.board, card)
-    assert_equal "Due date can't be blank outside Backlog", flash[:alert]
+    assert_equal "Due date can't be blank in Todo or Doing", flash[:alert]
     assert card.reload.backlogged?
   end
 end

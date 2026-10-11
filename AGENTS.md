@@ -205,9 +205,9 @@ Every board is created (`Board::Triageable`) with four fixed lanes, in order:
 | Column  | Meaning                                                      |
 |---------|--------------------------------------------------------------|
 | Backlog | Unscheduled work; every new card lands here (date optional)  |
-| Todo    | Queued                                                       |
-| Doing   | In progress                                                  |
-| Done    | Closed                                                       |
+| Todo    | Queued (date required)                                       |
+| Doing   | In progress (date required)                                  |
+| Done    | Closed (date optional)                                       |
 
 People and agents create and move cards the same way; there is no review lane.
 
@@ -216,11 +216,11 @@ People and agents create and move cards the same way; there is no review lane.
 - `backlogged?` = in **Backlog**.
 - `active?` = not Done/Backlog.
 
-`triage_into(column)` moves a card between lanes. The `card_triaged` event is recorded by an
-`after_update` on `column_id`, so **every** lane change is audited whichever door it comes
-through — the drop target, the picker, or a `PUT` to the card with a `column_id`. A move the
-card can't make (an undated card leaving Backlog) is refused: a `422` for JSON, and in the
-browser the card stays where it was with the reason in the flash.
+A card moves between lanes by a plain attribute write — `card.update(column: other)`. The
+`card_triaged` event is recorded by an `after_update` on `column_id`, so **every** lane change is
+audited whichever door it comes through — the drop target, the picker, or a `PUT` to the card with
+a `column_id`. A move the card can't make (an undated card into Todo or Doing) is refused: a
+`422` for JSON, and in the browser the card stays where it was with the reason in the flash.
 
 Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
 the card with a `board_id` — and a lane may be named in the same write. Before validation a
@@ -240,10 +240,13 @@ used to record only one.
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
 Cards carry an explicit **`due_on`** date (`Card::Due`):
-- `due_on` is optional in **Backlog** and required in every other lane (`validates :due_on,
-  presence: …, unless: :backlogged?`), so no save path — including the JSON create/update — can
-  move a card out of Backlog, or keep one outside it, without a date. The error reads
-  "can't be blank outside Backlog".
+- `due_on` is required in **Todo** and **Doing** (`validates :due_on, presence: …, if: :active?`)
+  and optional in **Backlog** and **Done**, so no save path — including the JSON create/update —
+  can move a card into Todo or Doing, or keep one there, without a date, while an unscheduled idea
+  can still be closed as-is. The error reads "can't be blank in Todo or Doing"
+  (`activerecord.errors.models.card.attributes.due_on.blank_while_active` in `config/locales/en.yml`).
+- A `due_on` that doesn't parse (`"2026-02-30"`, `"next friday"`) casts to `nil`; `Card::Due`
+  refuses it as `invalid` in every lane rather than saving the card undated.
 - `overdue?` is true for a card whose `due_on` is in the past.
 
 This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),

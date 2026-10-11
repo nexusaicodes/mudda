@@ -15,7 +15,7 @@ class Cards::Drops::ColumnsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "an undated card dropped outside Backlog stays put and says why" do
+  test "an undated card dropped in Doing stays put and says why" do
     card = cards(:logo)
     card.update!(due_on: nil)
 
@@ -24,6 +24,6 @@ class Cards::Drops::ColumnsControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
     end
 
-    assert_select "turbo-stream[action=replace][target=flash]", text: /Due date can't be blank outside Backlog/
+    assert_select "turbo-stream[action=replace][target=flash]", text: /Due date can't be blank in Todo or Doing/
   end
 end

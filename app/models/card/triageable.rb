@@ -43,10 +43,6 @@ module Card::Triageable
     !closed? && !backlogged?
   end
 
-  def triage_into(column)
-    update! column: column
-  end
-
   private
     def assign_default_column
       self.column ||= board&.backlog_column

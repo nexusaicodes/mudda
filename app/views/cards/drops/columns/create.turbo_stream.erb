@@ -4,6 +4,6 @@
   <%= turbo_stream.replace(dom_id(@source_column), partial: "boards/show/column", method: :morph, locals: { column: @source_column }) %>
 <% end %>
 
-<% if flash.now[:alert] %>
-  <%= turbo_stream.replace :flash, partial: "layouts/shared/flash" %>
+<% if @card.errors.any? %>
+  <%= turbo_stream_flash(alert: @card.errors.full_messages.to_sentence) %>
 <% end %>

@@ -214,9 +214,11 @@ changed is recorded as its own event (`card_title_changed`, `card_triaged`,
 `card_board_changed`), however many it changed at once.
 
 Moving between lanes with `column_id` records the same `card_triaged` event the UI does; a
-`column_id` from another board is a `404`, not a silent no-op. Outside Backlog a card needs a
-`due_on`, so moving an undated card out is a `422` —
-`{ "errors": { "due_on": ["can't be blank outside Backlog"] } }` — unless the same `PUT` sets one.
+`column_id` from another board is a `404`, not a silent no-op. In Todo and Doing a card needs
+a `due_on`, so moving an undated card there is a `422` —
+`{ "errors": { "due_on": ["can't be blank in Todo or Doing"] } }` — unless the same `PUT` sets one.
+Backlog and Done take a card with or without one. A `due_on` that isn't a real `YYYY-MM-DD` date
+(`"2026-02-30"`) is a `422` (`["is invalid"]`) in every lane, never a silently undated card.
 
 Moving to another **board** with `board_id` **renumbers** the card there and takes its events
 with it — so the number and the URL you used to reach it are both stale afterwards. The
@@ -227,7 +229,7 @@ the card in board 7's lane 31, and a lane from anywhere else is a `404`); with n
 the card lands in the destination's Backlog.
 
 A card is created in Backlog, and lands complete: there is no draft state and nothing to
-publish. `due_on` is optional while it stays in Backlog. On a deployment with a card
+publish. `due_on` is optional until it moves to Todo or Doing. On a deployment with a card
 limit (`MUDDA_CARD_LIMIT`, see DOCKER.md), a create past it is a `422` too, with the reason under
 `base`: `{ "errors": { "base": ["This account has used all 100 of its cards"] } }`. Every card in an index
 carries its own `url`, which is the reliable way to reach it again.
@@ -296,7 +298,7 @@ that never reach a controller (an unknown route, a crash), so a client never has
 the response to find out what went wrong:
 
 ```json
-{ "errors": { "due_on": ["can't be blank outside Backlog"] } }
+{ "errors": { "due_on": ["can't be blank in Todo or Doing"] } }
 ```
 
 | Status | When |

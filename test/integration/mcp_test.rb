@@ -207,7 +207,7 @@ class McpTest < ActionDispatch::IntegrationTest
   end
 
   test "a validation failure names the field" do
-    result = mcp("tools/call", name: "update_card", arguments: { board_id: @board.id, number: cards(:text).number, due_on: "not a date" })
+    result = mcp("tools/call", name: "create_card", arguments: { board_id: @board.id, title: "x", due_on: "not a date" })
     refusal = JSON.parse(result.dig("content", 0, "text"))
 
     assert result["isError"]

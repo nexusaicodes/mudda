@@ -124,10 +124,8 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create renders the form again when the card is invalid" do
-    Card.any_instance.stubs(:save).returns(false)
-
     assert_no_difference -> { Card.count } do
-      post board_cards_path(boards(:writebook)), params: { card: { title: "Refused" } }
+      post board_cards_path(boards(:writebook)), params: { card: { title: "Refused", due_on: "2026-02-30" } }
     end
 
     assert_response :unprocessable_entity

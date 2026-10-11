@@ -139,7 +139,7 @@ erDiagram
         bigint creator_id FK "NOT NULL — User"
         bigint number "NOT NULL — per-board sequence the API addresses"
         string title "limit 255 NULLABLE"
-        date due_on "NULLABLE — required by the model outside Backlog"
+        date due_on "NULLABLE — required by the model in Todo and Doing"
         boolean golden "default false NOT NULL — the pin"
         datetime last_active_at "NOT NULL"
         datetime created_at "NOT NULL"
@@ -311,7 +311,7 @@ erDiagram
 | 1 | Backlog | `backlogged?` — default for new cards; `due_on` optional |
 | 2 | Todo | queued |
 | 3 | Doing | in progress |
-| 4 | Done | `closed?` |
+| 4 | Done | `closed?`; `due_on` optional |
 
 `position` only orders a board's lanes; its values aren't contiguous on boards that once had
 a Triage lane (folded into Backlog by `20261011000000_fold_triage_into_backlog`).
