@@ -34,6 +34,7 @@ reset-auth` removes all passkeys and signs out every session.
 ### Testing
 ```bash
 make test                                          # Run unit/integration tests
+make test-system                                   # System tests, in a Selenium Chromium container
 make lint                                          # RuboCop
 docker compose run --rm web bin/rails test PATH    # Run a single test file
 docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test   # Serial run

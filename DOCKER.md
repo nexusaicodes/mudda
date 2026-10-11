@@ -79,6 +79,7 @@ make logs         # tail logs
 make console      # Rails console
 make shell        # bash shell in the container
 make test         # run the unit tests
+make test-system  # run the system tests (starts the selenium service)
 make lint         # RuboCop
 make down         # stop, keep data
 ```

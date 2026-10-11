@@ -45,8 +45,9 @@ Everything goes through Docker Compose — run `make` to list targets:
 - `make test` — unit/integration tests; `make lint` — RuboCop
 - `docker compose run --rm web bin/rails test PATH` — a single test file
 - `docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test` — serial run
-- `docker compose run --rm web bin/rails test:system` — system tests (`test/system/`), which
-  `make test` does **not** run; they drive headless Chrome via Capybara/Selenium
+- `make test-system` — system tests (`test/system/`), which `make test` does **not** run; they
+  drive headless Chromium via Capybara in the `selenium` Compose service (profile `system`),
+  reached over `SELENIUM_REMOTE_URL`, since the dev image has no browser
 
 There is no `bin/ci` and no CI test workflow — quality is just RuboCop + the test suite,
 both run locally. The one GitHub Actions workflow, `.github/workflows/deploy.yml`, only

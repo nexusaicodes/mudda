@@ -106,6 +106,11 @@ revoke: ## Revoke the API tokens carrying a label (make revoke LABEL=claude)
 test: ## Run the unit test suite
 	$(RUN) bin/rails test
 
+.PHONY: test-system
+test-system: ## Run the system tests in a Selenium Chromium container
+	$(COMPOSE) --profile system up -d --wait selenium
+	$(COMPOSE) run --rm -e SELENIUM_REMOTE_URL=http://selenium:4444 $(SERVICE) bin/rails test:system
+
 .PHONY: lint
 lint: ## Run RuboCop
 	$(RUN) bin/rubocop
