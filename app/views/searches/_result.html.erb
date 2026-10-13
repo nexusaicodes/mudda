@@ -18,12 +18,7 @@
 
     <div class="search__meta">
       <span class="search__lane" style="--column-color: <%= card.column.color %>"><%= card.column.name %></span>
-      <% if card.due_on && !card.closed? %>
-        <span class="card__when card__when--<%= card_due_tone(card) %>">
-          <%= icon_tag "bell-alert" if card.overdue? %>
-          <%= card_due_relative_label(card) %>
-        </span>
-      <% end %>
+      <%= render "cards/display/preview/due", card: card %>
     </div>
   <% end %>
 </li>

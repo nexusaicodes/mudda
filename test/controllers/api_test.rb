@@ -708,20 +708,26 @@ class ApiTest < ActionDispatch::IntegrationTest
       @response.parsed_body["data"].pluck("board").pluck("id").uniq.sort
   end
 
-  # Filter#boards is a HABTM, so a careless board_ids= would write join rows and permanently
-  # re-scope whatever saved filter the request happened to match.
-  test "a board's card index leaves a saved filter alone" do
-    Current.user = @user
-    filter = Current.user.filters.remember(indexed_by: "golden")
+  test "a filter value outside its list is refused rather than ignored" do
+    get cards_path(format: :json, due: "today", lane: "in-progress"), headers: bearer_headers_for(@user)
 
-    get board_cards_path(boards(:writebook), format: :json, indexed_by: "golden"),
-      headers: bearer_headers_for(@user)
+    assert_response :unprocessable_entity
+    assert_equal %w[ due lane ], @response.parsed_body["errors"].keys.sort
+  end
 
-    assert_response :success
-    assert_equal filter, Current.user.filters.from_params(indexed_by: "golden"),
-      "The request must match the saved filter, or this test proves nothing"
-    # Re-find rather than reload: Filter#boards memoizes into @boards, which reload keeps.
-    assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
+  test "due soon keeps an order that was asked for" do
+    older = card_on(boards(:writebook), "Older, more overdue")
+    older.update_columns created_at: 2.days.ago, due_on: 3.days.ago
+    newer = card_on(boards(:writebook), "Newer, less overdue")
+    newer.update_columns due_on: Date.yesterday
+
+    get cards_path(format: :json, due: "soon"), headers: bearer_headers_for(@user)
+    ids = @response.parsed_body["data"].pluck("id")
+    assert_operator ids.index(older.id), :<, ids.index(newer.id)
+
+    get cards_path(format: :json, due: "soon", sorted_by: "newest"), headers: bearer_headers_for(@user)
+    ids = @response.parsed_body["data"].pluck("id")
+    assert_operator ids.index(newer.id), :<, ids.index(older.id)
   end
 
   test "a blank board_id leaves the card where it is" do

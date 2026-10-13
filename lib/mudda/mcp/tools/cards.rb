@@ -23,10 +23,10 @@ module Mudda::Mcp::Tools
         card_ids: { type: "array", items: { type: "integer" } },
         terms: { type: "array", items: { type: "string" }, description: "Full-text terms" },
         creation: { type: "string", enum: TimeWindowParser::VALUES, description: "When the card was created" },
-        due: { type: "string", enum: %w[ soon ], description: "soon: open cards due by tomorrow, overdue first" },
-        lane: { type: "string", enum: %w[ backlog todo doing done ], description: "A lane by name, on every board" },
-        indexed_by: { type: "string", enum: %w[ all golden ] },
-        sorted_by: { type: "string", enum: %w[ latest newest oldest ] },
+        due: { type: "string", enum: Filter::DUES, description: "soon: open cards due by tomorrow, overdue first" },
+        lane: { type: "string", enum: Filter::LANES, description: "A lane by name, on every board" },
+        indexed_by: { type: "string", enum: Filter::INDEXES },
+        sorted_by: { type: "string", enum: Filter::SORTS },
         page: { type: "integer", minimum: 1 }
       }
     )

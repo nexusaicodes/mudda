@@ -1,2 +1,2 @@
-<%# locals: (cards:, draggable: false, show_board: true, show_lane: true) -%>
-<%= render partial: "cards/display/preview", collection: cards, as: :card, locals: { draggable: draggable, show_board: show_board, show_lane: show_lane }, cached: ->(card) { [ card, Date.current, show_board, show_lane ] } %>
+<%# locals: (cards:, draggable: false, show_lane: true) -%>
+<%= render partial: "cards/display/preview", collection: cards, as: :card, locals: { draggable: draggable, show_lane: show_lane }, cached: ->(card) { [ card, Date.current, show_lane ] } %>

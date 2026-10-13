@@ -4,8 +4,9 @@ class My::MenusController < ApplicationController
   def show
     @boards = Current.user.boards.alphabetically
     @current_board_id = params[:board_id].to_i
-    @views = Filter::VIEWS.map { |view| [ view, Current.user.filters.from_params(view[:params]).cards.count ] }
 
-    fresh_when etag: [ @boards, @current_board_id, Date.current ]
+    if stale? etag: [ @boards, @current_board_id, Date.current ]
+      @views = Filter::VIEWS.map { |view| [ view, Filter.new(Current.user, view[:params]).cards.count ] }
+    end
   end
 end

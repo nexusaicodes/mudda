@@ -239,13 +239,16 @@ rather than replacing the filter. `GET /boards/:board_id/cards.json` is the chea
 one board, and `?column_ids[]=4` narrows it to a single lane.
 
 `GET /cards.json` accepts `board_ids[]`, `column_ids[]`, `card_ids[]`, `terms[]` (full-text),
-`creation` (a time window), `due` (`soon`: open cards due by tomorrow, the most overdue first),
-`lane` (`backlog`, `todo`, `doing` or `done`: that lane on every board), `indexed_by` (`all` or
-`golden`) and `sorted_by` (`latest`, `newest` or `oldest`), alongside `page`. **Anything else is a `422` naming the offending
-parameter**, so a misspelled filter fails loudly rather than quietly widening the result set:
+`creation` (a time window), `due` (`soon`: open cards due by tomorrow, the most overdue first
+unless `sorted_by` says otherwise), `lane` (`backlog`, `todo`, `doing` or `done`, in any case:
+that lane on every board), `indexed_by` (`all` or `golden`) and `sorted_by` (`latest`, `newest`
+or `oldest`), alongside `page`. **Anything else is a `422` naming the offending parameter**, and
+so is a value outside a filter's list, so a mistaken filter fails loudly rather than quietly
+widening the result set:
 
 ```json
 { "errors": { "column_id": [ "is not a recognised parameter" ] } }
+{ "errors": { "due": [ "is not included in the list" ] } }
 ```
 
 **Every** JSON index is held to this, each against its own contract: `q` is a search

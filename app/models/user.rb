@@ -7,7 +7,6 @@ class User < ApplicationRecord
 
   has_many :sessions, dependent: :destroy
   has_many :notes, foreign_key: :creator_id, inverse_of: :creator, dependent: :destroy
-  has_many :filters, foreign_key: :creator_id, inverse_of: :creator, dependent: :destroy
 
   validates :name, presence: true
   validates :email_address, format: { with: URI::MailTo::EMAIL_REGEXP }

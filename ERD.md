@@ -2,7 +2,7 @@
 
 Generated from `db/schema_sqlite.rb` (version `2026_08_28_000000`) and the association
 declarations in `app/models/`, then verified against a live database: all tables, every
-column name, and all 31 indexes with their uniqueness flags match. Regenerate after any
+column name, and all 28 indexes with their uniqueness flags match. Regenerate after any
 migration.
 
 > **There are no database-level foreign keys.** `pragma foreign_key_list(<table>)` returns
@@ -34,12 +34,10 @@ erDiagram
     USERS ||--o{ BOARDS : "creator_id"
     USERS ||--o{ CARDS : "creator_id"
     USERS ||--o{ NOTES : "creator_id dependent-destroy"
-    USERS ||--o{ FILTERS : "creator_id dependent-destroy"
     USERS ||--o{ EVENTS : "creator_id"
 
     BOARDS ||--o{ COLUMNS : "has_many dependent-destroy — always 5"
     BOARDS ||--o{ CARDS : "has_many dependent-destroy"
-    BOARDS }o--o{ FILTERS : "boards_filters HABTM"
 
     COLUMNS ||--o{ CARDS : "has_many dependent-destroy — the lifecycle"
 
@@ -173,20 +171,6 @@ erDiagram
         json particulars "default json_object()"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
-    }
-
-    FILTERS {
-        bigint id PK
-        bigint creator_id FK "NOT NULL — User"
-        json fields "default json_object() NOT NULL"
-        string params_digest "limit 255 NOT NULL — unique per creator"
-        datetime created_at "NOT NULL"
-        datetime updated_at "NOT NULL"
-    }
-
-    BOARDS_FILTERS {
-        bigint board_id FK "NOT NULL — HABTM join, no id column"
-        bigint filter_id FK "NOT NULL"
     }
 
     SEARCH_QUERIES {
@@ -385,8 +369,6 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `notes` | `..._on_card_id` / `..._on_creator_id` | `card_id` / `creator_id` | |
 | `events` | `index_events_on_eventable` | `eventable_type, eventable_id` | |
 | `events` | `..._on_creator_id` | `creator_id` | |
-| `filters` | `index_filters_on_creator_id_and_params_digest` | `creator_id, params_digest` | ✓ |
-| `boards_filters` | `..._on_board_id` / `..._on_filter_id` | `board_id` / `filter_id` | |
 | `search_queries` | `..._on_user_id_and_updated_at` | `user_id, updated_at` | ✓ |
 | `search_queries` | `..._on_user_id_and_terms` | `user_id, terms` | |
 | `search_records` | `..._on_searchable_type_and_searchable_id` | `searchable_type, searchable_id` | ✓ |
@@ -435,7 +417,6 @@ defaults to `read write`.
   integer primary key. SQLite maintains it; nothing in the app reads it.
 - **`oauth_applications`**, **`oauth_access_grants`**, **`oauth_access_tokens`** are
   Doorkeeper's, in its standard shape plus PKCE columns; see Authentication chain above.
-- **`boards_filters`** is a classic HABTM join with `id: false` — no primary key, two indexes.
 
 ## Regenerating
 

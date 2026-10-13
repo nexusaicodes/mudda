@@ -1,17 +1,7 @@
-<%# locals: (card:, show_board:, show_lane:) -%>
-<%# One quiet line of facts under the title. The board is named only where a list spans boards,
-    and the lane only where a list spans lanes. %>
+<%# locals: (card:, show_lane:) -%>
+<%# One quiet line of facts under the title. The lane is named only where a list spans lanes. %>
 <footer class="card__details" id="<%= dom_id(card, :meta) %>">
-  <% if show_board %>
-    <span class="card__details-board overflow-ellipsis"><%= card.board.name %></span>
-  <% end %>
-
-  <% if card.due_on && !card.closed? %>
-    <span class="card__when card__when--<%= card_due_tone(card) %>" title="Due <%= l(card.due_on, format: :long) %>">
-      <%= icon_tag "bell-alert" if card.overdue? %>
-      <%= card_due_relative_label(card) %>
-    </span>
-  <% end %>
+  <%= render "cards/display/preview/due", card: card %>
 
   <%= render "cards/display/preview/steps", card: card %>
   <%= icon_tag "attachment", class: "card__details-attachments" if card.has_attachments? %>

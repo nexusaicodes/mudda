@@ -156,12 +156,12 @@ has none: the platform's "Go Premium" sends returning customers there.
 
 **User** → the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`,
 `has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`.
-Owns filters and notes. `deactivate` sets `active: false` and leaves the sessions alone, so
+Owns notes. `deactivate` sets `active: false` and leaves the sessions alone, so
 `Authorization` still has a credential to refuse.
 
-**Board** → primary organizational unit. Concerns: `Cards`, `Filterable`,
-`Triageable`. **Every board has the same four
-fixed columns** (see below). All of the account's boards are visible to the user.
+**Board** → primary organizational unit, named (never blank). Concerns: `Cards`, `Triageable`.
+**Every board has the same four fixed columns** (see below). All of the account's boards are
+visible to the user.
 
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
 fixed (`attr_readonly :name`, since lane predicates key off them); only color is editable.
@@ -301,8 +301,9 @@ The browser is for an occasional look — agents do most of the work through the
 chrome is small and there are **no keyboard shortcuts** (keys only act inside the field being
 typed in: Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
-- **One-row header** (`layouts/application`): the logo on the left, the page title in the
-  centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
+- **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
+  followed by the page's back link if it has one (`content_for :header_start`), the page title in
+  the centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
   upgrade, sign out) on the right.
 - **Board title** (`boards/_title`): clicking the name renames the board in place
   (`inline-edit` controller), with "Delete board…" beside Save/Cancel. There is no board
@@ -311,11 +312,12 @@ typed in: Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   on first open: every board (the current one ticked), the cross-board views in
   `Filter::VIEWS` with their counts, and "New board" last.
 - **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
-  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board. The board
-  page itself takes no filters.
+  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board, one board
+  after another. The board page itself takes no filters. A `Filter` is read from the query for
+  each request and never stored; a value outside its list is refused (`400`, or `422` for JSON).
 - **Search** is a pill floating at the bottom centre (`bar/_bar`); results open above it,
-  grouped by board with the board searched from first, one row per card, five per board with a
-  link to the rest.
+  grouped by board with the board searched from first, one row per card, the five latest per
+  board with a link to the rest (`User::Searcher#search_counts_by_board`, `#search_board`).
 
 ### Keys and Card Numbers
 

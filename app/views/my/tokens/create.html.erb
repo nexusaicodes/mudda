@@ -1,10 +1,10 @@
 <% @page_title = "Token minted" %>
 
-<% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= back_link_to "API tokens", my_tokens_path %>
-  </div>
+<% content_for :header_start do %>
+  <%= back_link_to "API tokens", my_tokens_path %>
+<% end %>
 
+<% content_for :header do %>
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 

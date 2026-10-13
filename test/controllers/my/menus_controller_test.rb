@@ -22,7 +22,7 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
 
     get my_menu_path
 
-    due_soon = @user.filters.from_params(due: "soon").cards.count
+    due_soon = Filter.new(@user, due: "soon").cards.count
     assert_operator due_soon, :>, 0
     assert_select "a[href=?]", cards_path(due: "soon") do
       assert_select ".menu__count", text: due_soon.to_s

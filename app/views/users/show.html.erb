@@ -1,5 +1,9 @@
 <% @page_title = @user.name %>
 
+<% content_for :header_start do %>
+  <%= back_link_to "Home", root_path %>
+<% end %>
+
 <div class="settings settings--profile">
   <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">

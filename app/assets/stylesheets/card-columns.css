@@ -558,11 +558,6 @@
     .card__when--soon { color: oklch(var(--lch-yellow-dark)); }
     .card__steps--complete { color: var(--color-positive); }
 
-    .card__details-board {
-      color: var(--card-text-color);
-      max-inline-size: 16ch;
-    }
-
     .card__notes .icon--comment {
       color: var(--card-color);
     }

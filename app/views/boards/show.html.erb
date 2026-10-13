@@ -3,10 +3,6 @@
 <% turbo_exempts_page_from_cache %>
 
 <% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= render "layouts/shared/home_link" %>
-  </div>
-
   <%= render "boards/title", board: @board %>
 <% end %>
 

@@ -1,10 +1,8 @@
 <% @page_title = "New card" %>
 <% @header_class = "header--card" %>
 
-<% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= link_back_to_board @board %>
-  </div>
+<% content_for :header_start do %>
+  <%= link_back_to_board @board %>
 <% end %>
 
 <section class="card-perma card-perma--draft" style="--card-color: <%= @card.color %>;">

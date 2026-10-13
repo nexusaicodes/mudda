@@ -1,9 +1,7 @@
 <% @page_title = "Edit your profile" %>
 
-<% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= back_link_to "profile", user_path(@user) %>
-  </div>
+<% content_for :header_start do %>
+  <%= back_link_to "profile", user_path(@user) %>
 <% end %>
 
 <div class="panel shadow center" style="--panel-size: 45ch;">

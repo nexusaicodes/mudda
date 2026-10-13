@@ -21,6 +21,7 @@ class Card < ApplicationRecord
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
   scope :by_due_date,             -> { order Arel.sql("cards.due_on IS NULL, CASE WHEN cards.due_on < '#{Date.current.to_fs(:db)}' THEN 1 ELSE 0 END, cards.due_on ASC, cards.id ASC") }
+  scope :grouped_by_board,        -> { joins(:board).reorder(Board.arel_table[:name].asc, Board.arel_table[:id].asc, *order_values) }
   scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ]) }
   scope :preloaded,               -> { with_users.preload(:column, :steps, board: [ :columns ]).with_rich_text_description_and_embeds }
 

@@ -10,6 +10,13 @@
     <div id="global-container">
       <header class="header <%= @header_class %>" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <% if Current.user %>
+          <div class="header__actions header__actions--start">
+            <%= render "layouts/shared/home_link" %>
+            <%= yield :header_start %>
+          </div>
+        <% end %>
+
         <%= yield :header %>
 
         <% if Current.user %>

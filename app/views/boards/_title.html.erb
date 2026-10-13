@@ -11,10 +11,10 @@
   </div>
 
   <div class="board-title__editor" data-inline-edit-target="editor" hidden>
-    <%= form_with model: board, class: "board-title__form", data: { action: "keydown.esc->inline-edit#cancel" } do |form| %>
+    <%= form_with model: board, class: "board-title__form", data: { controller: "form", action: "submit->form#preventEmptySubmit keydown.esc->inline-edit#cancel" } do |form| %>
       <%= form.label :name, "Board name", class: "for-screen-reader" %>
       <%= form.text_field :name, required: true, autocomplete: "off", class: "input board-title__input",
-            data: { inline_edit_target: "input", "1p-ignore": "true" } %>
+            data: { inline_edit_target: "input", form_target: "input", validation_message: "Board names can’t be blank", "1p-ignore": "true" } %>
       <%= form.button "Save", class: "btn btn--link txt-small" %>
       <button type="button" class="btn txt-small" data-action="inline-edit#cancel">Cancel</button>
     <% end %>

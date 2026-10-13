@@ -9,14 +9,22 @@ class CardsController < ApplicationController
   before_action :set_card, only: %i[ show edit update destroy ]
 
   # Nested under a board, the index answers for that board alone; at the top level it spans
-  # every board. The filter narrows either one.
+  # every board. The filter narrows either one. A person reading several boards gets the
+  # cards one board after another, each under its heading.
   def index
     cards = within_board(@filter.cards)
-    set_page_and_extract_portion_from cards
 
     respond_to do |format|
-      format.html { @board_counts = cards.reorder(nil).group(:board_id).count }
-      format.json
+      format.html do
+        if @single_board = @board || @filter.single_board
+          set_page_and_extract_portion_from cards
+        else
+          set_page_and_extract_portion_from cards.grouped_by_board
+          set_board_headings_from cards
+        end
+      end
+
+      format.json { set_page_and_extract_portion_from cards }
     end
   end
 
@@ -84,10 +92,15 @@ class CardsController < ApplicationController
   end
 
   private
-    # Narrows the query, not the filter: Filter#boards is a HABTM, so assigning board_ids on
-    # a saved filter would rewrite its boards on disk as a side effect of a GET.
+    # The board in the path narrows whatever the filter asks for.
     def within_board(cards)
       @board ? cards.where(board: @board) : cards
+    end
+
+    # A board whose cards began on an earlier page already has its heading there.
+    def set_board_headings_from(cards)
+      @board_counts = cards.reorder(nil).where(board_id: @page.records.map(&:board_id)).group(:board_id).count
+      @continued_board_id = @page.recordset.page(@page.number - 1).records.to_a.last&.board_id unless @page.first?
     end
 
     def set_board

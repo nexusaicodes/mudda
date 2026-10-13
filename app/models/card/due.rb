@@ -7,8 +7,9 @@ module Card::Due
     validates :due_on, presence: { message: :blank_while_active }, if: -> { active? && !due_on_supplied? }
     validate :due_on_is_a_date
 
-    # Open cards due by tomorrow, the overdue ones included; ordered most overdue first.
-    scope :due_soon, -> { open.where(due_on: ..Date.tomorrow).reorder(due_on: :asc, id: :asc) }
+    # Open cards due by tomorrow, the overdue ones included.
+    scope :due_soon, -> { open.where(due_on: ..Date.tomorrow) }
+    scope :most_overdue_first, -> { reorder(due_on: :asc, id: :asc) }
   end
 
   def overdue?

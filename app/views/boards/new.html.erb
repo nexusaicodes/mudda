@@ -1,6 +1,10 @@
 <% @page_title = "Create a new board" %>
 <% @body_class = "compact-on-touch" %>
 
+<% content_for :header_start do %>
+  <%= back_link_to "Home", root_path %>
+<% end %>
+
 <div class="panel panel--centered">
   <%= form_with model: @board, class: "flex flex-column gap", data: { controller: "form", action: "submit->form#preventEmptySubmit" } do |form| %>
     <h1 class="txt-x-large margin-none font-weight-black"><%= @page_title %></h1>

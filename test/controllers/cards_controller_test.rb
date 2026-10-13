@@ -14,7 +14,27 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     get cards_path
 
     assert_select ".card-group__title a", text: boards(:writebook).name
-    assert_select ".card .card__details-board", count: 0
+  end
+
+  test "a board's cards run on into the next page under the heading they started under" do
+    Current.user = users(:kevin)
+    board = boards(:writebook)
+    20.times { |i| board.cards.create!(title: "Filler #{i}") }
+
+    get cards_path(page: 2)
+
+    assert_response :success
+    assert_select ".card-group__title a", text: board.name, count: 0
+  end
+
+  test "a view's lane is named in any case" do
+    get cards_path(lane: "Doing")
+    assert_select ".board-title__name", text: "Doing everywhere"
+  end
+
+  test "a filter value it doesn't know is refused, not ignored" do
+    get cards_path(due: "today")
+    assert_response :bad_request
   end
 
   test "a view's title is the view's name" do
@@ -33,7 +53,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "filtered index" do
-    get cards_path(filters(:newest_first).as_params.merge(term: "haggis"))
+    get cards_path(sorted_by: "newest", terms: [ "haggis" ])
     assert_response :success
   end
 

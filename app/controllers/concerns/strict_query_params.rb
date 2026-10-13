@@ -14,7 +14,7 @@ module StrictQueryParams
 
   # The controls that page and shape a response, which every index shares — and `format`,
   # which Rails reads from the query as readily as from the path's extension.
-  PAGINATION_PARAMS = %w[ page previous expand_all format ]
+  PAGINATION_PARAMS = %w[ page previous format ]
 
   included do
     include JsonErrors
