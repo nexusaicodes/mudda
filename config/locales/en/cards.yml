@@ -50,6 +50,7 @@ en:
       common:
         board:
           card_number: Card number
+          number_prefix: No.
         meta:
           added_html: Added %{time}
           by_html: By <strong>%{name}</strong>

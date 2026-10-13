@@ -143,7 +143,7 @@ ar:
       switch: تبديل اللوحة
     tokens:
       create:
-        api: أو استدعِ الـ API
+        api: أو استدعِ واجهة API
         back: رموز API
         choose_scope: اختر صلاحية واحدة على الأقل للرمز
         copy: نسخ
@@ -156,7 +156,7 @@ ar:
       index:
         back: ملفي الشخصي
         intro: يتيح الرمز لبرنامج نصي أو وكيل ذكاء اصطناعي استخدام Mudda باسمك عبر
-          الـ API أو MCP. امنح كل رمز اسمًا خاصًا به لتعرف ما فعله وتلغيه وحده.
+          واجهة API أو MCP. امنح كل رمز اسمًا خاصًا به لتعرف ما فعله وتلغيه وحده.
         mint_heading: إنشاء رمز
         name: الاسم
         placeholder: 'مثلًا: claude أو cursor أو backup-script'

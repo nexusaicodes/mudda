@@ -50,6 +50,7 @@ ar:
       common:
         board:
           card_number: رقم البطاقة
+          number_prefix: رقم
         meta:
           added_html: أُضيفت %{time}
           by_html: بواسطة <strong>%{name}</strong>

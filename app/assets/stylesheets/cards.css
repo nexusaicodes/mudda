@@ -129,7 +129,7 @@
     flex-shrink: 0;
 
     .card-perma &:before {
-      content: "No.";
+      content: attr(data-number-prefix);
       opacity: 0.5;
     }
   }
