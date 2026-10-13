@@ -1,7 +1,7 @@
-<% @page_title = "Passkeys" %>
+<% @page_title = t(".title") %>
 
 <% content_for :header_start do %>
-  <%= back_link_to "My profile", user_path(Current.user) %>
+  <%= back_link_to t(".back"), user_path(Current.user) %>
 <% end %>
 
 <% content_for :header do %>
@@ -9,7 +9,7 @@
 <% end %>
 
 <section class="panel panel--wide shadow center">
-  <p class="font-weight-medium margin-none-block-start">Passkeys let you sign in securely without a password or email code.</p>
+  <p class="font-weight-medium margin-none-block-start"><%= t(".intro") %></p>
 
   <% if @passkeys.any? %>
     <ul class="margin-none-block-start margin-block-end-double unpad">
@@ -18,13 +18,13 @@
   <% end %>
 
   <footer>
-    <%= passkey_registration_button my_passkeys_path, options: @registration_options, error: { class: "txt-negative margin-block-half" }, cancellation: { class: "txt-subtle margin-block-half" }, duplicate: { class: "txt-negative margin-block-half" }, class: "btn btn--link center txt-medium" do %>
+    <%= passkey_registration_button my_passkeys_path, options: @registration_options, error: { class: "txt-negative margin-block-half", message: t(".error") }, cancellation: { class: "txt-subtle margin-block-half", message: t(".cancelled") }, duplicate: { class: "txt-negative margin-block-half", message: t(".duplicate") }, class: "btn btn--link center txt-medium" do %>
       <%= icon_tag "add" %>
-      <span>Register a passkey</span>
+      <span><%= t(".register") %></span>
     <% end %>
 
     <p class="txt-small txt-subtle txt-balance margin-none-block-end">
-      Your browser will prompt you to create a passkey using your device's biometrics, PIN, or security key
+      <%= t(".hint") %>
     </p>
   </footer>
 </section>

@@ -1,8 +1,13 @@
 module ColumnsHelper
+  # A lane's name for display; the stored name stays English for data attributes and the API.
+  def lane_name(column)
+    t("lanes.#{column.name.downcase}")
+  end
+
   def button_to_set_column(card, column)
     current = column == card.column
     button_to \
-      tag.span(column.name, class: "overflow-ellipsis"),
+      tag.span(lane_name(column), class: "overflow-ellipsis"),
       board_card_column_path(card.board, card, column_id: column.id),
       method: :patch,
       class: [ "card__column-name btn", { "card__column-name--current": current } ],

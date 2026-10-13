@@ -1,0 +1,8 @@
+---
+ar:
+  filters:
+    all_boards: كل اللوحات
+    views:
+      doing: "%{lane} في كل اللوحات"
+      due_soon: مستحقة اليوم وغدًا
+      golden: الذهبية

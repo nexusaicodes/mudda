@@ -59,7 +59,7 @@ class Card < ApplicationRecord
 
   private
     def set_default_title
-      self.title = "Untitled" if title.blank?
+      self.title = I18n.t("cards.untitled") if title.blank?
     end
 
     # A move names where the card ends up. A lane named alongside the board is kept, and
@@ -77,7 +77,7 @@ class Card < ApplicationRecord
     # raises RecordInvalid, which JSON clients receive as the usual 422 envelope.
     def claim_card_slot
       unless board.account.claim_card_slot
-        errors.add :base, "This account has used all #{board.account.card_limit} of its cards"
+        errors.add :base, :card_limit_reached, limit: board.account.card_limit
         raise ActiveRecord::RecordInvalid, self
       end
     end

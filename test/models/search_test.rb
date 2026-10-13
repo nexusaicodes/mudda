@@ -22,4 +22,34 @@ class SearchTest < ActiveSupport::TestCase
     results = Search::Record.search("BC3-IOS-1D8B", user: @user)
     assert results.find { |it| it.card_id == card.id }
   end
+
+  test "search matches Arabic regardless of harakat, hamza and the article" do
+    greeting = @board.cards.create!(title: "مَرْحَباً بالعالم", creator: @user, due_on: 1.week.from_now)
+    book = @board.cards.create!(title: "قرأت الكتاب", creator: @user, due_on: 1.week.from_now)
+    prefixed = @board.cards.create!(title: "بالكتاب", creator: @user, due_on: 1.week.from_now)
+    name = @board.cards.create!(title: "أحمد", creator: @user, due_on: 1.week.from_now)
+
+    assert_includes card_ids_for("مرحبا"), greeting.id
+    assert_includes card_ids_for("كتاب"), book.id
+    assert_includes card_ids_for("كتاب"), prefixed.id
+    assert_includes card_ids_for("احمد"), name.id
+  end
+
+  test "search still stems English" do
+    card = @board.cards.create!(title: "running tests", creator: @user, due_on: 1.week.from_now)
+
+    assert_includes card_ids_for("run"), card.id
+  end
+
+  test "search highlights the stored Arabic title" do
+    @board.cards.create!(title: "قرأت الكتابَ", creator: @user, due_on: 1.week.from_now)
+
+    record = Search::Record.search("كتاب", user: @user).first
+    assert_includes record.card_title, "<mark class=\"circled-text\"><span></span>الكتابَ</mark>"
+  end
+
+  private
+    def card_ids_for(terms)
+      Search::Record.search(terms, user: @user).map(&:card_id)
+    end
 end

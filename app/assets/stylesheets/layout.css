@@ -29,9 +29,8 @@
     inline-size: 100dvw;
     margin-inline: auto;
     max-inline-size: 100dvw;
-    padding-inline:
-      calc(var(--main-padding) + var(--custom-safe-inset-left))
-      calc(var(--main-padding) + var(--custom-safe-inset-right));
+    padding-left: calc(var(--main-padding) + var(--custom-safe-inset-left));
+    padding-right: calc(var(--main-padding) + var(--custom-safe-inset-right));
     text-align: center;
   }
 

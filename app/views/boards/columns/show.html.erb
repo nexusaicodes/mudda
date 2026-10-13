@@ -1,4 +1,4 @@
-<% @page_title = "Column: #{ @column.name }" %>
+<% @page_title = t(".title", lane: lane_name(@column)) %>
 
 <% content_for :header_start do %>
   <%= link_back_to_board(@column.board) %>

@@ -1,5 +1,5 @@
 <% if card.closed? %>
   <%= tag.div class: "card__closed" do %>
-    <span class="card__closed-title" data-text="Done">Done</span>
+    <span class="card__closed-title" data-text="<%= lane_name(card.column) %>"><%= lane_name(card.column) %></span>
   <% end %>
 <% end %>

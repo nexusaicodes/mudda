@@ -1,4 +1,4 @@
-<% @page_title = "Connect #{@pre_auth.client.name}" %>
+<% @page_title = t(".title", client: @pre_auth.client.name) %>
 <% redirect = URI.parse(@pre_auth.redirect_uri.to_s) rescue nil %>
 <% request_fields = { client_id: @pre_auth.client.uid, redirect_uri: @pre_auth.redirect_uri, state: @pre_auth.state,
      response_type: @pre_auth.response_type, response_mode: @pre_auth.response_mode, scope: @pre_auth.scope,
@@ -6,17 +6,15 @@
      resource: params[:resource] } %>
 
 <div class="panel panel--wide shadow center txt-align-start flex flex-column gap">
-  <h1 class="txt-large margin-none"><strong><%= @pre_auth.client.name %></strong> wants to use your Mudda</h1>
+  <h1 class="txt-large margin-none"><%= t(".heading_html", client: tag.strong(@pre_auth.client.name, dir: "auto")) %></h1>
 
   <p class="margin-none">
-    It will act as you, <%= Current.user.name %>, and what it does is recorded as done through
-    <strong><%= @pre_auth.client.name %></strong>. You can revoke it any time under
-    <%= link_to "API tokens", my_tokens_path %>.
+    <%= t(".acts_as_html", user: tag.span(Current.user.name, dir: "auto"), client: tag.strong(@pre_auth.client.name, dir: "auto"),
+          link: link_to(t(".tokens_link"), my_tokens_path)) %>
   </p>
 
   <p class="txt-small txt-subtle margin-none">
-    It will be sent back to <strong><%= redirect&.host.presence || @pre_auth.redirect_uri %></strong>.
-    Only continue if you started connecting it just now.
+    <%= t(".redirect_html", host: tag.strong(redirect&.host.presence || @pre_auth.redirect_uri, dir: "ltr")) %>
   </p>
 
   <%= form_tag oauth_authorization_path, method: :post, data: { turbo: false }, class: "flex flex-column gap" do %>
@@ -25,7 +23,7 @@
     <% end %>
 
     <fieldset class="flex flex-column gap-half borderless unpad margin-none">
-      <legend class="margin-block-end-half">Allow it to</legend>
+      <legend class="margin-block-end-half"><%= t(".allow_legend") %></legend>
       <% scope_descriptions(@pre_auth.scopes.to_a).each do |scope, description| %>
         <label class="flex align-center gap-half">
           <%= check_box_tag "granted_scopes[]", scope, true, id: "granted_scope_#{scope}" %>
@@ -34,13 +32,13 @@
       <% end %>
     </fieldset>
 
-    <%= submit_tag "Allow", class: "btn btn--link center" %>
+    <%= submit_tag t(".allow"), class: "btn btn--link center" %>
   <% end %>
 
   <%= form_tag oauth_authorization_path, method: :delete, data: { turbo: false }, class: "txt-align-center" do %>
     <% request_fields.each do |name, value| %>
       <%= hidden_field_tag name, value, id: nil %>
     <% end %>
-    <%= submit_tag "Deny", class: "btn borderless txt-small" %>
+    <%= submit_tag t(".deny"), class: "btn borderless txt-small" %>
   <% end %>
 </div>

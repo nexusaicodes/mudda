@@ -52,7 +52,7 @@ module Card::Triageable
     # this, so a card can never sit on one board in another board's lane.
     def column_on_its_board
       if column && column.board_id != board_id
-        errors.add :column, "must belong to the card's board"
+        errors.add :column, :off_board
       end
     end
 

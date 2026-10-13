@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= I18n.locale %>" dir="<%= html_direction %>">
   <%= render "layouts/shared/head" %>
 
   <body class="<%= @body_class %>"
     data-controller="local-time timezone-cookie turbo-navigation theme"
     data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
     data-turbo-navigation-label-value="<%= @page_title %>"
+    data-turbo-navigation-back-template-value="<%= t("back_link.label", label: "%{label}") %>"
     data-platform="<%= platform.type %>">
     <div id="global-container">
       <header class="header <%= @header_class %>" id="header">
-        <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
+        <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t(".skip") %></a>
         <% if Current.user %>
           <div class="header__actions header__actions--start">
             <%= render "layouts/shared/home_link" %>

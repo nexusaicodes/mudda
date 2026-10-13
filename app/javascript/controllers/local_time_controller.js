@@ -1,7 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 import { differenceInDays, secondsToDate } from "helpers/date_helpers"
 
-const DEFAULT_LOCALE = "en-US"
+// The page's language with Western digits, e.g. "ar-u-nu-latn"
+function locale() {
+  return `${document.documentElement.lang || "en-US"}-u-nu-latn`
+}
 
 export default class extends Controller {
   static targets = [ "time", "date", "datetime", "shortdate", "ago", "indays", "daysago", "agoorweekday", "timeordate" ]
@@ -11,14 +14,13 @@ export default class extends Controller {
   #timer
 
   initialize() {
-    this.timeFormatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, { timeStyle: "short" })
-    this.dateFormatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, { dateStyle: "long" })
-    this.shortdateFormatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, { month: "short", day: "numeric" })
-    this.datetimeFormatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, { timeStyle: "short", dateStyle: "short" })
+    this.timeFormatter = new Intl.DateTimeFormat(locale(), { timeStyle: "short" })
+    this.dateFormatter = new Intl.DateTimeFormat(locale(), { dateStyle: "long" })
+    this.shortdateFormatter = new Intl.DateTimeFormat(locale(), { month: "short", day: "numeric" })
+    this.datetimeFormatter = new Intl.DateTimeFormat(locale(), { timeStyle: "short", dateStyle: "short" })
     this.agoFormatter = new AgoFormatter()
     this.daysagoFormatter = new DaysAgoFormatter()
-    this.datewithweekdayFormatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, { weekday: "long", month: "long", day: "numeric" })
-    this.datewithweekdayFormatter = new Intl.DateTimeFormat(DEFAULT_LOCALE, { weekday: "long", month: "long", day: "numeric" })
+    this.datewithweekdayFormatter = new Intl.DateTimeFormat(locale(), { weekday: "long", month: "long", day: "numeric" })
     this.indaysFormatter = new InDaysFormatter()
     this.agoorweekdayFormatter = new DaysAgoOrWeekdayFormatter()
     this.timeordateFormatter = new TimeOrDateFormatter()
@@ -106,30 +108,24 @@ class AgoFormatter {
     const months = days / (365 / 12)
     const years = days / 365
 
-    if (years >= 1) return this.#pluralize("year", years)
-    if (months >= 1) return this.#pluralize("month", months)
-    if (weeks >= 1) return this.#pluralize("week", weeks)
-    if (days >= 1) return this.#pluralize("day", days)
-    if (hours >= 1) return this.#pluralize("hour", hours)
-    if (minutes >= 1) return this.#pluralize("minute", minutes)
+    if (years >= 1) return this.#ago(years, "year")
+    if (months >= 1) return this.#ago(months, "month")
+    if (weeks >= 1) return this.#ago(weeks, "week")
+    if (days >= 1) return this.#ago(days, "day")
+    if (hours >= 1) return this.#ago(hours, "hour")
+    if (minutes >= 1) return this.#ago(minutes, "minute")
 
-    return "Less than a minute ago"
+    return capitalize(relativeFormatter("auto").format(0, "second"))
   }
 
-  #pluralize(word, quantity) {
-    quantity = Math.floor(quantity)
-    const suffix = (quantity === 1) ? "" : "s"
-    return `${quantity} ${word}${suffix} ago`
+  #ago(quantity, unit) {
+    return relativeFormatter("always").format(-Math.floor(quantity), unit)
   }
 }
 
 class DaysAgoFormatter {
   format(date) {
-    const days = differenceInDays(date, new Date())
-
-    if (days <= 0) return styleableValue("today")
-    if (days === 1) return styleableValue("yesterday")
-    return `${styleableValue(days)} days ago`
+    return styleableRelativeDays(-Math.max(0, differenceInDays(date, new Date())))
   }
 }
 
@@ -140,18 +136,14 @@ class DaysAgoOrWeekdayFormatter {
     if (days <= 1) {
       return new DaysAgoFormatter().format(date)
     } else {
-      return new Intl.DateTimeFormat(DEFAULT_LOCALE, { weekday: "long", month: "long", day: "numeric" }).format(date)
+      return new Intl.DateTimeFormat(locale(), { weekday: "long", month: "long", day: "numeric" }).format(date)
     }
   }
 }
 
 class InDaysFormatter {
   format(date) {
-    const days = differenceInDays(new Date(), date)
-
-    if (days <= 0) return styleableValue("today")
-    if (days === 1) return styleableValue("tomorrow")
-    return `in ${styleableValue(days)} days`
+    return styleableRelativeDays(Math.max(0, differenceInDays(new Date(), date)))
   }
 }
 
@@ -160,13 +152,32 @@ class TimeOrDateFormatter {
     const days = differenceInDays(date, new Date())
 
     if (days >= 1) {
-      return new Intl.DateTimeFormat(DEFAULT_LOCALE, { month: "short", day: "numeric" }).format(date)
+      return new Intl.DateTimeFormat(locale(), { month: "short", day: "numeric" }).format(date)
     } else {
-      return new Intl.DateTimeFormat(DEFAULT_LOCALE, { timeStyle: "short" }).format(date)
+      return new Intl.DateTimeFormat(locale(), { timeStyle: "short" }).format(date)
     }
   }
 }
 
 function styleableValue(value) {
   return `<span class="local-time-value">${value}</span>`
+}
+
+function relativeFormatter(numeric) {
+  return new Intl.RelativeTimeFormat(locale(), { numeric })
+}
+
+// "today", "yesterday", "in 3 days", with the number (or the whole word) wrapped to be styled
+function styleableRelativeDays(days) {
+  const parts = relativeFormatter("auto").formatToParts(days, "day")
+
+  if (parts.some(part => part.type === "integer")) {
+    return parts.map(part => part.type === "literal" ? part.value : styleableValue(part.value)).join("")
+  } else {
+    return styleableValue(parts.map(part => part.value).join(""))
+  }
+}
+
+function capitalize(text) {
+  return text.charAt(0).toLocaleUpperCase(locale()) + text.slice(1)
 }

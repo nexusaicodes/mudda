@@ -77,7 +77,8 @@
     color: var(--color-ink-dark);
     font-size: var(--text-x-small);
     line-height: 1.4;
-    padding: 0.25rem var(--popup-item-padding-inline) 0.4rem calc(var(--popup-icon-size) + 2 * var(--popup-item-padding-inline));
+    padding-block: 0.25rem 0.4rem;
+    padding-inline: calc(var(--popup-icon-size) + 2 * var(--popup-item-padding-inline)) var(--popup-item-padding-inline);
   }
 
   .menu__footer {

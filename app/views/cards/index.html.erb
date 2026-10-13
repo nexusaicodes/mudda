@@ -34,7 +34,7 @@
     <% end %>
 
     <% if @page.first? && @page.records.empty? %>
-      <div class="blank-slate">Nothing here right now.</div>
+      <div class="blank-slate"><%= t(".empty") %></div>
     <% end %>
   </section>
 <% end %>

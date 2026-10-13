@@ -10,11 +10,12 @@ module My::MenuHelper
   end
 
   # One row of a header menu: an icon, a label, and either a tick for where you are or a count.
-  def menu_item(label, path, icon:, current: false, count: nil, turbo: true)
+  # +dir+ sets the label's text direction, for labels the user typed (dir: "auto").
+  def menu_item(label, path, icon:, current: false, count: nil, turbo: true, dir: nil)
     tag.li class: class_names("popup__item", "popup__item--current": current), aria: { current: current ? "page" : nil } do
       link_to path, class: "popup__btn btn", data: { turbo: turbo } do
         concat icon_tag(icon, class: "popup__icon")
-        concat tag.span(label, class: "overflow-ellipsis flex-item-grow")
+        concat tag.span(label, class: "overflow-ellipsis flex-item-grow", dir: dir)
         concat icon_tag("check", class: "menu__check") if current
         concat tag.span(count, class: "menu__count") if count
       end

@@ -1,0 +1,12 @@
+---
+en:
+  activerecord:
+    attributes:
+      card:
+        due_on: Due date
+    errors:
+      models:
+        card:
+          attributes:
+            due_on:
+              blank_while_active: can't be blank in Todo or Doing

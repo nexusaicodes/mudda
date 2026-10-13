@@ -1,0 +1,8 @@
+---
+en:
+  filters:
+    all_boards: all boards
+    views:
+      doing: "%{lane} everywhere"
+      due_soon: Due today & tomorrow
+      golden: Golden

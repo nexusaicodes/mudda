@@ -2,7 +2,7 @@
   <%= link_to edit_board_card_path(card.board, card), class: "btn btn--circle-mobile borderless",
         data: { turbo_frame: dom_id(card, :edit) } do %>
     <%= icon_tag "pencil", class: "icon--mobile-only" %>
-    <span>Edit</span>
+    <span><%= t(".edit") %></span>
   <% end %>
 
   <% if (done_column = card.board.done_column) && !card.closed? %>
@@ -11,7 +11,7 @@
           data: { form_target: "submit", turbo_frame: "_top" },
           form: { data: { controller: "form" } } do %>
       <%= icon_tag "check", class: "icon--mobile-only" %>
-      <span class="overflow-ellipsis">Mark as Done</span>
+      <span class="overflow-ellipsis"><%= t(".mark_as", lane: lane_name(done_column)) %></span>
     <% end %>
   <% end %>
 </div>

@@ -76,6 +76,7 @@ Rails.application.routes.draw do
     resources :passkeys, except: %i[ show new ]
     resources :tokens, only: %i[ index create destroy ]
     resource :timezone, only: :update
+    resource :locale, only: :update
     resource :menu, only: :show
   end
 

@@ -1,5 +1,5 @@
 <% if card.due_on && !card.closed? %>
-  <span class="card__when card__when--<%= card_due_tone(card) %>" title="Due <%= l(card.due_on, format: :long) %>">
+  <span class="card__when card__when--<%= card_due_tone(card) %>" title="<%= t(".due", date: l(card.due_on, format: :long)) %>">
     <%= icon_tag "bell-alert" if card.overdue? %>
     <%= card_due_relative_label(card) %>
   </span>

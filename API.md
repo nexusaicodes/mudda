@@ -297,6 +297,8 @@ card, or read the board, instead.
 
 ## Errors
 
+Errors are always in English, whatever language the user picked for the browser.
+
 Every failure comes back in one shape — including the ones that carry no record and the ones
 that never reach a controller (an unknown route, a crash), so a client never has to branch on
 the response to find out what went wrong:

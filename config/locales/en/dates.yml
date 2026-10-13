@@ -1,0 +1,7 @@
+---
+en:
+  date:
+    formats:
+      month_day: "%b %-d"
+      month_day_year: "%b %-d, %Y"
+      weekday: "%a"

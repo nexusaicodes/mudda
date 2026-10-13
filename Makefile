@@ -113,8 +113,13 @@ test-system: ## Run the system tests in a Selenium Chromium container
 	  status=$$?; $(COMPOSE) --profile system rm -sf selenium; exit $$status
 
 .PHONY: lint
-lint: ## Run RuboCop
+lint: ## Run RuboCop and the translation checks
 	$(RUN) bin/rubocop
+	$(RUN) sh -c "bundle exec i18n-tasks missing && bundle exec i18n-tasks unused && bundle exec i18n-tasks check-normalized"
+
+.PHONY: i18n
+i18n: ## Check the locale files for missing and unused keys
+	$(RUN) sh -c "bundle exec i18n-tasks missing && bundle exec i18n-tasks unused && bundle exec i18n-tasks check-normalized"
 
 .PHONY: lint-fix
 lint-fix: ## Run RuboCop with autocorrect

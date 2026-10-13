@@ -24,15 +24,26 @@
     /* The .pop-up--align-<drection> classes are used for initial alignment.
      * The orient JS helper layers on the .orient-<direction> to avoid running
      * off the edge of the screen and will override .popup--align */
-    &:where(.popup--align-left),
-    &.orient-left {
+    &:where(.popup--align-left) {
       inset-inline: auto 0;
       translate: var(--orient-offset, 0px);
     }
 
-    &:where(.popup--align-right),
-    &.orient-right {
+    &:where(.popup--align-right) {
       inset-inline: 0 auto;
+      translate: var(--orient-offset, 0px);
+    }
+
+    /* Physical, because the orient helper measures the viewport physically */
+    &.orient-left {
+      left: auto;
+      right: 0;
+      translate: var(--orient-offset, 0px);
+    }
+
+    &.orient-right {
+      left: 0;
+      right: auto;
       translate: var(--orient-offset, 0px);
     }
 
@@ -99,6 +110,8 @@
     .popup__section:not([open]) & {
       .icon--caret-down {
         rotate: -90deg;
+
+        &:dir(rtl) { rotate: 90deg; }
       }
     }
   }

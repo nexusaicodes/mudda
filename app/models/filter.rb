@@ -23,10 +23,20 @@ class Filter
   LANES = Board::Triageable::DEFAULT_COLUMNS.map { |column| column[:name].downcase }
 
   # The cross-board views the board switcher offers: each is a filter with a name.
+  View = Data.define(:key, :icon, :params) do
+    def name
+      I18n.t("filters.views.#{key}", lane: params[:lane] && I18n.t("lanes.#{params[:lane]}"))
+    end
+
+    def [](attribute)
+      public_send(attribute)
+    end
+  end
+
   VIEWS = [
-    { name: "Due today & tomorrow", icon: "bell-alert",    params: { due: "soon" } },
-    { name: "Doing everywhere",     icon: "bolt",          params: { lane: Card::Triageable::DOING_COLUMN.downcase } },
-    { name: "Golden",               icon: "golden-ticket", params: { indexed_by: "golden" } }
+    View.new(key: :due_soon, icon: "bell-alert",    params: { due: "soon" }),
+    View.new(key: :doing,    icon: "bolt",          params: { lane: Card::Triageable::DOING_COLUMN.downcase }),
+    View.new(key: :golden,   icon: "golden-ticket", params: { indexed_by: "golden" })
   ].freeze
 
   attr_reader :creator, :indexed_by, :sorted_by, :creation, :due, :lane, :terms, :card_ids, :column_ids, :board_ids
@@ -82,13 +92,13 @@ class Filter
     if boards.any?
       boards.map(&:name).to_sentence
     else
-      creator.boards.one? ? creator.boards.first.name : "all boards"
+      creator.boards.one? ? creator.boards.first.name : I18n.t("filters.all_boards")
     end
   end
 
   # The name of the view this filter is, if it is exactly one of them.
   def view_name
-    VIEWS.find { |view| Filter.new(creator, view[:params]).as_params == as_params }&.dig(:name)
+    VIEWS.find { |view| Filter.new(creator, view.params).as_params == as_params }&.name
   end
 
   def as_params

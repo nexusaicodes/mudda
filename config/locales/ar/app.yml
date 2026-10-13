@@ -1,0 +1,249 @@
+---
+ar:
+  account:
+    settings:
+      name:
+        placeholder: اسم الحساب…
+        save: حفظ التغييرات
+      plan:
+        heading: الخطة
+        no_refund: حذف بطاقة لا يُعيد مكانها.
+        upgrade: قم بالترقية لبطاقات غير محدودة
+        used:
+          few: استُخدمت %{count} بطاقات من %{limit}.
+          many: استُخدمت %{count} بطاقة من %{limit}.
+          one: استُخدمت بطاقة واحدة من %{limit}.
+          other: استُخدمت %{count} بطاقة من %{limit}.
+          two: استُخدمت بطاقتان من %{limit}.
+          zero: لم تُستخدم أي بطاقة من %{limit}.
+      show:
+        back: الرئيسية
+        title: إعدادات الحساب
+    upgrades:
+      show:
+        already_unlimited: هذه اللوحة تتيح بالفعل عددًا غير محدود من البطاقات
+  active_storage:
+    blobs:
+      blob:
+        download: تنزيل
+        download_title: تنزيل %{filename}
+  back_link:
+    label: العودة إلى %{label}
+  bar:
+    bar:
+      search: بحث
+  boards:
+    delete:
+      body:
+        few: سيؤدي هذا إلى حذف اللوحة و%{count} بطاقات فيها نهائيًا. لا يمكن التراجع
+          عن ذلك.
+        many: سيؤدي هذا إلى حذف اللوحة و%{count} بطاقة فيها نهائيًا. لا يمكن التراجع
+          عن ذلك.
+        one: سيؤدي هذا إلى حذف اللوحة وبطاقتها الوحيدة نهائيًا. لا يمكن التراجع عن
+          ذلك.
+        other: سيؤدي هذا إلى حذف اللوحة و%{count} بطاقة فيها نهائيًا. لا يمكن التراجع
+          عن ذلك.
+        two: سيؤدي هذا إلى حذف اللوحة وبطاقتيها نهائيًا. لا يمكن التراجع عن ذلك.
+        zero: سيؤدي هذا إلى حذف اللوحة نهائيًا، وليس فيها أي بطاقات. لا يمكن التراجع
+          عن ذلك.
+      cancel: إلغاء
+      heading_html: حذف «%{name}»؟
+      open: حذف اللوحة…
+      submit: حذف اللوحة
+    new:
+      back: الرئيسية
+      blank: لا يمكن أن يكون اسم اللوحة فارغًا
+      cancel: إلغاء والعودة
+      placeholder: سمّها…
+      submit: إنشاء اللوحة
+      title: إنشاء لوحة جديدة
+    title:
+      blank: لا يمكن أن يكون اسم اللوحة فارغًا
+      cancel: إلغاء
+      name_label: اسم اللوحة
+      rename: إعادة تسمية هذه اللوحة
+      save: حفظ
+  columns:
+    show:
+      add_card_button:
+        add: إضافة بطاقة
+        limit_reached:
+          few: استُخدمت كل البطاقات الـ%{count}
+          many: استُخدمت كل البطاقات الـ%{count}
+          one: استُخدمت البطاقة الوحيدة المتاحة
+          other: استُخدمت كل البطاقات الـ%{count}
+          two: استُخدمت البطاقتان المتاحتان
+          zero: لا توجد بطاقات متاحة
+        upgrade: ترقية
+  date:
+    formats:
+      app_long: "%-d %B %Y"
+  landings:
+    show:
+      create: إنشاء لوحة
+      empty_body: أنشئ لوحتك الأولى للبدء.
+      empty_heading: لا توجد لوحات بعد
+      open: فتح اللوحة
+      opening: جارٍ فتح لوحتك…
+      title: الرئيسية
+  layouts:
+    application:
+      skip: انتقل إلى المحتوى الرئيسي
+    lightbox:
+      close: إغلاق
+      label: عارض الصور (اضغط Esc للإغلاق)
+    public:
+      skip: انتقل إلى المحتوى الرئيسي
+    shared:
+      home_link:
+        label: الصفحة الرئيسية لـ Mudda
+  meta:
+    description: رتّب مهامك… لزمنك.
+  my:
+    account_menu:
+      account: الحساب
+      profile: الملف الشخصي
+      settings: إعدادات الحساب
+      sign_out: تسجيل الخروج
+      tokens: رموز API
+      upgrade: قم بالترقية لبطاقات غير محدودة
+    menus:
+      show:
+        boards: اللوحات
+        new_board: لوحة جديدة
+        only_board: هذه لوحتك الوحيدة حتى الآن. تفصل اللوحات بين الأعمال المختلفة
+          — مثل العمل والشؤون الشخصية.
+        views: طرق العرض
+    passkeys:
+      create:
+        failed: تعذّر تسجيل مفتاح المرور. حاول مرة أخرى.
+      edit:
+        back: مفاتيح المرور
+        confirm_remove: هل أنت متأكد من أنك تريد إزالة مفتاح المرور هذا؟
+        created: تم تسجيل مفتاح المرور. امنحه اسمًا لتتعرّف عليه لاحقًا.
+        name_label: سمِّ مفتاح المرور
+        placeholder: 'مثلًا: MacBook Pro أو iPhone'
+        remove: إزالة مفتاح المرور هذا
+        save: حفظ
+        title: تعديل مفتاح المرور
+      index:
+        back: ملفي الشخصي
+        cancelled: أُلغي تسجيل مفتاح المرور. حاول مرة أخرى عندما تكون مستعدًا.
+        duplicate: لديك بالفعل مفتاح مرور مسجّل على هذا الجهاز. أزل المفتاح الحالي
+          أولًا ثم حاول مرة أخرى.
+        error: حدث خطأ أثناء تسجيل مفتاح المرور.
+        hint: سيطلب منك متصفحك إنشاء مفتاح مرور باستخدام القياسات الحيوية لجهازك أو
+          رمز PIN أو مفتاح الأمان
+        intro: تتيح لك مفاتيح المرور تسجيل الدخول بأمان دون كلمة مرور أو رمز عبر البريد.
+        register: تسجيل مفتاح مرور
+        title: مفاتيح المرور
+      passkey:
+        unnamed: مفتاح مرور
+    switcher:
+      switch: تبديل اللوحة
+    tokens:
+      create:
+        api: أو استدعِ الـ API
+        back: رموز API
+        choose_scope: اختر صلاحية واحدة على الأقل للرمز
+        copy: نسخ
+        mcp: ربط عميل MCP
+        summary_html: 'يستطيع %{label}: %{scopes}. انسخ الرمز الآن — لن يُعرض مرة
+          أخرى. يتوقف عن العمل في %{date}، أو عند إلغائه.'
+        title: تم إنشاء الرمز
+      destroy:
+        revoked: تم إلغاء الرمز
+      index:
+        back: ملفي الشخصي
+        intro: يتيح الرمز لبرنامج نصي أو وكيل ذكاء اصطناعي استخدام Mudda باسمك عبر
+          الـ API أو MCP. امنح كل رمز اسمًا خاصًا به لتعرف ما فعله وتلغيه وحده.
+        mint_heading: إنشاء رمز
+        name: الاسم
+        placeholder: 'مثلًا: claude أو cursor أو backup-script'
+        replace_hint: إنشاء رمز باسم مستخدم بالفعل يستبدل الرمز السابق.
+        scopes_legend: ما يُسمح له به
+        submit: إنشاء الرمز
+        title: رموز API
+      token:
+        confirm_revoke: إلغاء %{label}؟ سيتوقف كل ما يستخدمه عن العمل.
+        connected: متصل منذ %{date}
+        revoke: إلغاء %{label}
+  oauth:
+    authorizations:
+      choose_scope: اختر صلاحية واحدة على الأقل يُسمح لـ %{client} بها، أو ارفض الطلب.
+      error:
+        back: العودة إلى Mudda
+        heading: لا يمكن ربط هذا التطبيق
+        retry_html: حاول ربطه مرة أخرى من التطبيق. %{link}
+        title: تعذّر الاتصال
+      foreign_resource: طلب هذا التطبيق الوصول إلى %{resource}، وهو ليس Mudda هذا.
+      new:
+        acts_as_html: سيتصرف باسمك، %{user}، وسيُسجَّل ما يفعله على أنه تم عبر %{client}.
+          يمكنك إلغاؤه في أي وقت من %{link}.
+        allow: السماح
+        allow_legend: السماح له بـ
+        deny: رفض
+        heading_html: يريد %{client} استخدام Mudda الخاص بك
+        redirect_html: ستتم إعادته إلى %{host}. لا تتابع إلا إذا كنت قد بدأت ربطه
+          للتو.
+        title: ربط %{client}
+        tokens_link: رموز API
+  pagination:
+    load_more: تحميل المزيد…
+    load_page: تحميل الصفحة %{number}
+  sessions:
+    new:
+      email_placeholder: أدخل بريدك الإلكتروني…
+      heading: ادخل إلى Mudda
+      or: "— أو —"
+      passkey: تسجيل الدخول بمفتاح مرور
+      passkey_cancelled: أُلغي تسجيل الدخول بمفتاح المرور. حاول مرة أخرى عندما تكون
+        مستعدًا.
+      passkey_error: حدث خطأ أثناء تسجيل الدخول بمفتاح المرور.
+      password_placeholder: كلمة المرور
+      submit: هيا بنا
+      title: تسجيل الدخول
+      unconfigured_html: لم تُضبط أي طريقة لتسجيل الدخول. اضبط <code>MUDDA_OWNER_PASSWORD</code>
+        وأعد تهيئة البيانات لتفعيل تسجيل الدخول.
+    passkeys:
+      create:
+        failed: لم ينجح مفتاح المرور هذا. حاول مرة أخرى.
+        rate_limited: حاول مرة أخرى لاحقًا.
+    passwords:
+      create:
+        failed: لم ينجح ذلك. تحقّق من كلمة المرور وحاول مرة أخرى.
+        rate_limited: حاول مرة أخرى لاحقًا.
+  tokens:
+    expiry:
+      expired: منتهي الصلاحية
+      expires: تنتهي صلاحيته في %{date}
+      unless_used: تنتهي صلاحيته في %{date} ما لم يُستخدم
+    scopes:
+      delete: حذفها — نهائيًا
+      read: قراءة اللوحات والبطاقات والملاحظات
+      write: إنشاؤها وتعديلها
+  users:
+    edit:
+      avatar_label: الصورة الرمزية لـ %{name}
+      back: الملف الشخصي
+      cancel: إلغاء والعودة
+      confirm_delete_avatar: هل أنت متأكد من أنك تريد إزالة صورتك الرمزية؟ لا يمكن
+        التراجع عن ذلك.
+      delete_avatar: حذف الصورة الرمزية
+      email_placeholder: البريد الإلكتروني
+      errors_heading: 'تعذّر حفظ تغييراتك:'
+      name_placeholder: الاسم
+      save: حفظ التغييرات
+      title: تعديل ملفك الشخصي
+    show:
+      avatar_alt: الصورة الرمزية لـ %{name}
+      back: الرئيسية
+      edit: تعديل الملف الشخصي
+      passkeys: إدارة مفاتيح المرور
+      sign_out: تسجيل الخروج من Mudda على هذا الجهاز
+      tokens: رموز API
+    theme:
+      auto: مثل نظام التشغيل
+      dark: داكن دائمًا
+      heading: المظهر
+      light: فاتح دائمًا

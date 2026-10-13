@@ -221,7 +221,7 @@
     border-radius: 0;
     box-shadow: none;
     padding: 0;
-    text-align: left;
+    text-align: start;
 
     h2 {
       &:before,

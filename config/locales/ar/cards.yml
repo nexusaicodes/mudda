@@ -1,0 +1,127 @@
+---
+ar:
+  activerecord:
+    errors:
+      models:
+        card:
+          attributes:
+            column:
+              off_board: يجب أن ينتمي إلى لوحة البطاقة
+          card_limit_reached: استخدم هذا الحساب جميع بطاقاته البالغ عددها %{limit}
+  boards:
+    columns:
+      empty_placeholder:
+        drag_cards: اسحب البطاقات إلى هنا
+        no_cards: لا توجد بطاقات هنا
+      show:
+        title: 'العمود: %{lane}'
+    show:
+      color_picker:
+        column_color: لون العمود
+        save_color: حفظ اللون
+      column:
+        maximize: تكبير العمود
+  cards:
+    boards:
+      edit:
+        filter: تصفية…
+        title: نقل هذه البطاقة إلى…
+    columns:
+      edit:
+        legend: اختر عمودًا لهذه البطاقة
+    container:
+      closure_buttons:
+        edit: تعديل
+        mark_as: نقل إلى %{lane}
+      gild:
+        demote: إعادة إلى عادية
+        promote: ترقية إلى تذكرة ذهبية
+      save_button:
+        save_changes: حفظ التغييرات
+    delete:
+      cancel: إلغاء
+      confirm: هل تريد بالتأكيد حذف هذه البطاقة نهائيًا؟
+      delete_card: حذف البطاقة
+      delete_this_card: حذف هذه البطاقة
+      title: حذف هذه البطاقة؟
+    destroy:
+      deleted: حُذفت البطاقة
+    display:
+      common:
+        board:
+          card_number: رقم البطاقة
+        meta:
+          added_html: أُضيفت %{time}
+          by_html: بواسطة <strong>%{name}</strong>
+          updated_html: حُدّثت %{time}
+      due:
+        due: الاستحقاق %{date}
+      perma:
+        board:
+          choose_board: اختر لوحة لهذه البطاقة
+        steps:
+          label: أضف خطوة
+          placeholder: أضف خطوة…
+      preview:
+        due:
+          due: الاستحقاق %{date}
+        steps:
+          title:
+            few: "%{completed} من %{count} خطوات منجزة"
+            many: "%{completed} من %{count} خطوة منجزة"
+            one: "%{completed} من خطوة واحدة منجزة"
+            other: "%{completed} من %{count} خطوة منجزة"
+            two: "%{completed} من خطوتين منجزة"
+            zero: "%{completed} من %{count} خطوة منجزة"
+    due:
+      overdue: متأخرة %{days} ي
+      today: اليوم
+      tomorrow: غدًا
+    edit:
+      description_placeholder: أضف ملاحظات أو سياقًا أو صورًا أو فيديو عن هذا…
+      discard: إغلاق المحرر وتجاهل التغييرات
+      due_date: تاريخ الاستحقاق
+      title_placeholder: سمّها…
+    index:
+      empty: لا شيء هنا الآن.
+    new:
+      add_step: أضف خطوة
+      allowance:
+        reached: استخدمت جميع البطاقات المتاحة في هذه الخطة وعددها %{limit}.
+        remaining:
+          few: تتبقى %{count} بطاقات من %{limit} في هذه الخطة.
+          many: تتبقى %{count} بطاقة من %{limit} في هذه الخطة.
+          one: تتبقى بطاقة واحدة من %{limit} في هذه الخطة.
+          other: تتبقى %{count} بطاقة من %{limit} في هذه الخطة.
+          two: تتبقى بطاقتان من %{limit} في هذه الخطة.
+          zero: لم تتبقَّ أي بطاقة من %{limit} في هذه الخطة.
+        upgrade: رقِّ خطتك لبطاقات غير محدودة
+      create: إنشاء البطاقة
+      description_placeholder: أضف ملاحظات أو سياقًا أو صورًا أو فيديو عن هذا…
+      due_date: تاريخ الاستحقاق
+      step_field:
+        label: خطوة
+        placeholder: أضف خطوة…
+      title: بطاقة جديدة
+      title_placeholder: سمّها…
+    notes:
+      edit:
+        cancel: إلغاء
+        confirm_delete: هل تريد بالتأكيد حذف هذه الملاحظة؟
+        delete: حذف
+        save: حفظ
+      first_placeholder: بعد ذلك، أضف ملاحظات أو سياقًا أو صورًا أو فيديو عن هذا…
+      label: الملاحظات
+      new:
+        post: نشر
+      note:
+        edit: تعديل هذه الملاحظة
+      placeholder: اكتب ملاحظتك…
+    steps:
+      edit:
+        cancel: إلغاء التغييرات
+        delete: حذف هذه الخطوة
+        placeholder: سمِّ هذه الخطوة…
+        save: حفظ التغييرات
+    title_tag: "%{title} أضافها %{creator} في %{board}"
+    untitled: بلا عنوان

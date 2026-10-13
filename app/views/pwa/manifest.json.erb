@@ -1,5 +1,7 @@
 {
-  "name": <%= [ "Mudda", Rails.env.production? ? nil : Rails.env ].compact.join(" - ").to_json.html_safe %>,
+  "lang": <%= I18n.locale.to_s.to_json.html_safe %>,
+  "dir": <%= (I18n.locale == :ar ? "rtl" : "ltr").to_json.html_safe %>,
+  "name": <%= [ t(".name"), Rails.env.production? ? nil : Rails.env ].compact.join(" - ").to_json.html_safe %>,
   "icons": [
     {
       "src": "/app-icon-192.png",
@@ -21,12 +23,12 @@
   "start_url": "/",
   "display": "standalone",
   "scope": "/",
-  "description": "Card-up the biggest issues in your projects",
+  "description": <%= t(".description").to_json.html_safe %>,
   "categories": ["bugs", "business", "productivity"],
   "shortcuts": [
     {
-      "name": "Home",
-      "description": "Jump back to your last board",
+      "name": <%= t(".home.name").to_json.html_safe %>,
+      "description": <%= t(".home.description").to_json.html_safe %>,
       "url": "<%= root_path %>",
       "icons": [{ "src": "<%= image_url("home.svg") %>", "sizes": "any" }]
     }

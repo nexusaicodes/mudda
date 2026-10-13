@@ -18,13 +18,16 @@
       translate: -50% -100%;
       text-overflow: ellipsis;
 
+      /* Physical, because the orient helper measures the viewport physically */
       &.orient-right {
-        inset-inline: 0 auto;
+        left: 0;
+        right: auto;
         translate: var(--orient-offset, 0px) -100%;
       }
 
       &.orient-left {
-        inset-inline: auto 0;
+        left: auto;
+        right: 0;
         translate: var(--orient-offset, 0px) -100%;
       }
     }

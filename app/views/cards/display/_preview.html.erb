@@ -16,12 +16,12 @@
 
   <div class="card__body">
     <div class="card__content">
-      <h3 class="card__title overflow-line-clamp">
+      <h3 class="card__title overflow-line-clamp" dir="auto">
         <%= card_html_title(card) %>
       </h3>
 
       <% if (excerpt = format_excerpt(card.description, length: 160)).present? %>
-        <p class="card__excerpt overflow-line-clamp"><%= excerpt %></p>
+        <p class="card__excerpt overflow-line-clamp" dir="auto"><%= excerpt %></p>
       <% end %>
     </div>
 

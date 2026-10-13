@@ -42,6 +42,7 @@ module ActiveSupport
 
     teardown do
       Current.clear_all
+      I18n.locale = I18n.default_locale
     end
   end
 end

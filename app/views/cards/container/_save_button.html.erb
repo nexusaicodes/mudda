@@ -1,6 +1,6 @@
 <div class="card-perma__notch card-perma__notch--bottom flex-column">
   <%= button_tag type: :submit, form: dom_id(card, :edit_form), class: "btn borderless",
-        title: "Save changes" do %>
-    <span>Save changes</span>
+        title: t(".save_changes") do %>
+    <span><%= t(".save_changes") %></span>
   <% end %>
 </div>

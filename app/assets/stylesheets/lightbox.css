@@ -54,11 +54,12 @@
   .lightbox__actions {
     display: flex;
     gap: 1ch;
-    inset:
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-top))
-      calc(var(--lightbox-padding) + var(--custom-safe-inset-right))
-      auto
-      auto;
+    inset-block: calc(var(--lightbox-padding) + var(--custom-safe-inset-top)) auto;
+    inset-inline: auto calc(var(--lightbox-padding) + var(--custom-safe-inset-right));
+
+    &:dir(rtl) {
+      inset-inline-end: calc(var(--lightbox-padding) + var(--custom-safe-inset-left));
+    }
     position: absolute;
   }
 

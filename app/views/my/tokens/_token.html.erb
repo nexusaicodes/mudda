@@ -2,17 +2,17 @@
   <div class="credential__link">
     <%= icon_tag "bolt", class: "flex-item-no-shrink" %>
     <div class="flex flex-column min-width flex-item-grow">
-      <strong class="overflow-ellipsis"><%= token.label %></strong>
+      <strong class="overflow-ellipsis" dir="auto"><%= token.label %></strong>
       <span class="txt-small txt-subtle overflow-ellipsis">
         <%= token.scopes.join(" · ") %> ·
-        <% if token.oauth? %>connected <%= token.created_at.to_date.to_fs(:long) %> ·<% end %>
+        <% if token.oauth? %><%= t(".connected", date: l(token.created_at.to_date, format: :app_long)) %> ·<% end %>
         <%= token_expiry(token) %>
       </span>
     </div>
     <%= button_to my_token_path(token), method: :delete, class: "btn txt-negative borderless txt-small",
-          data: { turbo_confirm: "Revoke #{token.label}? Anything using it stops working." } do %>
+          data: { turbo_confirm: t(".confirm_revoke", label: token.label) } do %>
       <%= icon_tag "trash" %>
-      <span class="for-screen-reader">Revoke <%= token.label %></span>
+      <span class="for-screen-reader"><%= t(".revoke", label: token.label) %></span>
     <% end %>
   </div>
 </li>

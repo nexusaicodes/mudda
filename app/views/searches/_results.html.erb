@@ -1,13 +1,13 @@
 <%# locals: (groups:, query:) -%>
 <section class="search">
   <% if query && groups.empty? %>
-    <div class="search__blank-slate blank-slate">No matches</div>
+    <div class="search__blank-slate blank-slate"><%= t(".no_matches") %></div>
   <% end %>
 
   <% groups.each do |board, count, cards| %>
     <section class="search__group">
       <h3 class="search__group-title">
-        <span class="overflow-ellipsis"><%= board.name %></span>
+        <span class="overflow-ellipsis" dir="auto"><%= board.name %></span>
         <span class="search__group-count"><%= count %></span>
       </h3>
 
@@ -18,7 +18,7 @@
       </ul>
 
       <% if count > cards.size %>
-        <%= link_to "Show all #{count} →", cards_path(board_ids: [ board.id ], terms: [ query ]),
+        <%= link_to t(".show_all", count: count), cards_path(board_ids: [ board.id ], terms: [ query ]),
               class: "search__more btn btn--plain txt-small", data: { turbo_frame: "_top", action: "bar#reset" } %>
       <% end %>
     </section>

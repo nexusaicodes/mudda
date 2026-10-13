@@ -8,6 +8,6 @@
   <%= render "cards/display/preview/notes", card: card %>
 
   <% if show_lane %>
-    <span class="card__details-lane overflow-ellipsis"><%= card.column.name %></span>
+    <span class="card__details-lane overflow-ellipsis"><%= lane_name(card.column) %></span>
   <% end %>
 </footer>

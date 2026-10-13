@@ -47,7 +47,7 @@
 
   .card__header {
     align-items: center;
-    border-radius: var(--border-radius) 0 0 0;
+    border-start-start-radius: var(--border-radius);
     display: flex;
     flex-wrap: nowrap;
     gap: var(--card-header-space);
@@ -100,7 +100,8 @@
     align-items: center;
     align-self: start;
     background-color: var(--card-color);
-    border-radius: var(--border-radius) 0 var(--border-radius) 0;
+    border-start-start-radius: var(--border-radius);
+    border-end-end-radius: var(--border-radius);
     color: var(--color-ink-inverted);
     display: inline-flex;
     font-weight: 600;
@@ -371,7 +372,8 @@
     display: flex;
     flex-direction: column;
     font-weight: bold;
-    inset: auto 0 -1lh auto;
+    inset-block: auto -1lh;
+    inset-inline: auto 0;
     justify-content: center;
     max-inline-size: 25ch;
     min-inline-size: 16ch;
@@ -381,6 +383,11 @@
     rotate: 5deg;
     transform-origin: top right;
     z-index: 2;
+
+    &:dir(rtl) {
+      rotate: -5deg;
+      transform-origin: top left;
+    }
 
     .cards & {
       display: none;

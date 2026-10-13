@@ -6,8 +6,7 @@ feature requests and questions, rather than [the issue
 tracker](https://github.com/nexus-ai/mudda/issues). If you're considering
 opening an issue or pull request, please open a discussion instead.
 
-Mudda is a fork of [Fizzy](https://github.com/basecamp/fizzy) by 37signals, maintained by
-Nexus AI. Please direct contributions here rather than upstream.
+Mudda is maintained by Nexus AI.
 
 Whenever a discussion leads to an actionable and well-understood task, we'll
 move it to the issue tracker where it can be worked on.

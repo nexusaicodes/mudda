@@ -4,7 +4,7 @@
     data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
   <button type="button" class="switcher__trigger btn btn--circle borderless" data-action="dialog#toggle">
     <%= icon_tag "caret-down" %>
-    <span class="for-screen-reader">Switch board</span>
+    <span class="for-screen-reader"><%= t(".switch") %></span>
   </button>
 
   <%= tag.dialog class: "switcher__menu menu popup popup--animated panel shadow",

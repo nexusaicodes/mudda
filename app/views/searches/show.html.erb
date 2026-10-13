@@ -1,7 +1,7 @@
-<% @page_title = @query ? "Search results for \"#{@query}\"" : "Search" %>
+<% @page_title = @query ? t(".title_with_query", query: @query) : t(".title") %>
 
 <% content_for :header_start do %>
-  <%= back_link_to "Home", root_path %>
+  <%= back_link_to t(".home"), root_path %>
 <% end %>
 
 <% content_for :header do %>

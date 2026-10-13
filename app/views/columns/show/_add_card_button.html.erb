@@ -1,14 +1,14 @@
 <div class="board-tools">
   <% if board.account.card_limit_reached? %>
-    <span class="txt-small">All <%= board.account.card_limit %> cards used</span>
+    <span class="txt-small"><%= t(".limit_reached", count: board.account.card_limit) %></span>
     <% if upgrade_url = board.account.upgrade_url %>
-      <%= link_to "Upgrade", upgrade_url, class: "btn btn--link", data: { turbo: false } %>
+      <%= link_to t(".upgrade"), upgrade_url, class: "btn btn--link", data: { turbo: false } %>
     <% end %>
   <% else %>
     <%= link_to new_board_card_path(board), class: "btn btn--link",
           data: { turbo_frame: "_top" } do %>
       <%= icon_tag "add", class: "show-on-touch" %>
-      <span>Add a card</span>
+      <span><%= t(".add") %></span>
     <% end %>
   <% end %>
 </div>

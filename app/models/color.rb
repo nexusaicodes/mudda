@@ -1,4 +1,4 @@
-Color = Struct.new(:name, :value)
+Color = Struct.new(:key, :value)
 
 class Color
   class << self
@@ -21,19 +21,23 @@ class Color
       end
   end
 
+  def name
+    I18n.t("colors.#{key}")
+  end
+
   def to_s
     value
   end
 
   COLORS = {
-    "Blue" => "var(--color-card-default)",
-    "Periwinkle" => "var(--color-card-1)",
-    "Indigo" => "var(--color-card-2)",
-    "Azure" => "var(--color-card-3)",
-    "Emerald" => "var(--color-card-4)",
-    "Amber" => "var(--color-card-5)",
-    "Violet" => "var(--color-card-6)",
-    "Purple" => "var(--color-card-7)",
-    "Pink" => "var(--color-card-8)"
-  }.collect { |name, value| new(name, value) }.freeze
+    blue: "var(--color-card-default)",
+    periwinkle: "var(--color-card-1)",
+    indigo: "var(--color-card-2)",
+    azure: "var(--color-card-3)",
+    emerald: "var(--color-card-4)",
+    amber: "var(--color-card-5)",
+    violet: "var(--color-card-6)",
+    purple: "var(--color-card-7)",
+    pink: "var(--color-card-8)"
+  }.collect { |key, value| new(key, value) }.freeze
 end

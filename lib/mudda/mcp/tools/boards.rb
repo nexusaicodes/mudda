@@ -30,7 +30,7 @@ module Mudda::Mcp::Tools
   class CreateBoard < Mudda::Mcp::Tool
     tool_name "create_board"
     title "Create a board"
-    description "Creates a board. It comes with the five fixed columns; they can't be added, removed, or renamed."
+    description "Creates a board. It comes with the four fixed columns; they can't be added, removed, or renamed."
     arguments(properties: { name: { type: "string" } }, required: %w[ name ])
     kind :create
 

@@ -1,5 +1,5 @@
 <%= notes_tag(card) do %>
-  <%= render partial: "cards/notes/note", collection: card.notes.preloaded.chronologically, cached: true %>
+  <%= render partial: "cards/notes/note", collection: card.notes.preloaded.chronologically, cached: ->(note) { [ note, I18n.locale ] } %>
   <%= render "cards/notes/new", card: card %>
 
   <footer class="delete-card txt-align-center full-width flex flex-column margin-block-start-double">

@@ -1,15 +1,12 @@
 # Mudda
 
-**Mudda** is a personal Kanban tool for tracking your own issues and ideas — boards, cards,
-notes, and a simple fixed workflow (Backlog → Todo → Doing → Done) to move work
-without ceremony.
+**Mudda** declutters your tasks for the age you live in: boards, cards, notes, and a simple
+fixed workflow (Backlog → Todo → Doing → Done) to move work without ceremony. It speaks
+English and Arabic (right-to-left).
 
-Mudda is built and maintained by **Nexus AI**. It is a fork of
-[Fizzy](https://fizzy.do/), originally created by [37signals](https://37signals.com).
-We're grateful to 37signals for releasing Fizzy as open source; Mudda continues that work
-under the same [O'Saasy License](LICENSE.md).
+Mudda is built and maintained by **Nexus AI**, under the [O'Saasy License](LICENSE.md).
 
-> **Heads up:** This is a trimmed standalone build — a single-tenant, single-person app on
+> **Heads up:** This is a standalone build — a single-tenant, single-person app on
 > SQLite, run via Docker Compose. The SaaS engine, Kamal deploy tooling, MySQL, S3/object
 > storage, cross-instance import/export, and all team-collaboration features (notifications,
 > mentions, assignments, watching, reactions, board sharing, roles, and invites) have been
@@ -56,5 +53,4 @@ We welcome contributions! Please read the [style guide](STYLE.md) and
 
 ## License
 
-Mudda is released under the [O'Saasy License](LICENSE.md). The license terms are inherited
-from upstream Fizzy and apply to Mudda unchanged.
+Mudda is released under the [O'Saasy License](LICENSE.md).

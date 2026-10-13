@@ -30,7 +30,7 @@ module PaginationHelper
 
   def pagination_link(namespace, page_number, activate_when_observed: false, label: default_pagination_label(activate_when_observed), data: {}, **attributes)
     link_to label, page_url(request.path, page_number),
-      "aria-label": "Load page #{page_number}",
+      "aria-label": t("pagination.load_page", number: page_number),
       id: "#{namespace}-pagination-link-#{page_number}",
       class: class_names(attributes.delete(:class), "pagination-link", { "pagination-link--active-when-observed" => activate_when_observed }),
       data: {
@@ -84,6 +84,6 @@ module PaginationHelper
     end
 
     def default_pagination_label(activate_when_observed)
-      "Load more…"
+      t("pagination.load_more")
     end
 end

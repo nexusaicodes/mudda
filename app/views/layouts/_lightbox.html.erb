@@ -1,4 +1,4 @@
-<%= tag.dialog class:"lightbox", aria: { label: "Image Viewer (Press escape to close)" },
+<%= tag.dialog class:"lightbox", aria: { label: t(".label") },
     data: { controller: "dialog", dialog_target: "dialog", dialog_modal_value: "true", lightbox_target: "dialog", action: "keydown.esc->dialog#close:stop transitionend->lightbox#handleTransitionEnd" } do %>
 
   <figure class="lightbox__figure">
@@ -9,7 +9,7 @@
   <div class="lightbox__actions">
     <button class="btn fill-white" data-action="dialog#close" data-controller="tooltip" data-dialog-target="focusMouse">
       <%= icon_tag "remove" %>
-      <span class="for-screen-reader">Close</span>
+      <span class="for-screen-reader"><%= t(".close") %></span>
     </button>
   </div>
 <% end %>

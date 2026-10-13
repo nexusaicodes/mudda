@@ -1,0 +1,20 @@
+base_locale: en
+locales: [ en, ar ]
+data:
+  read:
+    - config/locales/%{locale}/*.yml
+search:
+  paths:
+    - app/
+    - lib/action_pack/
+  exclude:
+    - app/assets
+ignore_unused:
+  - "activerecord.*"
+  - "date.*"
+  - "lanes.*"
+  - "colors.*"
+  - "filters.views.*"
+  - "doorkeeper.*"
+ignore_missing:
+  - "doorkeeper.*"

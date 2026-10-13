@@ -1,0 +1,23 @@
+---
+ar:
+  searches:
+    form:
+      close: إغلاق البحث
+      label: البحث في Mudda
+      placeholder: ابحث عن شيء…
+      submit: بحث
+    result:
+      in_a_note_html: 'في ملاحظة: «%{note}»'
+    results:
+      no_matches: لا توجد نتائج
+      show_all:
+        few: عرض كل النتائج الـ%{count} ←
+        many: عرض كل النتائج الـ%{count} ←
+        one: عرض النتيجة الوحيدة ←
+        other: عرض كل النتائج الـ%{count} ←
+        two: عرض النتيجتين ←
+        zero: عرض الكل (%{count}) ←
+    show:
+      home: الرئيسية
+      title: بحث
+      title_with_query: نتائج البحث عن «%{query}»

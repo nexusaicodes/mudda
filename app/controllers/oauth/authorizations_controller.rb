@@ -20,7 +20,7 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
     # here, so naming any other server is an error rather than a token that wouldn't.
     def ensure_resource_is_this_server
       if (resource = params[:resource].presence) && !this_server?(resource)
-        render :error, status: :bad_request, locals: { message: "This app asked for access to #{resource}, which isn't this Mudda." }
+        render :error, status: :bad_request, locals: { message: t("oauth.authorizations.foreign_resource", resource: resource) }
       end
     end
 
@@ -41,7 +41,7 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
         params[:scope] = granted.join(" ")
         @pre_auth = nil
       else
-        flash.now[:alert] = "Choose at least one thing #{pre_auth.client.name} may do, or deny it."
+        flash.now[:alert] = t("oauth.authorizations.choose_scope", client: pre_auth.client.name)
         render :new, status: :unprocessable_entity
       end
     end

@@ -1,9 +1,9 @@
 <h1 class="card__title flex align-start gap-half">
-  <%= link_to card_html_title(card), edit_board_card_path(card.board, card), class: "card__title-link" %>
+  <%= link_to card_html_title(card), edit_board_card_path(card.board, card), class: "card__title-link", dir: "auto" %>
 </h1>
 
 <% unless card.description.blank? %>
-  <div class="card__description lexxy-content" data-controller="syntax-highlight retarget-links">
+  <div class="card__description lexxy-content" dir="auto" data-controller="syntax-highlight retarget-links">
     <%= card.description %>
   </div>
 <% end %>

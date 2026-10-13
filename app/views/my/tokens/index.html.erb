@@ -1,7 +1,7 @@
-<% @page_title = "API tokens" %>
+<% @page_title = t(".title") %>
 
 <% content_for :header_start do %>
-  <%= back_link_to "My profile", user_path(Current.user) %>
+  <%= back_link_to t(".back"), user_path(Current.user) %>
 <% end %>
 
 <% content_for :header do %>
@@ -10,8 +10,7 @@
 
 <section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
   <p class="font-weight-medium margin-none">
-    A token lets a script or an AI agent use Mudda as you, through the API or MCP. Give each one its own
-    name, so you can tell what it did and revoke it on its own.
+    <%= t(".intro") %>
   </p>
 
   <% if @tokens.any? %>
@@ -21,21 +20,21 @@
   <% end %>
 
   <%= form_with model: @token, scope: :token, url: my_tokens_path, data: { turbo: false }, html: { class: "flex flex-column gap" } do |form| %>
-    <strong>Mint a token</strong>
+    <strong><%= t(".mint_heading") %></strong>
 
     <% if @token.errors.any? %>
       <p class="txt-negative margin-none"><%= @token.errors.full_messages.to_sentence %></p>
     <% end %>
 
     <div class="flex flex-column gap-half">
-      <%= form.label :label, "Name" %>
-      <%= form.text_field :label, class: "input", placeholder: "e.g. claude, cursor, backup-script", required: true,
+      <%= form.label :label, t(".name") %>
+      <%= form.text_field :label, class: "input", placeholder: t(".placeholder"), required: true,
             autocomplete: "off", data: { "1p-ignore": "" } %>
-      <span class="txt-small txt-subtle">Minting under a name already in use replaces that token.</span>
+      <span class="txt-small txt-subtle"><%= t(".replace_hint") %></span>
     </div>
 
     <fieldset class="flex flex-column gap-half borderless unpad margin-none">
-      <legend class="margin-block-end-half">What it may do</legend>
+      <legend class="margin-block-end-half"><%= t(".scopes_legend") %></legend>
       <%= hidden_field_tag "token[scopes][]", "", id: nil %>
       <% scope_descriptions.each do |scope, description| %>
         <label class="flex align-center gap-half">
@@ -45,6 +44,6 @@
       <% end %>
     </fieldset>
 
-    <%= form.submit "Mint token", class: "btn btn--link center" %>
+    <%= form.submit t(".submit"), class: "btn btn--link center" %>
   <% end %>
 </section>

@@ -30,6 +30,11 @@ module Mudda
     # be reloaded or eager loaded.
     config.autoload_lib ignore: %w[ assets mudda tasks rails_ext ]
 
+    # English is the default and the language of the JSON API; Arabic is the second UI locale.
+    config.i18n.available_locales = %i[ en ar ]
+    config.i18n.default_locale = :en
+    config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
+
     # Enable debug mode for Rails event logging so we get SQL query logs.
     # This was made necessary by the change in https://github.com/rails/rails/pull/55900
     config.after_initialize do

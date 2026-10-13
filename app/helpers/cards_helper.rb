@@ -18,18 +18,14 @@ module CardsHelper
   end
 
   def card_title_tag(card)
-    [
-      card.title,
-      "added by #{card.creator.name}",
-      "in #{card.board.name}"
-    ].join(" ")
+    t("cards.title_tag", title: card.title, creator: card.creator.name, board: card.board.name)
   end
 
   def card_due_label(card)
     if card.due_on.year == Date.current.year
-      card.due_on.strftime("%b %-d")
+      l(card.due_on, format: :month_day)
     else
-      card.due_on.strftime("%b %-d, %Y")
+      l(card.due_on, format: :month_day_year)
     end
   end
 
@@ -52,10 +48,10 @@ module CardsHelper
     days = card.days_until_due
 
     case days
-    when ...0 then "Overdue #{-days}d"
-    when 0    then "Today"
-    when 1    then "Tomorrow"
-    when 2..6 then card.due_on.strftime("%a")
+    when ...0 then t("cards.due.overdue", days: -days)
+    when 0    then t("cards.due.today")
+    when 1    then t("cards.due.tomorrow")
+    when 2..6 then l(card.due_on, format: :weekday)
     else           card_due_label(card)
     end
   end

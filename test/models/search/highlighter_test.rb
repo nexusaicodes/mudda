@@ -82,6 +82,15 @@ class Search::HighlighterTest < ActiveSupport::TestCase
     assert_equal "&lt;script&gt;#{mark('test')}&lt;/script&gt;", result
   end
 
+  test "highlight marks Arabic as written" do
+    assert_equal "قرأت #{mark('الكتابَ')}", Search::Highlighter.new("كتاب").highlight("قرأت الكتابَ")
+    assert_equal "#{mark('مَرْحَباً')} يا #{mark('أحمد')}", Search::Highlighter.new("مرحبا احمد").highlight("مَرْحَباً يا أحمد")
+  end
+
+  test "highlight escapes HTML around Arabic matches" do
+    assert_equal "&lt;b&gt;#{mark('بالكتاب')}&lt;/b&gt;", Search::Highlighter.new("كتاب").highlight("<b>بالكتاب</b>")
+  end
+
   private
     def mark(text)
       "#{Search::Highlighter::OPENING_MARK}#{text}#{Search::Highlighter::CLOSING_MARK}"

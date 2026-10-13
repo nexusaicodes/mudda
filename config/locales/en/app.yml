@@ -1,0 +1,236 @@
+---
+en:
+  account:
+    settings:
+      name:
+        placeholder: Account name…
+        save: Save changes
+      plan:
+        heading: Plan
+        no_refund: Deleting one doesn’t free its slot.
+        upgrade: Upgrade for unlimited cards
+        used:
+          one: "%{count} card of %{limit} used."
+          other: "%{count} cards of %{limit} used."
+      show:
+        back: Home
+        title: Account Settings
+    upgrades:
+      show:
+        already_unlimited: This board already has unlimited cards
+  active_storage:
+    blobs:
+      blob:
+        download: Download
+        download_title: Download %{filename}
+  back_link:
+    label: Back to %{label}
+  bar:
+    bar:
+      search: Search
+  boards:
+    delete:
+      body:
+        one: This permanently deletes the board and its %{count} card. It can't be
+          undone.
+        other: This permanently deletes the board and its %{count} cards. It can't
+          be undone.
+      cancel: Cancel
+      heading_html: Delete “%{name}”?
+      open: Delete board…
+      submit: Delete board
+    new:
+      back: Home
+      blank: Board names can’t be blank
+      cancel: Cancel and go back
+      placeholder: Name it…
+      submit: Create board
+      title: Create a new board
+    title:
+      blank: Board names can’t be blank
+      cancel: Cancel
+      name_label: Board name
+      rename: Rename this board
+      save: Save
+  columns:
+    show:
+      add_card_button:
+        add: Add a card
+        limit_reached:
+          one: All %{count} card used
+          other: All %{count} cards used
+        upgrade: Upgrade
+  date:
+    formats:
+      app_long: "%B %-d, %Y"
+  landings:
+    show:
+      create: Create a board
+      empty_body: Create your first board to get started.
+      empty_heading: No boards yet
+      open: Open board
+      opening: Opening your board…
+      title: Home
+  layouts:
+    application:
+      skip: Skip to main content
+    lightbox:
+      close: Close
+      label: Image Viewer (Press escape to close)
+    public:
+      skip: Skip to main content
+    shared:
+      home_link:
+        label: Mudda home
+  meta:
+    description: Declutter your tasks for the age you live in.
+  my:
+    account_menu:
+      account: Account
+      profile: Profile
+      settings: Account settings
+      sign_out: Sign out
+      tokens: API tokens
+      upgrade: Upgrade for unlimited cards
+    menus:
+      show:
+        boards: Boards
+        new_board: New board
+        only_board: Your only board so far. Boards keep separate work apart — say,
+          Work and Personal.
+        views: Views
+    passkeys:
+      create:
+        failed: That passkey couldn't be registered. Try again.
+      edit:
+        back: Passkeys
+        confirm_remove: Are you sure you want to remove this passkey?
+        created: Your passkey has been registered. Give it a name so you can identify
+          it later.
+        name_label: Name your passkey
+        placeholder: e.g. MacBook Pro, iPhone
+        remove: Remove this passkey
+        save: Save
+        title: Edit Passkey
+      index:
+        back: My profile
+        cancelled: Passkey registration was cancelled. Try again when you are ready.
+        duplicate: You already have a passkey registered on this device. Remove the
+          existing one first and try again.
+        error: Something went wrong while registering your passkey.
+        hint: Your browser will prompt you to create a passkey using your device's
+          biometrics, PIN, or security key
+        intro: Passkeys let you sign in securely without a password or email code.
+        register: Register a passkey
+        title: Passkeys
+      passkey:
+        unnamed: Passkey
+    switcher:
+      switch: Switch board
+    tokens:
+      create:
+        api: Or call the API
+        back: API tokens
+        choose_scope: Choose at least one thing the token may do
+        copy: Copy
+        mcp: Connect an MCP client
+        summary_html: "%{label} can %{scopes}. Copy the token now — it won't be shown
+          again. It stops working on %{date}, or when you revoke it."
+        title: Token minted
+      destroy:
+        revoked: Token revoked
+      index:
+        back: My profile
+        intro: A token lets a script or an AI agent use Mudda as you, through the
+          API or MCP. Give each one its own name, so you can tell what it did and
+          revoke it on its own.
+        mint_heading: Mint a token
+        name: Name
+        placeholder: e.g. claude, cursor, backup-script
+        replace_hint: Minting under a name already in use replaces that token.
+        scopes_legend: What it may do
+        submit: Mint token
+        title: API tokens
+      token:
+        confirm_revoke: Revoke %{label}? Anything using it stops working.
+        connected: connected %{date}
+        revoke: Revoke %{label}
+  oauth:
+    authorizations:
+      choose_scope: Choose at least one thing %{client} may do, or deny it.
+      error:
+        back: Back to Mudda
+        heading: This app can't be connected
+        retry_html: Try connecting it again from the app. %{link}
+        title: Can't connect
+      foreign_resource: This app asked for access to %{resource}, which isn't this
+        Mudda.
+      new:
+        acts_as_html: It will act as you, %{user}, and what it does is recorded as
+          done through %{client}. You can revoke it any time under %{link}.
+        allow: Allow
+        allow_legend: Allow it to
+        deny: Deny
+        heading_html: "%{client} wants to use your Mudda"
+        redirect_html: It will be sent back to %{host}. Only continue if you started
+          connecting it just now.
+        title: Connect %{client}
+        tokens_link: API tokens
+  pagination:
+    load_more: Load more…
+    load_page: Load page %{number}
+  sessions:
+    new:
+      email_placeholder: Enter your email address…
+      heading: Get into Mudda
+      or: "— or —"
+      passkey: Sign in with a passkey
+      passkey_cancelled: Passkey sign in was cancelled. Try again when you are ready.
+      passkey_error: Something went wrong while signing in with your passkey.
+      password_placeholder: Password
+      submit: Let’s go
+      title: Sign in
+      unconfigured_html: No sign-in method is configured. Set <code>MUDDA_OWNER_PASSWORD</code>
+        and reseed to enable sign-in.
+    passkeys:
+      create:
+        failed: That passkey didn't work. Try again.
+        rate_limited: Try again later.
+    passwords:
+      create:
+        failed: That didn't work. Check your password and try again.
+        rate_limited: Try again later.
+  tokens:
+    expiry:
+      expired: expired
+      expires: expires %{date}
+      unless_used: expires %{date} unless used
+    scopes:
+      delete: Delete them — permanently
+      read: Read boards, cards, and notes
+      write: Create and change them
+  users:
+    edit:
+      avatar_label: Profile avatar for %{name}
+      back: profile
+      cancel: Cancel and go back
+      confirm_delete_avatar: Are you sure you want to remove your avatar? This can't
+        be undone.
+      delete_avatar: Delete avatar
+      email_placeholder: Email address
+      errors_heading: 'Your changes couldn''t be saved:'
+      name_placeholder: Name
+      save: Save changes
+      title: Edit your profile
+    show:
+      avatar_alt: Profile avatar for %{name}
+      back: Home
+      edit: Edit profile
+      passkeys: Manage passkeys
+      sign_out: Sign out of Mudda on this device
+      tokens: API tokens
+    theme:
+      auto: Same as OS
+      dark: Always dark
+      heading: Appearance
+      light: Always light

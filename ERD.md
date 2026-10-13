@@ -77,6 +77,7 @@ erDiagram
     USER_SETTINGS {
         bigint id PK
         bigint user_id FK "UNIQUE — enforces has_one"
+        string locale "limit 255 nullable — en or ar; NULL follows the browser"
         string timezone_name "limit 255 nullable"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -261,7 +262,7 @@ erDiagram
     USERS ||--o{ SESSIONS : "credential — cookie or bearer"
     USERS ||--o{ ACTION_PACK_PASSKEYS : "optional, never required"
     USERS }o--|| ACCOUNTS : "the tenant"
-    USERS ||--o| USER_SETTINGS : "timezone"
+    USERS ||--o| USER_SETTINGS : "timezone, locale"
 ```
 
 There is **no password column anywhere** — the owner secret lives only in

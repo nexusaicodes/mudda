@@ -1,0 +1,7 @@
+---
+ar:
+  date:
+    formats:
+      month_day: "%-d %B"
+      month_day_year: "%-d %B %Y"
+      weekday: "%A"

@@ -19,14 +19,13 @@
     background: none;
   }
 
-  .icon--37signals {
-    --svg: url("37signals.svg");
-    top: -0.1em;
-    margin-right: 0.1375em;
-  }
   .icon--add { --svg: url("add.svg "); }
   .icon--arrow-left { --svg: url("arrow-left.svg "); }
   .icon--arrow-right { --svg: url("arrow-right.svg "); }
+
+  /* Horizontal arrows point along the reading direction */
+  [dir=rtl] :is(.icon--arrow-left, .icon--arrow-right) { scale: -1 1; }
+
   .icon--arrow-up { --svg: url("arrow-up.svg "); }
   .icon--art { --svg: url("art.svg "); }
   .icon--attachment { --svg: url("attachment.svg "); }
@@ -57,7 +56,7 @@
   .icon--mudda {
     --svg: url("mudda.svg");
     top: -0.1em;
-    margin-right: 0.1375em;
+    margin-inline-end: 0.1375em;
   }
   .icon--golden-ticket { --svg: url("golden-ticket.svg "); }
   .icon--history { --svg: url("history.svg "); }

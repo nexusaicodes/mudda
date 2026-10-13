@@ -150,6 +150,9 @@ Cursor) don't need them.
 
 ## How it works
 
+Tools always answer in English, whatever language the user picked for the browser: each
+call is a JSON request, and JSON is never localized.
+
 `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`) is a Rack middleware mounted in front of
 `ActionDispatch::Executor` by `config/initializers/mcp.rb`. On a request to `/mcp` it:
 

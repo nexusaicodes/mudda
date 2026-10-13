@@ -172,6 +172,12 @@
     box-shadow:
       -0.25ch 0 0 var(--attachment-bg-color),
        0.5ch 0 0 var(--attachment-bg-color);
+
+    &:dir(rtl) {
+      box-shadow:
+        0.25ch 0 0 var(--attachment-bg-color),
+        -0.5ch 0 0 var(--attachment-bg-color);
+    }
     color: var(--attachment-text-color);
     display: inline-flex;
     gap: 0.25ch;

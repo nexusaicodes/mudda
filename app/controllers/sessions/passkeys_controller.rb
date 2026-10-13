@@ -15,7 +15,7 @@ class Sessions::PasskeysController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to new_session_path, alert: "That passkey didn't work. Try again." }
+        format.html { redirect_to new_session_path, alert: t(".failed") }
         format.json { render_unauthorized "That passkey didn't work. Try again." }
       end
     end
@@ -26,7 +26,7 @@ class Sessions::PasskeysController < ApplicationController
       rate_limit_exceeded_message = "Try again later."
 
       respond_to do |format|
-        format.html { redirect_to new_session_path, alert: rate_limit_exceeded_message }
+        format.html { redirect_to new_session_path, alert: t("sessions.passkeys.create.rate_limited") }
         format.json { render_json_errors({ base: [ rate_limit_exceeded_message ] }, status: :too_many_requests) }
       end
     end

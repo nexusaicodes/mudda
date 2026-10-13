@@ -6,7 +6,7 @@ module User::Configurable
 
     after_create :create_settings
 
-    delegate :timezone, to: :settings, allow_nil: true
+    delegate :timezone, :locale, to: :settings, allow_nil: true
   end
 
   def in_time_zone(&block)

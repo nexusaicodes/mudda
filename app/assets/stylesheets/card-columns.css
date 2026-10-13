@@ -624,9 +624,12 @@
       border-radius: var(--bubble-shape);
       content: "";
       inline-size: 1em;
-      inset: 0 0 auto auto;
+      inset-block: 0 auto;
+      inset-inline: auto 0;
       position: absolute;
       translate: 20% -20%;
+
+      &:dir(rtl) { translate: -20% -20%; }
       z-index: 1;
 
       @media (max-width: 639px) {

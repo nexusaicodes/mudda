@@ -9,8 +9,8 @@ to create and manage **cards** (tasks/issues) on **boards**, move them through a
 of columns** (the workflow), and capture progress with **notes**. Opening the app lands you
 on the **board you last had open** (remembered in the browser).
 
-Mudda is maintained by **Nexus AI** and is a fork of **Fizzy**, originally created by
-**37signals**. This repository is the standalone, single-person build (see `CLAUDE.md`).
+Mudda is built and maintained by **Nexus AI**. It is a standalone, single-person app (see
+`CLAUDE.md`).
 
 ## Development Commands
 
@@ -59,9 +59,7 @@ runs, use the Compose setup in [DOCKER.md](DOCKER.md).
 ### One Account, Resolved From the Signed-in User
 
 Mudda serves a single account per deployment, and **URLs carry no account prefix** —
-paths are `/boards/:id`, not `/{account_id}/boards/:id`. (Upstream Fizzy prefixed every
-path and rewrote `PATH_INFO`/`SCRIPT_NAME` in a Rack middleware; that middleware and
-`Account#slug` are gone.)
+paths are `/boards/:id`, not `/{account_id}/boards/:id`.
 
 - `Current.account` is derived in `app/models/current.rb`: session → user → account.
 - `Current.account` is therefore **nil on unauthenticated requests**. Anything reachable
@@ -181,7 +179,7 @@ Polymorphic `eventable`, JSON `particulars`. Kept as an audit trail written via 
 `Eventable` concern; there is **no activity/timeline page** that renders it (removed — the
 app lands on your last-opened board instead).
 
-> **Removed in this fork's refactor (vs. upstream Fizzy):** team collaboration entirely —
+> **Not in Mudda:** team collaboration entirely —
 > notifications, mentions, assignments, watching, reactions, board access control (`Access`),
 > roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
 > Also gone: `Tag`/`Tagging` and the `Entropy` auto-postpone system (replaced by due dates;
@@ -349,8 +347,32 @@ Queue, no Redis, no separate worker process.
 
 `app/models/search/` denormalizes searchable content (cards and notes) into `Search::Record`,
 which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spans every board
-in the account. Stemming is handled by the FTS5 `porter` tokenizer; highlighting and query
-sanitizing live in `Search::Highlighter` and `Search::Query`.
+in the account. Stemming is handled by the FTS5 `porter` tokenizer. The FTS table holds text
+folded by `Search::Normalizer` (Arabic only: harakat and tatweel stripped, alef/yeh/teh-marbuta
+folded, the article ال removed), and `Search::Query` folds the query the same way, so a search
+matches with or without vowel marks or the article. `search_records` keeps the text as written,
+and `Search::Highlighter` marks it in Ruby. A change to the normalizer needs `bin/rails
+search:reindex` (or a data migration that runs it, as `20261014000001` does).
+
+### Internationalization
+
+The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`
+(`app/controllers/concerns/current_locale.rb`) picks each request's locale: the user's
+`user_settings.locale` (chosen on the profile page via `My::LocalesController`), else the
+browser's `Accept-Language`, else English. URLs carry no locale.
+- **JSON — and so every MCP tool call — always answers in English**, whatever the user chose:
+  errors, enum values, lane names. A 401/403 refused before the action runs is English too.
+- **Lanes stay English keys** (`columns.name`, the API, `lane=`); only the display goes through
+  `lane_name(column)` → `lanes.*`. Never compare against a translated name.
+- **Every HTML cache key carries `I18n.locale`** (card/note fragments, the column collection),
+  and `etag { I18n.locale }` keeps a conditional GET from serving the other language.
+- Strings live in `config/locales/{en,ar}/*.yml`, one file per area, looked up lazily in views
+  (`t(".key")`). Missing translations raise in dev and test; `make i18n` (also part of `make
+  lint`) checks for missing, unused and unnormalized keys, and `test/i18n_test.rb` runs the same.
+- `<html lang dir>` comes from the locale. CSS uses logical properties; where it can't, a
+  `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`,
+  OFL), loaded only for Arabic code points. Dates show Western digits (`-u-nu-latn`).
+- The `public/*.html` error pages are static, so each carries both languages.
 
 ### MCP
 
