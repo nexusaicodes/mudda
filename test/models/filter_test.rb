@@ -139,4 +139,35 @@ class FilterTest < ActiveSupport::TestCase
     assert_not_includes filter.board_titles, "Writebook"
     assert_not_includes filter.board_titles, "Private board"
   end
+
+  test "due soon holds open cards due by tomorrow, the most overdue first" do
+    board = boards(:writebook)
+    overdue  = board.cards.create!(title: "Overdue", due_on: 3.days.ago)
+    today    = board.cards.create!(title: "Today", due_on: Date.current)
+    tomorrow = board.cards.create!(title: "Tomorrow", due_on: Date.tomorrow)
+    later    = board.cards.create!(title: "Later", due_on: 3.days.from_now)
+    finished = board.cards.create!(title: "Finished", due_on: Date.yesterday)
+    finished.update!(column: columns(:writebook_done))
+
+    cards = users(:david).filters.from_params(due: "soon").cards.to_a
+
+    assert_equal [ overdue, today, tomorrow ], cards & [ overdue, today, tomorrow ]
+    assert_operator cards.index(overdue), :<, cards.index(today)
+    assert_not_includes cards, later
+    assert_not_includes cards, finished
+  end
+
+  test "lane narrows to a lane by name on every board" do
+    cards = users(:david).filters.from_params(lane: "doing").cards
+
+    assert cards.any?
+    assert cards.all? { |card| card.column.name == "Doing" }
+    assert_empty users(:david).filters.from_params(lane: "nowhere").cards
+  end
+
+  test "a view's filter knows its name" do
+    assert_equal "Due today & tomorrow", users(:david).filters.from_params(due: "soon").view_name
+    assert_equal "Golden", users(:david).filters.from_params(indexed_by: "golden").view_name
+    assert_nil users(:david).filters.from_params(due: "soon", indexed_by: "golden").view_name
+  end
 end

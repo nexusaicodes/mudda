@@ -27,7 +27,7 @@ module Filter::Fields
 
   included do
     store_accessor :fields, :indexed_by, :sorted_by, :terms,
-      :card_ids, :creation, :column_ids
+      :card_ids, :creation, :column_ids, :due, :lane
 
     def indexed_by
       (super || default_indexed_by).inquiry

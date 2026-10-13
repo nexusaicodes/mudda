@@ -773,20 +773,6 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal 1, card.number, "The first card to land on an empty board is its number 1"
   end
 
-  test "search jumps to a card by number only while one board answers to it" do
-    headers = bearer_headers_for(@user)
-
-    get search_path(format: :json, q: cards(:logo).number.to_s), headers: headers
-    assert_response :success
-    assert_equal [ cards(:logo).number ], @response.parsed_body["data"].pluck("number")
-
-    Current.user = @user
-    boards(:private).cards.create!(title: "Also number one", due_on: 1.week.from_now, creator: @user, last_active_at: Time.current)
-
-    get search_path(format: :json, q: "1"), headers: headers
-    assert_response :success
-  end
-
   # Goldness
 
   test "goldness round-trips through the JSON API" do
@@ -920,11 +906,6 @@ class ApiTest < ActionDispatch::IntegrationTest
   # after it has already written.
   test "a JSON request to a browser-only write is refused before it writes" do
     headers = bearer_headers_for(@user)
-    filter = filters(:newest_first)
-
-    delete filter_path(filter, format: :json), headers: headers
-    assert_response :not_acceptable
-    assert Filter.exists?(filter.id)
 
     assert_no_difference -> { @user.search_queries.count } do
       post searches_queries_path(format: :json), params: { q: "anything" }, headers: headers, as: :json

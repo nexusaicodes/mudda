@@ -8,10 +8,15 @@
     data-turbo-navigation-label-value="<%= @page_title %>"
     data-platform="<%= platform.type %>">
     <div id="global-container">
-      <header class="header header--mobile-actions-stack <%= @header_class %>" id="header">
+      <header class="header <%= @header_class %>" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false">Skip to main content</a>
-        <%= render "my/menu" if Current.user %>
         <%= yield :header %>
+
+        <% if Current.user %>
+          <div class="header__actions header__actions--end">
+            <%= render "my/account_menu" %>
+          </div>
+        <% end %>
       </header>
 
       <%= render "layouts/shared/flash" %>

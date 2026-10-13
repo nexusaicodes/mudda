@@ -7,46 +7,49 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     @account = accounts("37s")
   end
 
-  test "show" do
-    get my_menu_path
+  test "lists every board, ticking the one you are on" do
+    get my_menu_path(board_id: boards(:writebook).id)
+
     assert_response :success
+    @user.boards.each { |board| assert_select ".popup__item a[href=?]", board_path(board) }
+    assert_select ".popup__item--current a[href=?]", board_path(boards(:writebook))
+    assert_select ".popup__item--current", count: 1
   end
 
-  test "the upgrade link shows only when the board has somewhere to upgrade" do
+  test "offers the cross-board views with what each holds" do
+    Current.user = @user
+    cards(:logo).update!(due_on: Date.yesterday)
+
     get my_menu_path
-    assert_select "a[href=?]", account_upgrade_path, count: 0
 
-    with_env("MUDDA_UPGRADE_URL" => "https://mudda.example/upgrade/new?token=signed") { get my_menu_path }
-    assert_select "a[href=?]", account_upgrade_path, text: "Upgrade for unlimited cards"
-  end
-
-  test "etag invalidates when the upgrade link comes or goes" do
-    get my_menu_path
-    etag = response.headers["ETag"]
-
-    with_env("MUDDA_UPGRADE_URL" => "https://mudda.example/upgrade/new?token=signed") do
-      get my_menu_path, headers: { "If-None-Match" => etag }
+    due_soon = @user.filters.from_params(due: "soon").cards.count
+    assert_operator due_soon, :>, 0
+    assert_select "a[href=?]", cards_path(due: "soon") do
+      assert_select ".menu__count", text: due_soon.to_s
     end
-    assert_response :success
+    assert_select "a[href=?]", cards_path(lane: "doing")
+    assert_select "a[href=?]", cards_path(indexed_by: "golden")
   end
 
-  test "etag invalidates when filters change" do
+  test "new board comes last and nothing else is offered" do
     get my_menu_path
-    assert_response :success
-    etag = response.headers["ETag"]
 
-    @user.filters.create!(
-      params_digest: Filter.digest_params({ indexed_by: :all, sorted_by: :newest }),
-      fields: { indexed_by: :all, sorted_by: :newest }
-    )
+    assert_select "turbo-frame#my_menu" do
+      assert_select ".menu__footer a[href=?]", new_board_path, text: "New board"
+      assert_select "input", count: 0
+      assert_select "a[href=?]", account_settings_path, count: 0
+    end
+  end
 
-    get my_menu_path, headers: { "If-None-Match" => etag }
-    assert_response :success
+  test "says so when there is only one board" do
+    @account.boards.where.not(id: boards(:writebook).id).destroy_all
+
+    get my_menu_path(board_id: boards(:writebook).id)
+    assert_select ".menu__note", text: /only board/
   end
 
   test "etag invalidates when boards change" do
     get my_menu_path
-    assert_response :success
     etag = response.headers["ETag"]
 
     @account.boards.create!(name: "New Board", creator: @user)
@@ -55,9 +58,19 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "etag invalidates when a card changes" do
+    get my_menu_path
+    etag = response.headers["ETag"]
+
+    travel 1.second
+    cards(:logo).update!(due_on: Date.tomorrow)
+
+    get my_menu_path, headers: { "If-None-Match" => etag }
+    assert_response :success
+  end
+
   test "etag returns not modified when nothing changes" do
     get my_menu_path
-    assert_response :success
     etag = response.headers["ETag"]
 
     get my_menu_path, headers: { "If-None-Match" => etag }

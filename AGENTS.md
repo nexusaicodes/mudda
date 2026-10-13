@@ -275,7 +275,8 @@ index for the rest.
 
 The card index answers at both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
 same filters apply to either — including `column_ids[]`, which is how a single lane is read
-now that columns have no endpoints of their own. `/prompts/cards` (the mention autocomplete)
+now that columns have no endpoints of their own, `lane` (a lane by name on every board) and
+`due=soon` (open cards due by tomorrow, the most overdue first). `/prompts/cards` (the mention autocomplete)
 stays cross-board. A board's four fixed columns travel with the board itself
 (`boards/show.json.jbuilder`); what is left under `boards/:id/columns` is the browser's lane
 frame and colour picker.
@@ -294,6 +295,28 @@ as much as the record errors. Indexes answer with `{ "data": [...], "paging": {.
 than silently ignored — each endpoint declaring what it answers to with
 `allows_query_params` (`StrictQueryParams`). See [API.md](API.md).
 
+### Web UI
+
+The browser is for an occasional look — agents do most of the work through the API — so the
+chrome is small and there are **no keyboard shortcuts** (keys only act inside the field being
+typed in: Enter or Ctrl/Cmd+Enter submits, Esc cancels).
+
+- **One-row header** (`layouts/application`): the logo on the left, the page title in the
+  centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
+  upgrade, sign out) on the right.
+- **Board title** (`boards/_title`): clicking the name renames the board in place
+  (`inline-edit` controller), with "Delete board…" beside Save/Cancel. There is no board
+  settings page.
+- **Switcher** — the ▾ beside a board or view title (`my/_switcher`), loading `my/menus#show`
+  on first open: every board (the current one ticked), the cross-board views in
+  `Filter::VIEWS` with their counts, and "New board" last.
+- **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
+  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board. The board
+  page itself takes no filters.
+- **Search** is a pill floating at the bottom centre (`bar/_bar`); results open above it,
+  grouped by board with the board searched from first, one row per card, five per board with a
+  link to the rest.
+
 ### Keys and Card Numbers
 
 Primary keys are plain autoincrementing integers — Rails' default, no extensions. What a
@@ -302,9 +325,8 @@ Primary keys are plain autoincrementing integers — Rails' default, no extensio
 `Card#number` is a **separate** integer, and it is what the API addresses cards by. It is a
 **per-board** sequence drawn from `boards.cards_count`, unique only within its board — so
 two boards can each hold a card numbered `1`, a card moved between boards is renumbered on
-arrival, and a bare number never names a card on its own. Two places that used to treat one
-as a unique address now say so: `SearchesController` jumps to a card only while exactly one
-board answers to that number, and `Prompts::CardsController` prepends every match.
+arrival, and a bare number never names a card on its own: search treats a number as plain
+text, and `Prompts::CardsController` prepends every match.
 
 See [ERD.md](ERD.md) for the full schema — every table, column, index, and relationship,
 cross-verified against a live database.

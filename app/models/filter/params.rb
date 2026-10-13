@@ -5,6 +5,8 @@ module Filter::Params
     :indexed_by,
     :sorted_by,
     :creation,
+    :due,
+    :lane,
     card_ids: [],
     column_ids: [],
     board_ids: [],
@@ -38,7 +40,7 @@ module Filter::Params
   def used?(ignore_boards: false)
     terms.any? || card_ids&.any? || (!ignore_boards && boards.present?) ||
       !indexed_by.all? || !sorted_by.latest? ||
-      column_ids.any?
+      column_ids.any? || due.present? || lane.present?
   end
 
   # +as_params+ uses `resource#ids` instead of `#resource_ids`
@@ -52,6 +54,8 @@ module Filter::Params
       params[:board_ids]  = boards.ids
       params[:card_ids]   = card_ids
       params[:column_ids] = column_ids
+      params[:due]        = due
+      params[:lane]       = lane
     end.compact_blank.reject(&method(:default_value?))
   end
 

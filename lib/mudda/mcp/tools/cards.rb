@@ -5,14 +5,15 @@ module Mudda::Mcp::Tools
   }
 
   class ListCards < Mudda::Mcp::Tool
-    FILTERS = %i[ board_ids column_ids card_ids terms creation indexed_by sorted_by page ]
+    FILTERS = %i[ board_ids column_ids card_ids terms creation due lane indexed_by sorted_by page ]
 
     tool_name "list_cards"
     title "List cards"
     description <<~TEXT
       Cards across every board, or on one board when `board_id` is given; the filters narrow
-      either. To read one lane, pass its column id (from `get_board`) in `column_ids`. Paged:
-      follow paging.next or pass `page`.
+      either. To read one lane, pass its column id (from `get_board`) in `column_ids`, or name it
+      in `lane` to read that lane on every board. `due: "soon"` gives the open cards due by
+      tomorrow, the most overdue first. Paged: follow paging.next or pass `page`.
     TEXT
     arguments(
       properties: {
@@ -22,6 +23,8 @@ module Mudda::Mcp::Tools
         card_ids: { type: "array", items: { type: "integer" } },
         terms: { type: "array", items: { type: "string" }, description: "Full-text terms" },
         creation: { type: "string", enum: TimeWindowParser::VALUES, description: "When the card was created" },
+        due: { type: "string", enum: %w[ soon ], description: "soon: open cards due by tomorrow, overdue first" },
+        lane: { type: "string", enum: %w[ backlog todo doing done ], description: "A lane by name, on every board" },
         indexed_by: { type: "string", enum: %w[ all golden ] },
         sorted_by: { type: "string", enum: %w[ latest newest oldest ] },
         page: { type: "integer", minimum: 1 }

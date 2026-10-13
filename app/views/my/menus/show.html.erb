@@ -1,7 +1,20 @@
 <%= turbo_frame_tag "my_menu", target: "_top" do %>
-  <%= render "my/menus/jump" do %>
-    <%= render "my/menus/boards", boards: @boards %>
-    <%= render "my/menus/settings" %>
-    <%= render "my/menus/shortcuts" %>
+  <%= nav_section "Boards" do %>
+    <% @boards.each do |board| %>
+      <%= menu_item board.name, board_path(board), icon: "board", current: board.id == @current_board_id %>
+    <% end %>
+    <% if @boards.one? %>
+      <li class="menu__note">Your only board so far. Boards keep separate work apart — say, Work and Personal.</li>
+    <% end %>
   <% end %>
+
+  <%= nav_section "Views" do %>
+    <% @views.each do |view, count| %>
+      <%= menu_item view[:name], cards_path(view[:params]), icon: view[:icon], count: count %>
+    <% end %>
+  <% end %>
+
+  <ul class="popup__list menu__footer">
+    <%= menu_item "New board", new_board_path, icon: "add" %>
+  </ul>
 <% end %>

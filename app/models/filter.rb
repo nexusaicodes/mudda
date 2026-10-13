@@ -1,5 +1,5 @@
 class Filter < ApplicationRecord
-  include Fields, Params, Resources, Summarized
+  include Fields, Params, Resources, Summarized, Views
 
   belongs_to :creator, class_name: "User", default: -> { Current.user }
 
@@ -27,6 +27,8 @@ class Filter < ApplicationRecord
         result.mentioning(term, user: creator)
       end
       result = result.where(column_id: column_ids) if column_ids.present?
+      result = result.in_column_named(lane.capitalize) if lane.present?
+      result = result.due_soon if due == "soon"
 
       result.distinct
     end

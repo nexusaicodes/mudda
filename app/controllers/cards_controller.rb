@@ -11,7 +11,13 @@ class CardsController < ApplicationController
   # Nested under a board, the index answers for that board alone; at the top level it spans
   # every board. The filter narrows either one.
   def index
-    set_page_and_extract_portion_from within_board(@filter.cards)
+    cards = within_board(@filter.cards)
+    set_page_and_extract_portion_from cards
+
+    respond_to do |format|
+      format.html { @board_counts = cards.reorder(nil).group(:board_id).count }
+      format.json
+    end
   end
 
   def new

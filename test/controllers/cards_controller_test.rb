@@ -10,17 +10,26 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "index names each card's board, since it spans boards" do
+  test "index groups cards under their board, since it spans boards" do
     get cards_path
 
-    assert_select ".card .card__details-board", text: boards(:writebook).name
+    assert_select ".card-group__title a", text: boards(:writebook).name
+    assert_select ".card .card__details-board", count: 0
   end
 
-  test "a board's own index leaves the board name off its cards" do
+  test "a view's title is the view's name" do
+    get cards_path(due: "soon")
+    assert_select ".board-title__name", text: "Due today & tomorrow"
+
+    get cards_path(lane: "doing")
+    assert_select ".board-title__name", text: "Doing everywhere"
+  end
+
+  test "a board's own index needs no board headings" do
     get board_cards_path(boards(:writebook))
 
     assert_select ".card"
-    assert_select ".card .card__details-board", count: 0
+    assert_select ".card-group__title", count: 0
   end
 
   test "filtered index" do

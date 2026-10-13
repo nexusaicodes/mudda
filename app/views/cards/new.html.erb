@@ -15,7 +15,7 @@
       <%= form_with model: [ @board, @card ], id: "card_form",
             data: { controller: "autoresize form local-save step-fields",
                     local_save_key_value: "new-card-#{@board.id}",
-                    action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand" } do |form| %>
+                    action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent" } do |form| %>
         <h1 class="card__title">
           <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
             <%= form.text_area :title, placeholder: "Name it…",
@@ -59,9 +59,7 @@
 
         <div class="card-perma__notch card-perma__notch--bottom flex-column">
           <div class="card-perma__notch-new-card-buttons">
-            <%= form.submit "Create card", class: "btn",
-                  title: "Create card (#{ hotkey_label(["ctrl", "enter"]) })",
-                  data: { form_target: "submit", controller: "clicker", action: "keydown.ctrl+enter@document->clicker#click keydown.meta+enter@document->clicker#click" } %>
+            <%= form.submit "Create card", class: "btn", data: { form_target: "submit" } %>
           </div>
         </div>
       <% end %>

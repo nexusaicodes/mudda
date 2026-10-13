@@ -1,0 +1,17 @@
+<%# locals: (board:) -%>
+<div class="board-title__delete" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+  <button type="button" class="btn btn--plain txt-negative txt-x-small" data-action="dialog#open">Delete board…</button>
+
+  <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
+    <h3 class="txt-large txt-bold">Delete “<%= board.name %>”?</h3>
+    <p class="txt-medium margin-block-half">
+      This permanently deletes the board and its <%= pluralize board.cards.count, "card" %>. It can't be undone.
+    </p>
+    <div class="flex gap-half justify-center margin-block-start">
+      <button type="button" class="btn" data-action="dialog#close">Cancel</button>
+      <%= button_to board_path(board), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+        <span>Delete board</span>
+      <% end %>
+    </div>
+  </dialog>
+</div>

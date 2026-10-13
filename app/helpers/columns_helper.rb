@@ -14,7 +14,6 @@ module ColumnsHelper
 
   def column_tag(id:, name:, drop_url:, collapsed: true, selected: nil, card_color: "var(--color-card-default)", data: {}, **properties, &block)
     classes = token_list("cards", properties.delete(:class), "is-collapsed": collapsed, "is-expanded": !collapsed)
-    hotkeys_disabled = data[:card_hotkeys_disabled]
 
     data = {
       drag_and_drop_target: "container",
@@ -40,7 +39,6 @@ module ColumnsHelper
         navigable_list_auto_select_value: "false",
         navigable_list_actionable_items_value: "true",
         navigable_list_only_act_on_focused_items_value: "true",
-        card_hotkeys_disabled: hotkeys_disabled,
         action: "keydown->navigable-list#navigate"
       }, &block)
     end

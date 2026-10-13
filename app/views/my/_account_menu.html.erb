@@ -1,0 +1,24 @@
+<div class="account-menu" data-controller="dialog" data-dialog-orient-value="false"
+    data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
+  <button type="button" class="account-menu__trigger btn btn--circle borderless" data-action="dialog#toggle">
+    <%= avatar_image_tag Current.user, alt: "" %>
+    <span class="for-screen-reader">Account</span>
+  </button>
+
+  <%= tag.dialog class: "account-menu__popup menu popup popup--animated panel shadow",
+        data: { dialog_target: "dialog", action: "turbo:before-cache@document->dialog#close" } do %>
+    <ul class="popup__list">
+      <%= menu_item "Account settings", account_settings_path, icon: "settings" %>
+      <%= menu_item "Profile", user_path(Current.user), icon: "person" %>
+      <%= menu_item "API tokens", my_tokens_path, icon: "password" %>
+      <%= menu_item "Upgrade for unlimited cards", account_upgrade_path, icon: "arrow-up", turbo: false if Current.account&.upgrade_url %>
+
+      <li class="popup__item">
+        <%= button_to session_path, method: :delete, class: "popup__btn btn", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
+          <%= icon_tag "logout", class: "popup__icon" %>
+          <span>Sign out</span>
+        <% end %>
+      </li>
+    </ul>
+  <% end %>
+</div>

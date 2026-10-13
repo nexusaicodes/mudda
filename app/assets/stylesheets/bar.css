@@ -1,82 +1,106 @@
 @layer components {
+  /* A search pill floating above the page at the bottom centre. The bar itself lets clicks
+     through; only the pill and the results panel take them. */
   .bar {
-    --row-gap: 0.2lh;
+    --bar-offset: calc(var(--block-space) + env(safe-area-inset-bottom));
+    --bar-pill-width: min(280px, calc(100vw - 2rem));
+    --bar-pill-width-open: min(480px, calc(100vw - 2rem));
 
-    background-color: var(--color-terminal-bg);
-    block-size: calc(var(--footer-height) + env(safe-area-inset-bottom));
-    color: var(--color-terminal-text);
+    align-items: center;
     display: flex;
     flex-direction: column;
-    font-size: 0.9em;
-    inset: auto 0 0 0;
-    max-block-size: 100%;
-    padding-block: var(--block-space) calc(var(--block-space) + env(safe-area-inset-bottom));
-    padding-inline:
-      calc(calc(var(--inline-space) * 3) + env(safe-area-inset-left))
-      calc(calc(var(--inline-space) * 3) + env(safe-area-inset-right));
-    place-content: center;
+    inset: auto 0 var(--bar-offset) 0;
+    pointer-events: none;
     position: fixed;
     view-transition-name: bar;
     z-index: var(--z-bar);
-
-    html[data-theme="dark"] & {
-      border-block-start: 1px solid oklch(var(--lch-ink-lighter) / 0.35);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        border-block-start: 1px solid oklch(var(--lch-ink-lighter) / 0.35);
-      }
-    }
-
-    &:has(.bar__placeholder[hidden]) {
-      padding-inline: 1ch;
-    }
   }
 
   ::view-transition-group(bar) {
     z-index: 99;
   }
 
-  .bar__input {
-    transform: translateY(50%);
-    transition: transform 350ms cubic-bezier(0.25, 1.25, 0.5, 1);
+  .bar__pill {
+    background-color: var(--color-canvas);
+    border: 1px solid oklch(var(--lch-ink-darkest) / 0.08);
+    border-radius: 99rem;
+    box-shadow:
+      0 0.1rem 0.2rem oklch(var(--lch-ink-darkest) / 0.06),
+      0 0.4rem 0.8rem -0.2rem oklch(var(--lch-ink-darkest) / 0.1),
+      0 1rem 2rem -0.6rem oklch(var(--lch-ink-darkest) / 0.14);
+    inline-size: var(--bar-pill-width);
+    pointer-events: auto;
+    transition: inline-size 250ms var(--ease-out-overshoot-subtle, ease-out);
 
-    .bar:has(.bar__placeholder[hidden]) & {
-      transform: translateY(0);
+    &:has(.bar__input:not([hidden])) {
+      inline-size: var(--bar-pill-width-open);
+    }
+  }
+
+  .bar__trigger {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: inherit;
+    color: var(--color-ink-dark);
+    cursor: pointer;
+    display: flex;
+    font-size: var(--text-small);
+    font-weight: 500;
+    gap: 0.6ch;
+    inline-size: 100%;
+    justify-content: center;
+    padding: 0.65em 1.2em;
+
+    @media (any-hover: hover) {
+      &:hover {
+        color: var(--color-ink);
+      }
+    }
+  }
+
+  .bar__input {
+    .search__form {
+      padding: 0.3em 0.4em 0.3em 1.1em;
+
+      > label {
+        display: none;
+      }
+    }
+
+    .search__input {
+      --focus-ring-size: 0;
+      --input-background: transparent;
+      --input-border-color: transparent;
+      --input-padding: 0.35em 0;
+
+      flex: 1;
+      max-inline-size: none;
     }
   }
 
   .bar__modal {
-    background-color: var(--color-terminal-bg);
-    block-size: 75dvh;
-    border-block: 1px solid var(--color-ink-lighter);
-    inline-size: 100vw;
-    inset: auto 0 0 0;
-    max-inline-size: 100vw;
-    margin-block-end: calc(var(--footer-height) - 0.3rem + env(safe-area-inset-bottom));
+    background-color: var(--color-canvas);
+    border: 1px solid oklch(var(--lch-ink-darkest) / 0.08);
+    border-radius: 1.2rem;
+    box-shadow:
+      0 0.4rem 0.8rem -0.2rem oklch(var(--lch-ink-darkest) / 0.1),
+      0 1.5rem 3rem -1rem oklch(var(--lch-ink-darkest) / 0.2);
+    inline-size: min(560px, calc(100vw - 2rem));
+    inset: auto 0 calc(var(--bar-offset) + 3.6rem) 0;
+    margin-inline: auto;
+    max-block-size: min(70dvh, 40rem);
+    overflow-y: auto;
+    padding: 0;
+    pointer-events: auto;
     position: fixed;
-    z-index: -1;
 
-    &:has(#bar-content[busy]), &:has(#bar-content:not([complete])), &:has([data-search-redirect]) {
+    &:has(#bar_content[busy]), &:has(#bar_content:not([complete])) {
       display: none;
     }
-  }
 
-  .bar__placeholder {
-    .btn--plain {
-      color: inherit;
-      font-size: var(--text-x-small);
-      font-weight: 600;
-      opacity: 0.66;
-      padding-inline: 1ch;
-      text-transform: uppercase;
-      white-space: nowrap;
-
-      &:hover {
-        color: oklch(var(--lch-blue-dark));
-        opacity: 1;
-      }
+    @media (max-width: 639px) {
+      max-block-size: calc(100dvh - var(--bar-offset) - 6rem);
     }
   }
 }

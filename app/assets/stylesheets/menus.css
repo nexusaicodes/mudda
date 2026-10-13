@@ -1,0 +1,166 @@
+@layer components {
+  /* Header menus: the board switcher beside a page title and the account menu at the right.
+  /* ------------------------------------------------------------------------ */
+
+  .switcher,
+  .account-menu {
+    display: inline-flex;
+    position: relative;
+  }
+
+  .menu.popup {
+    --panel-padding: 0.6rem;
+    --popup-display: grid;
+
+    font-size: var(--text-small);
+    font-weight: normal;
+    gap: 0.25rem;
+    inset: calc(100% + 0.5rem) auto auto 50%;
+    min-inline-size: min(30ch, calc(100vw - 2rem));
+    text-align: start;
+    text-transform: none;
+  }
+
+  @media (max-width: 639px) {
+    .switcher__menu.popup {
+      inset: calc(var(--custom-safe-inset-top) + 3.5rem) 1rem auto 1rem;
+      max-inline-size: none;
+      position: fixed;
+      translate: 0;
+    }
+  }
+
+  .account-menu__popup.popup {
+    inset-inline: auto 0;
+    translate: 0;
+  }
+
+  .account-menu__trigger {
+    --btn-size: 2rem;
+
+    overflow: hidden;
+    padding: 0;
+
+    img {
+      block-size: 100%;
+      border-radius: 50%;
+      inline-size: 100%;
+    }
+  }
+
+  .nav__section {
+    border-block-start: 1px solid var(--color-ink-lighter);
+    font-size: var(--text-small);
+    padding-block-start: 0.4rem;
+
+    &:first-child {
+      border-block-start: 0;
+      padding-block-start: 0;
+    }
+  }
+
+  .popup__item--current .popup__btn {
+    font-weight: 700;
+  }
+
+  .menu__check {
+    color: var(--color-link);
+  }
+
+  .menu__count {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .menu__note {
+    color: var(--color-ink-dark);
+    font-size: var(--text-x-small);
+    line-height: 1.4;
+    padding: 0.25rem var(--popup-item-padding-inline) 0.4rem calc(var(--popup-icon-size) + 2 * var(--popup-item-padding-inline));
+  }
+
+  .menu__footer {
+    border-block-start: 1px solid var(--color-ink-lighter);
+    padding-block-start: 0.4rem;
+  }
+
+  /* Board title: the name renames the board in place; the ▾ beside it switches boards.
+  /* ------------------------------------------------------------------------ */
+
+  .board-title {
+    display: flex;
+    justify-content: center;
+    min-inline-size: 0;
+  }
+
+  .board-title__display {
+    align-items: center;
+    display: flex;
+    gap: 0.25ch;
+    min-inline-size: 0;
+  }
+
+  .board-title__name {
+    font-size: inherit;
+    font-weight: inherit;
+    margin: 0;
+    min-inline-size: 0;
+  }
+
+  .board-title__rename {
+    background: none;
+    border: 0;
+    border-radius: 0.3em;
+    color: inherit;
+    cursor: text;
+    display: flex;
+    font: inherit;
+    max-inline-size: 100%;
+    padding: 0 0.2em;
+    text-decoration: underline 0.08em transparent;
+    text-underline-offset: 0.18em;
+    transition: text-decoration-color 150ms ease;
+
+    @media (any-hover: hover) {
+      &:hover {
+        text-decoration-color: var(--color-ink-light);
+      }
+    }
+  }
+
+  .switcher__trigger {
+    --btn-size: 1.75rem;
+
+    font-size: var(--text-normal);
+  }
+
+  .board-title__editor {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5ch 1ch;
+    justify-content: center;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .board-title__form {
+    align-items: center;
+    display: flex;
+    gap: 0.5ch;
+  }
+
+  .board-title__input {
+    font-size: var(--text-medium);
+    font-weight: 800;
+    inline-size: min(24ch, 55vw);
+    text-align: center;
+  }
+
+  .board-title__delete {
+    font-weight: normal;
+  }
+}

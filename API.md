@@ -239,8 +239,9 @@ rather than replacing the filter. `GET /boards/:board_id/cards.json` is the chea
 one board, and `?column_ids[]=4` narrows it to a single lane.
 
 `GET /cards.json` accepts `board_ids[]`, `column_ids[]`, `card_ids[]`, `terms[]` (full-text),
-`creation` (a time window), `indexed_by` (`all` or `golden`) and `sorted_by` (`latest`,
-`newest` or `oldest`), alongside `page`. **Anything else is a `422` naming the offending
+`creation` (a time window), `due` (`soon`: open cards due by tomorrow, the most overdue first),
+`lane` (`backlog`, `todo`, `doing` or `done`: that lane on every board), `indexed_by` (`all` or
+`golden`) and `sorted_by` (`latest`, `newest` or `oldest`), alongside `page`. **Anything else is a `422` naming the offending
 parameter**, so a misspelled filter fails loudly rather than quietly widening the result set:
 
 ```json
@@ -270,9 +271,9 @@ representation; for most cards, reading the card is enough.
 
 ### Search
 
-`GET /search.json?q=…` runs full-text search across every board and returns cards. A query
-that is exactly a card number jumps straight to that card — but only while one board answers
-to that number; once two do, the search results are returned instead.
+`GET /search.json?q=…` runs full-text search across every board and returns cards. A card
+number is searched like any other text; to fetch a card by its number, read
+`/boards/:board_id/cards/:number.json`.
 
 ## What isn't here
 

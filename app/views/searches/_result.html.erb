@@ -1,21 +1,29 @@
-<li>
-  <%= link_to result.source, class: "search__result", data: { turbo_frame: "_top", action: "bar#reset" } do %>
-    <div>
-      <h3 class="search__title txt--medium margin-none">
-        # <%= result.card.number %> <%= result.card_title %>
-      </h3>
+<%# locals: (card:, matches:) -%>
+<%# One row per card: the title, then where the query matched — its description, or a note. %>
+<% title_match = matches.find { |match| match.note.nil? } || matches.first %>
+<% note_match = matches.find(&:note) %>
 
-      <% if result.note.present? %>
-        <div class="search__excerpt search__excerpt--note">
-          <%= avatar_preview_tag result.card.creator %>
-          <div><%= result.note_body %></div>
-        </div>
-      <% elsif result.card_id.present? %>
-        <div class="search__excerpt"><%= result.card_description %></div>
+<li>
+  <%= link_to board_card_path(card.board, card), class: "search__result", style: "--card-color: #{card.color}",
+        data: { turbo_frame: "_top", action: "bar#reset" } do %>
+    <div class="search__result-main">
+      <h4 class="search__title margin-none"><%= title_match.card_title %></h4>
+
+      <% if title_match.note.nil? && (description = title_match.card_description).present? %>
+        <div class="search__excerpt"><%= description %></div>
+      <% elsif note_match %>
+        <div class="search__excerpt search__excerpt--note">in a note: “<%= note_match.note_body %>”</div>
       <% end %>
     </div>
-    <div class="overflow-ellipsis translucent txt-ink">
-      <%= result.card.board.name %> · <%= local_datetime_tag(result.created_at, style: :timeordate) %>
+
+    <div class="search__meta">
+      <span class="search__lane" style="--column-color: <%= card.column.color %>"><%= card.column.name %></span>
+      <% if card.due_on && !card.closed? %>
+        <span class="card__when card__when--<%= card_due_tone(card) %>">
+          <%= icon_tag "bell-alert" if card.overdue? %>
+          <%= card_due_relative_label(card) %>
+        </span>
+      <% end %>
     </div>
   <% end %>
 </li>

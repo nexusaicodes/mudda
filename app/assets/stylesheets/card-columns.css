@@ -484,10 +484,10 @@
     }
   }
 
-  /* Override card styles within columns
+  /* Override card styles within columns, and in the grouped cross-board lists
   /* ------------------------------------------------------------------------ */
 
-  .cards .card {
+  :is(.cards, .card-group__cards) .card {
     --block-space: 1em;
     --block-space-half: 0.5em;
     --card-padding-block: 0.85em;
@@ -739,5 +739,61 @@
         scale: 1;
       }
     }
+  }
+}
+
+@layer components {
+  /* A cross-board card list, its cards grouped under their board, drawn like the lanes' cards */
+  .card-groups {
+    container-type: inline-size;
+    display: grid;
+    gap: calc(var(--block-space) * 1.5);
+    margin-inline: auto;
+    max-inline-size: var(--main-width);
+    padding-block: var(--block-space);
+  }
+
+  .card-group__title {
+    align-items: baseline;
+    border-block-end: 1px solid var(--color-ink-lighter);
+    display: flex;
+    font-size: var(--text-small);
+    gap: 1ch;
+    letter-spacing: 0.04em;
+    margin: 0 1ch;
+    padding-block-end: 0.4rem;
+    text-transform: uppercase;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  .card-group__cards {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr));
+    padding: 0.75rem 1ch 0;
+    text-align: start;
+
+    .card {
+      font-size: clamp(0.6rem, 0.85cqi, 0.75rem);
+    }
+
+    .card__details-lane {
+      border: 1px solid currentColor;
+      border-radius: 0.2em;
+      color: var(--card-color);
+      margin-inline-start: auto;
+      padding: 0.05em 0.5em;
+      text-transform: uppercase;
+    }
+  }
+
+  .card-group__count {
+    color: var(--color-ink-dark);
+    font-weight: normal;
+    margin-inline-start: auto;
   }
 }

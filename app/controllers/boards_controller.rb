@@ -1,7 +1,7 @@
 class BoardsController < ApplicationController
   wrap_parameters :board, include: %i[ name ]
 
-  include FilterScoped
+  include StrictQueryParams
 
   serves_json :index, :show, :create, :update, :destroy
 
@@ -12,12 +12,11 @@ class BoardsController < ApplicationController
     fresh_when etag: @page.records
   end
 
+  # Each lane loads its own cards in a frame; a card's save touches the board, so the board
+  # stands in for them in the etag. The header's account menu offers an upgrade only while
+  # there is somewhere to upgrade.
   def show
-    if @filter.used?(ignore_boards: true)
-      show_filtered_cards
-    else
-      show_columns
-    end
+    fresh_when etag: [ @board, Current.user, Current.account, Current.account.upgrade_url, Date.current ]
   end
 
   def new
@@ -33,14 +32,11 @@ class BoardsController < ApplicationController
     end
   end
 
-  def edit
-  end
-
   def update
     @board.update! board_params
 
     respond_to do |format|
-      format.html { redirect_to edit_board_path(@board), notice: "Saved" }
+      format.html { redirect_to board_path(@board) }
       format.json { render :show }
     end
   end
@@ -57,18 +53,6 @@ class BoardsController < ApplicationController
   private
     def set_board
       @board = Current.user.boards.find params[:id]
-    end
-
-    # The board narrows the query, not the filter: Filter#boards is a HABTM, so assigning
-    # board_ids would rewrite a saved filter's boards on disk as a side effect of a GET.
-    def show_filtered_cards
-      set_page_and_extract_portion_from @filter.cards.where(board: @board)
-    end
-
-    # Each lane loads its own cards in a frame; a card's save touches the board, so the board
-    # stands in for them in the etag.
-    def show_columns
-      fresh_when etag: [ @board, @user_filtering, Current.account, Date.current ]
     end
 
     def board_params

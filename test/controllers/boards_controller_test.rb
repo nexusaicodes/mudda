@@ -15,6 +15,27 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "the board's name renames it in place, and the switcher sits beside it" do
+    get board_path(boards(:writebook))
+
+    assert_select ".board-title__rename", text: boards(:writebook).name
+    assert_select ".board-title__editor[hidden] form[action=?]", board_path(boards(:writebook))
+    assert_select ".board-title__editor .board-title__delete", text: /Delete board/
+    assert_select ".switcher turbo-frame#my_menu[src=?]", my_menu_path(board_id: boards(:writebook).id)
+  end
+
+  test "the account menu offers the upgrade only when there is somewhere to upgrade" do
+    get board_path(boards(:writebook))
+    assert_select ".account-menu a[href=?]", account_upgrade_path, count: 0
+
+    etag = response.headers["ETag"]
+    with_env("MUDDA_UPGRADE_URL" => "https://mudda.example/upgrade/new?token=signed") do
+      get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
+    end
+    assert_response :success
+    assert_select ".account-menu a[href=?]", account_upgrade_path, text: "Upgrade for unlimited cards"
+  end
+
   test "invalidates page title cache when account updates" do
     get board_path(boards(:writebook))
     etag = response.headers["ETag"]
@@ -49,17 +70,12 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Remodel Punch List", board.name
   end
 
-  test "edit" do
-    get edit_board_path(boards(:writebook))
-    assert_response :success
-  end
-
   test "update" do
     patch board_path(boards(:writebook)), params: {
       board: { name: "Writebook bugs" }
     }
 
-    assert_redirected_to edit_board_path(boards(:writebook))
+    assert_redirected_to board_path(boards(:writebook))
     assert_equal "Writebook bugs", boards(:writebook).reload.name
   end
 
@@ -125,32 +141,5 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     first_board = @response.parsed_body["data"].first
     assert first_board["creator"].present?
     assert first_board["creator"]["email_address"].present?
-  end
-
-  # Filter#boards is a HABTM, so assigning board_ids here would write join rows — pinning a
-  # saved filter to whichever board its owner last looked at, on every later page.
-  test "showing a filtered board leaves a saved filter alone" do
-    Current.user = users(:kevin)
-    filter = users(:kevin).filters.remember(indexed_by: "golden")
-
-    get board_path(boards(:writebook), indexed_by: "golden")
-
-    assert_response :success
-    assert_equal filter, users(:kevin).filters.from_params(indexed_by: "golden"),
-      "The request must match the saved filter, or this test proves nothing"
-    # Re-find rather than reload: Filter#boards memoizes into @boards, which reload keeps.
-    assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
-  end
-
-  test "showing a filtered board lists only that board's cards" do
-    Current.user = users(:kevin)
-    cards(:logo).gild
-    boards(:private).cards.create!(title: "Golden elsewhere", due_on: 1.week.from_now, creator: users(:kevin), last_active_at: Time.current).gild
-
-    get board_path(boards(:writebook), indexed_by: "golden")
-
-    assert_response :success
-    assert_select ".card__title", text: /logo/i
-    assert_select "*", { text: /Golden elsewhere/, count: 0 }
   end
 end
