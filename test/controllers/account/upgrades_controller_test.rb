@@ -28,12 +28,21 @@ class Account::UpgradesControllerTest < ActionDispatch::IntegrationTest
     assert_equal account_upgrade_url(billing: "monthly"), session[:return_to_after_authenticating]
   end
 
-  test "a board with no upgrade URL already has unlimited cards" do
+  test "with no upgrade URL and no ceiling, the account already has unlimited cards" do
     sign_in_as :kevin
 
-    with_env("MUDDA_UPGRADE_URL" => nil) { get account_upgrade_path }
+    with_env("MUDDA_UPGRADE_URL" => nil, "MUDDA_CARD_LIMIT" => nil) { get account_upgrade_path }
 
     assert_redirected_to root_path
-    assert_equal "This board already has unlimited cards", flash[:notice]
+    assert_equal "This account already has unlimited cards", flash[:notice]
+  end
+
+  test "with no upgrade URL under a ceiling, there is no upgrade to offer" do
+    sign_in_as :kevin
+
+    with_env("MUDDA_UPGRADE_URL" => nil, "MUDDA_CARD_LIMIT" => "100") { get account_upgrade_path }
+
+    assert_redirected_to root_path
+    assert_equal "Upgrades aren't available here", flash[:notice]
   end
 end

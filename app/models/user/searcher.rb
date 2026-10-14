@@ -1,10 +1,6 @@
 module User::Searcher
   extend ActiveSupport::Concern
 
-  included do
-    has_many :search_queries, class_name: "Search::Query", dependent: :destroy
-  end
-
   def search(terms)
     Search::Record.search(terms, user: self)
   end
@@ -22,11 +18,5 @@ module User::Searcher
     latest = matches.where(card_id: card_ids).group(:card_id, :searchable_type).select("MAX(search_records.id)")
 
     search(terms).includes(card: :column).where(id: latest).group_by(&:card).sort_by { |card, _| card_ids.index(card.id) }
-  end
-
-  def remember_search(terms)
-    search_queries.find_or_create_by(terms: terms).tap do |search_query|
-      search_query.touch unless search_query.invalid? || search_query.previously_new_record?
-    end
   end
 end

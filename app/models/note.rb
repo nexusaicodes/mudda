@@ -1,5 +1,5 @@
 class Note < ApplicationRecord
-  include Attachments, Eventable, Promptable, Searchable
+  include Attachments, Eventable, Searchable
 
   belongs_to :card, touch: true
   belongs_to :creator, class_name: "User", default: -> { Current.user }

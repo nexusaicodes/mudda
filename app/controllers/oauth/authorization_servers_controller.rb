@@ -8,13 +8,15 @@ class Oauth::AuthorizationServersController < ActionController::API
       token_endpoint: oauth_token_url,
       registration_endpoint: oauth_registrations_url,
       revocation_endpoint: oauth_revoke_url,
+      introspection_endpoint: oauth_introspect_url,
       scopes_supported: Session::SCOPES,
       response_types_supported: %w[ code ],
       response_modes_supported: %w[ query ],
       grant_types_supported: Oauth::RegistrationsController::GRANT_TYPES,
       code_challenge_methods_supported: %w[ S256 ],
       token_endpoint_auth_methods_supported: Oauth::RegistrationsController::AUTH_METHODS,
-      revocation_endpoint_auth_methods_supported: Oauth::RegistrationsController::AUTH_METHODS
+      revocation_endpoint_auth_methods_supported: Oauth::RegistrationsController::AUTH_METHODS,
+      introspection_endpoint_auth_methods_supported: Oauth::RegistrationsController::AUTH_METHODS
     }
   end
 end

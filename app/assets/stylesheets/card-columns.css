@@ -20,11 +20,6 @@
         overflow: auto;
         padding: 0;
       }
-
-      /* Adapt the grid to public views (no filters section) */
-      &.public #main {
-        grid-template-rows: 1fr;
-      }
     }
   }
 
@@ -36,7 +31,6 @@
   }
 
   .card-columns {
-    --bubble-size: 3.5rem;
     --cards-gap: min(1.2cqi, 1.7rem);
     --column-gap: 8px;
     --column-padding: calc(var(--column-gap) * 2);
@@ -136,15 +130,12 @@
         }
       }
     }
-
-    @media (any-hover: hover) {
-    }
   }
 
   .cards__transition-container {
     block-size: 100%;
     border-radius: calc(var(--column-width-collapsed) / 2);
-    margin-block-start: 0.5ch; /* Allow a little room for the mini bubble */
+    margin-block-start: 0.5ch;
     transition: translate var(--column-transition-duration) var(--ease-out-overshoot-subtle);
 
     @media (min-width: 640px) {
@@ -509,8 +500,7 @@
       z-index: 1;
     }
 
-    .card__stages,
-    .card__hide-on-index {
+    .card__stages {
       display: none;
     }
 
@@ -561,11 +551,6 @@
     .card__notes .icon--comment {
       color: var(--card-color);
     }
-
-    .bubble {
-      inset-inline-start: 100%;
-      translate: -90% -40%;
-    }
   }
 
   /* Board tools
@@ -586,71 +571,6 @@
       --btn-padding: 0.55em 1.5em;
 
       font-size: 1.05em;
-    }
-  }
-
-  /* On Deck (Not Now)
-  /* ------------------------------------------------------------------------ */
-
-  .cards--closed,
-  .cards--on-deck {
-    --card-color: var(--color-ink-light) !important;
-
-    .card,
-    .blank-slate {
-      --card-color: var(--color-card-complete) !important;
-    }
-
-    .bubble {
-      display: none !important;
-    }
-  }
-
-  /* Doing
-  /* -------------------------------------------------------------------------- */
-
-  /* Surface a mini bubble if there are cards with bubbles inside */
-  .cards--doing.is-collapsed:has(.bubble:not([hidden])) .cards__transition-container {
-    --bubble-color: var(--card-color, oklch(var(--lch-blue-medium)));
-    --bubble-opacity: 75%;
-    --bubble-shape: 54% 46% 61% 39% / 57% 49% 51% 43%;
-
-    &:before {
-      background: radial-gradient(
-        color-mix(in srgb, var(--bubble-color) calc(var(--bubble-opacity) / 5), var(--color-canvas)) 50%,
-        color-mix(in srgb, var(--bubble-color) var(--bubble-opacity), var(--color-canvas)) 100%
-      );
-      block-size: 1em;
-      border-radius: var(--bubble-shape);
-      content: "";
-      inline-size: 1em;
-      inset-block: 0 auto;
-      inset-inline: auto 0;
-      position: absolute;
-      translate: 20% -20%;
-
-      &:dir(rtl) { translate: -20% -20%; }
-      z-index: 1;
-
-      @media (max-width: 639px) {
-        translate: 20% 0%;
-      }
-    }
-
-    @media (max-width: 639px) {
-      &.cards__expander-title:before {
-        display: none;
-      }
-    }
-
-    html[data-theme="dark"] & {
-      --bubble-opacity: 100%;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        --bubble-opacity: 100%;
-      }
     }
   }
 

@@ -17,7 +17,8 @@ en:
         title: Account Settings
     upgrades:
       show:
-        already_unlimited: This board already has unlimited cards
+        already_unlimited: This account already has unlimited cards
+        unavailable: Upgrades aren't available here
   active_storage:
     blobs:
       blob:

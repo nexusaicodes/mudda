@@ -1,8 +1,10 @@
-# Apply MySQL-compatible column limits when defining tables.
+# Give every string and text column a length limit when defining tables, and have SQLite
+# enforce it (it ignores declared lengths on its own) with a CHECK constraint per column. The
+# sizes are MySQL's, which this schema began on.
 #
-# For string columns: defaults to 255 (MySQL's VARCHAR default)
+# For string columns: defaults to 255
 #
-# For text columns: converts MySQL's `size:` option to equivalent limits:
+# For text columns: a `size:` option maps to a limit:
 #   - (blank/default): 65,535 (TEXT)
 #   - size: :tiny: 255 (TINYTEXT)
 #   - size: :medium: 16,777,215 (MEDIUMTEXT)

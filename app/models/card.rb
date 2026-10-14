@@ -1,6 +1,6 @@
 class Card < ApplicationRecord
   include Attachments, Colored, Notable,
-    Due, Eventable, Golden, Multistep, Promptable,
+    Due, Eventable, Golden, Multistep,
     Searchable, Triageable
 
   belongs_to :board

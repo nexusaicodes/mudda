@@ -77,11 +77,6 @@ authenticator.
   Do **not** repoint it.
 - Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`.
 
-### Placeholders
-
-`CONTRIBUTING.md` links to a `nexus-ai/mudda` GitHub org, which is a placeholder. The repository
-lives at `nexusaicodes/mudda`.
-
 ## Architecture
 
 ### One account, resolved from the signed-in user
@@ -189,19 +184,18 @@ fixed (`attr_readonly :name`, since lane predicates key off them); only color is
 
 **Card**: the main work item, with a per-board `number`, a rich-text description, steps, and
 notes. Concerns: `Attachments`, `Colored`, `Notable`, `Due`, `Eventable`, `Golden`,
-`Multistep`, `Promptable`, `Searchable`, `Triageable`. A card is created complete; there is no
+`Multistep`, `Searchable`, `Triageable`. A card is created complete; there is no
 draft state. The compose screen (`cards#new`) holds its state in the browser, `local-save` keeps
 it across a reload, and one POST creates the card with its steps. Pictures live in the
 description, which uploads through Active Storage direct upload.
 
 **Note**: a timestamped, rich-text entry on a card (`Card::Notable`), created with
-`card.notes.create!`. Concerns: `Attachments`, `Eventable`, `Promptable`, `Searchable`. Only its
-creator can edit or delete it.
+`card.notes.create!`. Concerns: `Attachments`, `Eventable`, `Searchable`. Only its creator can
+edit or delete it.
 
 **Event**: an audit record of a card's creation, title change, lane change, or board change,
 or a note's creation. It has a polymorphic `eventable` and JSON `particulars`, and is written
 through the `Eventable` concern (see [ERD.md](ERD.md#enumerated-values) for the actions).
-Concerns: `Promptable`.
 
 ### Card lifecycle: fixed columns
 
@@ -350,8 +344,8 @@ FTS5 virtual table (`search_records_fts`) with the `porter` tokenizer. Search sp
 in the account, scoped through the card (`Search::Record.for_query` reads
 `user.accessible_cards`).
 
-The FTS table holds text folded by `Search::Normalizer`, and `Search::Query` folds the query the
-same way. The folding is Arabic only: harakat and tatweel are stripped, alef, yeh, and teh
+The FTS table holds text folded by `Search::Normalizer`, and `Search::Query` (a plain model of
+what was typed, not a table) folds the query the same way. The folding is Arabic only: harakat and tatweel are stripped, alef, yeh, and teh
 marbuta are folded, and the article ال is removed. So a search matches with or without vowel
 marks or the article. `search_records` keeps the text as written, and `Search::Highlighter`
 marks it in Ruby. A change to the normalizer needs `bin/rails search:reindex`, or a data

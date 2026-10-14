@@ -146,23 +146,10 @@
     --focus-ring-color: var(--color-positive);
   }
 
-  .btn--success {
-    --success-timing-function: cubic-bezier(0.25, 1.25, 0.5, 1);
-    animation: success 1s var(--success-timing-function);
-
-    .icon {
-      animation: zoom-fade 500ms var(--success-timing-function);
-    }
-  }
-
   /* Fake button used to help space things out */
   .btn--placeholder {
     pointer-events: none;
     visibility: hidden;
-  }
-
-  .btn--remove {
-    --btn-icon-size: 0.7em;
   }
 
   .btn--reversed {
@@ -230,66 +217,6 @@
 
       .icon--arrow-left {
         display: none;
-      }
-    }
-  }
-
-
-  /* Button groups
-  /* ------------------------------------------------------------------------ */
-
-  .btn__group {
-    .btn {
-      --btn-border-radius: 0;
-      --radius: 0.3em;
-
-      flex: 1 0 33%;
-      inline-size: 100%;
-      justify-content: center;
-      white-space: nowrap;
-    }
-
-    form {
-      flex: 1 1 0%;
-    }
-
-    :first-of-type .btn {
-      border-end-start-radius: var(--radius);
-      border-inline-end: 0;
-      border-start-start-radius: var(--radius);
-      padding-inline-end: 0.8em;
-    }
-
-    :last-of-type .btn {
-      border-end-end-radius: var(--radius);
-      border-inline-start: 0;
-      border-start-end-radius: var(--radius);
-      padding-inline-start: 0.8em;
-    }
-
-    span {
-      inline-size: 100%;
-    }
-  }
-
-  /* Button utilities
-  /* ------------------------------------------------------------------------ */
-
-  :is([data-platform~=mobile], [data-platform~=native]) {
-    .btn--ensure-tap-target-size {
-      --tap-target-z-index: 1;
-      --tap-target-min-size: 44px;
-
-      z-index: var(--tap-target-z-index);
-
-      &::before {
-        content: "";
-        display: block;
-        block-size: var(--tap-target-min-size);
-        inline-size: var(--tap-target-min-size);
-        inset: calc(50% - var(--tap-target-min-size) / 2) auto auto calc(50% - var(--tap-target-min-size) / 2);
-        opacity: 0;
-        position: absolute;
       }
     }
   }

@@ -7,16 +7,13 @@ development:
   primary:
     <<: *default
     database: storage/development.sqlite3
-    schema_dump: schema_sqlite.rb
 
 test:
   primary:
     <<: *default
     database: storage/test.sqlite3
-    schema_dump: schema_sqlite.rb
 
 production:
   primary:
     <<: *default
     database: storage/production.sqlite3
-    schema_dump: schema_sqlite.rb

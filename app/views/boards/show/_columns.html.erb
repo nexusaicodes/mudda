@@ -20,5 +20,5 @@
         drop->drag-and-drop#drop
         dragend->drag-and-drop#dragEnd
         click@document->navigable-list#deselectWhenClickingOutside" } do %>
-  <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, column.leftmost?, column.rightmost?, I18n.locale ] } %>
+  <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, I18n.locale ] } %>
 <% end %>

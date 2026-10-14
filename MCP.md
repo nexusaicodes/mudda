@@ -107,6 +107,7 @@ spec:
 | It redeems the code (valid 10 minutes) with the PKCE verifier | `POST /oauth/token` | OAuth 2.1 |
 | It refreshes the hour-long access token as it expires | `POST /oauth/token` | OAuth 2.1 |
 | It may revoke its own token | `POST /oauth/revoke` | RFC 7009 |
+| It may ask whether one of its tokens is still active | `POST /oauth/introspect` | RFC 7662 |
 
 What is enforced:
 

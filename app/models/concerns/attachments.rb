@@ -1,8 +1,8 @@
 module Attachments
   extend ActiveSupport::Concern
 
-  # Variants used by ActionText embeds. Processed immediately on attachment to avoid
-  # read replica issues (lazy variants would attempt writes on read replicas).
+  # Variants used by ActionText embeds, processed immediately on attachment rather than lazily
+  # on first view.
   #
   # Patched into ActionText::RichText in config/initializers/action_text.rb
   VARIANTS = {

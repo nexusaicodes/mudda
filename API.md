@@ -281,8 +281,8 @@ The browser has endpoints for things the API reads and writes as fields. A card'
 drop target (`…/drops/column`), the compose screen (`…/cards/new`), and a lane's colour
 (`/boards/:board_id/columns/:id`) all answer `406`. `PUT` or `POST` the card, or read the
 board, instead. Every `new` and `edit` page, `/`, `/landing`, `/my/menu`, `/my/tokens`,
-`/my/passkeys`, `/my/locale`, `/account/upgrade`, `/prompts/cards`, and `/searches/queries` are
-the browser's too.
+`/my/passkeys`, `/my/locale`, `/account/upgrade`, and `/prompts/cards` are the browser's
+too.
 
 ## Errors
 

@@ -69,7 +69,6 @@ Rails.application.configure do
     "mudda.localhost", # here for backwards compat
     "localhost",
     "127.0.0.1",
-    /mudda-\d+/,   # review apps: mudda-123, mudda-456:3000
     /.*\.ts\.net/, # tailscale serve: hostname.tail1234.ts.net
     /.*\.nip\.io/  # nip.io for mobile apps
   ]

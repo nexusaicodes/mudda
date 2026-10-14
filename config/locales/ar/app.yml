@@ -21,7 +21,8 @@ ar:
         title: إعدادات الحساب
     upgrades:
       show:
-        already_unlimited: هذه اللوحة تتيح بالفعل عددًا غير محدود من البطاقات
+        already_unlimited: هذا الحساب يتيح بالفعل عددًا غير محدود من البطاقات
+        unavailable: الترقية غير متاحة هنا
   active_storage:
     blobs:
       blob:

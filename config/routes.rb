@@ -39,10 +39,6 @@ Rails.application.routes.draw do
   resources :cards, only: :index
 
   resource :search, only: :show
-  namespace :searches do
-    resources :queries, only: :create
-  end
-
 
   resource :session, only: %i[ new destroy ] do
     scope module: :sessions do

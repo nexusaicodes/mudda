@@ -1,6 +1,6 @@
 # Mudda — Entity Relationship Diagram
 
-The schema of `db/schema_sqlite.rb` (version `2026_10_14_000001`) and the associations declared
+The schema of `db/schema.rb` (version `2026_10_14_000002`) and the associations declared
 in `app/models/`. Update it with every migration. What the records *do* (the card lifecycle,
 sessions and tokens, search) is in [AGENTS.md](AGENTS.md).
 
@@ -23,7 +23,6 @@ erDiagram
     USERS ||--o{ SESSIONS : "has_many dependent-destroy — browser or token"
     USERS ||--o{ ACTION_PACK_PASSKEYS : "has_passkeys dependent-destroy, polymorphic holder"
     USERS ||--o| USER_SETTINGS : "has_one dependent-destroy"
-    USERS ||--o{ SEARCH_QUERIES : "has_many dependent-destroy"
     USERS ||--o{ BOARDS : "creator_id"
     USERS ||--o{ CARDS : "creator_id"
     USERS ||--o{ NOTES : "creator_id dependent-destroy"
@@ -67,7 +66,6 @@ erDiagram
         string email_address UK "limit 255 NOT NULL"
         string name "limit 255 NOT NULL"
         boolean active "default true NOT NULL"
-        datetime verified_at "nullable"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }
@@ -211,14 +209,6 @@ erDiagram
         datetime updated_at "NOT NULL"
     }
 
-    SEARCH_QUERIES {
-        integer id PK
-        bigint user_id FK "NOT NULL"
-        string terms "limit 2000 NOT NULL"
-        datetime created_at "NOT NULL"
-        datetime updated_at "NOT NULL"
-    }
-
     SEARCH_RECORDS {
         integer id PK "the FTS rowid"
         bigint card_id FK "NOT NULL — the card, or the note's card"
@@ -337,7 +327,6 @@ erDiagram
     CARDS ||--o| SEARCH_RECORDS : "searchable_type = Card"
     NOTES ||--o| SEARCH_RECORDS : "searchable_type = Note"
     SEARCH_RECORDS ||--|| SEARCH_RECORDS_FTS : "rowid = id"
-    USERS ||--o{ SEARCH_QUERIES : "recent searches"
 ```
 
 `search_records` holds one row per card and per note. **Every row carries `card_id`**, so a
@@ -373,8 +362,6 @@ note's match resolves to its card; neither it nor `events` stores a board. `sear
 | `notes` | `..._on_card_id` / `..._on_creator_id` | `card_id` / `creator_id` | |
 | `events` | `index_events_on_eventable` | `eventable_type, eventable_id` | |
 | `events` | `..._on_creator_id` | `creator_id` | |
-| `search_queries` | `..._on_user_id_and_updated_at` | `user_id, updated_at` | ✓ |
-| `search_queries` | `..._on_user_id_and_terms` | `user_id, terms` | |
 | `search_records` | `..._on_searchable_type_and_searchable_id` | `searchable_type, searchable_id` | ✓ |
 | `search_records` | `..._on_card_id` | `card_id` | |
 | `action_text_rich_texts` | `index_action_text_rich_texts_uniqueness` | `record_type, record_id, name` | ✓ |
@@ -420,7 +407,7 @@ of either).
 
 ## Infrastructure tables
 
-These don't appear in `db/schema_sqlite.rb`:
+These don't appear in `db/schema.rb`:
 
 - **`schema_migrations`** holds one `version` row per applied migration; `db:migrate` compares
   it against `db/migrate/`.
@@ -433,7 +420,7 @@ These don't appear in `db/schema_sqlite.rb`:
 
 ```bash
 # schema (after a migration)
-docker compose exec web bin/rails db:migrate     # rewrites db/schema_sqlite.rb
+docker compose exec web bin/rails db:migrate     # rewrites db/schema.rb
 
 # check a table against the live database
 docker compose exec -T web sqlite3 storage/development.sqlite3 ".schema --indent cards"

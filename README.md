@@ -26,7 +26,6 @@ Then open http://app.mudda.localhost:3006 and sign in as the owner (see
 | [AGENTS.md](AGENTS.md) | The architecture, for anyone changing the code |
 | [ERD.md](ERD.md) | The database schema |
 | [STYLE.md](STYLE.md) | House style |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
 
 You are welcome, and encouraged, to modify Mudda to your liking.
 

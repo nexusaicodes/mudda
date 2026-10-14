@@ -24,11 +24,6 @@
     /* The .pop-up--align-<drection> classes are used for initial alignment.
      * The orient JS helper layers on the .orient-<direction> to avoid running
      * off the edge of the screen and will override .popup--align */
-    &:where(.popup--align-left) {
-      inset-inline: auto 0;
-      translate: var(--orient-offset, 0px);
-    }
-
     &:where(.popup--align-right) {
       inset-inline: 0 auto;
       translate: var(--orient-offset, 0px);
@@ -50,15 +45,6 @@
     form {
       display: contents;
     }
-  }
-
-  .popup__footer {
-    border-block-start: 1px solid var(--color-ink-lightest);
-    color: var(--card-color);
-    margin-block-start: var(--popup-item-padding-inline);
-    padding: var(--popup-item-padding-inline) var(--popup-item-padding-inline) 0;
-    text-align: center;
-    text-transform: initial;
   }
 
   .popup__title {
@@ -192,19 +178,6 @@
 
     inline-size: var(--popup-icon-size);
     margin-inline-start: var(--popup-item-padding-inline);
-  }
-
-  .popup__radio {
-    --icon-size: var(--text-x-small);
-
-    block-size: var(--popup-icon-size);
-    inline-size: var(--popup-icon-size);
-    margin-inline-start: var(--popup-item-padding-inline);
-    flex-shrink: 0;
-
-    &:hover {
-      --btn-border-color: var(--color-ink);
-    }
   }
 
   /* Animated

@@ -1,13 +1,16 @@
 # Hands the signed-in owner to the platform's upgrade page (MUDDA_UPGRADE_URL), passing on the
 # billing (monthly or yearly) they picked. The platform's "Go Premium" sends a returning
 # customer here, so signing in to their board is how they show it's theirs; a signed-out
-# visitor signs in first and comes back. A board with no upgrade URL already has unlimited cards.
+# visitor signs in first and comes back. With no upgrade URL there is nowhere to send them: the
+# account either has no ceiling to lift, or has one this deployment offers no way past.
 class Account::UpgradesController < ApplicationController
   BILLINGS = %w[ monthly yearly ].freeze
 
   def show
     if upgrade_url = Current.account.upgrade_url
       redirect_to with_billing(upgrade_url), allow_other_host: true
+    elsif Current.account.card_limited?
+      redirect_to root_path, notice: t(".unavailable")
     else
       redirect_to root_path, notice: t(".already_unlimited")
     end

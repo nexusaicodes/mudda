@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_14_000001) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_14_000002) do
   create_table "accounts", force: :cascade do |t|
     t.integer "cards_created_count", default: 0, null: false
     t.datetime "created_at", null: false
@@ -176,15 +176,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_14_000001) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
-  create_table "search_queries", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "terms", limit: 2000, null: false
-    t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
-    t.index ["user_id", "terms"], name: "index_search_queries_on_user_id_and_terms"
-    t.index ["user_id", "updated_at"], name: "index_search_queries_on_user_id_and_updated_at", unique: true
-  end
-
   create_table "search_records", force: :cascade do |t|
     t.bigint "card_id", null: false
     t.text "content", limit: 65535
@@ -236,7 +227,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_14_000001) do
     t.string "email_address", limit: 255, null: false
     t.string "name", limit: 255, null: false
     t.datetime "updated_at", null: false
-    t.datetime "verified_at"
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
