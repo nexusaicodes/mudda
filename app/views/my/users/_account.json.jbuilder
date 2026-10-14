@@ -1,4 +1,4 @@
 json.cache! account do
-  json.(account, :id, :name)
+  json.(account, :id)
   json.created_at account.created_at.utc
 end

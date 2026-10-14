@@ -1,20 +1,6 @@
 ---
 en:
   account:
-    settings:
-      name:
-        placeholder: Account name…
-        save: Save changes
-      plan:
-        heading: Plan
-        no_refund: Deleting one doesn’t free its slot.
-        upgrade: Upgrade for unlimited cards
-        used:
-          one: "%{count} card of %{limit} used."
-          other: "%{count} cards of %{limit} used."
-      show:
-        back: Home
-        title: Account Settings
     upgrades:
       show:
         already_unlimited: This account already has unlimited cards
@@ -86,13 +72,8 @@ en:
   meta:
     description: Declutter your tasks for the age you live in.
   my:
-    account_menu:
-      account: Account
+    account_link:
       profile: Profile
-      settings: Account settings
-      sign_out: Sign out
-      tokens: API tokens
-      upgrade: Upgrade for unlimited cards
     menus:
       show:
         boards: Boards
@@ -223,11 +204,19 @@ en:
       name_placeholder: Name
       save: Save changes
       title: Edit your profile
+    plan:
+      heading: Plan
+      no_refund: Deleting one doesn’t free its slot.
+      upgrade: Upgrade for unlimited cards
+      used:
+        one: "%{count} card of %{limit} used."
+        other: "%{count} cards of %{limit} used."
     show:
       avatar_alt: Profile avatar for %{name}
       back: Home
       edit: Edit profile
       passkeys: Manage passkeys
+      security: Security
       sign_out: Sign out of Mudda on this device
       tokens: API tokens
     theme:

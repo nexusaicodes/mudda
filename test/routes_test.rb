@@ -1,7 +1,7 @@
 require "test_helper"
 
 class RouteTest < ActionDispatch::IntegrationTest
-  test "account/settings" do
-    assert_recognizes({ controller: "account/settings", action: "show" }, "/account/settings")
+  test "account/upgrade" do
+    assert_recognizes({ controller: "account/upgrades", action: "show" }, "/account/upgrade")
   end
 end

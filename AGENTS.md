@@ -162,10 +162,9 @@ can't both take the last one, and raises `RecordInvalid` past the ceiling, which
 JSON and MCP. Under a ceiling:
 - The compose screen warns within `Account::CardLimited::NEAR_LIMIT` cards of it.
 - The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL` once it is reached.
-- Account Settings shows a Plan section (cards used of the limit), which links to
-  `/account/upgrade` while `MUDDA_UPGRADE_URL` is set.
+- The profile shows a Plan section (cards used of the limit).
 
-While `MUDDA_UPGRADE_URL` is set, the account menu links to `/account/upgrade` at any time.
+While `MUDDA_UPGRADE_URL` is set, the profile's Plan section links to `/account/upgrade` at any time.
 `GET /account/upgrade` (`Account::UpgradesController`) hands the signed-in owner to
 `MUDDA_UPGRADE_URL`, signing them in first if needed and passing on `billing`
 (`monthly`/`yearly`), or sends them back to the board when there is no URL. The platform's "Go
@@ -306,8 +305,9 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   it (an inline script on a full load, the `landing` controller on a Turbo visit).
 - **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
   then the page's back link if it has one (`content_for :header_start`), the page title in the
-  centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
-  upgrade, sign out) on the right.
+  centre, and the avatar on the right (`my/_account_link`), a plain link to the profile. The
+  profile (`users/show`) holds appearance, language, the plan, passkeys, API tokens, and sign
+  out; there is no account settings page and no account name.
 - **Board title** (`boards/_title`): clicking the name renames the board in place
   (`inline-edit` controller), with "Delete board…" beside Save/Cancel. There is no board
   settings page.

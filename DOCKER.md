@@ -32,7 +32,6 @@ seed runs once, when `db:prepare` creates the database:
 |---|---|---|
 | `MUDDA_OWNER_EMAIL` | The owner's email address. Required outside development | `saksham@nexusai.world` |
 | `MUDDA_OWNER_NAME` | Display name. Defaults to the email's local part, capitalized | `Saksham Saxena` |
-| `MUDDA_OWNER_ACCOUNT` | The account's name | `Mudda` |
 | `MUDDA_OWNER_PASSWORD` | The sign-in password, checked against this variable on every sign-in and never stored | `mudda-dev-password` |
 
 Sign in with `MUDDA_OWNER_EMAIL` and `MUDDA_OWNER_PASSWORD`. The password always works.
@@ -59,7 +58,7 @@ more. A self-hoster leaves both unset.
 | `MUDDA_UPGRADE_URL` | Where the upgrade links and `/account/upgrade` send the owner (see [AGENTS.md → Core domain models](AGENTS.md#core-domain-models)) |
 
 `docker-compose.yml` doesn't pass these through, so to try them in development add them to the
-`web` service's `environment:`, as you would `MUDDA_OWNER_ACCOUNT`.
+`web` service's `environment:`, as you would `MUDDA_OWNER_NAME`.
 
 ### Commands
 
@@ -136,7 +135,7 @@ To run it:
 | Variable | Purpose |
 |---|---|
 | `SECRET_KEY_BASE` | Required. Any long random string, stable across restarts |
-| `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, `MUDDA_OWNER_ACCOUNT` | The owner, as above |
+| `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME` | The owner, as above |
 | `MUDDA_OWNER_PASSWORD` | Required. The owner's password |
 | `MUDDA_OWNER_PASSWORD_B64` | An alternative to the above, base64-encoded so any character survives an env file. The entrypoint decodes it when `MUDDA_OWNER_PASSWORD` is empty |
 | `BASE_URL` | The public URL (`https://mudda.example.com`), for links built outside a request |

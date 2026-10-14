@@ -1,24 +1,6 @@
 ---
 ar:
   account:
-    settings:
-      name:
-        placeholder: اسم الحساب…
-        save: حفظ التغييرات
-      plan:
-        heading: الخطة
-        no_refund: حذف بطاقة لا يُعيد مكانها.
-        upgrade: قم بالترقية لبطاقات غير محدودة
-        used:
-          few: استُخدمت %{count} بطاقات من %{limit}.
-          many: استُخدمت %{count} بطاقة من %{limit}.
-          one: استُخدمت بطاقة واحدة من %{limit}.
-          other: استُخدمت %{count} بطاقة من %{limit}.
-          two: استُخدمت بطاقتان من %{limit}.
-          zero: لم تُستخدم أي بطاقة من %{limit}.
-      show:
-        back: الرئيسية
-        title: إعدادات الحساب
     upgrades:
       show:
         already_unlimited: هذا الحساب يتيح بالفعل عددًا غير محدود من البطاقات
@@ -101,13 +83,8 @@ ar:
   meta:
     description: رتّب مهامك… لزمنك.
   my:
-    account_menu:
-      account: الحساب
+    account_link:
       profile: الملف الشخصي
-      settings: إعدادات الحساب
-      sign_out: تسجيل الخروج
-      tokens: رموز API
-      upgrade: قم بالترقية لبطاقات غير محدودة
     menus:
       show:
         boards: اللوحات
@@ -236,11 +213,23 @@ ar:
       name_placeholder: الاسم
       save: حفظ التغييرات
       title: تعديل ملفك الشخصي
+    plan:
+      heading: الخطة
+      no_refund: حذف بطاقة لا يُعيد مكانها.
+      upgrade: قم بالترقية لبطاقات غير محدودة
+      used:
+        few: استُخدمت %{count} بطاقات من %{limit}.
+        many: استُخدمت %{count} بطاقة من %{limit}.
+        one: استُخدمت بطاقة واحدة من %{limit}.
+        other: استُخدمت %{count} بطاقة من %{limit}.
+        two: استُخدمت بطاقتان من %{limit}.
+        zero: لم تُستخدم أي بطاقة من %{limit}.
     show:
       avatar_alt: الصورة الرمزية لـ %{name}
       back: الرئيسية
       edit: تعديل الملف الشخصي
       passkeys: إدارة مفاتيح المرور
+      security: الأمان
       sign_out: تسجيل الخروج من Mudda على هذا الجهاز
       tokens: رموز API
     theme:

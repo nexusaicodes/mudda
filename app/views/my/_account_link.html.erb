@@ -1,0 +1,4 @@
+<%# The avatar opens the profile, which holds the plan, passkeys, API tokens, and sign out. %>
+<%= link_to user_path(Current.user), class: "account-link", aria: { label: t(".profile") } do %>
+  <%= avatar_image_tag Current.user, alt: "" %>
+<% end %>

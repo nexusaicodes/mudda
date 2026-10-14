@@ -4,7 +4,7 @@
   <%= back_link_to t(".back"), root_path %>
 <% end %>
 
-<div class="settings settings--profile">
+<div class="settings">
   <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
       <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
@@ -16,29 +16,11 @@
         <%= image_tag user_avatar_path(@user), alt: t(".avatar_alt", name: @user.name) %>
       </div>
 
-      <div class="flex flex-column gap-half margin-block-end">
+      <div class="flex flex-column gap-half">
         <h1 class="txt-x-large margin-none" dir="auto"><%= @user.name %></h1>
         <div class="txt-medium">
           <%= mail_to @user.email_address %>
         </div>
-      </div>
-
-      <div class="flex-inline justify-center flex-wrap gap full-width">
-        <hr class="separator--horizontal full-width margin-block-start-double" style="--border-color: var(--color-ink-light);" aria-hidden="true">
-
-        <%= link_to my_passkeys_path, class: "btn txt-x-small" do %>
-          <%= icon_tag "authentication" %>
-          <span><%= t(".passkeys") %></span>
-        <% end %>
-
-        <%= link_to my_tokens_path, class: "btn txt-x-small" do %>
-          <%= icon_tag "bolt" %>
-          <span><%= t(".tokens") %></span>
-        <% end %>
-
-        <%= button_to session_path, method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
-          <span><%= t(".sign_out") %></span>
-        <% end %>
       </div>
     </div>
   </div>
@@ -50,4 +32,32 @@
   <div class="settings__panel panel shadow">
     <%= render "users/language" %>
   </div>
+
+  <% if Current.account.card_limited? || Current.account.upgrade_url %>
+    <div class="settings__panel panel shadow">
+      <%= render "users/plan", account: Current.account %>
+    </div>
+  <% end %>
+
+  <div class="settings__panel panel shadow">
+    <section class="settings__section">
+      <h2><%= t(".security") %></h2>
+      <div class="settings__actions">
+        <%= link_to my_passkeys_path, class: "btn" do %>
+          <%= icon_tag "authentication" %>
+          <span><%= t(".passkeys") %></span>
+        <% end %>
+
+        <%= link_to my_tokens_path, class: "btn" do %>
+          <%= icon_tag "password" %>
+          <span><%= t(".tokens") %></span>
+        <% end %>
+      </div>
+    </section>
+  </div>
+
+  <%= button_to session_path, method: :delete, class: "btn settings__sign-out", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
+    <%= icon_tag "logout" %>
+    <span><%= t(".sign_out") %></span>
+  <% end %>
 </div>

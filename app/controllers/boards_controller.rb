@@ -13,8 +13,8 @@ class BoardsController < ApplicationController
   end
 
   # Each lane loads its own cards in a frame; a card's save touches the board, so the board
-  # stands in for them in the etag. The header's account menu offers an upgrade only while
-  # there is somewhere to upgrade.
+  # stands in for them in the etag. The account and its upgrade URL decide whether "Add a card"
+  # is an upgrade link.
   def show
     fresh_when etag: [ @board, Current.user, Current.account, Current.account.upgrade_url, Date.current ]
   end

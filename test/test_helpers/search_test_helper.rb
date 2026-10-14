@@ -10,10 +10,9 @@ module SearchTestHelper
 
   def setup_search_test
     clear_search_records
-    Account.find_by(name: "Search Test")&.destroy
-    User.find_by(email_address: "test@example.com")&.destroy
+    User.find_by(email_address: "test@example.com")&.account&.destroy
 
-    @account = Account.create!(name: "Search Test")
+    @account = Account.create!
     Current.account = @account
     @user = User.create!(name: "Test User", email_address: "test@example.com", account: @account)
     Current.user = @user
@@ -22,8 +21,7 @@ module SearchTestHelper
 
   def teardown_search_test
     clear_search_records
-    Account.find_by(name: "Search Test")&.destroy
-    User.find_by(email_address: "test@example.com")&.destroy
+    @account&.destroy
   end
 
   private

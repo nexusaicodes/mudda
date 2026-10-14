@@ -37,7 +37,6 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#my_menu" do
       assert_select ".menu__footer a[href=?]", new_board_path, text: "New board"
       assert_select "input", count: 0
-      assert_select "a[href=?]", account_settings_path, count: 0
     end
   end
 

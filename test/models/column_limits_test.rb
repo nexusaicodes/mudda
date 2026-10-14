@@ -4,24 +4,24 @@ class ColumnLimitsTest < ActiveSupport::TestCase
   # SQLite enforces the limits with CHECK constraints; see config/initializers/table_definition_column_limits.rb.
   COLUMN_LIMIT_ERRORS = [ ActiveRecord::CheckViolation ]
 
-  test "account name rejects strings over 255 characters" do
-    account = Account.new(name: "a" * 256)
-    assert_raises(*COLUMN_LIMIT_ERRORS) { account.save! }
+  test "board name rejects strings over 255 characters" do
+    board = Board.new(name: "a" * 256, account: accounts("37s"), creator: users(:david))
+    assert_raises(*COLUMN_LIMIT_ERRORS) { board.save! }
   end
 
-  test "account name accepts strings up to 255 characters" do
-    account = Account.new(name: "a" * 255)
-    assert account.save
+  test "board name accepts strings up to 255 characters" do
+    board = Board.new(name: "a" * 255, account: accounts("37s"), creator: users(:david))
+    assert board.save
   end
 
-  test "account name accepts 255 emoji characters" do
-    account = Account.new(name: "🎉" * 255)
-    assert account.save
+  test "board name accepts 255 emoji characters" do
+    board = Board.new(name: "🎉" * 255, account: accounts("37s"), creator: users(:david))
+    assert board.save
   end
 
-  test "account name rejects 256 emoji characters" do
-    account = Account.new(name: "🎉" * 256)
-    assert_raises(*COLUMN_LIMIT_ERRORS) { account.save! }
+  test "board name rejects 256 emoji characters" do
+    board = Board.new(name: "🎉" * 256, account: accounts("37s"), creator: users(:david))
+    assert_raises(*COLUMN_LIMIT_ERRORS) { board.save! }
   end
 
   # Test text column limits (65535 bytes for TEXT)

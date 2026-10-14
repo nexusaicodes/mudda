@@ -24,23 +24,17 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".switcher turbo-frame#my_menu[src=?]", my_menu_path(board_id: boards(:writebook).id)
   end
 
-  test "the account menu offers the upgrade only when there is somewhere to upgrade" do
+  test "the avatar is a plain link to the profile" do
     get board_path(boards(:writebook))
-    assert_select ".account-menu a[href=?]", account_upgrade_path, count: 0
-
-    etag = response.headers["ETag"]
-    with_env("MUDDA_UPGRADE_URL" => "https://mudda.example/upgrade/new?token=signed") do
-      get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
-    end
-    assert_response :success
-    assert_select ".account-menu a[href=?]", account_upgrade_path, text: "Upgrade for unlimited cards"
+    assert_select "header a.account-link[href=?]", user_path(users(:kevin))
+    assert_select "header dialog.account-menu__popup", count: 0
   end
 
-  test "invalidates page title cache when account updates" do
+  test "a change to the account invalidates the board's etag" do
     get board_path(boards(:writebook))
     etag = response.headers["ETag"]
 
-    accounts("37s").update!(name: "Renamed Account")
+    accounts("37s").touch
 
     get board_path(boards(:writebook)), headers: { "If-None-Match" => etag }
     assert_response :success

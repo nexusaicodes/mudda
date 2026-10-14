@@ -4,11 +4,9 @@ class Account < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :boards, dependent: :destroy
 
-  validates :name, presence: true
-
   class << self
-    def create_with_owner(account:, owner:)
-      create!(**account).tap do |account|
+    def create_with_owner(owner:)
+      create!.tap do |account|
         account.users.create!(**owner)
       end
     end

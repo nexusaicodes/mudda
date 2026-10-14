@@ -1,0 +1,13 @@
+<%# The card ceiling (MUDDA_CARD_LIMIT) when there is one, and the way to lift it when MUDDA_UPGRADE_URL is set. %>
+<section class="settings__section">
+  <h2><%= t(".heading") %></h2>
+  <% if account.card_limited? %>
+    <p>
+      <%= t(".used", count: account.cards_created_count, limit: account.card_limit) %>
+      <%= t(".no_refund") %>
+    </p>
+  <% end %>
+  <% if account.upgrade_url %>
+    <%= link_to t(".upgrade"), account_upgrade_path, class: "btn btn--link", data: { turbo: false } %>
+  <% end %>
+</section>

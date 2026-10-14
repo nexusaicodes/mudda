@@ -3,7 +3,7 @@ require "test_helper"
 class AccountTest < ActiveSupport::TestCase
   test "create" do
     assert_difference "Account.count", +1 do
-      Account.create!(name: "ACME corp")
+      Account.create!
     end
   end
 
@@ -14,15 +14,12 @@ class AccountTest < ActiveSupport::TestCase
       assert_changes -> { Account.count }, +1 do
         assert_changes -> { User.count }, +1 do
           account = Account.create_with_owner(
-            account: { name: "Account Create With Owner" },
             owner: { name: "David", email_address: "owner@example.com" }
           )
         end
       end
 
       assert account.persisted?
-      assert_equal "Account Create With Owner", account.name
-
       owner = account.users.first
       assert_equal "David", owner.name
       assert_equal "owner@example.com", owner.email_address

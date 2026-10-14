@@ -2,7 +2,6 @@ Rails.application.routes.draw do
   root "landings#show"
 
   namespace :account do
-    resource :settings, only: %i[ show update ]
     resource :upgrade, only: :show
   end
 

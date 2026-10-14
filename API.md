@@ -22,7 +22,7 @@ sign-in is ever handed a cookie.
 
 There are four ways to get a token:
 
-- **The browser**: account menu → **API tokens**. The token is shown once.
+- **The browser**: profile (the avatar) → **API tokens**. The token is shown once.
 - **A shell** on the box: `make token LABEL=claude`, which prints the token on its last line (see
   [Managing tokens](#managing-tokens)).
 - **Signing in over JSON**, as below.
@@ -148,10 +148,9 @@ next loads a page in a browser set to another zone, the same browser included.
 
 | Verb | Path | Notes |
 |---|---|---|
-| `GET` | `/my/user.json` | The signed-in user, with the `account` (`id`, `name`, `created_at`) nested in it, the `timezone` the request was reckoned in, and, for a token, `"token": { "label": "claude", "scopes": ["read", "write"] }` |
+| `GET` | `/my/user.json` | The signed-in user, with the `account` (`id`, `created_at`) nested in it, the `timezone` the request was reckoned in, and, for a token, `"token": { "label": "claude", "scopes": ["read", "write"] }` |
 | `GET` `PATCH` | `/users/:id.json` | `PATCH` takes `name` and `avatar`. Always the signed-in user, whatever the `:id` |
 | `DELETE` | `/users/:id/avatar.json` | Removes the avatar |
-| `GET` `PATCH` | `/account/settings.json` | The account's `id`, `name`, and `created_at`; `PATCH` takes `name` and answers `204` |
 | `PATCH` | `/my/timezone.json` | `timezone`: an IANA name (`Asia/Kolkata`), the same key `/my/user.json` reports. Saves the owner's zone (see [Time zone](#time-zone)) and answers `204`. A missing or blank zone is a `400`, and a name that isn't a zone a `422` |
 
 A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `avatar_url`.

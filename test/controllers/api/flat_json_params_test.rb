@@ -5,13 +5,6 @@ class FlatJsonParamsTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "update account settings with flat JSON" do
-    put account_settings_path, params: { name: "New Name" }, as: :json
-
-    assert_response :no_content
-    assert_equal "New Name", Current.account.reload.name
-  end
-
   test "create card with flat JSON" do
     assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),

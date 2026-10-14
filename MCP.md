@@ -19,7 +19,7 @@ In claude.ai or ChatGPT, add it as a custom connector. In Claude Code, run
 `claude mcp add --transport http mudda https://your-mudda/mcp`, then `/mcp` to sign in. The
 client discovers that Mudda issues its own tokens, registers itself, and opens Mudda in your
 browser: sign in if you aren't, choose what it may do, and allow it. It then holds a token that
-refreshes itself, and appears under the account menu → **API tokens** as a connected client,
+refreshes itself, and appears under the profile (the avatar) → **API tokens** as a connected client,
 where you can revoke it. See [OAuth](#oauth) for what happens underneath.
 
 **With a token you mint.** For a client that can't do OAuth, or a script. Mint a token for the
