@@ -1,0 +1,49 @@
+---
+ar:
+  doorkeeper:
+    errors:
+      messages:
+        access_denied: رفض مالك المورد أو خادم التفويض الطلب.
+        admin_authenticator_not_configured: الوصول إلى لوحة الإدارة ممنوع لأن Doorkeeper.configure.admin_authenticator
+          غير مضبوط.
+        credential_flow_not_configured: فشل تدفق بيانات اعتماد مالك المورد لأن Doorkeeper.configure.resource_owner_from_credentials
+          غير مضبوط.
+        forbidden_token:
+          missing_scope: يتطلب الوصول إلى هذا المورد النطاق "%{oauth_scopes}".
+        invalid_client: 'فشلت مصادقة العميل: العميل غير معروف، أو لم تُرفق مصادقة،
+          أو طريقة المصادقة غير مدعومة.'
+        invalid_code_challenge_method:
+          few: يجب أن تكون code_challenge_method إحدى القيم %{challenge_methods}.
+          many: يجب أن تكون code_challenge_method إحدى القيم %{challenge_methods}.
+          one: يجب أن تكون code_challenge_method هي %{challenge_methods}.
+          other: يجب أن تكون code_challenge_method إحدى القيم %{challenge_methods}.
+          two: يجب أن تكون code_challenge_method إحدى القيم %{challenge_methods}.
+          zero: لا يدعم خادم التفويض PKCE لعدم وجود قيم مقبولة لـ code_challenge_method.
+        invalid_grant: منحة التفويض المقدّمة غير صالحة أو منتهية أو ملغاة، أو لا تطابق
+          عنوان إعادة التوجيه المستخدم في طلب التفويض، أو صدرت لعميل آخر.
+        invalid_redirect_uri: عنوان إعادة التوجيه المطلوب غير صالح أو لا يطابق عنوان
+          إعادة التوجيه الخاص بالعميل.
+        invalid_request:
+          invalid_code_challenge: تحدي الرمز (code challenge) مطلوب.
+          missing_param: 'معامل مطلوب مفقود: %{value}.'
+          multiple_client_auth_methods: يستخدم الطلب أكثر من طريقة لمصادقة العميل.
+          request_not_authorized: يجب تفويض الطلب. المعامل المطلوب لتفويضه مفقود أو
+            غير صالح.
+          unknown: الطلب ينقصه معامل مطلوب، أو يتضمن قيمة غير مدعومة، أو أنه غير صالح
+            لسبب آخر.
+        invalid_scope: النطاق المطلوب غير صالح أو غير معروف أو مشوّه.
+        invalid_token:
+          expired: انتهت صلاحية رمز الوصول
+          revoked: تم إلغاء رمز الوصول
+          unknown: رمز الوصول غير صالح
+        resource_owner_authenticator_not_configured: فشل العثور على مالك المورد لأن
+          Doorkeeper.configure.resource_owner_authenticator غير مضبوط.
+        revoke:
+          unauthorized: غير مصرّح لك بإلغاء هذا الرمز
+        server_error: واجه خادم التفويض حالة غير متوقعة منعته من إتمام الطلب.
+        temporarily_unavailable: خادم التفويض غير قادر حاليًا على معالجة الطلب بسبب
+          ضغط مؤقت أو أعمال صيانة.
+        unauthorized_client: العميل غير مخوّل بتنفيذ هذا الطلب بهذه الطريقة.
+        unsupported_grant_type: نوع منحة التفويض غير مدعوم من خادم التفويض.
+        unsupported_response_mode: لا يدعم خادم التفويض وضع الاستجابة هذا.
+        unsupported_response_type: لا يدعم خادم التفويض نوع الاستجابة هذا.

@@ -1,19 +1,23 @@
 <% @page_title = @user.name %>
 
+<% content_for :header_start do %>
+  <%= back_link_to t(".back"), root_path %>
+<% end %>
+
 <div class="settings settings--profile">
   <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
       <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
         <%= icon_tag "pencil" %>
-        <span class="for-screen-reader">Edit profile</span>
+        <span class="for-screen-reader"><%= t(".edit") %></span>
       <% end %>
 
       <div class="avatar txt-xx-large center fill-white btn--circle hide-focus-ring">
-        <%= image_tag user_avatar_path(@user), alt: "Profile avatar for #{@user.name}" %>
+        <%= image_tag user_avatar_path(@user), alt: t(".avatar_alt", name: @user.name) %>
       </div>
 
       <div class="flex flex-column gap-half margin-block-end">
-        <h1 class="txt-x-large margin-none"><%= @user.name %></h1>
+        <h1 class="txt-x-large margin-none" dir="auto"><%= @user.name %></h1>
         <div class="txt-medium">
           <%= mail_to @user.email_address %>
         </div>
@@ -24,16 +28,16 @@
 
         <%= link_to my_passkeys_path, class: "btn txt-x-small" do %>
           <%= icon_tag "authentication" %>
-          <span>Manage passkeys</span>
+          <span><%= t(".passkeys") %></span>
         <% end %>
 
         <%= link_to my_tokens_path, class: "btn txt-x-small" do %>
           <%= icon_tag "bolt" %>
-          <span>API tokens</span>
+          <span><%= t(".tokens") %></span>
         <% end %>
 
         <%= button_to session_path, method: :delete, class: "btn txt-x-small", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
-          <span>Sign out of Mudda on this device</span>
+          <span><%= t(".sign_out") %></span>
         <% end %>
       </div>
     </div>
@@ -41,5 +45,9 @@
 
   <div class="settings__panel panel shadow">
     <%= render "users/theme" %>
+  </div>
+
+  <div class="settings__panel panel shadow">
+    <%= render "users/language" %>
   </div>
 </div>

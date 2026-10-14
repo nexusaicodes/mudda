@@ -257,14 +257,17 @@ export default class extends Controller {
         this.#handleArrowKey(event, selectMethod)
       }
     },
+    // Right moves forward in left-to-right pages and backward in right-to-left ones
     ArrowRight(event) {
       if (this.supportsHorizontalNavigationValue) {
-        this.#handleArrowKey(event, this.#selectNext.bind(this))
+        const selectMethod = document.dir === "rtl" ? this.#selectPrevious.bind(this) : this.#selectNext.bind(this)
+        this.#handleArrowKey(event, selectMethod)
       }
     },
     ArrowLeft(event) {
       if (this.supportsHorizontalNavigationValue) {
-        this.#handleArrowKey(event, this.#selectPrevious.bind(this))
+        const selectMethod = document.dir === "rtl" ? this.#selectNext.bind(this) : this.#selectPrevious.bind(this)
+        this.#handleArrowKey(event, selectMethod)
       }
     },
     Enter(event) {

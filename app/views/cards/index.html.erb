@@ -1,29 +1,40 @@
-<% @page_title = @user_filtering.selected_boards_label %>
+<% @page_title = @filter.view_name || @filter.boards_label %>
 <% turbo_exempts_page_from_cache %>
 
 <% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= render "filters/settings", filter_url: cards_path, user_filtering: @user_filtering, no_filtering_url: cards_path %>
-  </div>
-
-  <h1 class="header__title">
-    <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @user_filtering.selected_boards_label %></span>
-  </h1>
-
-  <div class="header__actions header__actions--end">
-    <% if board = @filter.single_board %>
-      <%= link_to_edit_board board %>
-    <% end %>
+  <div class="header__title board-title">
+    <div class="board-title__display">
+      <h1 class="board-title__name">
+        <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @page_title %></span>
+      </h1>
+      <%= render "my/switcher", board: @single_board %>
+    </div>
   </div>
 <% end %>
 
+<%# Cards grouped under their board; a list narrowed to one board needs no headings, and a
+    board carried over from the page before already has one. %>
 <%= turbo_frame_tag :cards_container do %>
-  <section class="cards cards--grid">
-    <div class="cards__list hide-scrollbar">
-      <%= with_automatic_pagination :cards_paginated_container, @page do %>
-        <%= render "cards/display/previews", cards: @page.records, draggable: true %>
+  <section class="card-groups">
+    <%= with_automatic_pagination :cards_paginated_container, @page do %>
+      <% @page.records.group_by(&:board).each do |board, cards| %>
+        <section class="card-group">
+          <% unless @single_board || board.id == @continued_board_id %>
+            <h2 class="card-group__title">
+              <%= link_to board.name, board, data: { turbo_frame: "_top" } %>
+              <span class="card-group__count"><%= @board_counts[board.id] %></span>
+            </h2>
+          <% end %>
+
+          <div class="card-group__cards">
+            <%= render "cards/display/previews", cards: cards %>
+          </div>
+        </section>
       <% end %>
-      <div class="blank-slate">No cards match this filter</div>
-    </div>
+    <% end %>
+
+    <% if @page.first? && @page.records.empty? %>
+      <div class="blank-slate"><%= t(".empty") %></div>
+    <% end %>
   </section>
 <% end %>

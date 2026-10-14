@@ -1,4 +1,4 @@
-<% cache note do %>
+<% cache [ note, I18n.locale ] do %>
   <%= turbo_frame_tag note, :container do %>
     <div id="<%= dom_id(note) %>" class="note align-start full-width">
       <figure class="note__avatar flex-item-no-shrink" aria-hidden="true">
@@ -9,7 +9,7 @@
         <div class="note__author flex align-center gap-half">
           <h3 class="font-weight-normal txt-normal flex-item-justify-start min-width overflow-ellipsis">
             <strong>
-              <%= link_to note.creator.name, note.creator, class: "txt-ink btn btn--plain fill-transparent", data: { turbo_frame: "_top" } %>
+              <%= link_to note.creator.name, note.creator, class: "txt-ink btn btn--plain fill-transparent", dir: "auto", data: { turbo_frame: "_top" } %>
             </strong>
 
             <%= link_to note, class: "note__permalink-title", data: { turbo_frame: "_top" } do %>
@@ -21,11 +21,11 @@
           <%= link_to edit_board_card_note_path(note.card.board, note.card, note),
                 class: "note__edit btn btn--circle borderless translucent" do %>
             <%= icon_tag "menu-dots-horizontal" %>
-            <span class="for-screen-reader">Edit this note</span>
+            <span class="for-screen-reader"><%= t(".edit") %></span>
           <% end %>
         </div>
 
-        <div class="note__body lexxy-content" data-controller="syntax-highlight retarget-links" data-turbo-permanent>
+        <div class="note__body lexxy-content" dir="auto" data-controller="syntax-highlight retarget-links" data-turbo-permanent>
           <%= note.body %>
         </div>
       </div>

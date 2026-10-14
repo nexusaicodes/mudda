@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { label: String }
+  static values = { label: String, backTemplate: { type: String, default: "Back to %{label}" } }
   static targets = [ "referrerBackLink" ]
 
   rememberLocation() {
@@ -31,7 +31,7 @@ export default class extends Controller {
 
     link.href = this.#referrerUrl
     const strong = link.querySelector("strong")
-    if (strong) { strong.textContent = `Back to ${this.#referrerLabel}` }
+    if (strong) { strong.textContent = this.backTemplateValue.replace("%{label}", this.#referrerLabel) }
   }
 
   get #referrerPath() {

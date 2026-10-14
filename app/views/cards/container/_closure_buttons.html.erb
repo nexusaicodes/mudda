@@ -1,28 +1,17 @@
 <div class="flex gap-half">
   <%= link_to edit_board_card_path(card.board, card), class: "btn btn--circle-mobile borderless",
-        data: {
-          controller: "hotkey",
-          action: "keydown.e@document->hotkey#click",
-          turbo_frame: dom_id(card, :edit)
-        } do %>
+        data: { turbo_frame: dom_id(card, :edit) } do %>
     <%= icon_tag "pencil", class: "icon--mobile-only" %>
-    <span>Edit</span>
-    <kbd class="txt-x-small hide-on-touch">e</kbd>
+    <span><%= t(".edit") %></span>
   <% end %>
 
   <% if (done_column = card.board.done_column) && !card.closed? %>
     <%= button_to board_card_column_path(card.board, card, column_id: done_column.id), method: :patch,
           class: "btn btn--circle-mobile borderless",
-          data: {
-            controller: "hotkey",
-            form_target: "submit",
-            turbo_frame: "_top",
-            action: "keydown.d@document->hotkey#click"
-          },
+          data: { form_target: "submit", turbo_frame: "_top" },
           form: { data: { controller: "form" } } do %>
       <%= icon_tag "check", class: "icon--mobile-only" %>
-      <span class="overflow-ellipsis">Mark as Done</span>
-      <kbd class="txt-x-small hide-on-touch">d</kbd>
+      <span class="overflow-ellipsis"><%= t(".mark_as", lane: lane_name(done_column)) %></span>
     <% end %>
   <% end %>
 </div>

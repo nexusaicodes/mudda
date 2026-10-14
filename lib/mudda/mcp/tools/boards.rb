@@ -15,7 +15,7 @@ module Mudda::Mcp::Tools
     tool_name "get_board"
     title "Get a board"
     description <<~TEXT
-      One board with its five fixed columns, in order: Triage, Backlog, Todo, Doing, Done.
+      One board with its four fixed columns, in order: Backlog, Todo, Doing, Done.
       Column ids from here are what `update_card` takes as `column_id` and `list_cards` as
       `column_ids`.
     TEXT
@@ -30,7 +30,7 @@ module Mudda::Mcp::Tools
   class CreateBoard < Mudda::Mcp::Tool
     tool_name "create_board"
     title "Create a board"
-    description "Creates a board. It comes with the five fixed columns; they can't be added, removed, or renamed."
+    description "Creates a board. It comes with the four fixed columns; they can't be added, removed, or renamed."
     arguments(properties: { name: { type: "string" } }, required: %w[ name ])
     kind :create
 

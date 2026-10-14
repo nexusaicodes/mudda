@@ -1,7 +1,13 @@
-<div class="card__meta card__meta--due" id="<%= dom_id(card, :meta) %>">
-  <div class="card__meta-avatars card__meta-avatars--author">
-    <%= avatar_tag card.creator, tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
-  </div>
+<%# locals: (card:, show_lane:) -%>
+<%# One quiet line of facts under the title. The lane is named only where a list spans lanes. %>
+<footer class="card__details" id="<%= dom_id(card, :meta) %>">
+  <%= render "cards/display/preview/due", card: card %>
 
-  <%= render "cards/display/due", card: card %>
-</div>
+  <%= render "cards/display/preview/steps", card: card %>
+  <%= icon_tag "attachment", class: "card__details-attachments" if card.has_attachments? %>
+  <%= render "cards/display/preview/notes", card: card %>
+
+  <% if show_lane %>
+    <span class="card__details-lane overflow-ellipsis"><%= lane_name(card.column) %></span>
+  <% end %>
+</footer>

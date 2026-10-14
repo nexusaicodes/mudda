@@ -2,7 +2,7 @@
 
 Generated from `db/schema_sqlite.rb` (version `2026_08_28_000000`) and the association
 declarations in `app/models/`, then verified against a live database: all tables, every
-column name, and all 31 indexes with their uniqueness flags match. Regenerate after any
+column name, and all 28 indexes with their uniqueness flags match. Regenerate after any
 migration.
 
 > **There are no database-level foreign keys.** `pragma foreign_key_list(<table>)` returns
@@ -34,12 +34,10 @@ erDiagram
     USERS ||--o{ BOARDS : "creator_id"
     USERS ||--o{ CARDS : "creator_id"
     USERS ||--o{ NOTES : "creator_id dependent-destroy"
-    USERS ||--o{ FILTERS : "creator_id dependent-destroy"
     USERS ||--o{ EVENTS : "creator_id"
 
     BOARDS ||--o{ COLUMNS : "has_many dependent-destroy — always 5"
     BOARDS ||--o{ CARDS : "has_many dependent-destroy"
-    BOARDS }o--o{ FILTERS : "boards_filters HABTM"
 
     COLUMNS ||--o{ CARDS : "has_many dependent-destroy — the lifecycle"
 
@@ -79,6 +77,7 @@ erDiagram
     USER_SETTINGS {
         bigint id PK
         bigint user_id FK "UNIQUE — enforces has_one"
+        string locale "limit 255 nullable — en or ar; NULL follows the browser"
         string timezone_name "limit 255 nullable"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -125,8 +124,8 @@ erDiagram
     COLUMNS {
         bigint id PK
         bigint board_id FK "NOT NULL"
-        string name "limit 255 NOT NULL — Triage Backlog Todo Doing Done"
-        integer position "default 0 NOT NULL — 0..4"
+        string name "limit 255 NOT NULL — Backlog Todo Doing Done"
+        integer position "default 0 NOT NULL — ascending in lane order"
         string color "limit 255 NOT NULL — the only editable field"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -139,7 +138,7 @@ erDiagram
         bigint creator_id FK "NOT NULL — User"
         bigint number "NOT NULL — per-board sequence the API addresses"
         string title "limit 255 NULLABLE"
-        date due_on "NULLABLE in DB — required by the model"
+        date due_on "NULLABLE — required by the model in Todo and Doing"
         boolean golden "default false NOT NULL — the pin"
         datetime last_active_at "NOT NULL"
         datetime created_at "NOT NULL"
@@ -173,20 +172,6 @@ erDiagram
         json particulars "default json_object()"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
-    }
-
-    FILTERS {
-        bigint id PK
-        bigint creator_id FK "NOT NULL — User"
-        json fields "default json_object() NOT NULL"
-        string params_digest "limit 255 NOT NULL — unique per creator"
-        datetime created_at "NOT NULL"
-        datetime updated_at "NOT NULL"
-    }
-
-    BOARDS_FILTERS {
-        bigint board_id FK "NOT NULL — HABTM join, no id column"
-        bigint filter_id FK "NOT NULL"
     }
 
     SEARCH_QUERIES {
@@ -277,7 +262,7 @@ erDiagram
     USERS ||--o{ SESSIONS : "credential — cookie or bearer"
     USERS ||--o{ ACTION_PACK_PASSKEYS : "optional, never required"
     USERS }o--|| ACCOUNTS : "the tenant"
-    USERS ||--o| USER_SETTINGS : "timezone"
+    USERS ||--o| USER_SETTINGS : "timezone, locale"
 ```
 
 There is **no password column anywhere** — the owner secret lives only in
@@ -296,23 +281,25 @@ foreign keys.
 
 ### Card lifecycle
 
-`column_id` is the single source of truth — there are no closed/postponed/triage state tables.
+`column_id` is the single source of truth — there are no closed/backlog state tables.
 
 ```mermaid
 erDiagram
-    BOARDS ||--o{ COLUMNS : "exactly 5, fixed, positions 0-4"
+    BOARDS ||--o{ COLUMNS : "exactly 4, fixed, in lane order"
     COLUMNS ||--o{ CARDS : "a card is in exactly one"
     CARDS ||--o{ STEPS : "checklist"
     CARDS ||--o{ NOTES : "rich-text log"
 ```
 
-| Position | Column | Predicate derived in `Card::Triageable` |
+| Order | Column | Predicate derived in `Card::Triageable` |
 |---|---|---|
-| 0 | Triage | `awaiting_triage?` — default for new cards |
-| 1 | Backlog | `postponed?` |
-| 2 | Todo | triaged, queued |
+| 1 | Backlog | `backlogged?` — default for new cards; `due_on` optional |
+| 2 | Todo | queued |
 | 3 | Doing | in progress |
-| 4 | Done | `closed?` |
+| 4 | Done | `closed?`; `due_on` optional |
+
+`position` only orders a board's lanes; its values aren't contiguous on boards that once had
+a Triage lane (folded into Backlog by `20261011000000_fold_triage_into_backlog`).
 
 `active?` = in neither Done nor Backlog. `open?` = not Done. `golden?` is the
 pin, and it is a column on the card.
@@ -383,8 +370,6 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 | `notes` | `..._on_card_id` / `..._on_creator_id` | `card_id` / `creator_id` | |
 | `events` | `index_events_on_eventable` | `eventable_type, eventable_id` | |
 | `events` | `..._on_creator_id` | `creator_id` | |
-| `filters` | `index_filters_on_creator_id_and_params_digest` | `creator_id, params_digest` | ✓ |
-| `boards_filters` | `..._on_board_id` / `..._on_filter_id` | `board_id` / `filter_id` | |
 | `search_queries` | `..._on_user_id_and_updated_at` | `user_id, updated_at` | ✓ |
 | `search_queries` | `..._on_user_id_and_terms` | `user_id, terms` | |
 | `search_records` | `..._on_searchable_type_and_searchable_id` | `searchable_type, searchable_id` | ✓ |
@@ -404,7 +389,7 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 **`sessions.scopes`** — space-separated, any of `read` · `write` · `delete`. Tokens only;
 defaults to `read write`.
 
-**`columns.name`** — `Triage` · `Backlog` · `Todo` · `Doing` · `Done`. Created together by
+**`columns.name`** — `Backlog` · `Todo` · `Doing` · `Done`. Created together by
 `Board::Triageable` on every board; not creatable, reorderable, or deletable.
 
 **`events.action`** — written by `Eventable#track_event` as `<type>_<action>`:
@@ -433,7 +418,6 @@ defaults to `read write`.
   integer primary key. SQLite maintains it; nothing in the app reads it.
 - **`oauth_applications`**, **`oauth_access_grants`**, **`oauth_access_tokens`** are
   Doorkeeper's, in its standard shape plus PKCE columns; see Authentication chain above.
-- **`boards_filters`** is a classic HABTM join with `id: false` — no primary key, two indexes.
 
 ## Regenerating
 

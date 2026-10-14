@@ -10,8 +10,8 @@
 #   * `production` — the default target. Multi-stage: gems + assets build in a
 #                    throwaway stage, then only the runtime artifacts land in a
 #                    slim image that runs as a non-root user. Secrets are never
-#                    baked in — they arrive at runtime via the env_file the deploy
-#                    writes (see deploy/remote-deploy.sh).
+#                    baked in — they arrive as runtime env vars (see DOCKER.md →
+#                    Production image).
 
 ARG RUBY_VERSION=3.4.8
 FROM docker.io/library/ruby:${RUBY_VERSION}-slim AS base

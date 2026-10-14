@@ -5,14 +5,15 @@ module Mudda::Mcp::Tools
   }
 
   class ListCards < Mudda::Mcp::Tool
-    FILTERS = %i[ board_ids column_ids card_ids terms creation indexed_by sorted_by page ]
+    FILTERS = %i[ board_ids column_ids card_ids terms creation due lane indexed_by sorted_by page ]
 
     tool_name "list_cards"
     title "List cards"
     description <<~TEXT
       Cards across every board, or on one board when `board_id` is given; the filters narrow
-      either. To read one lane, pass its column id (from `get_board`) in `column_ids`. Paged:
-      follow paging.next or pass `page`.
+      either. To read one lane, pass its column id (from `get_board`) in `column_ids`, or name it
+      in `lane` to read that lane on every board. `due: "soon"` gives the open cards due by
+      tomorrow, the most overdue first. Paged: follow paging.next or pass `page`.
     TEXT
     arguments(
       properties: {
@@ -22,8 +23,10 @@ module Mudda::Mcp::Tools
         card_ids: { type: "array", items: { type: "integer" } },
         terms: { type: "array", items: { type: "string" }, description: "Full-text terms" },
         creation: { type: "string", enum: TimeWindowParser::VALUES, description: "When the card was created" },
-        indexed_by: { type: "string", enum: %w[ all golden ] },
-        sorted_by: { type: "string", enum: %w[ latest newest oldest ] },
+        due: { type: "string", enum: Filter::DUES, description: "soon: open cards due by tomorrow, overdue first" },
+        lane: { type: "string", enum: Filter::LANES, description: "A lane by name, on every board" },
+        indexed_by: { type: "string", enum: Filter::INDEXES },
+        sorted_by: { type: "string", enum: Filter::SORTS },
         page: { type: "integer", minimum: 1 }
       }
     )
@@ -58,9 +61,10 @@ module Mudda::Mcp::Tools
     tool_name "create_card"
     title "Create a card"
     description <<~TEXT
-      Creates a card, complete, in the board's Triage column. `due_on` is required. Steps are
-      created with it, in order. The result carries the card's `number`, which together with
-      the board addresses it from now on.
+      Creates a card, complete, in the board's Backlog column. `due_on` is optional there, and
+      required before the card moves to Todo or Doing. Steps are created with it, in order.
+      The result carries the card's `number`, which together with the board addresses it from
+      now on.
     TEXT
     arguments(
       properties: {
@@ -71,7 +75,7 @@ module Mudda::Mcp::Tools
         golden: { type: "boolean", description: "Starred" },
         steps: { type: "array", items: { type: "string" }, description: "Checklist steps, in order" }
       },
-      required: %w[ board_id title due_on ]
+      required: %w[ board_id title ]
     )
     kind :create
 
@@ -90,7 +94,8 @@ module Mudda::Mcp::Tools
       Changes any of a card's fields in one write — all of it applies or none of it does. Move
       it between lanes with `column_id` (a column of the board it ends up on). Move it to
       another board with `to_board_id`: it is renumbered there, so use the `number` and `url`
-      in the result from then on; with no `column_id` it lands in that board's Triage. Steps:
+      in the result from then on; with no `column_id` it lands in that board's Backlog. In Todo
+      and Doing a card needs a `due_on`, so set one in the same write that moves it there. Steps:
       an entry with no `id` adds one; with an `id` it edits that step, or removes it when
       `remove` is true.
     TEXT

@@ -4,17 +4,16 @@
   </div>
 
   <span class="card__meta-text card__meta-text--added">
-    Added <%= local_datetime_tag(card.created_at, style: :daysago) %>
+    <%= t(".added_html", time: local_datetime_tag(card.created_at, style: :daysago)) %>
   </span>
 
   <span class="card__meta-text card__meta-text--author">
-    By <strong><%= card.creator.familiar_name %></strong>
+    <%= t(".by_html", name: card.creator.familiar_name) %>
   </span>
 
   <span class="card__meta-text card__meta-text--updated overflow-ellipsis">
     <%= icon_tag "refresh--meta" %>
-    Updated
-    <%= local_datetime_tag(card.last_active_at, style: :daysago) %>
+    <%= t(".updated_html", time: local_datetime_tag(card.last_active_at, style: :daysago)) %>
   </span>
 
 </div>

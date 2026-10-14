@@ -10,8 +10,50 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index groups cards under their board, since it spans boards" do
+    get cards_path
+
+    assert_select ".card-group__title a", text: boards(:writebook).name
+  end
+
+  test "a board's cards run on into the next page under the heading they started under" do
+    Current.user = users(:kevin)
+    board = boards(:writebook)
+    20.times { |i| board.cards.create!(title: "Filler #{i}") }
+
+    get cards_path(page: 2)
+
+    assert_response :success
+    assert_select ".card-group__title a", text: board.name, count: 0
+  end
+
+  test "a view's lane is named in any case" do
+    get cards_path(lane: "Doing")
+    assert_select ".board-title__name", text: "Doing everywhere"
+  end
+
+  test "a filter value it doesn't know is refused, not ignored" do
+    get cards_path(due: "today")
+    assert_response :bad_request
+  end
+
+  test "a view's title is the view's name" do
+    get cards_path(due: "soon")
+    assert_select ".board-title__name", text: "Due today & tomorrow"
+
+    get cards_path(lane: "doing")
+    assert_select ".board-title__name", text: "Doing everywhere"
+  end
+
+  test "a board's own index needs no board headings" do
+    get board_cards_path(boards(:writebook))
+
+    assert_select ".card"
+    assert_select ".card-group__title", count: 0
+  end
+
   test "filtered index" do
-    get cards_path(filters(:newest_first).as_params.merge(term: "haggis"))
+    get cards_path(sorted_by: "newest", terms: [ "haggis" ])
     assert_response :success
   end
 
@@ -71,7 +113,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index as JSON can OR multiple workflow column ids" do
-    get cards_path(format: :json), params: { column_ids: [ columns(:writebook_triage).id, columns(:writebook_doing).id ] }
+    get cards_path(format: :json), params: { column_ids: [ columns(:writebook_backlog).id, columns(:writebook_doing).id ] }
     assert_response :success
 
     assert_equal [ cards(:logo).number, cards(:layout).number, cards(:buy_domain).number, cards(:text).number ].sort, @response.parsed_body["data"].pluck("number").sort
@@ -103,7 +145,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to board_card_path(board, card)
     assert_equal "One shot", card.title
     assert_equal [ "First", "Second" ], card.steps.map(&:content).sort
-    assert_equal "Triage", card.column.name
+    assert_equal "Backlog", card.column.name
   end
 
   # A blank step row is the form offering one, so it must not fail the card.
@@ -119,7 +161,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
   test "create renders the form again when the card is invalid" do
     assert_no_difference -> { Card.count } do
-      post board_cards_path(boards(:writebook)), params: { card: { title: "No due date" } }
+      post board_cards_path(boards(:writebook)), params: { card: { title: "Refused", due_on: "2026-02-30" } }
     end
 
     assert_response :unprocessable_entity
@@ -241,7 +283,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal card.title, @response.parsed_body["title"]
     assert_equal card.closed?, @response.parsed_body["closed"]
-    assert_equal card.postponed?, @response.parsed_body["postponed"]
+    assert_equal card.backlogged?, @response.parsed_body["backlogged"]
     assert_equal 2, @response.parsed_body["steps"].size
   end
 
@@ -261,24 +303,27 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Big if true", card.description.to_plain_text
   end
 
-  test "create as JSON without a due date is rejected" do
-    assert_no_difference -> { Card.count } do
+  test "create as JSON without a due date lands the card in Backlog" do
+    assert_difference -> { Card.count }, +1 do
       post board_cards_path(boards(:writebook)),
         params: { card: { title: "No due date" } },
         as: :json
-      assert_response :unprocessable_entity
+      assert_response :created
     end
 
-    assert_includes @response.parsed_body["errors"].keys, "due_on"
+    assert Card.last.backlogged?
   end
 
-  test "update as JSON cannot blank out a card's due date" do
-    card = cards(:logo)
+  test "update as JSON can blank a due date in Backlog but nowhere else" do
+    backlogged, doing = cards(:logo), cards(:text)
 
-    put board_card_path(card.board, card, format: :json), params: { card: { due_on: "" } }
+    put board_card_path(backlogged.board, backlogged, format: :json), params: { card: { due_on: "" } }
+    assert_response :success
+    assert_nil backlogged.reload.due_on
+
+    put board_card_path(doing.board, doing, format: :json), params: { card: { due_on: "" } }
     assert_response :unprocessable_entity
-
-    assert_predicate card.reload.due_on, :present?
+    assert_predicate doing.reload.due_on, :present?
   end
 
   test "create as JSON with custom created_at" do

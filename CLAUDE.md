@@ -14,11 +14,10 @@ The authoritative architecture and conventions live in these files, which you sh
 
 ## This is a standalone, single-person build
 
-Mudda began as a fork of **Fizzy** (37signals), which shipped as a dual OSS + hosted-SaaS
-**team** product. This repository has been **trimmed to a single-tenant, single-person,
-standalone app** run only through Docker Compose ([DOCKER.md](DOCKER.md)).
+Mudda is a **single-tenant, single-person, standalone app** run only through Docker Compose
+([DOCKER.md](DOCKER.md)).
 
-Removed infrastructure: the `saas/` engine and second Gemfile, Kamal deploy tooling,
+Not part of it: the `saas/` engine and second Gemfile, Kamal deploy tooling,
 MySQL/Trilogy (now SQLite-only), S3/object storage (local disk only), cross-instance
 import/export, the CI/security wrapper scripts, all email/mailers (Action Mailer +
 Action Mailbox, SMTP — the app sends no email), and the hosted-SaaS account lifecycle
@@ -29,7 +28,7 @@ byte-accounting/quota ledger. Auth is a standing owner password (`MUDDA_OWNER_PA
 optional passkeys layered on top (never required); the old email magic-link OTP and web signup
 are gone (see AGENTS.md → Authentication).
 
-Removed team-collaboration features: notifications and mentions, assignments, watching,
+There are no team-collaboration features: notifications and mentions, assignments, watching,
 reactions, board access control (`Access`) and roles, membership/invites/join codes, and
 public board sharing (`Board::Publication`). `Comment` is now `Note`. The single user can
 reach every board and card in their account. The recent-activity/timeline page has also been
@@ -45,26 +44,28 @@ Everything goes through Docker Compose — run `make` to list targets:
 - `make test` — unit/integration tests; `make lint` — RuboCop
 - `docker compose run --rm web bin/rails test PATH` — a single test file
 - `docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test` — serial run
-- `docker compose run --rm web bin/rails test:system` — system tests (`test/system/`), which
-  `make test` does **not** run; they drive headless Chrome via Capybara/Selenium
+- `make test-system` — system tests (`test/system/`), which `make test` does **not** run; they
+  drive headless Chromium via Capybara in the `selenium` Compose service (profile `system`),
+  reached over `SELENIUM_REMOTE_URL`, since the dev image has no browser
 
 There is no `bin/ci` and no CI test workflow — quality is just RuboCop + the test suite,
-both run locally. The one GitHub Actions workflow, `.github/workflows/deploy.yml`, only
-builds and deploys (the `Dockerfile`'s `production` target → GHCR → the box over SSH); see [DEPLOY.md](DEPLOY.md).
+both run locally. The one GitHub Actions workflow, `.github/workflows/build.yml`, only builds the
+`Dockerfile`'s `production` target and pushes it to GHCR; nothing deploys it. See
+[DOCKER.md](DOCKER.md) → Production image.
 
 ## Toolchain
 
 - Ruby is pinned in `.ruby-version` (3.4.x); the dev image (the `Dockerfile`'s `dev` target) installs it.
-- Rails runs off `main` (edge) plus a couple of forked/branch gems (see `Gemfile`) — expect
+- Rails runs off `main` (edge) plus a couple of gems pinned to git branches (see `Gemfile`) — expect
   APIs slightly ahead of the latest stable Rails release.
 - Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`. Run via
   `make lint`.
-- The `:bc` git_source (`github.com/basecamp/...`) in the `Gemfile` resolves real forked
+- The `:bc` git_source (`github.com/basecamp/...`) in the `Gemfile` resolves real
   upstream gems — do **not** repoint it.
 
 ## Branding placeholders
 
-One fork placeholder may still need a real value: the `nexus-ai/mudda` GitHub org. The
+One placeholder may still need a real value: the `nexus-ai/mudda` GitHub org. The
 public sign-in-page logo links to `root_path`. The app no longer renders a colophon, so the
 old `mudda.do`/`nexus.ai` links and the `support@mudda.do` footer email are gone.
 

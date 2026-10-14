@@ -13,7 +13,7 @@ class My::PasskeysController < ApplicationController
     passkey = Current.user.passkeys.register(passkey_registration_params)
     redirect_to edit_my_passkey_path(passkey, created: true)
   rescue ActionPack::WebAuthn::Error, ActiveRecord::RecordNotUnique
-    redirect_to my_passkeys_path, alert: "That passkey couldn't be registered. Try again."
+    redirect_to my_passkeys_path, alert: t(".failed")
   end
 
   def edit

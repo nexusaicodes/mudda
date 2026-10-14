@@ -1,8 +1,8 @@
-<div class="card__id">
-  <span class="for-screen-reader">Card number</span>
+<div class="card__id" data-number-prefix="<%= t(".number_prefix") %>">
+  <span class="for-screen-reader"><%= t(".card_number") %></span>
   <%= card.number %>
 </div>
 <div class="card__board-name">
-  <span class="overflow-ellipsis"><%= card.board.name %></span>
+  <span class="overflow-ellipsis" dir="auto"><%= card.board.name %></span>
   <%= yield %>
 </div>

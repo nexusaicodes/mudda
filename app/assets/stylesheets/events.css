@@ -122,7 +122,8 @@
   }
 
   .events__activity-prompt-edit {
-    inset: auto 1em 1em auto;
+    inset-block: auto 1em;
+    inset-inline: auto 1em;
     position: absolute;
   }
 
@@ -234,7 +235,8 @@
   }
 
   .events__maximize-button {
-    inset: 50% var(--events-gap) auto auto;
+    inset-block: 50% auto;
+    inset-inline: auto var(--events-gap);
     outline-offset: -2px;
     position: absolute;
     transform: translateY(-50%);
@@ -320,7 +322,8 @@
     .card__board-name {
       border-inline-start: 1px solid color-mix(in srgb, var(--color-ink) 33%, var(--color-canvas));
       color: color-mix(in srgb, var(--card-color) 40%, var(--color-ink));
-      margin: 0 0 0 calc(var(--inline-space) * 0.75);
+      margin: 0;
+      margin-inline-start: calc(var(--inline-space) * 0.75);
       padding-inline-start: calc(var(--inline-space) * 0.75);
     }
 

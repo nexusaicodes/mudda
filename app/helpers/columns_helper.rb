@@ -1,8 +1,13 @@
 module ColumnsHelper
+  # A lane's name for display; the stored name stays English for data attributes and the API.
+  def lane_name(column)
+    t("lanes.#{column.name.downcase}")
+  end
+
   def button_to_set_column(card, column)
     current = column == card.column
     button_to \
-      tag.span(column.name, class: "overflow-ellipsis"),
+      tag.span(lane_name(column), class: "overflow-ellipsis"),
       board_card_column_path(card.board, card, column_id: column.id),
       method: :patch,
       class: [ "card__column-name btn", { "card__column-name--current": current } ],
@@ -14,7 +19,6 @@ module ColumnsHelper
 
   def column_tag(id:, name:, drop_url:, collapsed: true, selected: nil, card_color: "var(--color-card-default)", data: {}, **properties, &block)
     classes = token_list("cards", properties.delete(:class), "is-collapsed": collapsed, "is-expanded": !collapsed)
-    hotkeys_disabled = data[:card_hotkeys_disabled]
 
     data = {
       drag_and_drop_target: "container",
@@ -40,7 +44,6 @@ module ColumnsHelper
         navigable_list_auto_select_value: "false",
         navigable_list_actionable_items_value: "true",
         navigable_list_only_act_on_focused_items_value: "true",
-        card_hotkeys_disabled: hotkeys_disabled,
         action: "keydown->navigable-list#navigate"
       }, &block)
     end

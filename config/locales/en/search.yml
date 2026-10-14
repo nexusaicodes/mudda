@@ -1,0 +1,19 @@
+---
+en:
+  searches:
+    form:
+      close: Close search
+      label: Search Mudda
+      placeholder: Find something…
+      submit: Search
+    result:
+      in_a_note_html: 'in a note: “%{note}”'
+    results:
+      no_matches: No matches
+      show_all:
+        one: Show all %{count} →
+        other: Show all %{count} →
+    show:
+      home: Home
+      title: Search
+      title_with_query: Search results for "%{query}"

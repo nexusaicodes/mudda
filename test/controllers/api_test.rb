@@ -173,7 +173,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     # The board names its own lanes, so nothing has to be guessed.
     get board_path(board_id, format: :json), headers: headers
     columns = @response.parsed_body["columns"]
-    assert_equal %w[ Triage Backlog Todo Doing Done ], columns.pluck("name")
+    assert_equal %w[ Backlog Todo Doing Done ], columns.pluck("name")
 
     post board_cards_path(board_id, format: :json),
       params: { title: "Ship the API", due_on: 1.week.from_now.to_date }, headers: headers, as: :json
@@ -185,7 +185,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     get board_card_path(board, number, format: :json), headers: headers
     assert_equal 1.week.from_now.to_date.to_s, @response.parsed_body["due_on"]
     assert_not @response.parsed_body["overdue"]
-    assert_equal "Triage", @response.parsed_body["column"]["name"]
+    assert_equal "Backlog", @response.parsed_body["column"]["name"]
 
     %w[ Todo Doing Done ].each do |name|
       column_id = columns.find { |column| column["name"] == name }["id"]
@@ -226,14 +226,47 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert @response.parsed_body["errors"].present?
   end
 
-  test "creating a card without a due date is a JSON 422 naming the field" do
+  test "a card created without a due date lands in Backlog" do
     headers = bearer_headers_for(@user)
 
     post board_cards_path(boards(:writebook), format: :json),
       params: { title: "No due date" }, headers: headers, as: :json
 
+    assert_response :created
+    assert_equal "Backlog", @response.parsed_body.dig("column", "name")
+    assert_nil @response.parsed_body["due_on"]
+  end
+
+  test "moving an undated card out of Backlog is a JSON 422 naming the field" do
+    headers = bearer_headers_for(@user)
+    post board_cards_path(boards(:writebook), format: :json),
+      params: { title: "No due date" }, headers: headers, as: :json
+    card = boards(:writebook).cards.find_by!(number: @response.parsed_body["number"])
+
+    put board_card_path(card.board, card, format: :json),
+      params: { column_id: columns(:writebook_doing).id }, headers: headers, as: :json
+
     assert_response :unprocessable_entity
-    assert_equal [ "can't be blank" ], @response.parsed_body.dig("errors", "due_on")
+    assert_equal [ "can't be blank in Todo or Doing" ], @response.parsed_body.dig("errors", "due_on")
+    assert card.reload.backlogged?
+  end
+
+  test "a due date that doesn't parse is a JSON 422, not a silently undated card" do
+    headers = bearer_headers_for(@user)
+
+    assert_no_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook), format: :json),
+        params: { title: "Bad date", due_on: "2026-02-30" }, headers: headers, as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal [ "is invalid" ], @response.parsed_body.dig("errors", "due_on")
+
+    card = cards(:logo)
+    assert_no_changes -> { card.reload.due_on } do
+      put board_card_path(card.board, card, format: :json),
+        params: { due_on: "garbage" }, headers: headers, as: :json
+    end
+    assert_response :unprocessable_entity
   end
 
   # A bang method's RecordInvalid has to reach the client as the JSON error envelope, and a
@@ -271,7 +304,7 @@ class ApiTest < ActionDispatch::IntegrationTest
       params: { column_id: columns(:private_todo).id }, headers: headers, as: :json
 
     assert_response :not_found
-    assert_equal "Triage", card.reload.column.name
+    assert_equal "Backlog", card.reload.column.name
   end
 
   # Token lifetime and labels
@@ -675,20 +708,26 @@ class ApiTest < ActionDispatch::IntegrationTest
       @response.parsed_body["data"].pluck("board").pluck("id").uniq.sort
   end
 
-  # Filter#boards is a HABTM, so a careless board_ids= would write join rows and permanently
-  # re-scope whatever saved filter the request happened to match.
-  test "a board's card index leaves a saved filter alone" do
-    Current.user = @user
-    filter = Current.user.filters.remember(indexed_by: "golden")
+  test "a filter value outside its list is refused rather than ignored" do
+    get cards_path(format: :json, due: "today", lane: "in-progress"), headers: bearer_headers_for(@user)
 
-    get board_cards_path(boards(:writebook), format: :json, indexed_by: "golden"),
-      headers: bearer_headers_for(@user)
+    assert_response :unprocessable_entity
+    assert_equal %w[ due lane ], @response.parsed_body["errors"].keys.sort
+  end
 
-    assert_response :success
-    assert_equal filter, Current.user.filters.from_params(indexed_by: "golden"),
-      "The request must match the saved filter, or this test proves nothing"
-    # Re-find rather than reload: Filter#boards memoizes into @boards, which reload keeps.
-    assert_empty Filter.find(filter.id).boards, "A GET must not rewrite a saved filter's boards"
+  test "due soon keeps an order that was asked for" do
+    older = card_on(boards(:writebook), "Older, more overdue")
+    older.update_columns created_at: 2.days.ago, due_on: 3.days.ago
+    newer = card_on(boards(:writebook), "Newer, less overdue")
+    newer.update_columns due_on: Date.yesterday
+
+    get cards_path(format: :json, due: "soon"), headers: bearer_headers_for(@user)
+    ids = @response.parsed_body["data"].pluck("id")
+    assert_operator ids.index(older.id), :<, ids.index(newer.id)
+
+    get cards_path(format: :json, due: "soon", sorted_by: "newest"), headers: bearer_headers_for(@user)
+    ids = @response.parsed_body["data"].pluck("id")
+    assert_operator ids.index(newer.id), :<, ids.index(older.id)
   end
 
   test "a blank board_id leaves the card where it is" do
@@ -738,20 +777,6 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal destination, card.reload.board
     assert_equal 1, card.number, "The first card to land on an empty board is its number 1"
-  end
-
-  test "search jumps to a card by number only while one board answers to it" do
-    headers = bearer_headers_for(@user)
-
-    get search_path(format: :json, q: cards(:logo).number.to_s), headers: headers
-    assert_response :success
-    assert_equal [ cards(:logo).number ], @response.parsed_body["data"].pluck("number")
-
-    Current.user = @user
-    boards(:private).cards.create!(title: "Also number one", due_on: 1.week.from_now, creator: @user, last_active_at: Time.current)
-
-    get search_path(format: :json, q: "1"), headers: headers
-    assert_response :success
   end
 
   # Goldness
@@ -867,7 +892,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :not_found
-    assert_equal [ boards(:writebook), columns(:writebook_triage) ], [ card.reload.board, card.column ]
+    assert_equal [ boards(:writebook), columns(:writebook_backlog) ], [ card.reload.board, card.column ]
   end
 
   # One request, one event per thing it changed — however many things that is.
@@ -887,11 +912,6 @@ class ApiTest < ActionDispatch::IntegrationTest
   # after it has already written.
   test "a JSON request to a browser-only write is refused before it writes" do
     headers = bearer_headers_for(@user)
-    filter = filters(:newest_first)
-
-    delete filter_path(filter, format: :json), headers: headers
-    assert_response :not_acceptable
-    assert Filter.exists?(filter.id)
 
     assert_no_difference -> { @user.search_queries.count } do
       post searches_queries_path(format: :json), params: { q: "anything" }, headers: headers, as: :json

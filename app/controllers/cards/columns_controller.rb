@@ -10,8 +10,11 @@ class Cards::ColumnsController < ApplicationController
   end
 
   def update
-    @card.triage_into(column)
-    redirect_back_or_to board_card_path(@board, @card)
+    if @card.update(column: column)
+      redirect_back_or_to board_card_path(@board, @card)
+    else
+      redirect_back_or_to board_card_path(@board, @card), alert: @card.errors.full_messages.to_sentence
+    end
   end
 
   private

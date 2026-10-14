@@ -9,7 +9,7 @@ class Account::UpgradesController < ApplicationController
     if upgrade_url = Current.account.upgrade_url
       redirect_to with_billing(upgrade_url), allow_other_host: true
     else
-      redirect_to root_path, notice: "This board already has unlimited cards"
+      redirect_to root_path, notice: t(".already_unlimited")
     end
   end
 

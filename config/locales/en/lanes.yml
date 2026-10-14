@@ -1,0 +1,7 @@
+---
+en:
+  lanes:
+    backlog: Backlog
+    doing: Doing
+    done: Done
+    todo: Todo

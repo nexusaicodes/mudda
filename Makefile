@@ -106,9 +106,20 @@ revoke: ## Revoke the API tokens carrying a label (make revoke LABEL=claude)
 test: ## Run the unit test suite
 	$(RUN) bin/rails test
 
+.PHONY: test-system
+test-system: ## Run the system tests in a Selenium Chromium container
+	$(COMPOSE) --profile system up -d --wait selenium
+	$(COMPOSE) run --rm -e SELENIUM_REMOTE_URL=http://selenium:4444 $(SERVICE) bin/rails test:system; \
+	  status=$$?; $(COMPOSE) --profile system rm -sf selenium; exit $$status
+
 .PHONY: lint
-lint: ## Run RuboCop
+lint: ## Run RuboCop and the translation checks
 	$(RUN) bin/rubocop
+	$(RUN) sh -c "bundle exec i18n-tasks missing && bundle exec i18n-tasks unused && bundle exec i18n-tasks check-normalized"
+
+.PHONY: i18n
+i18n: ## Check the locale files for missing and unused keys
+	$(RUN) sh -c "bundle exec i18n-tasks missing && bundle exec i18n-tasks unused && bundle exec i18n-tasks check-normalized"
 
 .PHONY: lint-fix
 lint-fix: ## Run RuboCop with autocorrect

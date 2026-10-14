@@ -3,29 +3,13 @@
 <% turbo_exempts_page_from_cache %>
 
 <% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= render "filters/settings", filter_url: board_path(@board), user_filtering: @user_filtering, no_filtering_url: board_path(@board) do |form| %>
-      <%= hidden_field_tag "board_ids[]", @board.id %>
-    <% end %>
-  </div>
-
-  <h1 class="header__title">
-    <span class="overflow-ellipsis"><%= @board.name %></span>
-  </h1>
-
-  <div class="header__actions header__actions--end">
-    <%= link_to_edit_board @board %>
-  </div>
+  <%= render "boards/title", board: @board %>
 <% end %>
 
 <%= turbo_frame_tag :cards_container, data: {
       controller: "last-board",
       last_board_id_value: @board.id,
       last_board_key_value: last_board_storage_key } do %>
-  <% if @filter.used?(ignore_boards: true) %>
-    <%= render "boards/show/filtered_cards", page: @page %>
-  <% else %>
-    <%= render "columns/show/add_card_button", board: @board %>
-    <%= render "boards/show/columns", page: @page, board: @board %>
-  <% end %>
+  <%= render "columns/show/add_card_button", board: @board %>
+  <%= render "boards/show/columns", board: @board %>
 <% end %>

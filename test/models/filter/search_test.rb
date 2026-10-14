@@ -8,7 +8,7 @@ class Filter::SearchTest < ActiveSupport::TestCase
     card.notes.create(body: "I hate haggis.", creator: @user)
     card.notes.create(body: "I love haggis.", creator: @user)
 
-    filter = @user.filters.new(terms: [ "haggis" ], indexed_by: "all", sorted_by: "latest")
+    filter = Filter.new(@user, terms: [ "haggis" ], indexed_by: "all", sorted_by: "latest")
 
     assert_equal [ card ], filter.cards.to_a
   end
@@ -18,7 +18,7 @@ class Filter::SearchTest < ActiveSupport::TestCase
     @board.cards.create!(title: "haggis only", creator: @user, due_on: 1.week.from_now)
     @board.cards.create!(title: "neeps only", creator: @user, due_on: 1.week.from_now)
 
-    filter = @user.filters.new(terms: [ "haggis", "neeps" ], indexed_by: "all", sorted_by: "latest")
+    filter = Filter.new(@user, terms: [ "haggis", "neeps" ], indexed_by: "all", sorted_by: "latest")
 
     assert_equal [ matching_card ], filter.cards.to_a
   end

@@ -5,38 +5,39 @@ class SearchesController < ApplicationController
 
   allows_query_params :q
 
+  RESULTS_PER_BOARD = 5
+
+  # A person gets matches grouped by board, read from the full-text index; a program gets a
+  # paginated card list.
   def show
-    @query = params[:q].blank? ? nil : params[:q]
+    @query = params[:q].presence
 
-    if card = card_matching_number
-      respond_to do |format|
-        format.html { @card = card }
-        format.json { set_page_and_extract_portion_from Current.user.accessible_cards.where(id: card.id) }
-      end
-    else
-      respond_to do |format|
-        format.html do
-          set_page_and_extract_portion_from Current.user.search(@query)
-          @recent_search_queries = Current.user.search_queries.order(updated_at: :desc).limit(10)
-        end
-
-        format.json do
-          set_page_and_extract_portion_from \
-            Current.user.accessible_cards.mentioning(@query, user: Current.user).distinct.latest.preloaded
-        end
+    respond_to do |format|
+      format.html { @groups = grouped_matches }
+      format.json do
+        set_page_and_extract_portion_from \
+          Current.user.accessible_cards.mentioning(@query, user: Current.user).distinct.latest.preloaded
       end
     end
   end
 
   private
-    # Jump straight to a card only when the query is exactly a card number and exactly one
-    # board answers to it — numbers run per board, so the same number can name several
-    # cards, and then the search results are the honest answer. A looser match would also
-    # hijack any full-text query that merely starts with a digit.
-    def card_matching_number
-      if @query&.match?(/\A\d+\z/)
-        matches = Current.user.accessible_cards.where(number: @query).limit(2).to_a
-        matches.first if matches.one?
-      end
+    # Each board with how many of its cards match and the latest few of them, each card once
+    # however many of its notes matched. The board the search was made from comes first, then
+    # the boards with the most matching cards.
+    def grouped_matches
+      counts = Current.user.search_counts_by_board(@query)
+
+      Current.user.boards.where(id: counts.keys)
+        .sort_by { |board| [ board.id == searched_from_board_id ? 0 : 1, -counts[board.id], board.name.downcase ] }
+        .map { |board| [ board, counts[board.id], Current.user.search_board(@query, board, limit: RESULTS_PER_BOARD) ] }
+    end
+
+    # The search box sits in the page footer and reads no page state, so the board is taken
+    # from the page that made the request.
+    def searched_from_board_id
+      @searched_from_board_id ||= URI(request.referer.to_s).path.to_s[%r{\A/boards/(\d+)}, 1].to_i
+    rescue URI::InvalidURIError
+      @searched_from_board_id = 0
     end
 end

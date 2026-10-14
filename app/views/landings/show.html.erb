@@ -1,4 +1,4 @@
-<% @page_title = "Home" %>
+<% @page_title = t(".title") %>
 
 <%#
   Client-side landing: jump to the board you last had open (remembered in
@@ -40,11 +40,11 @@
         landing_paths_value: @board_paths.to_json,
         landing_fallback_value: @default_board_path } do %>
   <% if @default_board_path %>
-    <p class="txt-medium color-ink-light">Opening your board…</p>
-    <%= link_to "Open board", @default_board_path, class: "btn" %>
+    <p class="txt-medium color-ink-light"><%= t(".opening") %></p>
+    <%= link_to t(".open"), @default_board_path, class: "btn" %>
   <% else %>
-    <h1 class="txt-x-large margin-none">No boards yet</h1>
-    <p class="txt-medium color-ink-light">Create your first board to get started.</p>
-    <%= link_to "Create a board", new_board_path, class: "btn btn--primary" %>
+    <h1 class="txt-x-large margin-none"><%= t(".empty_heading") %></h1>
+    <p class="txt-medium color-ink-light"><%= t(".empty_body") %></p>
+    <%= link_to t(".create"), new_board_path, class: "btn btn--primary" %>
   <% end %>
 <% end %>

@@ -14,9 +14,32 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     opts.add_argument("--enable-automation")
   end
 
+  # With SELENIUM_REMOTE_URL set (e.g. http://selenium:4444), the browser runs in a Selenium
+  # container instead of beside the app, so the app server listens on every interface and is
+  # addressed by the local IP that routes to Selenium. The port is fixed so URL helpers can name
+  # it, and offset per parallel worker so workers don't collide.
+  if selenium_url = ENV["SELENIUM_REMOTE_URL"]
+    selenium = URI(selenium_url)
+    app_ip = UDPSocket.open { |socket| socket.connect(selenium.host, selenium.port); socket.addr.last }
+
+    serve_app_on = ->(port) do
+      Capybara.server_port = port
+      Capybara.app_host = "http://#{app_ip}:#{port}"
+    end
+
+    Capybara.server_host = "0.0.0.0"
+    serve_app_on.(3100)
+    parallelize_setup { |worker| serve_app_on.(3101 + worker) }
+  end
+
   Capybara.register_driver :chrome_headless do |app|
     browser_options.add_argument("--headless")
-    Capybara::Selenium::Driver.new(app, browser: :chrome, options: browser_options)
+
+    if selenium_url
+      Capybara::Selenium::Driver.new(app, browser: :remote, url: selenium_url, options: browser_options)
+    else
+      Capybara::Selenium::Driver.new(app, browser: :chrome, options: browser_options)
+    end
   end
 
   Capybara.register_driver :chrome do |app|

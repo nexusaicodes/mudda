@@ -1,6 +1,6 @@
 <%= turbo_frame_tag @card, :columns do %>
   <div class="card__stages" role="radiogroup" data-controller="scroll-to">
-    <legend class="for-screen-reader">Choose a column for this card</legend>
+    <legend class="for-screen-reader"><%= t(".legend") %></legend>
 
     <% @columns.each do |column| %>
       <%= button_to_set_column @card, column %>

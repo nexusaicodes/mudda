@@ -22,7 +22,7 @@ class Sessions::PasswordsController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to new_session_path, alert: "That didn't work. Check your password and try again." }
+        format.html { redirect_to new_session_path, alert: t(".failed") }
         format.json { render_unauthorized "Invalid credentials" }
       end
     end
@@ -53,7 +53,7 @@ class Sessions::PasswordsController < ApplicationController
       rate_limit_exceeded_message = "Try again later."
 
       respond_to do |format|
-        format.html { redirect_to new_session_path, alert: rate_limit_exceeded_message }
+        format.html { redirect_to new_session_path, alert: t("sessions.passwords.create.rate_limited") }
         format.json { render_json_errors({ base: [ rate_limit_exceeded_message ] }, status: :too_many_requests) }
       end
     end

@@ -9,8 +9,8 @@ to create and manage **cards** (tasks/issues) on **boards**, move them through a
 of columns** (the workflow), and capture progress with **notes**. Opening the app lands you
 on the **board you last had open** (remembered in the browser).
 
-Mudda is maintained by **Nexus AI** and is a fork of **Fizzy**, originally created by
-**37signals**. This repository is the standalone, single-person build (see `CLAUDE.md`).
+Mudda is built and maintained by **Nexus AI**. It is a standalone, single-person app (see
+`CLAUDE.md`).
 
 ## Development Commands
 
@@ -34,6 +34,7 @@ reset-auth` removes all passkeys and signs out every session.
 ### Testing
 ```bash
 make test                                          # Run unit/integration tests
+make test-system                                   # System tests, in a Selenium Chromium container
 make lint                                          # RuboCop
 docker compose run --rm web bin/rails test PATH    # Run a single test file
 docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test   # Serial run
@@ -45,24 +46,20 @@ docker compose exec web bin/rails db:migrate   # Run migrations
 make reset-db                                  # Drop, recreate, and reseed
 ```
 
-## Deploy
+## Production image
 
-Runs on a **single VPS box** via Docker: the `Dockerfile`'s `production` target, `docker-compose.prod.yml`
-(app behind Caddy for auto-HTTPS over an `*.sslip.io` name), and a GitHub Actions workflow
-(`.github/workflows/deploy.yml`) that builds/pushes to GHCR and deploys over **SSH** (streams the
-compose file, Caddyfile, and a rendered `.env` over the SSH exec channel, then runs
-`deploy/remote-deploy.sh` on the box). See
-[DEPLOY.md](DEPLOY.md). Kamal and the SaaS engine remain removed. For local runs, use the
-Compose setup in [DOCKER.md](DOCKER.md).
+There is no deploy pipeline. `.github/workflows/build.yml` builds the `Dockerfile`'s `production`
+target on every push to `main` and pushes it to GHCR (`:<sha>` and `:latest`); hosts pull and run
+it themselves, running `db:prepare` before boot. The runtime env contract is in
+[DOCKER.md](DOCKER.md) → Production image. Kamal and the SaaS engine remain removed. For local
+runs, use the Compose setup in [DOCKER.md](DOCKER.md).
 
 ## Architecture Overview
 
 ### One Account, Resolved From the Signed-in User
 
 Mudda serves a single account per deployment, and **URLs carry no account prefix** —
-paths are `/boards/:id`, not `/{account_id}/boards/:id`. (Upstream Fizzy prefixed every
-path and rewrote `PATH_INFO`/`SCRIPT_NAME` in a Rack middleware; that middleware and
-`Account#slug` are gone.)
+paths are `/boards/:id`, not `/{account_id}/boards/:id`.
 
 - `Current.account` is derived in `app/models/current.rb`: session → user → account.
 - `Current.account` is therefore **nil on unauthenticated requests**. Anything reachable
@@ -157,15 +154,15 @@ has none: the platform's "Go Premium" sends returning customers there.
 
 **User** → the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`,
 `has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`.
-Owns filters and notes. `deactivate` sets `active: false` and leaves the sessions alone, so
+Owns notes. `deactivate` sets `active: false` and leaves the sessions alone, so
 `Authorization` still has a credential to refuse.
 
-**Board** → primary organizational unit. Concerns: `Cards`, `Filterable`,
-`Triageable`. **Every board has the same five
-fixed columns** (see below). All of the account's boards are visible to the user.
+**Board** → primary organizational unit, named (never blank). Concerns: `Cards`, `Triageable`.
+**Every board has the same four fixed columns** (see below). All of the account's boards are
+visible to the user.
 
 **Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
-fixed; only color is editable.
+fixed (`attr_readonly :name`, since lane predicates key off them); only color is editable.
 
 **Card** → the main work item. Sequential per-board `number` (via
 `board.increment!(:cards_count)`), rich-text description, steps, and **notes**. A card is created complete — there is no draft state and nothing to publish; the
@@ -182,7 +179,7 @@ Polymorphic `eventable`, JSON `particulars`. Kept as an audit trail written via 
 `Eventable` concern; there is **no activity/timeline page** that renders it (removed — the
 app lands on your last-opened board instead).
 
-> **Removed in this fork's refactor (vs. upstream Fizzy):** team collaboration entirely —
+> **Not in Mudda:** team collaboration entirely —
 > notifications, mentions, assignments, watching, reactions, board access control (`Access`),
 > roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
 > Also gone: `Tag`/`Tagging` and the `Entropy` auto-postpone system (replaced by due dates;
@@ -198,31 +195,33 @@ app lands on your last-opened board instead).
 ### Card Lifecycle — Fixed Columns
 
 A card **always lives in exactly one column**, and `column_id` is the **single source of
-truth** for its lifecycle. There are no separate closed/not-now/triage state tables.
+truth** for its lifecycle. There are no separate closed/backlog state tables.
 
-Every board is created (`Board::Triageable`) with five fixed lanes, in order:
+Every board is created (`Board::Triageable`) with four fixed lanes, in order:
 
-| Column  | Meaning                                  |
-|---------|------------------------------------------|
-| Triage  | Awaiting triage (default for new cards)  |
-| Backlog | Postponed / "not now"                    |
-| Todo    | Triaged, queued                          |
-| Doing   | In progress                              |
-| Done    | Closed                                    |
+| Column  | Meaning                                                      |
+|---------|--------------------------------------------------------------|
+| Backlog | Unscheduled work; every new card lands here (date optional)  |
+| Todo    | Queued (date required)                                       |
+| Doing   | In progress (date required)                                  |
+| Done    | Closed (date optional)                                       |
+
+People and agents create and move cards the same way; there is no review lane.
 
 `Card::Triageable` derives predicates and scopes from the column name:
 - `closed?` = in **Done**; `open?` = not Done.
-- `postponed?` = in **Backlog**.
-- `awaiting_triage?` = in **Triage**; `triaged?` = not Triage.
+- `backlogged?` = in **Backlog**.
 - `active?` = not Done/Backlog.
 
-`triage_into(column)` moves a card between lanes. The `card_triaged` event is recorded by an
-`after_update` on `column_id`, so **every** lane change is audited whichever door it comes
-through — the drop target, the picker, or a `PUT` to the card with a `column_id`.
+A card moves between lanes by a plain attribute write — `card.update(column: other)`. The
+`card_triaged` event is recorded by an `after_update` on `column_id`, so **every** lane change is
+audited whichever door it comes through — the drop target, the picker, or a `PUT` to the card with
+a `column_id`. A move the card can't make (an undated card into Todo or Doing) is refused: a
+`422` for JSON, and in the browser the card stays where it was with the reason in the flash.
 
 Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
 the card with a `board_id` — and a lane may be named in the same write. Before validation a
-move with no lane named lands in the destination's Triage (`Card#land_in_destination_triage`);
+move with no lane named lands in the destination's Backlog (`Card#land_in_destination_backlog`);
 `Card::Triageable` validates that a card's column is on its board, so no door can leave it in
 another board's lane. The card is **renumbered** (numbers run per board) in the same UPDATE;
 its events and search rows reach their board through the card, so they follow it with nothing
@@ -238,8 +237,14 @@ used to record only one.
 ### Due Dates (replaces the old entropy/auto-postpone system)
 
 Cards carry an explicit **`due_on`** date (`Card::Due`):
-- `due_on` is required on every card (`validates :due_on, presence: true`), so no save path —
-  including the JSON create/update — can persist one without it.
+- `due_on` is required in **Todo** and **Doing** (`validates :due_on, presence: …, if: :active?`)
+  and optional in **Backlog** and **Done**, so no save path — including the JSON create/update —
+  can move a card into Todo or Doing, or keep one there, without a date, while an unscheduled idea
+  can still be closed as-is. The error reads "can't be blank in Todo or Doing"
+  (`activerecord.errors.models.card.attributes.due_on.blank_while_active` in `config/locales/en.yml`).
+- A `due_on` that isn't a date — a string that doesn't parse (`"2026-02-30"`, `"next friday"`),
+  or a non-string such as `20261201` or `true` — is refused as `invalid` in every lane, and only
+  as `invalid` (never also "can't be blank"), rather than saved undated or as a non-date.
 - `overdue?` is true for a card whose `due_on` is in the past.
 
 This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),
@@ -268,8 +273,9 @@ index for the rest.
 
 The card index answers at both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
 same filters apply to either — including `column_ids[]`, which is how a single lane is read
-now that columns have no endpoints of their own. `/prompts/cards` (the mention autocomplete)
-stays cross-board. A board's five fixed columns travel with the board itself
+now that columns have no endpoints of their own, `lane` (a lane by name on every board) and
+`due=soon` (open cards due by tomorrow, the most overdue first). `/prompts/cards` (the mention autocomplete)
+stays cross-board. A board's four fixed columns travel with the board itself
 (`boards/show.json.jbuilder`); what is left under `boards/:id/columns` is the browser's lane
 frame and colour picker.
 
@@ -287,6 +293,30 @@ as much as the record errors. Indexes answer with `{ "data": [...], "paging": {.
 than silently ignored — each endpoint declaring what it answers to with
 `allows_query_params` (`StrictQueryParams`). See [API.md](API.md).
 
+### Web UI
+
+The browser is for an occasional look — agents do most of the work through the API — so the
+chrome is small and there are **no keyboard shortcuts** (keys only act inside the field being
+typed in: Enter or Ctrl/Cmd+Enter submits, Esc cancels).
+
+- **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
+  followed by the page's back link if it has one (`content_for :header_start`), the page title in
+  the centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
+  upgrade, sign out) on the right.
+- **Board title** (`boards/_title`): clicking the name renames the board in place
+  (`inline-edit` controller), with "Delete board…" beside Save/Cancel. There is no board
+  settings page.
+- **Switcher** — the ▾ beside a board or view title (`my/_switcher`), loading `my/menus#show`
+  on first open: every board (the current one ticked), the cross-board views in
+  `Filter::VIEWS` with their counts, and "New board" last.
+- **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
+  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board, one board
+  after another. The board page itself takes no filters. A `Filter` is read from the query for
+  each request and never stored; a value outside its list is refused (`400`, or `422` for JSON).
+- **Search** is a pill floating at the bottom centre (`bar/_bar`); results open above it,
+  grouped by board with the board searched from first, one row per card, the five latest per
+  board with a link to the rest (`User::Searcher#search_counts_by_board`, `#search_board`).
+
 ### Keys and Card Numbers
 
 Primary keys are plain autoincrementing integers — Rails' default, no extensions. What a
@@ -295,9 +325,8 @@ Primary keys are plain autoincrementing integers — Rails' default, no extensio
 `Card#number` is a **separate** integer, and it is what the API addresses cards by. It is a
 **per-board** sequence drawn from `boards.cards_count`, unique only within its board — so
 two boards can each hold a card numbered `1`, a card moved between boards is renumbered on
-arrival, and a bare number never names a card on its own. Two places that used to treat one
-as a unique address now say so: `SearchesController` jumps to a card only while exactly one
-board answers to that number, and `Prompts::CardsController` prepends every match.
+arrival, and a bare number never names a card on its own: search treats a number as plain
+text, and `Prompts::CardsController` prepends every match.
 
 See [ERD.md](ERD.md) for the full schema — every table, column, index, and relationship,
 cross-verified against a live database.
@@ -318,8 +347,32 @@ Queue, no Redis, no separate worker process.
 
 `app/models/search/` denormalizes searchable content (cards and notes) into `Search::Record`,
 which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spans every board
-in the account. Stemming is handled by the FTS5 `porter` tokenizer; highlighting and query
-sanitizing live in `Search::Highlighter` and `Search::Query`.
+in the account. Stemming is handled by the FTS5 `porter` tokenizer. The FTS table holds text
+folded by `Search::Normalizer` (Arabic only: harakat and tatweel stripped, alef/yeh/teh-marbuta
+folded, the article ال removed), and `Search::Query` folds the query the same way, so a search
+matches with or without vowel marks or the article. `search_records` keeps the text as written,
+and `Search::Highlighter` marks it in Ruby. A change to the normalizer needs `bin/rails
+search:reindex` (or a data migration that runs it, as `20261014000001` does).
+
+### Internationalization
+
+The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`
+(`app/controllers/concerns/current_locale.rb`) picks each request's locale: the user's
+`user_settings.locale` (chosen on the profile page via `My::LocalesController`), else the
+browser's `Accept-Language`, else English. URLs carry no locale.
+- **JSON — and so every MCP tool call — always answers in English**, whatever the user chose:
+  errors, enum values, lane names. A 401/403 refused before the action runs is English too.
+- **Lanes stay English keys** (`columns.name`, the API, `lane=`); only the display goes through
+  `lane_name(column)` → `lanes.*`. Never compare against a translated name.
+- **Every HTML cache key carries `I18n.locale`** (card/note fragments, the column collection),
+  and `etag { I18n.locale }` keeps a conditional GET from serving the other language.
+- Strings live in `config/locales/{en,ar}/*.yml`, one file per area, looked up lazily in views
+  (`t(".key")`). Missing translations raise in dev and test; `make i18n` (also part of `make
+  lint`) checks for missing, unused and unnormalized keys, and `test/i18n_test.rb` runs the same.
+- `<html lang dir>` comes from the locale. CSS uses logical properties; where it can't, a
+  `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`,
+  OFL), loaded only for Arabic code points. Dates show Western digits (`-u-nu-latn`).
+- The `public/*.html` error pages are static, so each carries both languages.
 
 ### MCP
 

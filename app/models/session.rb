@@ -66,7 +66,7 @@ class Session < ApplicationRecord
 
     def scopes_are_known
       if (unknown = scopes - SCOPES).any?
-        errors.add :scopes, "includes unknown #{"scope".pluralize(unknown.size)}: #{unknown.to_sentence}"
+        errors.add :scopes, :unknown, count: unknown.size, scopes: unknown.to_sentence
       end
     end
 

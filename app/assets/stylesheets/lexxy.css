@@ -155,6 +155,11 @@
       letter-spacing: -0.02ch;
       line-height: 1.1;
       overflow-wrap: break-word;
+
+      &:lang(ar) {
+        letter-spacing: 0;
+        line-height: 1.4;
+      }
       text-wrap: balance;
     }
 

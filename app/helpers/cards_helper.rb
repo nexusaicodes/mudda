@@ -3,11 +3,10 @@ module CardsHelper
     classes = [
       options.delete(:class),
       ("golden-effect" if card.golden?),
-      ("card--postponed" if card.postponed?),
       ("card--active" if card.active?)
     ].compact.join(" ")
 
-    data[:drag_and_drop_top] = true if card.golden? && !card.closed? && !card.postponed?
+    data[:drag_and_drop_top] = true if card.golden? && !card.closed?
 
     tag.article \
       id: id,
@@ -19,30 +18,41 @@ module CardsHelper
   end
 
   def card_title_tag(card)
-    [
-      card.title,
-      "added by #{card.creator.name}",
-      "in #{card.board.name}"
-    ].join(" ")
+    t("cards.title_tag", title: card.title, creator: card.creator.name, board: card.board.name)
   end
 
-  def card_due_urgency(card)
-    days = (card.due_on - Date.current).to_i
+  def card_due_label(card)
+    if card.due_on.year == Date.current.year
+      l(card.due_on, format: :month_day)
+    else
+      l(card.due_on, format: :month_day_year)
+    end
+  end
 
-    if days <= 1
-      "urgent"
-    elsif days <= 2
+  # One tone for a due date wherever it shows: only a card that is late or due within a day asks
+  # for attention.
+  def card_due_tone(card)
+    days = card.days_until_due
+
+    if days.negative?
+      "overdue"
+    elsif days <= 1
       "soon"
     else
       "later"
     end
   end
 
-  def card_due_label(card)
-    if card.due_on.year == Date.current.year
-      card.due_on.strftime("%b %-d")
-    else
-      card.due_on.strftime("%b %-d, %Y")
+  # Relative while it's close, then the date: "Overdue 2d", "Today", "Tomorrow", "Fri", "Oct 24".
+  def card_due_relative_label(card)
+    days = card.days_until_due
+
+    case days
+    when ...0 then t("cards.due.overdue", days: -days)
+    when 0    then t("cards.due.today")
+    when 1    then t("cards.due.tomorrow")
+    when 2..6 then l(card.due_on, format: :weekday)
+    else           card_due_label(card)
     end
   end
 

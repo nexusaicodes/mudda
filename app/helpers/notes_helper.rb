@@ -4,14 +4,14 @@ module NotesHelper
       class: "notes gap center",
       style: "--card-color: #{card.color}",
       role: "group",
-      aria: { label: "Notes" }, &
+      aria: { label: t("cards.notes.label") }, &
   end
 
   def new_note_placeholder(card)
     if card.notes.empty?
-      "Next, add some notes, context, pictures, or video about this…"
+      t("cards.notes.first_placeholder")
     else
-      "Type your note…"
+      t("cards.notes.placeholder")
     end
   end
 end

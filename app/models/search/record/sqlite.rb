@@ -2,9 +2,6 @@ module Search::Record::SQLite
   extend ActiveSupport::Concern
 
   included do
-    attribute :result_title, :string
-    attribute :result_content, :string
-
     has_one :search_records_fts, -> { with_rowid },
       class_name: "Search::Record::SQLite::Fts", foreign_key: :rowid, primary_key: :id, dependent: :destroy
 
@@ -18,39 +15,30 @@ module Search::Record::SQLite
 
   class_methods do
     def search_fields(query)
-      opening_mark = connection.quote(Search::Highlighter::OPENING_MARK)
-      closing_mark = connection.quote(Search::Highlighter::CLOSING_MARK)
-      ellipsis = connection.quote(Search::Highlighter::ELIPSIS)
-
-      [ "highlight(search_records_fts, 0, #{opening_mark}, #{closing_mark}) AS result_title",
-        "snippet(search_records_fts, 1, #{opening_mark}, #{closing_mark}, #{ellipsis}, 20) AS result_content",
-        "#{connection.quote(query.terms)} AS query" ]
+      [ "#{connection.quote(query.terms)} AS query" ]
     end
   end
 
+  # The FTS table holds the normalized text that queries match against; the record keeps the
+  # text as written, which is what gets highlighted.
   def card_title
-    escape_fts_highlight(result_title || card.title)
+    highlighter.highlight(title.presence || card.title)
   end
 
   def card_description
-    escape_fts_highlight(result_content) unless note
+    highlighter.snippet(content) if content.present? && !note
   end
 
   def note_body
-    escape_fts_highlight(result_content) if note
+    highlighter.snippet(content) if content.present? && note
   end
 
   private
-    def escape_fts_highlight(html)
-      return nil unless html.present?
-
-      CGI.escapeHTML(html)
-        .gsub(CGI.escapeHTML(Search::Highlighter::OPENING_MARK), Search::Highlighter::OPENING_MARK)
-        .gsub(CGI.escapeHTML(Search::Highlighter::CLOSING_MARK), Search::Highlighter::CLOSING_MARK)
-        .html_safe
+    def highlighter
+      @highlighter ||= Search::Highlighter.new(self[:query])
     end
 
     def upsert_to_fts5_table
-      Fts.upsert(id, title, content)
+      Fts.upsert(id, Search::Normalizer.normalize(title), Search::Normalizer.normalize(content))
     end
 end

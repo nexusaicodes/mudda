@@ -1,15 +1,26 @@
+<%# locals: (groups:, query:) -%>
 <section class="search">
-  <div class="search__results">
-    <% if !page.used? && query %>
-      <div class="search__blank-slate blank-slate">
-        No matches
-      </div>
-    <% end %>
+  <% if query && groups.empty? %>
+    <div class="search__blank-slate blank-slate"><%= t(".no_matches") %></div>
+  <% end %>
 
-    <ul class="search__list">
-      <%= with_automatic_pagination :filtered_search_results, page do %>
-        <%= render partial: "searches/result", collection: page.records %>
+  <% groups.each do |board, count, cards| %>
+    <section class="search__group">
+      <h3 class="search__group-title">
+        <span class="overflow-ellipsis" dir="auto"><%= board.name %></span>
+        <span class="search__group-count"><%= count %></span>
+      </h3>
+
+      <ul class="search__list">
+        <% cards.each do |card, matches| %>
+          <%= render "searches/result", card: card, matches: matches %>
+        <% end %>
+      </ul>
+
+      <% if count > cards.size %>
+        <%= link_to t(".show_all", count: count), cards_path(board_ids: [ board.id ], terms: [ query ]),
+              class: "search__more btn btn--plain txt-small", data: { turbo_frame: "_top", action: "bar#reset" } %>
       <% end %>
-    </ul>
-  </div>
+    </section>
+  <% end %>
 </section>

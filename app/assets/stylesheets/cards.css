@@ -47,7 +47,7 @@
 
   .card__header {
     align-items: center;
-    border-radius: var(--border-radius) 0 0 0;
+    border-start-start-radius: var(--border-radius);
     display: flex;
     flex-wrap: nowrap;
     gap: var(--card-header-space);
@@ -78,11 +78,11 @@
     white-space: nowrap;
   }
 
-  .card__due--urgent { --due-color: var(--color-negative); }
-  .card__due--soon   { --due-color: oklch(var(--lch-yellow-dark)); }
-  .card__due--later  { --due-color: var(--color-positive); }
+  .card__due--overdue { --due-color: var(--color-negative); }
+  .card__due--soon    { --due-color: oklch(var(--lch-yellow-dark)); }
+  .card__due--later   { --due-color: var(--color-positive); }
 
-  .card__due--urgent,
+  .card__due--overdue,
   .card__due--soon,
   .card__due--later {
     border-color: color-mix(in srgb, var(--due-color) 30%, transparent);
@@ -100,7 +100,8 @@
     align-items: center;
     align-self: start;
     background-color: var(--card-color);
-    border-radius: var(--border-radius) 0 var(--border-radius) 0;
+    border-start-start-radius: var(--border-radius);
+    border-end-end-radius: var(--border-radius);
     color: var(--color-ink-inverted);
     display: inline-flex;
     font-weight: 600;
@@ -128,7 +129,7 @@
     flex-shrink: 0;
 
     .card-perma &:before {
-      content: "No.";
+      content: attr(data-number-prefix);
       opacity: 0.5;
     }
   }
@@ -271,13 +272,6 @@
     }
   }
 
-  /* Due-date footer: profile circle beside a single boxed due date */
-  .card__meta--due {
-    display: flex;
-    grid-template-areas: none;
-    text-transform: none;
-  }
-
   /* Assign grid areas */
   .card__meta-avatars--author { grid-area: avatars-author; }
   .card__meta-avatars--assignees { grid-area: avatars-assignees; }
@@ -378,7 +372,8 @@
     display: flex;
     flex-direction: column;
     font-weight: bold;
-    inset: auto 0 -1lh auto;
+    inset-block: auto -1lh;
+    inset-inline: auto 0;
     justify-content: center;
     max-inline-size: 25ch;
     min-inline-size: 16ch;
@@ -388,6 +383,11 @@
     rotate: 5deg;
     transform-origin: top right;
     z-index: 2;
+
+    &:dir(rtl) {
+      rotate: -5deg;
+      transform-origin: top left;
+    }
 
     .cards & {
       display: none;
@@ -402,9 +402,7 @@
   }
 
   .card:has(.card__closed),
-  .card:is(.card--postponed),
-  .card-perma:has(.card__closed),
-  .card-perma:has(.card--postponed) {
+  .card-perma:has(.card__closed) {
     --card-color: var(--color-card-complete) !important;
 
     .bubble {

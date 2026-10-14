@@ -21,7 +21,8 @@
     position: relative;
     white-space: nowrap;
 
-    &:has(input:checked) {
+    &:has(input:checked),
+    &[aria-pressed=true] {
       --btn-background: var(--color-selected);
       --btn-color: var(--color-ink);
     }

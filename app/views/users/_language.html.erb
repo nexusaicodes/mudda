@@ -1,0 +1,13 @@
+<section class="settings__section">
+  <header>
+    <h2 class="divider"><%= t(".title") %></h2>
+  </header>
+
+  <div class="theme-switcher flex gap max-width justify-center txt-small margin-block-start-half">
+    <% [ [ nil, t(".browser"), I18n.locale ], [ "en", "English", :en ], [ "ar", "العربية", :ar ] ].each do |value, label, lang| %>
+      <%= button_to label, my_locale_path, method: :patch, params: { locale: value },
+            class: "btn theme-switcher__btn", aria: { pressed: Current.user.locale == value },
+            lang: lang, dir: (lang == :ar ? "rtl" : "ltr"), form: { data: { turbo: false } } %>
+    <% end %>
+  </div>
+</section>

@@ -1,4 +1,8 @@
-<% @page_title = "Account Settings" %>
+<% @page_title = t(".title") %>
+
+<% content_for :header_start do %>
+  <%= back_link_to t(".back"), root_path %>
+<% end %>
 
 <% content_for :header do %>
   <h1 class="header__title">

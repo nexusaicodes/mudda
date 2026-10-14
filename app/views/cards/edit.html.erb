@@ -11,24 +11,24 @@
     <h1 class="card__title flex align-start gap-half">
       <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
         <%= form.text_area :title, class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
-              required: true, autofocus: true, placeholder: "Name it…", rows: 1, dir: "auto", maxlength: 255,
+              required: true, autofocus: true, placeholder: t(".title_placeholder"), rows: 1, dir: "auto", maxlength: 255,
               data: { local_save_target: "input", autoresize_target: "textarea", action: "input->autoresize#resize input->local-save#save keydown.enter->form#submit:prevent keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel focus->form#select" } %>
       <% end %>
     </h1>
 
-    <%= form.rich_textarea :description, class: "card__description lexxy-content",
-          placeholder: "Add some notes, context, pictures, or video about this…",
+    <%= form.rich_textarea :description, class: "card__description lexxy-content", dir: "auto",
+          placeholder: t(".description_placeholder"),
           data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restore keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do %>
       <%= general_prompts(@card.board) %>
     <% end %>
 
     <div class="card-field__due flex align-center">
-      <%= form.label :due_on, "Due date", class: "card-field__due-label" %>
-      <%= form.date_field :due_on, required: true, class: "card-field__due-input input",
+      <%= form.label :due_on, t(".due_date"), class: "card-field__due-label" %>
+      <%= form.date_field :due_on, required: @card.active?, class: "card-field__due-input input",
             data: { action: "change->form#submit" } %>
     </div>
 
-    <%= link_to "Close editor and discard changes", @card,
+    <%= link_to t(".discard"), @card,
           data: { form_target: "cancel" }, hidden: true %>
   <% end %>
 <% end %>

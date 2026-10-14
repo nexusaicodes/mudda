@@ -1,0 +1,12 @@
+---
+ar:
+  activerecord:
+    attributes:
+      card:
+        due_on: تاريخ الاستحقاق
+    errors:
+      models:
+        card:
+          attributes:
+            due_on:
+              blank_while_active: مطلوب في «للتنفيذ» و«قيد التنفيذ»

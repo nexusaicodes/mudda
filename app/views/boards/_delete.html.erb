@@ -1,0 +1,17 @@
+<%# locals: (board:) -%>
+<div class="board-title__delete" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
+  <button type="button" class="btn btn--plain txt-negative txt-x-small" data-action="dialog#open"><%= t(".open") %></button>
+
+  <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
+    <h3 class="txt-large txt-bold"><%= t(".heading_html", name: tag.span(board.name, dir: "auto")) %></h3>
+    <p class="txt-medium margin-block-half">
+      <%= t(".body", count: board.cards.count) %>
+    </p>
+    <div class="flex gap-half justify-center margin-block-start">
+      <button type="button" class="btn" data-action="dialog#close"><%= t(".cancel") %></button>
+      <%= button_to board_path(board), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
+        <span><%= t(".submit") %></span>
+      <% end %>
+    </div>
+  </dialog>
+</div>

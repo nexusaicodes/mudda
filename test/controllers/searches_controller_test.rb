@@ -28,25 +28,41 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li .search__title", text: /Some card/
     assert_select "li .search__excerpt--note", text: /overflowing text issue/
 
-    # Searching for a term that appears in a card and in a note
+    # A card that matched in its description and a note shows once, by its description
     get search_path(q: "haggis")
-    assert_select "li .search__title", text: /Just haggis/, count: 2 # card title shows up in two entries
-    assert_select "li .search__excerpt", text: /More haggis/ # one entry for the card description
-    assert_select "li .search__excerpt--note", text: /I love haggis/ # one entry for the note
+    assert_select "li .search__title", text: /Just haggis/, count: 1
+    assert_select "li .search__excerpt", text: /More haggis/
     assert_match(/<mark class="circled-text"><span><\/span>haggis<\/mark>/, response.body)
 
-    # Searching by card number jumps straight to the card
-    get search_path(q: @card.number)
-    assert_select "form[data-controller='auto-submit']"
-
-    # Searching with a non-existent card number
-    get search_path(q: "999999")
-    assert_select "form[data-controller='auto-submit']", count: 0
+    get search_path(q: "nothingmatchesthis")
     assert_select ".search__blank-slate", text: "No matches"
   end
 
-  test "a full-text query that merely starts with a digit does not hijack to a card number" do
-    get search_path(q: "#{@card.number} is broken")
+  test "results are grouped by board, the board searched from first" do
+    Current.user = @user
+    other = @user.account.boards.create!(name: "Elsewhere", creator: @user)
+    2.times { |i| other.cards.create!(title: "Broken thing #{i}", creator: @user) }
+
+    get search_path(q: "broken")
+    assert_select ".search__group-title", count: 2
+    assert_select ".search__group:first-child .search__group-title", text: /Elsewhere\s*2/
+
+    get search_path(q: "broken"), headers: { "Referer" => board_url(@board) }
+    assert_select ".search__group:first-child .search__group-title", text: /#{@board.name}\s*1/
+  end
+
+  test "a board with more than five matches links to the rest" do
+    Current.user = @user
+    6.times { |i| @board.cards.create!(title: "Broken widget #{i}", creator: @user) }
+
+    get search_path(q: "broken")
+    assert_select ".search__group:first-child .search__list li", count: 5
+    assert_select "a.search__more[href=?]", cards_path(board_ids: [ @board.id ], terms: [ "broken" ]), text: "Show all 7 →"
+  end
+
+  test "a card number is searched like any other text, never jumped to" do
+    get search_path(q: @card.number)
+    assert_response :success
     assert_select "form[data-controller='auto-submit']", count: 0
   end
 
@@ -58,16 +74,6 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_kind_of Array, body
     assert_equal 1, body.size
     assert_equal "Layout is broken", body.first["title"]
-  end
-
-  test "search by card number as JSON returns array" do
-    get search_path(q: @card.number), as: :json
-    assert_response :success
-
-    body = @response.parsed_body["data"]
-    assert_kind_of Array, body
-    assert_equal 1, body.size
-    assert_equal @card.id, body.first["id"]
   end
 
   test "search as JSON deduplicates cards with multiple search hits" do

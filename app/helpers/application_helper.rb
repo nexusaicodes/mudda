@@ -13,14 +13,14 @@ module ApplicationHelper
     "mudda:last-board:#{account.id}"
   end
 
-  def back_link_to(label, url, action, prefer_referrer: [], **options)
-    data = { controller: "hotkey", action: action }
+  def back_link_to(label, url, action: nil, prefer_referrer: [], **options)
+    data = { action: action }
     if prefer_referrer.any?
       data[:turbo_navigation_target] = "referrerBackLink"
       data[:turbo_navigation_allowed_referrer_paths] = prefer_referrer.join(",")
     end
     link_to url, class: "btn btn--back btn--circle-mobile", data: data, **options do
-      icon_tag("arrow-left") + tag.strong("Back to #{label}", class: "overflow-ellipsis") + tag.kbd("ESC", class: "txt-x-small hide-on-touch").html_safe
+      icon_tag("arrow-left") + tag.strong(t("back_link.label", label: label), class: "overflow-ellipsis")
     end
   end
 end

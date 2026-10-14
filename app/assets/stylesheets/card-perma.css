@@ -243,7 +243,8 @@
 
     .card__closed {
       @media (max-width: 639px) {
-        inset: auto 0 3rem auto;
+        inset-block: auto 3rem;
+        inset-inline: auto 0;
         scale: 75%;
       }
     }
@@ -297,13 +298,15 @@
       --bubble-number-max: 42px;
       --bubble-size: 6rem;
 
-      inset: calc(var(--bubble-size) / -4) calc(var(--bubble-size) / 1.5) auto auto;
+      inset-block: calc(var(--bubble-size) / -4) auto;
+      inset-inline: auto calc(var(--bubble-size) / 1.5);
       translate: 0 0;
 
       @media (max-width: 799px) {
         --bubble-size: 4.5rem;
 
-        inset: calc(var(--bubble-size) / 1.5) 0 auto auto;
+        inset-block: calc(var(--bubble-size) / 1.5) auto;
+        inset-inline: auto 0;
       }
     }
   }

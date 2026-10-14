@@ -12,7 +12,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :boards do
+  resources :boards, except: :edit do
     # A board's columns are fixed and travel with the board itself, so what is left is the
     # browser's: one lane's cards, and the color picker.
     scope module: :boards do
@@ -43,13 +43,6 @@ Rails.application.routes.draw do
     resources :queries, only: :create
   end
 
-  resources :filters, only: %i[ create destroy ] do
-    scope module: :filters do
-      collection do
-        resource :settings_refresh, only: :create
-      end
-    end
-  end
 
   resource :session, only: %i[ new destroy ] do
     scope module: :sessions do
@@ -83,6 +76,7 @@ Rails.application.routes.draw do
     resources :passkeys, except: %i[ show new ]
     resources :tokens, only: %i[ index create destroy ]
     resource :timezone, only: :update
+    resource :locale, only: :update
     resource :menu, only: :show
   end
 

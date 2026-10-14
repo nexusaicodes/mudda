@@ -1,0 +1,33 @@
+---
+ar:
+  activerecord:
+    attributes:
+      session:
+        scopes: الصلاحيات
+      user:
+        avatar: الصورة الشخصية
+    errors:
+      models:
+        session:
+          attributes:
+            scopes:
+              unknown:
+                few: 'تتضمن صلاحيات غير معروفة: %{scopes}'
+                many: 'تتضمن صلاحيات غير معروفة: %{scopes}'
+                one: 'تتضمن صلاحية غير معروفة: %{scopes}'
+                other: 'تتضمن صلاحيات غير معروفة: %{scopes}'
+                two: 'تتضمن صلاحيتين غير معروفتين: %{scopes}'
+                zero: 'تتضمن صلاحيات غير معروفة: %{scopes}'
+        user:
+          attributes:
+            avatar:
+              content_type: يجب أن تكون صورة بصيغة JPEG أو PNG أو GIF أو WebP
+              too_tall: يجب أن يكون الارتفاع أقل من %{max} بكسل
+              too_wide: يجب أن يكون العرض أقل من %{max} بكسل
+  pwa:
+    manifest:
+      description: رتّب مهامك… لزمنك.
+      home:
+        description: عُد إلى آخر لوحة فتحتها
+        name: الرئيسية
+      name: Mudda

@@ -22,7 +22,7 @@ class My::TokensController < ApplicationController
 
   def destroy
     tokens.find(params[:id]).destroy!
-    redirect_to my_tokens_path, notice: "Token revoked"
+    redirect_to my_tokens_path, notice: t(".revoked")
   end
 
   private
@@ -39,7 +39,7 @@ class My::TokensController < ApplicationController
     # Session::DEFAULT_SCOPES.
     def valid_with_scopes_chosen?
       @token.validate
-      @token.errors.add :base, "Choose at least one thing the token may do" if token_params[:scopes].to_a.compact_blank.empty?
+      @token.errors.add :base, t("my.tokens.create.choose_scope") if token_params[:scopes].to_a.compact_blank.empty?
       @token.errors.none?
     end
 end

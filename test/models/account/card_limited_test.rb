@@ -68,7 +68,7 @@ class Account::CardLimitedTest < ActiveSupport::TestCase
   test "a failed card doesn't use a slot" do
     with_env("MUDDA_CARD_LIMIT" => "100") do
       assert_no_difference -> { @account.reload.cards_created_count } do
-        @board.cards.create(title: "No due date")
+        @board.cards.create(title: "In another board's lane", column: columns(:private_doing))
       end
     end
   end

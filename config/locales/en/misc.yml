@@ -1,0 +1,29 @@
+---
+en:
+  activerecord:
+    attributes:
+      session:
+        scopes: Scopes
+      user:
+        avatar: Avatar
+    errors:
+      models:
+        session:
+          attributes:
+            scopes:
+              unknown:
+                one: 'includes unknown scope: %{scopes}'
+                other: 'includes unknown scopes: %{scopes}'
+        user:
+          attributes:
+            avatar:
+              content_type: must be a JPEG, PNG, GIF, or WebP image
+              too_tall: height must be less than %{max}px
+              too_wide: width must be less than %{max}px
+  pwa:
+    manifest:
+      description: Declutter your tasks for the age you live in.
+      home:
+        description: Jump back to your last board
+        name: Home
+      name: Mudda

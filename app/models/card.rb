@@ -8,7 +8,7 @@ class Card < ApplicationRecord
 
   has_rich_text :description
 
-  before_validation :land_in_destination_triage, on: :update, if: :board_id_changed?
+  before_validation :land_in_destination_backlog, on: :update, if: :board_id_changed?
   before_save :set_default_title
   before_create :claim_card_slot, :assign_number
   before_update :renumber_for_new_board, if: :board_id_changed?
@@ -21,6 +21,7 @@ class Card < ApplicationRecord
   scope :chronologically,         -> { order created_at:     :asc,  id: :asc  }
   scope :latest,                  -> { order last_active_at: :desc, id: :desc }
   scope :by_due_date,             -> { order Arel.sql("cards.due_on IS NULL, CASE WHEN cards.due_on < '#{Date.current.to_fs(:db)}' THEN 1 ELSE 0 END, cards.due_on ASC, cards.id ASC") }
+  scope :grouped_by_board,        -> { joins(:board).reorder(Board.arel_table[:name].asc, Board.arel_table[:id].asc, *order_values) }
   scope :with_users,              -> { preload(creator: [ :avatar_attachment, :account ]) }
   scope :preloaded,               -> { with_users.preload(:column, :steps, board: [ :columns ]).with_rich_text_description_and_embeds }
 
@@ -58,14 +59,14 @@ class Card < ApplicationRecord
 
   private
     def set_default_title
-      self.title = "Untitled" if title.blank?
+      self.title = I18n.t("cards.untitled") if title.blank?
     end
 
     # A move names where the card ends up. A lane named alongside the board is kept, and
     # column_on_its_board refuses one from anywhere else; with no lane named, the card starts
-    # over in the destination's Triage. Settled before validation, so the move is one UPDATE.
-    def land_in_destination_triage
-      self.column = board.triage_column unless column_id_changed?
+    # over in the destination's Backlog. Settled before validation, so the move is one UPDATE.
+    def land_in_destination_backlog
+      self.column = board.backlog_column unless column_id_changed?
     end
 
     def track_board_change
@@ -76,7 +77,7 @@ class Card < ApplicationRecord
     # raises RecordInvalid, which JSON clients receive as the usual 422 envelope.
     def claim_card_slot
       unless board.account.claim_card_slot
-        errors.add :base, "This account has used all #{board.account.card_limit} of its cards"
+        errors.add :base, :card_limit_reached, limit: board.account.card_limit
         raise ActiveRecord::RecordInvalid, self
       end
     end

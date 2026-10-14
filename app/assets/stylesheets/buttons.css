@@ -120,7 +120,6 @@
       aspect-ratio: 1;
       inline-size: var(--btn-size);
 
-      kbd,
       span:last-of-type:not(.icon) {
         display: none;
       }
@@ -221,7 +220,7 @@
     --btn-border-size: 0;
 
     @media (max-width: 639px) {
-      strong, kbd {
+      strong {
         display: none;
       }
     }

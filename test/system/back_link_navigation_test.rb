@@ -1,19 +1,6 @@
 require "application_system_test_case"
 
 class BackLinkNavigationTest < ApplicationSystemTestCase
-  test "card back link returns to board filter view when navigating from it" do
-    sign_in_as(users(:david))
-
-    filter_url = board_url(boards(:writebook), column_ids: [ columns(:writebook_triage).id ])
-    visit filter_url
-    click_on cards(:logo).title
-
-    back_link = find("a.btn--back")
-    assert_selector "a.btn--back strong", text: "Back to Writebook"
-    back_link.click
-    assert_current_path filter_url, ignore_query: false
-  end
-
   test "card back link returns to global filter view when navigating from it" do
     sign_in_as(users(:kevin))
 
@@ -31,7 +18,7 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
   test "card back link is not rewritten when navigating from a non-filter page" do
     sign_in_as(users(:david))
 
-    visit board_column_url(boards(:writebook), columns(:writebook_triage))
+    visit board_column_url(boards(:writebook), columns(:writebook_backlog))
     click_on cards(:logo).title
 
     assert_selector "a.btn--back strong", text: "Back to Writebook"

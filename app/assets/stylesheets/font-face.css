@@ -38,4 +38,45 @@
     font-weight: 800 900;
     font-style: italic;
   }
+
+  /*
+    IBM Plex Sans Arabic (OFL, see app/assets/fonts/IBM-Plex-Sans-Arabic-OFL.txt), limited to
+    Arabic code points so Latin text keeps the system stack. Weights 800-900 map to Bold.
+  */
+
+  @font-face {
+    font-family: "IBM Plex Sans Arabic";
+    src: url("ibm-plex-sans-arabic-arabic-400-normal.woff2") format("woff2");
+    font-weight: 100 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
+  @font-face {
+    font-family: "IBM Plex Sans Arabic";
+    src: url("ibm-plex-sans-arabic-arabic-500-normal.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
+  @font-face {
+    font-family: "IBM Plex Sans Arabic";
+    src: url("ibm-plex-sans-arabic-arabic-600-normal.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
+  @font-face {
+    font-family: "IBM Plex Sans Arabic";
+    src: url("ibm-plex-sans-arabic-arabic-700-normal.woff2") format("woff2");
+    font-weight: 700 900;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  }
 }

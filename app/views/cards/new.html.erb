@@ -1,10 +1,8 @@
-<% @page_title = "New card" %>
+<% @page_title = t(".title") %>
 <% @header_class = "header--card" %>
 
-<% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= link_back_to_board @board %>
-  </div>
+<% content_for :header_start do %>
+  <%= link_back_to_board @board %>
 <% end %>
 
 <section class="card-perma card-perma--draft" style="--card-color: <%= @card.color %>;">
@@ -15,25 +13,25 @@
       <%= form_with model: [ @board, @card ], id: "card_form",
             data: { controller: "autoresize form local-save step-fields",
                     local_save_key_value: "new-card-#{@board.id}",
-                    action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand" } do |form| %>
+                    action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent" } do |form| %>
         <h1 class="card__title">
           <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
-            <%= form.text_area :title, placeholder: "Name it…",
+            <%= form.text_area :title, placeholder: t(".title_placeholder"),
                   class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
                   autofocus: true, rows: 1, dir: "auto", maxlength: 255,
                   data: { autoresize_target: "textarea", local_save_target: "input", action: "input->autoresize#resize input->local-save#save" } %>
           <% end %>
         </h1>
 
-        <%= form.rich_textarea :description, class: "card__description lexxy-content",
-              placeholder: "Add some notes, context, pictures, or video about this…",
+        <%= form.rich_textarea :description, class: "card__description lexxy-content", dir: "auto",
+              placeholder: t(".description_placeholder"),
               data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restore" } do %>
           <%= general_prompts(@board) %>
         <% end %>
 
         <div class="card-field__due flex align-center">
-          <%= form.label :due_on, "Due date", class: "card-field__due-label" %>
-          <%= form.date_field :due_on, required: true, class: "card-field__due-input input",
+          <%= form.label :due_on, t(".due_date"), class: "card-field__due-label" %>
+          <%= form.date_field :due_on, class: "card-field__due-input input",
                 data: { local_save_target: "input", action: "change->local-save#save" } %>
         </div>
 
@@ -52,16 +50,14 @@
 
         <button type="button" class="btn btn--link txt-small" data-action="step-fields#add">
           <%= icon_tag "add" %>
-          <span>Add a step</span>
+          <span><%= t(".add_step") %></span>
         </button>
 
         <%= render "cards/new/allowance", account: @board.account %>
 
         <div class="card-perma__notch card-perma__notch--bottom flex-column">
           <div class="card-perma__notch-new-card-buttons">
-            <%= form.submit "Create card", class: "btn",
-                  title: "Create card (#{ hotkey_label(["ctrl", "enter"]) })",
-                  data: { form_target: "submit", controller: "clicker", action: "keydown.ctrl+enter@document->clicker#click keydown.meta+enter@document->clicker#click" } %>
+            <%= form.submit t(".create"), class: "btn", data: { form_target: "submit" } %>
           </div>
         </div>
       <% end %>

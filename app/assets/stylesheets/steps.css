@@ -53,16 +53,4 @@
     max-inline-size: 100%;
     padding: 0;
   }
-
-  .steps__icon {
-    --icon-size: 0.875em;
-
-    background-color: var(--card-color);
-    block-size: 1.3em;
-    border-radius: 50%;
-    color: var(--color-ink-inverted);
-    display: grid;
-    inline-size: 1.3em;
-    place-content: center;
-  }
 }

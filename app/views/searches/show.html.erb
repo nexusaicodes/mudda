@@ -1,20 +1,16 @@
-<% @page_title = @query ? "Search results for \"#{@query}\"" : "Search" %>
+<% @page_title = @query ? t(".title_with_query", query: @query) : t(".title") %>
+
+<% content_for :header_start do %>
+  <%= back_link_to t(".home"), root_path %>
+<% end %>
 
 <% content_for :header do %>
-  <div class="header__actions header__actions--start">
-    <%= back_link_to "Home", root_path, "keydown.left@document->hotkey#click keydown.esc@document->hotkey#click" %>
-  </div>
-
   <h1 class="header__title"><%= @page_title %></h1>
 <% end %>
 
 <div class="search-perma margin-block-start">
   <%= render "form", query_terms: @query, turbo_action: "advance", target_turbo_frame: "bar_content" %>
   <%= turbo_frame_tag "bar_content" do %>
-    <% if @card %>
-      <%= auto_submit_form_with url: board_card_path(@card.board, @card), method: :get, data: { turbo_action: "advance", turbo_frame: "_top", search_redirect: true } %>
-    <% else %>
-      <%= render "results", page: @page, query: @query %>
-    <% end %>
+    <%= render "results", groups: @groups, query: @query %>
   <% end %>
 </div>

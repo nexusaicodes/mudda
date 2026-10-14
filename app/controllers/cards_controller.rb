@@ -9,16 +9,30 @@ class CardsController < ApplicationController
   before_action :set_card, only: %i[ show edit update destroy ]
 
   # Nested under a board, the index answers for that board alone; at the top level it spans
-  # every board. The filter narrows either one.
+  # every board. The filter narrows either one. A person reading several boards gets the
+  # cards one board after another, each under its heading.
   def index
-    set_page_and_extract_portion_from within_board(@filter.cards)
+    cards = within_board(@filter.cards)
+
+    respond_to do |format|
+      format.html do
+        if @single_board = @board || @filter.single_board
+          set_page_and_extract_portion_from cards
+        else
+          set_page_and_extract_portion_from cards.grouped_by_board
+          set_board_headings_from cards
+        end
+      end
+
+      format.json { set_page_and_extract_portion_from cards }
+    end
   end
 
   def new
     @card = @board.cards.new
   end
 
-  # The board comes from the path, and a new card always starts in that board's Triage column,
+  # The board comes from the path, and a new card always starts in that board's Backlog column,
   # so neither id is read from the body.
   def create
     @card = @board.cards.new card_params.except(:board_id, :column_id).merge(creator: Current.user)
@@ -72,16 +86,21 @@ class CardsController < ApplicationController
     @card.destroy!
 
     respond_to do |format|
-      format.html { redirect_to @card.board, notice: "Card deleted" }
+      format.html { redirect_to @card.board, notice: t(".deleted") }
       format.json { head :no_content }
     end
   end
 
   private
-    # Narrows the query, not the filter: Filter#boards is a HABTM, so assigning board_ids on
-    # a saved filter would rewrite its boards on disk as a side effect of a GET.
+    # The board in the path narrows whatever the filter asks for.
     def within_board(cards)
       @board ? cards.where(board: @board) : cards
+    end
+
+    # A board whose cards began on an earlier page already has its heading there.
+    def set_board_headings_from(cards)
+      @board_counts = cards.reorder(nil).where(board_id: @page.records.map(&:board_id)).group(:board_id).count
+      @continued_board_id = @page.recordset.page(@page.number - 1).records.to_a.last&.board_id unless @page.first?
     end
 
     def set_board
@@ -106,7 +125,7 @@ class CardsController < ApplicationController
     # rather than assigned by id, so neither can name a record the caller can't reach; a blank
     # one leaves the card where it is. A column_id names a lane on the board the card ends on —
     # the destination when board_id is sent too, which with no column_id lands the card in that
-    # board's Triage (Card#land_in_destination_triage).
+    # board's Backlog (Card#land_in_destination_backlog).
     def card_attributes
       card_params.except(:board_id, :column_id).merge(destination_board).merge(destination_column)
     end

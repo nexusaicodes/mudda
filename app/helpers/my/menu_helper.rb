@@ -1,32 +1,24 @@
 module My::MenuHelper
-  def jump_field_tag
-    text_field_tag :search, nil,
-      type: "search",
-      role: "combobox",
-      placeholder: "Type to jump to a board or place…",
-      class: "input input--transparent txt-small",
-      autofocus: true,
-      autocorrect: "off",
-      autocomplete: "off",
-      aria: { activedescendant: "" },
-      data: {
-        "1p-ignore": "true",
-        dialog_target: "focusMouse",
-        filter_target: "input",
-        nav_section_expander_target: "input",
-        navigable_list_target: "input",
-        action: "input->filter#filter" }
-  end
-
-  def my_menu_board_item(board)
-    my_menu_item("board", board) do
-      link_to(tag.span(board.name, class: "overflow-ellipsis"), board, class: "popup__btn btn")
+  # A titled group of menu rows.
+  def nav_section(title, **properties, &block)
+    tag.section class: "nav__section popup__section", **properties do
+      concat tag.div(title, class: "popup__section-title")
+      concat(tag.ul(class: "popup__list") do
+        capture(&block)
+      end)
     end
   end
 
-  def my_menu_item(item, record)
-    tag.li(class: "popup__item", data: { filter_target: "item", navigable_list_target: "item", id: "filter-#{item}-#{record.id}" }) do
-      icon_tag(item, class: "popup__icon") + yield
+  # One row of a header menu: an icon, a label, and either a tick for where you are or a count.
+  # +dir+ sets the label's text direction, for labels the user typed (dir: "auto").
+  def menu_item(label, path, icon:, current: false, count: nil, turbo: true, dir: nil)
+    tag.li class: class_names("popup__item", "popup__item--current": current), aria: { current: current ? "page" : nil } do
+      link_to path, class: "popup__btn btn", data: { turbo: turbo } do
+        concat icon_tag(icon, class: "popup__icon")
+        concat tag.span(label, class: "overflow-ellipsis flex-item-grow", dir: dir)
+        concat icon_tag("check", class: "menu__check") if current
+        concat tag.span(count, class: "menu__count") if count
+      end
     end
   end
 end

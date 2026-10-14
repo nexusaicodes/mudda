@@ -36,11 +36,16 @@ export default class extends Controller {
 
       if (isEmpty) {
         event.preventDefault()
-        input.setCustomValidity(input.dataset.validationMessage || "Please fill out this field")
+        input.setCustomValidity(input.dataset.validationMessage || this.#emptyValueMessage)
         input.reportValidity()
         input.addEventListener("input", () => input.setCustomValidity(""), { once: true })
       }
     }
+  }
+
+  // The browser's own wording for a required field left empty, in the browser's language.
+  get #emptyValueMessage() {
+    return Object.assign(document.createElement("input"), { required: true }).validationMessage
   }
 
   preventComposingSubmit(event) {

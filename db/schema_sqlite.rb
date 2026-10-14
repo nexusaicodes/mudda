@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_05_000000) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_14_000001) do
   create_table "accounts", force: :cascade do |t|
     t.integer "cards_created_count", default: 0, null: false
     t.datetime "created_at", null: false
@@ -83,13 +83,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_05_000000) do
     t.index ["creator_id"], name: "index_boards_on_creator_id"
   end
 
-  create_table "boards_filters", id: false, force: :cascade do |t|
-    t.bigint "board_id", null: false
-    t.bigint "filter_id", null: false
-    t.index ["board_id"], name: "index_boards_filters_on_board_id"
-    t.index ["filter_id"], name: "index_boards_filters_on_filter_id"
-  end
-
   create_table "cards", force: :cascade do |t|
     t.bigint "board_id", null: false
     t.bigint "column_id", null: false
@@ -128,15 +121,6 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_05_000000) do
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_events_on_creator_id"
     t.index ["eventable_type", "eventable_id"], name: "index_events_on_eventable"
-  end
-
-  create_table "filters", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "creator_id", null: false
-    t.json "fields", default: -> { "json_object()" }, null: false
-    t.string "params_digest", limit: 255, null: false
-    t.datetime "updated_at", null: false
-    t.index ["creator_id", "params_digest"], name: "index_filters_on_creator_id_and_params_digest", unique: true
   end
 
   create_table "notes", force: :cascade do |t|
@@ -238,6 +222,7 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_05_000000) do
 
   create_table "user_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "locale", limit: 255
     t.string "timezone_name", limit: 255
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false

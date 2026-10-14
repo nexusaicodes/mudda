@@ -1,0 +1,120 @@
+---
+en:
+  activerecord:
+    errors:
+      models:
+        card:
+          attributes:
+            column:
+              off_board: must belong to the card's board
+          card_limit_reached: This account has used all %{limit} of its cards
+  boards:
+    columns:
+      empty_placeholder:
+        drag_cards: Drag cards here
+        no_cards: No cards here
+      show:
+        title: 'Column: %{lane}'
+    show:
+      color_picker:
+        column_color: Column color
+        save_color: Save color
+      column:
+        maximize: Maximize column
+  cards:
+    boards:
+      edit:
+        filter: Filter…
+        title: Move this card to…
+    columns:
+      edit:
+        legend: Choose a column for this card
+    container:
+      closure_buttons:
+        edit: Edit
+        mark_as: Mark as %{lane}
+      gild:
+        demote: Demote to normal
+        promote: Promote to Golden Ticket
+      save_button:
+        save_changes: Save changes
+    delete:
+      cancel: Cancel
+      confirm: Are you sure you want to permanently delete this card?
+      delete_card: Delete card
+      delete_this_card: Delete this card
+      title: Delete this card?
+    destroy:
+      deleted: Card deleted
+    display:
+      common:
+        board:
+          card_number: Card number
+          number_prefix: No.
+        meta:
+          added_html: Added %{time}
+          by_html: By <strong>%{name}</strong>
+          updated_html: Updated %{time}
+      due:
+        due: Due %{date}
+      perma:
+        board:
+          choose_board: Choose a board for this card
+        steps:
+          label: Add a step
+          placeholder: Add a step…
+      preview:
+        due:
+          due: Due %{date}
+        steps:
+          title:
+            one: "%{completed} of %{count} step done"
+            other: "%{completed} of %{count} steps done"
+    due:
+      overdue: Overdue %{days}d
+      today: Today
+      tomorrow: Tomorrow
+    edit:
+      description_placeholder: Add some notes, context, pictures, or video about this…
+      discard: Close editor and discard changes
+      due_date: Due date
+      title_placeholder: Name it…
+    index:
+      empty: Nothing here right now.
+    new:
+      add_step: Add a step
+      allowance:
+        reached: You’ve used all %{limit} cards on this plan.
+        remaining:
+          one: "%{count} card left of %{limit} on this plan."
+          other: "%{count} cards left of %{limit} on this plan."
+        upgrade: Upgrade for unlimited cards
+      create: Create card
+      description_placeholder: Add some notes, context, pictures, or video about this…
+      due_date: Due date
+      step_field:
+        label: Step
+        placeholder: Add a step…
+      title: New card
+      title_placeholder: Name it…
+    notes:
+      edit:
+        cancel: Cancel
+        confirm_delete: Are you sure you want to delete this note?
+        delete: Delete
+        save: Save
+      first_placeholder: Next, add some notes, context, pictures, or video about this…
+      label: Notes
+      new:
+        post: Post
+      note:
+        edit: Edit this note
+      placeholder: Type your note…
+    steps:
+      edit:
+        cancel: Cancel changes
+        delete: Delete this step
+        placeholder: Name this step…
+        save: Save changes
+    title_tag: "%{title} added by %{creator} in %{board}"
+    untitled: Untitled
