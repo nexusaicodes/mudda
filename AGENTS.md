@@ -351,6 +351,28 @@ marks or the article. `search_records` keeps the text as written, and `Search::H
 marks it in Ruby. A change to the normalizer needs `bin/rails search:reindex`, or a data
 migration that runs it, as `20261014000001` does.
 
+### Time zones
+
+Timestamps are rendered by the browser (the `local-time` Stimulus controller), so they always
+read in the viewer's zone. Dates are the server's: due-date labels and colours, overdue
+ordering, `due=soon`, and `creation=today` compare against `Date.current`, so each request runs
+in one zone (`CurrentTimezone`, `app/controllers/concerns/current_timezone.rb`):
+
+1. the browser's, from the `timezone` cookie the `timezone-cookie` controller sets;
+2. else the owner's saved zone, `user_settings.timezone_name`. This is what a token (a script
+   or an MCP agent) gets, so an agent's "today" is the owner's, and what a browser gets on its
+   first request, before the cookie exists;
+3. else UTC.
+
+`layouts/shared/_time_zone` saves the browser's zone through `My::TimezonesController` whenever
+it differs from the saved one, so the saved zone follows the browser the owner used last. Every
+zone name goes through `User::Settings.timezone_named`, which resolves it to its canonical IANA
+zone, so the old alias a browser may report (Chromium says `Asia/Calcutta`) is the same zone as
+the saved `Asia/Kolkata`. The aliases resolve because the `tzinfo-data` gem bundles the whole
+zone database; don't rely on the OS's, which leaves them out. HTML
+caches that hold a date are keyed on `Date.current`, and the resolved zone is part of every
+ETag, so neither is served across a change of day or zone.
+
 ### Internationalization
 
 The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`

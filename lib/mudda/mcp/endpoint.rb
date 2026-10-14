@@ -16,8 +16,9 @@ module Mudda::Mcp
       fixed columns, in order: Backlog, Todo, Doing, Done (closed). New cards land in Backlog. A
       card is addressed by its board id and its per-board `number`, never its id alone. A
       `due_on` date is required in Todo and Doing and optional in Backlog and Done, so give a
-      card one before (or while) moving it into Todo or Doing. Moving a card to another board renumbers it, so use
-      the address the result reports. Errors carry the HTTP status and
+      card one before (or while) moving it into Todo or Doing. Moving a card to another board
+      renumbers it, so use the address the result reports. "Today", "overdue" and "due soon"
+      follow the owner's time zone, which whoami reports. Errors carry the HTTP status and
       `{ "errors": { field: [messages] } }`.
     TEXT
 

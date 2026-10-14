@@ -45,7 +45,7 @@ own (see [API.md → Errors](API.md#errors)), and a `429` keeps its `Retry-After
 
 | Tool | API call |
 |---|---|
-| `whoami` | `GET /my/user` |
+| `whoami` | `GET /my/user`, including the owner's `timezone`, which decides "today" |
 | `search_cards` | `GET /search?q=` |
 | `list_boards` | `GET /boards` |
 | `get_board` | `GET /boards/:id`, which includes the four columns and their ids |

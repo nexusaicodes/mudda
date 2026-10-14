@@ -133,8 +133,14 @@ fails loudly instead of quietly widening the results:
 own list: `q` is a `422` on `/cards.json`, `column_ids[]` is a `422` on `/search.json`, and
 boards and notes take nothing but those three.
 
-Dates and times are UTC. A bearer request has no browser time zone, so "today", "overdue", and
-`due=soon` are reckoned in UTC.
+### Time zone
+
+Timestamps in a response are UTC. "Today", though (what `overdue`, `due=soon`, and `creation`
+compare against), is the owner's day: a token has no browser zone of its own, so it gets the
+zone saved from the owner's browser, which `GET /my/user.json` reports as `timezone`. Until a
+browser has saved one, it is UTC. The browser saves its zone whenever it changes, so a zone
+set with `PATCH /my/timezone.json` lasts until the owner next opens Mudda in a browser
+elsewhere.
 
 ## Resources
 
@@ -142,11 +148,11 @@ Dates and times are UTC. A bearer request has no browser time zone, so "today", 
 
 | Verb | Path | Notes |
 |---|---|---|
-| `GET` | `/my/user.json` | The signed-in user, with the `account` (`id`, `name`, `created_at`) nested in it, and, for a token, `"token": { "label": "claude", "scopes": ["read", "write"] }` |
+| `GET` | `/my/user.json` | The signed-in user, with the `account` (`id`, `name`, `created_at`) nested in it, the `timezone` the request was reckoned in, and, for a token, `"token": { "label": "claude", "scopes": ["read", "write"] }` |
 | `GET` `PATCH` | `/users/:id.json` | `PATCH` takes `name` and `avatar`. Always the signed-in user, whatever the `:id` |
 | `DELETE` | `/users/:id/avatar.json` | Removes the avatar |
 | `GET` `PATCH` | `/account/settings.json` | The account's `id`, `name`, and `created_at`; `PATCH` takes `name` and answers `204` |
-| `PATCH` | `/my/timezone.json` | `timezone_name`. Stores the browser's zone preference and answers `204`; it doesn't change how the API reckons dates |
+| `PATCH` | `/my/timezone.json` | `timezone_name`: an IANA name (`Asia/Kolkata`). Saves the owner's zone under its canonical name (`Asia/Calcutta` is saved as `Asia/Kolkata`; see [Time zone](#time-zone)) and answers `204`. A name that isn't a zone is a `422`, and `null` or `""` clears it |
 
 A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `avatar_url`.
 

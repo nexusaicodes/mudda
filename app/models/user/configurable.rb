@@ -6,10 +6,12 @@ module User::Configurable
 
     after_create :create_settings
 
-    delegate :timezone, :locale, to: :settings, allow_nil: true
+    delegate :timezone, :locale, to: :settings
   end
 
-  def in_time_zone(&block)
-    Time.use_zone(timezone, &block)
+  # Every user is created with settings, but one that somehow has none still reads the defaults
+  # and saves its first preference rather than failing.
+  def settings
+    super || build_settings
   end
 end
