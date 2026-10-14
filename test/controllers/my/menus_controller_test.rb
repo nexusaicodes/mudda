@@ -31,20 +31,31 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", cards_path(indexed_by: "pinned")
   end
 
-  test "new board comes last and nothing else is offered" do
+  test "new board closes the boards section, and nothing else is offered" do
     get my_menu_path
 
     assert_select "turbo-frame#my_menu" do
-      assert_select ".menu__footer a[href=?]", new_board_path, text: "New board"
+      assert_select ".nav__section:first-of-type li:last-child a[href=?]", new_board_path, text: "New board"
       assert_select "input", count: 0
+      assert_select ".menu__note", count: 0
     end
   end
 
-  test "says so when there is only one board" do
-    @account.boards.where.not(id: boards(:writebook).id).destroy_all
+  test "ticks the view you are on, and dims a view with nothing in it" do
+    Card.update_all(pinned: false)
 
+    get my_menu_path(view: "pinned")
+
+    assert_select ".popup__item--current a[href=?]", cards_path(indexed_by: "pinned")
+    assert_select ".popup__item--muted a[href=?]", cards_path(indexed_by: "pinned")
+  end
+
+  test "offers to delete the board you are on, and only then" do
     get my_menu_path(board_id: boards(:writebook).id)
-    assert_select ".menu__note", text: /only board/
+    assert_select ".menu__footer form[action=?]", board_path(boards(:writebook))
+
+    get my_menu_path
+    assert_select ".menu__footer", count: 0
   end
 
   test "etag invalidates when boards change" do

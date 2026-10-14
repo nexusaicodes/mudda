@@ -29,7 +29,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
 
   test "a view's lane is named in any case" do
     get cards_path(lane: "Doing")
-    assert_select ".board-title__name", text: "Doing everywhere"
+    assert_select ".board-title__name", text: "Doing, all boards"
   end
 
   test "a filter value it doesn't know is refused, not ignored" do
@@ -42,7 +42,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".board-title__name", text: "Due today & tomorrow"
 
     get cards_path(lane: "doing")
-    assert_select ".board-title__name", text: "Doing everywhere"
+    assert_select ".board-title__name", text: "Doing, all boards"
   end
 
   test "a board's own index needs no board headings" do

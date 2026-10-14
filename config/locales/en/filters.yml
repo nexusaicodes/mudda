@@ -3,6 +3,6 @@ en:
   filters:
     all_boards: all boards
     views:
-      doing: "%{lane} everywhere"
+      doing: "%{lane}, all boards"
       due_soon: Due today & tomorrow
       pinned: Pinned

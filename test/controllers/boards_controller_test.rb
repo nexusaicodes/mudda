@@ -20,7 +20,8 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select ".board-title__rename", text: boards(:writebook).name
     assert_select ".board-title__editor[hidden] form[action=?]", board_path(boards(:writebook))
-    assert_select ".board-title__editor .board-title__delete", text: /Delete board/
+    assert_select ".board-title__editor button", count: 2
+    assert_select ".board-title__editor form[action=?] input[name=_method][value=delete]", board_path(boards(:writebook)), count: 0
     assert_select ".switcher turbo-frame#my_menu[src=?]", my_menu_path(board_id: boards(:writebook).id)
   end
 

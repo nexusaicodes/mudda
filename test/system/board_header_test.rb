@@ -30,9 +30,22 @@ class BoardHeaderTest < ApplicationSystemTestCase
     within ".switcher__menu" do
       assert_selector ".popup__item--current", text: "Writebook"
       assert_link "Due today & tomorrow"
-      click_on "Doing everywhere"
+      click_on "Doing, all boards"
     end
 
-    assert_selector ".board-title__name", text: "Doing everywhere"
+    assert_selector ".board-title__name", text: "Doing, all boards"
+  end
+
+  test "a board is deleted from the switcher, behind a confirmation" do
+    find(".board-title__rename").click
+    assert_no_selector ".board-title__editor", text: "Delete"
+    find_field("Board name").send_keys(:escape)
+
+    find(".switcher__trigger").click
+    within(".switcher__menu") { click_on "Delete this board…" }
+    within("dialog[open]") { click_on "Delete board" }
+
+    assert_no_selector ".board-title__rename", text: "Writebook"
+    assert_not Board.exists?(boards(:writebook).id)
   end
 end

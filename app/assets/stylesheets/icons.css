@@ -35,6 +35,7 @@
   .icon--bookmark-outline { --svg: url("bookmark-outline.svg "); }
   .icon--bookmark { --svg: url("bookmark.svg "); }
   .icon--camera { --svg: url("camera.svg "); }
+  .icon--calendar { --svg: url("calendar.svg"); }
   .icon--caret-down { --svg: url("caret-down.svg "); }
   .icon--check { --svg: url("check.svg "); }
   .icon--check-circle { --svg: url("check-circle.svg "); }

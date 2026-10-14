@@ -31,7 +31,7 @@ ar:
           عن ذلك.
       cancel: إلغاء
       heading_html: حذف «%{name}»؟
-      open: حذف اللوحة…
+      open: حذف هذه اللوحة…
       submit: حذف اللوحة
     new:
       back: الرئيسية
@@ -89,8 +89,6 @@ ar:
       show:
         boards: اللوحات
         new_board: لوحة جديدة
-        only_board: هذه لوحتك الوحيدة حتى الآن. تفصل اللوحات بين الأعمال المختلفة
-          — مثل العمل والشؤون الشخصية.
         views: طرق العرض
     passkeys:
       create:

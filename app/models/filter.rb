@@ -34,7 +34,7 @@ class Filter
   end
 
   VIEWS = [
-    View.new(key: :due_soon, icon: "bell-alert",    params: { due: "soon" }),
+    View.new(key: :due_soon, icon: "calendar",      params: { due: "soon" }),
     View.new(key: :doing,    icon: "bolt",          params: { lane: Card::Triageable::DOING_COLUMN.downcase }),
     View.new(key: :pinned,   icon: "pin",           params: { indexed_by: "pinned" })
   ].freeze
@@ -97,8 +97,12 @@ class Filter
   end
 
   # The name of the view this filter is, if it is exactly one of them.
+  def view
+    VIEWS.find { |view| Filter.new(creator, view.params).as_params == as_params }
+  end
+
   def view_name
-    VIEWS.find { |view| Filter.new(creator, view.params).as_params == as_params }&.name
+    view&.name
   end
 
   def as_params

@@ -24,7 +24,7 @@ en:
           be undone.
       cancel: Cancel
       heading_html: Delete “%{name}”?
-      open: Delete board…
+      open: Delete this board…
       submit: Delete board
     new:
       back: Home
@@ -78,8 +78,6 @@ en:
       show:
         boards: Boards
         new_board: New board
-        only_board: Your only board so far. Boards keep separate work apart — say,
-          Work and Personal.
         views: Views
     passkeys:
       create:

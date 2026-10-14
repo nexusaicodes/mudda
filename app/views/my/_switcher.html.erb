@@ -1,4 +1,4 @@
-<%# locals: (board: nil) -%>
+<%# locals: (board: nil, view: nil) -%>
 <%# The ▾ beside a page title: every board and the cross-board views, loaded on first open. %>
 <div class="switcher" data-controller="dialog" data-dialog-orient-value="false"
     data-action="keydown.esc->dialog#close click@document->dialog#closeOnClickOutside">
@@ -9,6 +9,6 @@
 
   <%= tag.dialog class: "switcher__menu menu popup popup--animated panel shadow",
         data: { dialog_target: "dialog", action: "turbo:before-cache@document->dialog#close" } do %>
-    <%= turbo_frame_tag "my_menu", src: my_menu_path(board_id: board&.id), loading: :lazy, target: "_top" %>
+    <%= turbo_frame_tag "my_menu", src: my_menu_path(board_id: board&.id, view: view), loading: :lazy, target: "_top" %>
   <% end %>
 </div>

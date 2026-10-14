@@ -309,11 +309,13 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   profile (`users/show`) holds appearance, language, the plan, passkeys, API tokens, and sign
   out; there is no account settings page and no account name.
 - **Board title** (`boards/_title`): clicking the name renames the board in place
-  (`inline-edit` controller), with "Delete board…" beside Save/Cancel. There is no board
-  settings page.
+  (`inline-edit` controller) with just Save and Cancel; the input takes the title's own type, so
+  the header doesn't jump. There is no board settings page.
 - **Switcher**: the ▾ beside a board or view title (`my/_switcher`), loading `my/menus#show` on
-  first open. It lists every board (the current one ticked), the cross-board views in
-  `Filter::VIEWS` with their counts, and "New board" last.
+  first open. It lists every board (the current one ticked and shaded) with "New board" after
+  them, then the cross-board views in `Filter::VIEWS` with their counts (the current one ticked,
+  an empty one dimmed), and, on a board, "Delete this board…" last, behind a confirmation
+  (`boards/_delete`).
 - **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
   `?lane=doing`, `?indexed_by=pinned`), drawn as cards grouped under their board. The board page
   itself takes no filters. A `Filter` is read from the query for each request and never stored;

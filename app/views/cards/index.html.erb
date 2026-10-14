@@ -7,7 +7,7 @@
       <h1 class="board-title__name">
         <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @page_title %></span>
       </h1>
-      <%= render "my/switcher", board: @single_board %>
+      <%= render "my/switcher", board: @single_board, view: @filter.view&.key %>
     </div>
   </div>
 <% end %>
