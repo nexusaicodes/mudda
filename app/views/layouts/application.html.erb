@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="<%= I18n.locale %>" dir="<%= html_direction %>">
+<html lang="<%= I18n.locale %>" dir="<%= html_direction %>" <%= tag.attributes(data: { theme: html_theme }) %>>
   <%= render "layouts/shared/head" %>
 
   <body class="<%= @body_class %>"
-    data-controller="local-time timezone-cookie turbo-navigation theme"
+    data-controller="local-time timezone-cookie turbo-navigation"
     data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
     data-turbo-navigation-label-value="<%= @page_title %>"
     data-turbo-navigation-back-template-value="<%= t("back_link.label", label: "%{label}") %>"

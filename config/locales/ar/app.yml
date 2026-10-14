@@ -233,7 +233,7 @@ ar:
       sign_out: تسجيل الخروج من Mudda على هذا الجهاز
       tokens: رموز API
     theme:
-      auto: مثل نظام التشغيل
-      dark: داكن دائمًا
+      auto: تلقائي
+      dark: داكن
       heading: المظهر
-      light: فاتح دائمًا
+      light: فاتح

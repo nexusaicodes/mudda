@@ -2,5 +2,5 @@
 ar:
   users:
     language:
-      browser: مثل المتصفح
+      automatic: تلقائي
       title: اللغة

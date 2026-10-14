@@ -152,6 +152,7 @@ next loads a page in a browser set to another zone, the same browser included.
 | `GET` `PATCH` | `/users/:id.json` | `PATCH` takes `name` and `avatar`. Always the signed-in user, whatever the `:id` |
 | `DELETE` | `/users/:id/avatar.json` | Removes the avatar |
 | `PATCH` | `/my/timezone.json` | `timezone`: an IANA name (`Asia/Kolkata`), the same key `/my/user.json` reports. Saves the owner's zone (see [Time zone](#time-zone)) and answers `204`. A missing or blank zone is a `400`, and a name that isn't a zone a `422` |
+| `GET` `PATCH` | `/my/preferences.json` | The owner's `locale` (`en`, `ar`, or `null` to follow the browser) and `theme` (`auto`, `light`, `dark`). `PATCH` changes only the keys sent and answers `204`; an unknown value is a `422` |
 
 A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `avatar_url`.
 
@@ -286,7 +287,7 @@ The browser has endpoints for things the API reads and writes as fields. A card'
 drop target (`…/drops/column`), the compose screen (`…/cards/new`), and a lane's colour
 (`/boards/:board_id/columns/:id`) all answer `406`. `PUT` or `POST` the card, or read the
 board, instead. Every `new` and `edit` page, `/`, `/landing`, `/my/menu`, `/my/tokens`,
-`/my/passkeys`, `/my/locale`, `/account/upgrade`, and `/prompts/cards` are the browser's
+`/my/passkeys`, `/account/upgrade`, and `/prompts/cards` are the browser's
 too.
 
 ## Errors

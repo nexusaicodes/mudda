@@ -2,5 +2,5 @@
 en:
   users:
     language:
-      browser: Same as browser
+      automatic: Automatic
       title: Language

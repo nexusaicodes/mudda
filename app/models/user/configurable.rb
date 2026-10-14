@@ -6,6 +6,6 @@ module User::Configurable
 
     after_create :create_settings
 
-    delegate :timezone, :locale, to: :settings, allow_nil: true
+    delegate :timezone, :locale, :theme, to: :settings, allow_nil: true
   end
 end

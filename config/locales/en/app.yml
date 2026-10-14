@@ -220,7 +220,7 @@ en:
       sign_out: Sign out of Mudda on this device
       tokens: API tokens
     theme:
-      auto: Same as OS
-      dark: Always dark
+      auto: Automatic
+      dark: Dark
       heading: Appearance
-      light: Always light
+      light: Light

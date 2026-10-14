@@ -1,0 +1,42 @@
+@layer components {
+  /* Equal-width options for one preference (theme, language). They wrap rather than spill out
+  /* of the panel, so three fit on a 320px phone as easily as on a desktop.
+  /* ------------------------------------------------------------------------ */
+
+  .preference-choice {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
+
+    form {
+      display: contents;
+    }
+  }
+
+  .preference-choice__option {
+    --btn-background: var(--color-ink-lightest);
+    --btn-border-radius: 0.5em;
+    --btn-border-size: 1px;
+    --btn-border-color: transparent;
+    --btn-padding: 0.6em 0.8em;
+
+    inline-size: 100%;
+    justify-content: center;
+    min-block-size: 2.75rem;
+    min-inline-size: 0;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &[aria-pressed=true] {
+      --btn-background: var(--color-link);
+      --btn-border-color: var(--color-link);
+      --btn-color: var(--color-ink-inverted);
+
+      font-weight: 600;
+    }
+  }
+}
