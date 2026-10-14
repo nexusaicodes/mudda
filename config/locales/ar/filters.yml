@@ -5,4 +5,4 @@ ar:
     views:
       doing: "%{lane} في كل اللوحات"
       due_soon: مستحقة اليوم وغدًا
-      golden: الذهبية
+      pinned: المثبّتة

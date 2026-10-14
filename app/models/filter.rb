@@ -17,7 +17,7 @@ class Filter
 
   DEFAULTS = { indexed_by: "all", sorted_by: "latest" }
 
-  INDEXES = %w[ all golden ]
+  INDEXES = %w[ all pinned ]
   SORTS = %w[ latest newest oldest ]
   DUES = %w[ soon ]
   LANES = Board::Triageable::DEFAULT_COLUMNS.map { |column| column[:name].downcase }
@@ -36,7 +36,7 @@ class Filter
   VIEWS = [
     View.new(key: :due_soon, icon: "bell-alert",    params: { due: "soon" }),
     View.new(key: :doing,    icon: "bolt",          params: { lane: Card::Triageable::DOING_COLUMN.downcase }),
-    View.new(key: :golden,   icon: "golden-ticket", params: { indexed_by: "golden" })
+    View.new(key: :pinned,   icon: "pin",           params: { indexed_by: "pinned" })
   ].freeze
 
   attr_reader :creator, :indexed_by, :sorted_by, :creation, :due, :lane, :terms, :card_ids, :column_ids, :board_ids

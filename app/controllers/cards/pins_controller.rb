@@ -1,15 +1,15 @@
-# The star button. Goldness is a boolean column on the card, so everywhere but the browser
+# The pin button. Pinned is a boolean column on the card, so everywhere but the browser
 # sets it with a PUT to the card itself (see CardsController).
-class Cards::GoldnessesController < ApplicationController
+class Cards::PinsController < ApplicationController
   include CardScoped
 
   def create
-    @card.gild
+    @card.pin
     render_card_replacement
   end
 
   def destroy
-    @card.ungild
+    @card.unpin
     render_card_replacement
   end
 end

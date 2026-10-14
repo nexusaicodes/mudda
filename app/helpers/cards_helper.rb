@@ -2,11 +2,11 @@ module CardsHelper
   def card_article_tag(card, id: dom_id(card, :article), data: {}, **options, &block)
     classes = [
       options.delete(:class),
-      ("golden-effect" if card.golden?),
+      ("card--pinned" if card.pinned?),
       ("card--active" if card.active?)
     ].compact.join(" ")
 
-    data[:drag_and_drop_top] = true if card.golden? && !card.closed?
+    data[:drag_and_drop_top] = true if card.pinned? && !card.closed?
 
     tag.article \
       id: id,

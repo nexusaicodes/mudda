@@ -6,7 +6,7 @@ json.cache! [ card, card.overdue? ] do
 
   json.closed card.closed?
   json.backlogged card.backlogged?
-  json.golden card.golden?
+  json.pinned card.pinned?
   json.overdue card.overdue?
   json.color card.color
   json.due_on card.due_on

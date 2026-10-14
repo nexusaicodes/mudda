@@ -24,7 +24,7 @@ Rails.application.routes.draw do
       scope module: :cards do
         resource :board, only: :edit
         resource :column, only: %i[ edit update ]
-        resource :goldness, only: %i[ create destroy ]
+        resource :pin, only: %i[ create destroy ]
         resources :steps, except: %i[ new index ]
         resources :notes, except: :new
 

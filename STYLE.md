@@ -142,13 +142,13 @@ We model web endpoints as CRUD operations on resources (REST). When an action do
 ```ruby
 # Bad
 resources :cards do
-  post :gild
-  post :ungild
+  post :pin
+  post :unpin
 end
 
 # Good
 resources :cards do
-  resource :goldness, only: %i[ create destroy ]
+  resource :pin, only: %i[ create destroy ]
 end
 ```
 
@@ -169,9 +169,9 @@ end
 For more complex behavior, we prefer clear, intention-revealing model APIs that controllers call directly:
 
 ```ruby
-class Cards::GoldnessesController < ApplicationController
+class Cards::PinsController < ApplicationController
   def create
-    @card.gild
+    @card.pin
   end
 end
 ```

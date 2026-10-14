@@ -1,7 +1,7 @@
 <section id="<%= dom_id(card, :card_container) %>" class="card-perma" style="--card-color: <%= card.color %>;" data-controller="dialog-manager">
   <% cache [ card, Date.current, I18n.locale ] do %>
     <div class="card-perma__actions card-perma__actions--left">
-      <%= render "cards/container/gild", card: card unless card.closed? %>
+      <%= render "cards/container/pin", card: card unless card.closed? %>
     </div>
 
     <div class="card-perma__bg">

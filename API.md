@@ -188,14 +188,14 @@ again.
 | `DELETE` | `/boards/:board_id/cards/:number.json` | |
 
 **What a card reports:** `id`, `number`, `title`, `description` (plain text),
-`description_html`, `has_attachments`, `due_on`, `golden`, `closed` (in Done), `backlogged`
+`description_html`, `has_attachments`, `due_on`, `pinned`, `closed` (in Done), `backlogged`
 (in Backlog), `overdue`, `color` (its lane's), `last_active_at`, `created_at`, `url`, `board`,
 `column`, `creator`, and `notes_url`. In an index that is all. A single card adds all of its
 `steps` (`id`, `content`, `completed`), its most recent 20 `notes`, and `notes_truncated`. When
 that is `true`, `notes_url` pages through the whole log ([Notes](#notes)).
 
 **What a card takes:** `title`, `description` (rich text, as plain text or HTML), `due_on`
-(`YYYY-MM-DD`), `golden`, `created_at`, `last_active_at`, and `steps_attributes`. Write the
+(`YYYY-MM-DD`), `pinned`, `created_at`, `last_active_at`, and `steps_attributes`. Write the
 description back from `description_html`, never `description`, or its formatting and
 attachments are lost. Images belong in the description: upload them through Active Storage
 direct upload (`POST /rails/active_storage/direct_uploads`, which needs `write`) and embed them
@@ -214,11 +214,11 @@ On a deployment with a card limit (`MUDDA_CARD_LIMIT`; see
 [DOCKER.md → Card limit](DOCKER.md#card-limit)), a create past it is a `422`:
 `{ "errors": { "base": ["This account has used all 100 of its cards"] } }`.
 
-**And edited in one request.** A card's board, lane, goldness, and steps are attributes of the
+**And edited in one request.** A card's board, lane, pinned flag, and steps are attributes of the
 card, so a single `PUT` sets any of them:
 
 ```json
-{ "title": "Ship it", "column_id": 4, "golden": true,
+{ "title": "Ship it", "column_id": 4, "pinned": true,
   "steps_attributes": [ { "id": 12, "completed": true }, { "content": "A new step" } ] }
 ```
 
@@ -252,7 +252,7 @@ recorded as its own event (`card_title_changed`, `card_triaged`, `card_board_cha
 | `creation` | When the card was created: `today`, `yesterday`, `thisweek`, `thismonth`, `thisyear`, `lastweek`, `lastmonth`, `lastyear` |
 | `due` | `soon`: open cards due by tomorrow, the most overdue first |
 | `lane` | `backlog`, `todo`, `doing`, or `done`, in any case: that lane on every board |
-| `indexed_by` | `all` (the default) or `golden` |
+| `indexed_by` | `all` (the default) or `pinned` |
 | `sorted_by` | `latest` (most recently active first, the default), `newest`, or `oldest` (by creation). With `due=soon`, only `newest` and `oldest` override its order |
 
 ### Notes
@@ -283,7 +283,7 @@ behind. `bin/rails routes` lists browser and API routes together, so build a cli
 tables above, not from the route list.
 
 The browser has endpoints for things the API reads and writes as fields. A card's lane
-(`…/cards/:number/column`), board picker (`…/board/edit`), star (`…/goldness`), steps (`…/steps`), and
+(`…/cards/:number/column`), board picker (`…/board/edit`), pin (`…/pin`), steps (`…/steps`), and
 drop target (`…/drops/column`), the compose screen (`…/cards/new`), and a lane's colour
 (`/boards/:board_id/columns/:id`) all answer `406`. `PUT` or `POST` the card, or read the
 board, instead. Every `new` and `edit` page, `/`, `/landing`, `/my/menu`, `/my/tokens`,

@@ -33,9 +33,9 @@ en:
       closure_buttons:
         edit: Edit
         mark_as: Mark as %{lane}
-      gild:
-        demote: Demote to normal
-        promote: Promote to Golden Ticket
+      pin:
+        pin: Pin to the top of its lane
+        unpin: Unpin
       save_button:
         save_changes: Save changes
     delete:

@@ -58,7 +58,7 @@
     top: -0.1em;
     margin-inline-end: 0.1375em;
   }
-  .icon--golden-ticket { --svg: url("golden-ticket.svg "); }
+  .icon--pin { --svg: url("pin.svg"); }
   .icon--history { --svg: url("history.svg "); }
   .icon--home { --svg: url("home.svg "); }
   .icon--install-edge { --svg: url("install-edge.svg "); }

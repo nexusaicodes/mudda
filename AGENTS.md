@@ -36,7 +36,7 @@ treat any trace of them in the code as a leftover:
 - **Email**: Action Mailer, Action Mailbox, SMTP, and with them the magic-link sign-in and web
   signup. The app sends no email.
 - **Models and states**: `Identity` (folded into `User`), `Comment` (renamed `Note`),
-  `Tag`/`Tagging`, `Card::Goldness` (now a boolean on `cards`), the `Entropy` auto-postpone
+  `Tag`/`Tagging`, `Card::Goldness` (now the `pinned` boolean on `cards`), the `Entropy` auto-postpone
   system (replaced by due dates), the `drafted`/`published` card states, the card background
   image, the Triage lane (folded into Backlog), and stored filters.
 - **Pages**: the recent-activity timeline. `Event` rows are still written as an audit trail,
@@ -183,7 +183,7 @@ has a credential to refuse.
 fixed (`attr_readonly :name`, since lane predicates key off them); only color is editable.
 
 **Card**: the main work item, with a per-board `number`, a rich-text description, steps, and
-notes. Concerns: `Attachments`, `Colored`, `Notable`, `Due`, `Eventable`, `Golden`,
+notes. Concerns: `Attachments`, `Colored`, `Notable`, `Due`, `Eventable`, `Pinnable`,
 `Multistep`, `Searchable`, `Triageable`. A card is created complete; there is no
 draft state. The compose screen (`cards#new`) holds its state in the browser, `local-save` keeps
 it across a reload, and one POST creates the card with its steps. Pictures live in the
@@ -264,10 +264,10 @@ call site. Every declaration that serves fewer than all seven actions names them
 imply.
 
 Nested under a card are `notes`, and, for the browser alone, `board` and `column` (the two
-picker screens), `goldness` (the star), `steps`, and `drops/column` (the drag-and-drop target,
+picker screens), `pin` (the pin button), `steps`, and `drops/column` (the drag-and-drop target,
 which repaints both lanes).
 
-**A card is one resource.** Its board, lane, goldness, and steps are attributes of the card, so
+**A card is one resource.** Its board, lane, pinned flag, and steps are attributes of the card, so
 a client reads them from `GET …/cards/:number` and writes them back with a single `PUT`
 (`steps_attributes` via `accepts_nested_attributes_for :steps`). The browser's
 one-thing-at-a-time endpoints are the same associations by another door. Notes stay a
@@ -315,7 +315,7 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   first open. It lists every board (the current one ticked), the cross-board views in
   `Filter::VIEWS` with their counts, and "New board" last.
 - **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
-  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board. The board page
+  `?lane=doing`, `?indexed_by=pinned`), drawn as cards grouped under their board. The board page
   itself takes no filters. A `Filter` is read from the query for each request and never stored;
   a value outside its list is refused (`400`, or `422` for JSON).
 - **Search** is a pill floating at the bottom centre (`bar/_bar`). Results open above it,

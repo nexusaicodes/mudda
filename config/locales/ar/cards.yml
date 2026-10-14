@@ -33,9 +33,9 @@ ar:
       closure_buttons:
         edit: تعديل
         mark_as: نقل إلى %{lane}
-      gild:
-        demote: إعادة إلى عادية
-        promote: ترقية إلى تذكرة ذهبية
+      pin:
+        pin: تثبيت في أعلى العمود
+        unpin: إلغاء التثبيت
       save_button:
         save_changes: حفظ التغييرات
     delete:

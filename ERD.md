@@ -174,7 +174,7 @@ erDiagram
         bigint number "NOT NULL"
         string title "limit 255 nullable — the model fills in a default"
         date due_on "nullable — the model requires it in Todo and Doing"
-        boolean golden "default false NOT NULL"
+        boolean pinned "default false NOT NULL"
         datetime last_active_at "NOT NULL"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"

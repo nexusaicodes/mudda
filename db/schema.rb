@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_14_000002) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_15_000000) do
   create_table "accounts", force: :cascade do |t|
     t.integer "cards_created_count", default: 0, null: false
     t.datetime "created_at", null: false
@@ -89,9 +89,9 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_14_000002) do
     t.datetime "created_at", null: false
     t.bigint "creator_id", null: false
     t.date "due_on"
-    t.boolean "golden", default: false, null: false
     t.datetime "last_active_at", null: false
     t.bigint "number", null: false
+    t.boolean "pinned", default: false, null: false
     t.string "title", limit: 255
     t.datetime "updated_at", null: false
     t.index ["board_id", "last_active_at"], name: "index_cards_on_board_id_and_last_active_at"

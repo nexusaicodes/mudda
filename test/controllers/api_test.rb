@@ -485,12 +485,12 @@ class ApiTest < ActionDispatch::IntegrationTest
     card = cards(:logo)
     step = card.steps.create!(content: "Something to do")
 
-    { golden: nil, steps_attributes: [ { id: step.id, completed: nil } ] }.each do |field, value|
+    { pinned: nil, steps_attributes: [ { id: step.id, completed: nil } ] }.each do |field, value|
       put board_card_path(card.board, card, format: :json),
         params: { field => value }, headers: bearer_headers_for(@user), as: :json
 
       assert_response :unprocessable_entity
-      assert_error_envelope field == :golden ? "golden" : "completed"
+      assert_error_envelope field == :pinned ? "pinned" : "completed"
     end
   end
 
@@ -689,10 +689,10 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test "a board's card index still honours filters, narrowed to that board" do
     headers = bearer_headers_for(@user)
-    cards(:logo).gild
-    card_on(boards(:private), "Golden elsewhere").gild
+    cards(:logo).pin
+    card_on(boards(:private), "Pinned elsewhere").pin
 
-    get board_cards_path(boards(:writebook), format: :json, indexed_by: "golden"), headers: headers
+    get board_cards_path(boards(:writebook), format: :json, indexed_by: "pinned"), headers: headers
 
     assert_response :success
     assert_equal [ cards(:logo).number ], @response.parsed_body["data"].pluck("number")
@@ -779,22 +779,22 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal 1, card.number, "The first card to land on an empty board is its number 1"
   end
 
-  # Goldness
+  # Pin
 
-  test "goldness round-trips through the JSON API" do
+  test "pin round-trips through the JSON API" do
     card, headers = cards(:text), bearer_headers_for(@user)
 
     put board_card_path(card.board, card, format: :json),
-      params: { golden: true }, headers: headers, as: :json
+      params: { pinned: true }, headers: headers, as: :json
     assert_response :success
-    assert @response.parsed_body["golden"]
+    assert @response.parsed_body["pinned"]
 
     put board_card_path(card.board, card, format: :json),
-      params: { golden: false }, headers: headers, as: :json
-    assert_not @response.parsed_body["golden"]
+      params: { pinned: false }, headers: headers, as: :json
+    assert_not @response.parsed_body["pinned"]
 
     get board_card_path(card.board, card, format: :json), headers: headers
-    assert_not @response.parsed_body["golden"]
+    assert_not @response.parsed_body["pinned"]
   end
 
   # A card is read in one request: its steps and the tail of its note log come with it.
@@ -915,8 +915,8 @@ class ApiTest < ActionDispatch::IntegrationTest
 
     card = cards(:layout)
 
-    assert_no_changes -> { card.reload.golden? } do
-      post board_card_goldness_path(card.board, card, format: :json), headers: headers, as: :json
+    assert_no_changes -> { card.reload.pinned? } do
+      post board_card_pin_path(card.board, card, format: :json), headers: headers, as: :json
     end
     assert_response :not_acceptable
   end

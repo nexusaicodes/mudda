@@ -102,7 +102,7 @@ class FilterTest < ActiveSupport::TestCase
 
   test "a view's filter knows its name" do
     assert_equal "Due today & tomorrow", Filter.new(users(:david), due: "soon").view_name
-    assert_equal "Golden", Filter.new(users(:david), indexed_by: "golden").view_name
-    assert_nil Filter.new(users(:david), due: "soon", indexed_by: "golden").view_name
+    assert_equal "Pinned", Filter.new(users(:david), indexed_by: "pinned").view_name
+    assert_nil Filter.new(users(:david), due: "soon", indexed_by: "pinned").view_name
   end
 end

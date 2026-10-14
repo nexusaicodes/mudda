@@ -1,0 +1,13 @@
+<% if card.pinned? %>
+  <%= button_to board_card_pin_path(card.board, card), method: :delete, class: "btn btn--reversed btn--circle-mobile",
+        data: { controller: "tooltip" } do %>
+    <%= icon_tag "pin" %>
+    <span class="for-screen-reader"><%= t(".unpin") %></span>
+  <% end %>
+<% else %>
+  <%= button_to board_card_pin_path(card.board, card), class: "btn btn--circle-mobile",
+        data: { controller: "tooltip" } do %>
+    <%= icon_tag "pin" %>
+    <span class="for-screen-reader"><%= t(".pin") %></span>
+  <% end %>
+<% end %>

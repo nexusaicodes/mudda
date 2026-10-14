@@ -1,6 +1,6 @@
 class Card < ApplicationRecord
   include Attachments, Colored, Notable,
-    Due, Eventable, Golden, Multistep,
+    Due, Eventable, Multistep, Pinnable,
     Searchable, Triageable
 
   belongs_to :board
@@ -27,7 +27,7 @@ class Card < ApplicationRecord
 
   scope :indexed_by, ->(index) do
     case index
-    when "golden" then golden
+    when "pinned" then pinned
     else all
     end
   end

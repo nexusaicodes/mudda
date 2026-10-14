@@ -4,7 +4,7 @@ logo:
   creator: david
   column: writebook_backlog
   title: The logo isn't big enough
-  golden: true
+  pinned: true
   due_on: <%= 3.days.from_now %>
   created_at: <%= 1.week.ago %>
   last_active_at: <%= 1.week.ago %>

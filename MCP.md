@@ -54,7 +54,7 @@ own (see [API.md → Errors](API.md#errors)), and a `429` keeps its `Retry-After
 | `list_cards` | `GET /cards` or `GET /boards/:board_id/cards`, with the API's filters |
 | `get_card` | `GET /boards/:board_id/cards/:number` |
 | `create_card` | `POST /boards/:board_id/cards`. Lands in Backlog; `steps` is a list of strings |
-| `update_card` | `PUT /boards/:board_id/cards/:number`: `title`, `description`, `due_on`, `golden`, `column_id`, `to_board_id` (sent as `board_id`), and `steps` (each `{ id?, content?, completed?, remove? }`) |
+| `update_card` | `PUT /boards/:board_id/cards/:number`: `title`, `description`, `due_on`, `pinned`, `column_id`, `to_board_id` (sent as `board_id`), and `steps` (each `{ id?, content?, completed?, remove? }`) |
 | `list_notes` | `GET /boards/:board_id/cards/:number/notes` |
 | `add_note` | `POST /boards/:board_id/cards/:number/notes` |
 | `update_note` | `PUT /boards/:board_id/cards/:number/notes/:id` |

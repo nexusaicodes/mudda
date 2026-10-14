@@ -5,4 +5,4 @@ en:
     views:
       doing: "%{lane} everywhere"
       due_soon: Due today & tomorrow
-      golden: Golden
+      pinned: Pinned

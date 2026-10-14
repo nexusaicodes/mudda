@@ -72,7 +72,7 @@ module Mudda::Mcp::Tools
         title: { type: "string" },
         due_on: { type: "string", format: "date", description: "YYYY-MM-DD" },
         description: { type: "string", description: "Rich text; plain text or HTML" },
-        golden: { type: "boolean", description: "Starred" },
+        pinned: { type: "boolean", description: "Pinned to the top of its lane" },
         steps: { type: "array", items: { type: "string" }, description: "Checklist steps, in order" }
       },
       required: %w[ board_id title ]
@@ -80,7 +80,7 @@ module Mudda::Mcp::Tools
     kind :create
 
     def self.call(board_id:, steps: [], server_context:, **attributes)
-      card = attributes.slice(:title, :due_on, :description, :golden)
+      card = attributes.slice(:title, :due_on, :description, :pinned)
         .merge(steps_attributes: steps.map { |content| { content: content } })
 
       respond api(server_context).post("/boards/#{Integer(board_id)}/cards", card)
@@ -104,7 +104,7 @@ module Mudda::Mcp::Tools
         title: { type: "string" },
         due_on: { type: "string", format: "date", description: "YYYY-MM-DD" },
         description: { type: "string", description: "Rich text; replaces the whole description" },
-        golden: { type: "boolean", description: "Starred" },
+        pinned: { type: "boolean", description: "Pinned to the top of its lane" },
         column_id: { type: "integer", description: "The lane to move the card to" },
         to_board_id: { type: "integer", description: "The board to move the card to" },
         steps: {
@@ -126,7 +126,7 @@ module Mudda::Mcp::Tools
     kind :update, destructive_hint: true, idempotent_hint: false
 
     def self.call(board_id:, number:, to_board_id: nil, steps: nil, server_context:, **attributes)
-      card = attributes.slice(:title, :due_on, :description, :golden, :column_id)
+      card = attributes.slice(:title, :due_on, :description, :pinned, :column_id)
       card[:board_id] = to_board_id if to_board_id
       card[:steps_attributes] = steps.map { |step| step_attributes(step) } if steps
 

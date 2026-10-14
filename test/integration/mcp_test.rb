@@ -133,11 +133,11 @@ class McpTest < ActionDispatch::IntegrationTest
     doing = @board.columns.find_by!(name: "Doing")
 
     assert_difference -> { card.events.where(action: "card_triaged").count } do
-      call_tool("update_card", board_id: @board.id, number: card.number, column_id: doing.id, golden: true)
+      call_tool("update_card", board_id: @board.id, number: card.number, column_id: doing.id, pinned: true)
     end
 
     assert_equal doing, card.reload.column
-    assert card.golden?
+    assert card.pinned?
   end
 
   test "what a tool does is recorded under the token's label" do

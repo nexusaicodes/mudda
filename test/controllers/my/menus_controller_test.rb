@@ -28,7 +28,7 @@ class My::MenusControllerTest < ActionDispatch::IntegrationTest
       assert_select ".menu__count", text: due_soon.to_s
     end
     assert_select "a[href=?]", cards_path(lane: "doing")
-    assert_select "a[href=?]", cards_path(indexed_by: "golden")
+    assert_select "a[href=?]", cards_path(indexed_by: "pinned")
   end
 
   test "new board comes last and nothing else is offered" do
