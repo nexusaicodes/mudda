@@ -36,7 +36,6 @@ Rails.application.configure do
   }
 
   # Select Active Storage service via env var; default to local disk.
-  # Don't overwrite if it's already been set (e.g. by mudda-saas)
   if config.active_storage.service.blank?
     config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
   end

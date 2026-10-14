@@ -115,8 +115,8 @@ RUN apt-get update -qq && \
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Run as an unprivileged user; own the writable dirs. /rails/storage is a bind
-# mount at runtime, so the host directory must also be owned by uid 1000.
+# Run as an unprivileged user; own the writable dirs. /rails/storage is mounted
+# at runtime, so a host directory mounted there must also be owned by uid 1000.
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp

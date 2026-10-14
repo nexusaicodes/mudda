@@ -1,5 +1,5 @@
 namespace :auth do
-  desc "Remove all passkeys and sign out every session (recovery for lost or broken passkeys)"
+  desc "Remove all passkeys and end every session, API token, and OAuth grant (recovery for lost or broken passkeys)"
   task reset: :environment do
     passkeys = ActionPack::Passkey.delete_all
     sessions = Session.delete_all
@@ -23,7 +23,7 @@ namespace :auth do
     puts session.token
   end
 
-  desc "List the API tokens that have been minted"
+  desc "List the API tokens and connected OAuth clients"
   task tokens: :environment do
     sessions = Session.token.order(:created_at)
 

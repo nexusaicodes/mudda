@@ -1,398 +1,388 @@
 # Mudda
 
-This file provides guidance to AI coding agents working with this repository.
+Guidance for AI coding agents, and anyone else, working in this repository.
 
 ## What is Mudda?
 
-Mudda is a personal project management and issue-tracking app: a single-person Kanban tool
-to create and manage **cards** (tasks/issues) on **boards**, move them through a **fixed set
-of columns** (the workflow), and capture progress with **notes**. Opening the app lands you
-on the **board you last had open** (remembered in the browser).
+Mudda is a personal project-management and issue-tracking app: a single-person Kanban tool for
+**cards** (tasks) on **boards**, moved through a **fixed set of four columns**, with progress
+captured in **notes**. Opening the app lands you on the board you last had open. It is built and
+maintained by **Nexus AI**.
 
-Mudda is built and maintained by **Nexus AI**. It is a standalone, single-person app (see
-`CLAUDE.md`).
+It is a **single-tenant, single-person, standalone** app on SQLite, run through Docker Compose.
+The single user can reach every board and card in their account.
 
-## Development Commands
+| Doc | Covers |
+|---|---|
+| [DOCKER.md](DOCKER.md) | Running it: every `make` target, the owner and env vars, the production image |
+| [API.md](API.md) | The JSON API a script or agent drives: tokens, scopes, resources, errors, pagination |
+| [MCP.md](MCP.md) | The MCP endpoint at `/mcp`, its tools, and the OAuth server |
+| [ERD.md](ERD.md) | The database schema: every table, column, index, and enumerated value |
+| [STYLE.md](STYLE.md) | House style |
 
-This is a standalone, single-tenant SQLite build run entirely through Docker Compose.
-See [DOCKER.md](DOCKER.md) for the full reference; `make` lists every target.
+### Not in Mudda
 
-### Setup and Server
+Mudda began as a multi-tenant team product. These are **gone**; don't reintroduce them, and
+treat any trace of them in the code as a leftover:
+
+- **Team collaboration**: notifications, mentions, assignments, watching, reactions, board
+  access control (`Access`) and roles, membership, invites and join codes, public board sharing
+  (`Board::Publication`).
+- **Hosted SaaS**: the `saas/` engine and its second Gemfile, the signup toggle, account
+  cancellation and incineration, and the per-account storage quota ledger.
+- **Infrastructure**: Kamal and every deploy pipeline, MySQL/Trilogy, S3 and object storage,
+  Solid Queue and Solid Cache, cross-instance import/export, `bin/ci` and the CI/security
+  wrapper scripts.
+- **Email**: Action Mailer, Action Mailbox, SMTP, and with them the magic-link sign-in and web
+  signup. The app sends no email.
+- **Models and states**: `Identity` (folded into `User`), `Comment` (renamed `Note`),
+  `Tag`/`Tagging`, `Card::Goldness` (now a boolean on `cards`), the `Entropy` auto-postpone
+  system (replaced by due dates), the `drafted`/`published` card states, the card background
+  image, the Triage lane (folded into Backlog), and stored filters.
+- **Pages**: the recent-activity timeline. `Event` rows are still written as an audit trail,
+  but nothing renders them.
+
+## Development
+
+Everything runs through Docker Compose; [DOCKER.md](DOCKER.md) is the reference, and `make`
+lists every target. `make setup` starts the app at http://app.mudda.localhost:3006 (or
+http://localhost:3006). Sign in with `MUDDA_OWNER_EMAIL` and `MUDDA_OWNER_PASSWORD`, whose dev
+defaults are in `docker-compose.yml`.
+
 ```bash
-make setup    # Build the image and start the app (first run)
-make logs     # Tail the server log
-make down     # Stop, keeping data
-make fresh    # Wipe all data and rebuild from scratch
+make test                                                         # unit and integration tests
+make test-system                                                  # system tests (test/system/), which make test skips
+make lint                                                         # RuboCop and the i18n checks
+docker compose run --rm web bin/rails test PATH                   # one test file
+docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test  # a serial run
 ```
 
-Development URL: http://app.mudda.localhost:3006 (or http://localhost:3006)
-Login: the owner email + password come from `MUDDA_OWNER_EMAIL` / `MUDDA_OWNER_PASSWORD`
-(dev defaults `saksham@nexusai.world` / `mudda-dev-password` in `docker-compose.yml`). The password
-is the standing sign-in method; enrolling a passkey (under `my/passkeys`) is optional. `make
-reset-auth` removes all passkeys and signs out every session.
+System tests drive headless Chromium through Capybara in the `selenium` Compose service (profile
+`system`), reached over `SELENIUM_REMOTE_URL`, since the dev image has no browser. There is no CI
+test workflow: quality is RuboCop plus the test suite, run locally. The one GitHub Actions
+workflow, `.github/workflows/build.yml`, builds the production image (see
+[DOCKER.md → Production image](DOCKER.md#production-image)).
 
-### Testing
-```bash
-make test                                          # Run unit/integration tests
-make test-system                                   # System tests, in a Selenium Chromium container
-make lint                                          # RuboCop
-docker compose run --rm web bin/rails test PATH    # Run a single test file
-docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test   # Serial run
-```
+To drive the running app from a browser tool (such as Chrome MCP), use the dev URL and owner
+credentials above. Passkeys are optional; to exercise them, use a WebAuthn virtual
+authenticator.
 
-### Database
-```bash
-docker compose exec web bin/rails db:migrate   # Run migrations
-make reset-db                                  # Drop, recreate, and reseed
-```
+### Toolchain
 
-## Production image
+- Ruby 3.4.8 is pinned in three places that must agree: `.ruby-version`, the `RUBY_VERSION`
+  build arg in `docker-compose.yml`, and the default `ARG` in the `Dockerfile`.
+- Rails runs off `main` (edge), plus a couple of gems pinned to git branches (see `Gemfile`), so
+  expect APIs slightly ahead of the latest stable release.
+- The `:bc` git_source (`github.com/basecamp/...`) in the `Gemfile` resolves real upstream gems.
+  Do **not** repoint it.
+- Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`.
 
-There is no deploy pipeline. `.github/workflows/build.yml` builds the `Dockerfile`'s `production`
-target on every push to `main` and pushes it to GHCR (`:<sha>` and `:latest`); hosts pull and run
-it themselves, running `db:prepare` before boot. The runtime env contract is in
-[DOCKER.md](DOCKER.md) → Production image. Kamal and the SaaS engine remain removed. For local
-runs, use the Compose setup in [DOCKER.md](DOCKER.md).
+### Placeholders
 
-## Architecture Overview
+`CONTRIBUTING.md` links to a `nexus-ai/mudda` GitHub org, which is a placeholder. The repository
+lives at `nexusaicodes/mudda`.
 
-### One Account, Resolved From the Signed-in User
+## Architecture
 
-Mudda serves a single account per deployment, and **URLs carry no account prefix** —
-paths are `/boards/:id`, not `/{account_id}/boards/:id`.
+### One account, resolved from the signed-in user
 
-- `Current.account` is derived in `app/models/current.rb`: session → user → account.
-- `Current.account` is therefore **nil on unauthenticated requests**. Anything reachable
-  while signed out must not depend on it (see `Users::AvatarsController`).
+Mudda serves a single account per deployment, and **URLs carry no account prefix**: paths are
+`/boards/:id`, not `/{account_id}/boards/:id`. The account follows the credential, not the URL,
+so every resource has exactly one canonical path, which is what lets a fixed API and MCP
+endpoint work.
+
+- `Current.account` is derived in `app/models/current.rb`: session → user → account. It is
+  therefore **nil on unauthenticated requests**, and anything reachable while signed out must not
+  depend on it (see `Users::AvatarsController`).
 - **`account_id` lives on `users` and `boards`, and nowhere else.** Everything below a board
-  reaches its account through the board (`Account#cards` joins through `boards`), so there is
-  one place a record's tenant is written down. `accounts.id` keys the browser-local "last
-  opened board" (`ApplicationHelper#last_board_storage_key`) and names the account in error
-  context.
-- Background jobs serialize and restore `Current.account` explicitly (see Background Jobs),
-  since they run with no session.
-
-**Key insight:** the account follows the credential, not the URL — so there is exactly one
-canonical path for every resource, which is what lets a fixed API/MCP endpoint work.
+  reaches its account through the board (`Account#cards` joins through `boards`), so a record's
+  tenant is written down in one place. `accounts.id` keys the browser-local "last opened board"
+  (`ApplicationHelper#last_board_storage_key`) and names the account in error context.
+- Background jobs carry `Current.account` explicitly (see [Background jobs](#background-jobs)).
 
 ### Authentication
 
-**Owner password (standing) + optional passkeys:**
-- The `User` is the principal: it carries the `email_address`, holds the passkeys, and owns
-  the sessions. There is no separate `Identity`.
-- **Password sign-in:** the owner signs in with their email + a deployment secret held in
-  `ENV["MUDDA_OWNER_PASSWORD"]`. `OwnerPassword` (`app/models/owner_password.rb`) verifies the
-  secret with `secure_compare` and is `enabled?` whenever the secret is configured.
+The `User` is the principal: it carries the `email_address`, holds the passkeys, and owns the
+sessions. The API-facing rules (token lifetime, scopes, labels, rate limits) are specified in
+[API.md](API.md#authenticating), and OAuth in [MCP.md](MCP.md#oauth). This section maps them to
+the code.
+
+- **Owner password.** The owner signs in with their email and the deployment secret in
+  `ENV["MUDDA_OWNER_PASSWORD"]`. `OwnerPassword` (`app/models/owner_password.rb`) verifies it
+  with `secure_compare` and is `enabled?` whenever the secret is set.
   `Sessions::PasswordsController` handles `POST /session/password`. There is **no password
-  column** — the secret lives only in the env. Password stays available regardless of passkeys.
-- **Passkeys are optional:** enrolling a passkey (WebAuthn) is a convenience for biometric/device
-  sign-in, never required. The owner can add or remove any/all passkeys under `my/passkeys`; doing
-  so never disables password sign-in.
-- **Recovery:** `bin/rails auth:reset` (`make reset-auth`) removes all passkeys and signs out every
-  session. The seed (`db/seeds.rb`) is the source of truth for the owner user/account, and warns
-  only when there is neither a password secret nor a passkey (no way to sign in).
-- Passkeys (WebAuthn) via `User has_passkeys` + `lib/action_pack/passkey/` and the
-  `sessions/passkeys`, `my/passkeys` controllers. (There is no `Credential` model.)
-- `Session belongs_to :user`; `Current` resolves session → user → account (the account is
-  derived from the user, not the URL — see above). A deactivated user is still named by
-  `Current` but has no account, and `Authorization` refuses the request by the session's kind,
-  not the format asked for: a token keeps its session and gets a 403, while a browser is signed
-  out (redirected to the login page, or a 403 if it asked for JSON).
-- **`Session#kind` says how the user is present** — `browser` (a cookie) or `token` (a script
-  or agent). A token always carries a `label` and a browser session never does; both are
-  validated, so the two can't disagree. Tokens are minted by `make token` (`auth:token`) or
-  by the JSON sign-in, which labels its sessions `json-sign-in` unless the client names
-  itself. A label holds one live token: minting under a label revokes the previous one, so a
-  JSON client should send its own `label` rather than sharing the default and revoking its
-  neighbours. `Session#token` is the single definition of the credential — tokens expire
-  after `Session::API_TOKEN_EXPIRY` (90 days), browser cookies do not. **Each channel accepts
-  only its own kind:** the cookie resolves `Session.browser`, a bearer header `Session.token`,
-  so a browser session's never-expiring id can't be replayed as a token. A JSON sign-in mints
-  a token and sets no cookie. Tokens are also minted, listed, and revoked from the browser at
-  `my/tokens` (`My::TokensController`), which — like `my/passkeys` — refuses token sessions
-  outright (`Authorization.require_browser_session`), so a token can't make itself a browser.
-- **Token scopes** — `Session#scopes` (`read`, `write`, `delete`; stored space-separated, absent
-  on browser sessions) bound what a token may do. `Authorization#ensure_token_permits_request`
-  reads the scope off the HTTP verb (GET → read, DELETE or a body with a truthy `_destroy` →
-  delete, anything else → write) and 403s before the action runs; `allow_any_token_scope` opts
-  an action out (`SessionsController#destroy` and `My::UsersController#show`). New tokens default to `Session::DEFAULT_SCOPES` (`read write`),
-  so `delete` is only ever granted on request.
-- **Agent attribution** — every token is the same single user, so `creator` stays that user;
+  column**, and the password stays available whether or not passkeys exist.
+- **Passkeys are optional**: WebAuthn via `User has_passkeys`, `lib/action_pack/passkey/`, and
+  the `sessions/passkeys` and `my/passkeys` controllers. There is no `Credential` model. Adding or
+  removing passkeys never disables the password.
+- **Provisioning and recovery.** `db/seeds.rb` provisions the owner user and account from the
+  `MUDDA_OWNER_*` env vars. With neither a password secret nor a passkey there is no way to sign
+  in, so the seed warns locally and aborts elsewhere. `bin/rails auth:reset` (`make reset-auth`)
+  deletes every passkey, session (API tokens included), and OAuth grant.
+- **`Session#kind`** says how the user is present: `browser` (a cookie) or `token` (a script or
+  agent). A token always carries a `label` and a browser session never does; both are validated.
+  `Session#token` is the single definition of the credential, and minted tokens expire after
+  `Session::API_TOKEN_EXPIRY`. **Each channel accepts only its own kind:** the cookie resolves
+  `Session.browser` and a bearer header `Session.token`, so a browser session's never-expiring
+  id can't be replayed as a token. Minting under a label revokes that label's previous token
+  (`Session#revoke_others_sharing_its_label`).
+- **Where tokens come from**: `make token` (`auth:token`), the JSON sign-in (password or
+  passkey), `my/tokens` (`My::TokensController`), and OAuth consent. `my/tokens` and
+  `my/passkeys` refuse token sessions (`require_browser_session`), so a token can't make itself
+  a browser.
+- **Scopes.** `Session#scopes` (`read`, `write`, `delete`, stored space-separated, absent on
+  browser sessions) bound a token. `Authorization#ensure_token_permits_request` reads the scope
+  off the HTTP verb and refuses before the action runs. `allow_any_token_scope` opts an action
+  out (`SessionsController#destroy`, `My::UsersController#show`). New tokens default to
+  `Session::DEFAULT_SCOPES`.
+- **Deactivation.** `Current` still names a deactivated user but gives them no account, and
+  `Authorization` refuses the request by the session's kind, not the format asked for: a token
+  keeps its session and gets a 403, while a browser is signed out.
+- **Agent attribution.** Every token is the same single user, so `creator` stays that user;
   `Current.agent_name` (the token's label, `nil` for a browser) is written to
   `events.agent_name` by `Eventable#track_event`. There is no per-agent actor model.
-- **OAuth 2.1** — Mudda is its own authorization server (Doorkeeper, `config/initializers/doorkeeper.rb`)
-  so MCP clients connect by consent: discovery (`Oauth::ProtectedResourcesController`,
-  `Oauth::AuthorizationServersController` under `/.well-known/`), dynamic client registration
-  (`Oauth::RegistrationsController`), consent (`Oauth::AuthorizationsController`, a subclass of
-  Doorkeeper's whose base is `ApplicationController`, so a signed-out browser is sent to sign in),
-  and Doorkeeper's token/revoke endpoints. PKCE S256 is forced for every client (confidential ones
-  too, via a `PreAuthorization` override in the initializer), consent is never skipped, and a
-  refresh token idle for 90 days is refused. Consent creates or updates one
-  token `Session` per client (`Session::Oauth`, `sessions.oauth_application_id`); a bearer that
-  isn't a minted token's signed id is looked up as a Doorkeeper access token and resolves to
-  that session. Destroying the session revokes the client's tokens. A minted token is
-  `Session.token.minted` — an OAuth session's own signed id is never a credential. See MCP.md → OAuth.
-- **Token rate limit** — `TokenRateLimit` gives each token 600 requests a minute across all
-  endpoints (its own `MemoryStore`, cleared in `test_helper.rb`); browsers aren't limited.
-- **No roles, no per-board access control.** The single user can reach every board and card
-  in their account (`User#boards => account.boards`, `User#accessible_cards => account.cards`).
+- **OAuth 2.1.** Mudda is its own authorization server (Doorkeeper,
+  `config/initializers/doorkeeper.rb`). The controllers are `Oauth::ProtectedResourcesController`
+  and `Oauth::AuthorizationServersController` (discovery, under `/.well-known/`),
+  `Oauth::RegistrationsController` (dynamic client registration), and
+  `Oauth::AuthorizationsController` (consent: a subclass of Doorkeeper's whose base is
+  `ApplicationController`, so a signed-out browser is sent to sign in). PKCE S256 is forced on
+  confidential clients too, by a `PreAuthorization` override in the initializer. Consent
+  creates or updates one token `Session` per client (`Session::Oauth`,
+  `sessions.oauth_application_id`). A bearer that isn't a minted token's signed id is looked up
+  as a Doorkeeper access token and resolves to that session, and destroying the session revokes
+  the client's tokens. A minted token is `Session.token.minted`; an OAuth session's own signed
+  id is never a credential.
+- **Rate limits.** `TokenRateLimit` gives each token its allowance, in its own `MemoryStore`
+  (cleared in `test_helper.rb`). Password and passkey sign-in have their own limits.
 
-### Core Domain Models
+### Core domain models
 
-**Account** → the tenant/organization. Concerns: `CardLimited`, `Searchable`. Has users and boards;
-`#cards` reaches them through the boards. `create_with_owner` provisions the single user.
-`CardLimited` applies the optional `MUDDA_CARD_LIMIT` ceiling: `accounts.cards_created_count`
-only goes up, a `Card` `before_create` claims a slot in one conditional `UPDATE` (so two
-creates can't both take the last one) and raises `RecordInvalid` past the ceiling, which is a
-`422` for JSON and MCP. The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL`
-once the ceiling is reached. Under a ceiling, Account Settings shows a Plan section (cards used
-of the limit), and while `MUDDA_UPGRADE_URL` is set, it and the Settings menu link to
-`/account/upgrade` at any time. Unset, there is no ceiling. `GET /account/upgrade` hands the
-signed-in owner to `MUDDA_UPGRADE_URL` (signing in first if needed), passing on `billing`
-(`monthly`/`yearly`), or back to the board when it
-has none: the platform's "Go Premium" sends returning customers there.
+**Account**: the tenant. Concerns: `CardLimited`, `Searchable`. Has users and boards; `#cards`
+reaches cards through the boards. `create_with_owner` provisions the single user.
+`CardLimited` applies the optional `MUDDA_CARD_LIMIT` ceiling. `accounts.cards_created_count`
+only goes up. A `Card` `before_create` claims a slot in one conditional `UPDATE`, so two creates
+can't both take the last one, and raises `RecordInvalid` past the ceiling, which is a `422` for
+JSON and MCP. Under a ceiling:
+- The compose screen warns within `Account::CardLimited::NEAR_LIMIT` cards of it.
+- The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL` once it is reached.
+- Account Settings shows a Plan section (cards used of the limit).
 
-**User** → the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`,
-`has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`.
-Owns notes. `deactivate` sets `active: false` and leaves the sessions alone, so
-`Authorization` still has a credential to refuse.
+While `MUDDA_UPGRADE_URL` is set, Account Settings and the Settings menu link to
+`/account/upgrade` at any time. `GET /account/upgrade` (`Account::UpgradesController`) hands the
+signed-in owner to `MUDDA_UPGRADE_URL`, signing them in first if needed and passing on `billing`
+(`monthly`/`yearly`), or sends them back to the board when there is no URL. The platform's "Go
+Premium" sends returning customers there.
 
-**Board** → primary organizational unit, named (never blank). Concerns: `Cards`, `Triageable`.
-**Every board has the same four fixed columns** (see below). All of the account's boards are
-visible to the user.
+**User**: the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`, and
+`has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`. Owns
+notes. `deactivate` sets `active: false` and leaves the sessions alone, so `Authorization` still
+has a credential to refuse.
 
-**Column** → a fixed workflow lane (`Colored`, `Positioned`); `has_many :cards`. Names are
+**Board**: the primary organizational unit, named (never blank). Concerns: `Cards`,
+`Triageable`. Every board has the same four fixed columns (below).
+
+**Column**: a fixed workflow lane (`Colored`, `Positioned`) with `has_many :cards`. Names are
 fixed (`attr_readonly :name`, since lane predicates key off them); only color is editable.
 
-**Card** → the main work item. Sequential per-board `number` (via
-`board.increment!(:cards_count)`), rich-text description, steps, and **notes**. A card is created complete — there is no draft state and nothing to publish; the
-compose screen (`cards#new`) holds its state in the browser until one POST creates the card,
-its steps included, and `local-save` keeps that state across a reload. Concerns: `Attachments`,
-`Colored`, `Notable`, `Due`, `Eventable`, `Golden`, `Multistep`, `Promptable`,
-`Searchable`, `Triageable`.
+**Card**: the main work item, with a per-board `number`, a rich-text description, steps, and
+notes. Concerns: `Attachments`, `Colored`, `Notable`, `Due`, `Eventable`, `Golden`,
+`Multistep`, `Promptable`, `Searchable`, `Triageable`. A card is created complete; there is no
+draft state. The compose screen (`cards#new`) holds its state in the browser, `local-save` keeps
+it across a reload, and one POST creates the card with its steps. Pictures live in the
+description, which uploads through Active Storage direct upload.
 
-**Note** → a timestamped, rich-text entry on a card (`Card::Notable`). Created via
-`card.notes.create!`; only the creator can edit or delete it.
+**Note**: a timestamped, rich-text entry on a card (`Card::Notable`), created with
+`card.notes.create!`. Concerns: `Attachments`, `Eventable`, `Promptable`, `Searchable`. Only its
+creator can edit or delete it.
 
-**Event** → records significant actions (card creation/triage/board-change, note creation).
-Polymorphic `eventable`, JSON `particulars`. Kept as an audit trail written via the
-`Eventable` concern; there is **no activity/timeline page** that renders it (removed — the
-app lands on your last-opened board instead).
+**Event**: an audit record of a card's creation, title change, lane change, or board change,
+or a note's creation. It has a polymorphic `eventable` and JSON `particulars`, and is written
+through the `Eventable` concern (see [ERD.md](ERD.md#enumerated-values) for the actions).
+Concerns: `Promptable`.
 
-> **Not in Mudda:** team collaboration entirely —
-> notifications, mentions, assignments, watching, reactions, board access control (`Access`),
-> roles, membership/invites/join codes, and public board sharing (`Board::Publication`).
-> Also gone: `Tag`/`Tagging` and the `Entropy` auto-postpone system (replaced by due dates;
-> see below). `Comment` was renamed to `Note`. `Identity` was folded into `User`, and
-> `Card::Goldness` into a boolean on `cards`. The `drafted`/`published` status enum and the
-> half-built card record behind it are gone too: a card is composed in the browser and
-> created complete, and the card background image is gone with it — pictures live in the
-> description, which is rich text and uploads through Active Storage direct upload.
-> All email/mailers (Action Mailer + Action Mailbox, SMTP) are removed — the app sends no email.
-> The email **magic-link OTP** and the web **signup** flow are gone too, replaced by the standing
-> owner password with optional passkeys (see Authentication); the owner is provisioned by `db/seeds.rb`.
+### Card lifecycle: fixed columns
 
-### Card Lifecycle — Fixed Columns
+A card **always lives in exactly one column**, and `column_id` is the **single source of truth**
+for its lifecycle. Every board is created by `Board::Triageable` with four lanes, in order:
 
-A card **always lives in exactly one column**, and `column_id` is the **single source of
-truth** for its lifecycle. There are no separate closed/backlog state tables.
+| Column | Meaning | `due_on` |
+|---|---|---|
+| Backlog | Unscheduled work; every new card lands here | Optional |
+| Todo | Queued | Required |
+| Doing | In progress | Required |
+| Done | Closed | Optional |
 
-Every board is created (`Board::Triageable`) with four fixed lanes, in order:
+`Card::Triageable` derives predicates and scopes from the column name: `closed?` is in Done,
+`open?` is not in Done, `backlogged?` is in Backlog, and `active?` is in neither Done nor
+Backlog. People and agents move cards the same way, and there is no review lane.
 
-| Column  | Meaning                                                      |
-|---------|--------------------------------------------------------------|
-| Backlog | Unscheduled work; every new card lands here (date optional)  |
-| Todo    | Queued (date required)                                       |
-| Doing   | In progress (date required)                                  |
-| Done    | Closed (date optional)                                       |
+- **Lane changes** are a plain attribute write, `card.update(column: other)`. An `after_update`
+  on `column_id` records `card_triaged`, so **every** lane change is audited, whichever door it
+  comes through: the drop target (`cards/drops/columns_controller.rb`), the picker, or a `PUT`
+  with a `column_id`. A move the card can't make (an undated card into Todo or Doing) is refused:
+  a `422` for JSON, and from the drop target or the picker the card stays where it was with the
+  reason in the flash.
+- **Board changes** are a plain attribute write too, `card.update!(board: other)`, and may name
+  a lane in the same write. With no lane named, `Card#land_in_destination_backlog` puts the
+  card in the destination's Backlog before validation, and `Card::Triageable` validates that a
+  card's column is on its board, so no door can leave it in another board's lane. The card is
+  renumbered in the same UPDATE. Its events and search rows reach their board through the card,
+  so nothing needs re-homing.
+- **Every change in a save is recorded.** `Card::Eventable` snapshots the tracked changes
+  (title, column, board) in `before_update`, records one event per change from that snapshot,
+  and sets `last_active_at` in the same UPDATE. Nothing writes the card again from inside its
+  own save: a nested write replaces `saved_changes`, which is how a request that changed two
+  things used to record only one.
 
-People and agents create and move cards the same way; there is no review lane.
+### Due dates
 
-`Card::Triageable` derives predicates and scopes from the column name:
-- `closed?` = in **Done**; `open?` = not Done.
-- `backlogged?` = in **Backlog**.
-- `active?` = not Done/Backlog.
+`Card::Due` gives a card an explicit `due_on`:
 
-A card moves between lanes by a plain attribute write — `card.update(column: other)`. The
-`card_triaged` event is recorded by an `after_update` on `column_id`, so **every** lane change is
-audited whichever door it comes through — the drop target, the picker, or a `PUT` to the card with
-a `column_id`. A move the card can't make (an undated card into Todo or Doing) is refused: a
-`422` for JSON, and in the browser the card stays where it was with the reason in the flash.
-
-Reparenting a card is a plain attribute change — `card.update!(board: other)`, or a `PUT` to
-the card with a `board_id` — and a lane may be named in the same write. Before validation a
-move with no lane named lands in the destination's Backlog (`Card#land_in_destination_backlog`);
-`Card::Triageable` validates that a card's column is on its board, so no door can leave it in
-another board's lane. The card is **renumbered** (numbers run per board) in the same UPDATE;
-its events and search rows reach their board through the card, so they follow it with nothing
-to re-home. Cards are dropped between columns through
-`cards/drops/columns_controller.rb`.
-
-**Every change in a save is recorded.** `Card::Eventable` snapshots the tracked changes
-(title, column, board) in `before_update` and records one event per change from that snapshot,
-and sets `last_active_at` in the same UPDATE. Nothing writes the card again from inside its own
-save: a nested write replaces `saved_changes`, which is how a request that changed two things
-used to record only one.
-
-### Due Dates (replaces the old entropy/auto-postpone system)
-
-Cards carry an explicit **`due_on`** date (`Card::Due`):
-- `due_on` is required in **Todo** and **Doing** (`validates :due_on, presence: …, if: :active?`)
-  and optional in **Backlog** and **Done**, so no save path — including the JSON create/update —
-  can move a card into Todo or Doing, or keep one there, without a date, while an unscheduled idea
-  can still be closed as-is. The error reads "can't be blank in Todo or Doing"
-  (`activerecord.errors.models.card.attributes.due_on.blank_while_active` in `config/locales/en.yml`).
-- A `due_on` that isn't a date — a string that doesn't parse (`"2026-02-30"`, `"next friday"`),
-  or a non-string such as `20261201` or `true` — is refused as `invalid` in every lane, and only
-  as `invalid` (never also "can't be blank"), rather than saved undated or as a non-date.
+- It is required in Todo and Doing and optional in Backlog and Done, so no save path, the JSON
+  ones included, can put an undated card in an active lane, while an unscheduled idea can still
+  be closed as-is. The error reads "can't be blank in Todo or Doing"
+  (`activerecord.errors.models.card.attributes.due_on.blank_while_active`, in
+  `config/locales/en/models.yml`).
+- A `due_on` that isn't a date, whether a string that doesn't parse (`"2026-02-30"`,
+  `"next friday"`) or a non-string such as `20261201` or `true`, is refused as `invalid` in every
+  lane, and only as `invalid` (never also "can't be blank"), rather than saved undated.
 - `overdue?` is true for a card whose `due_on` is in the past.
 
-This replaces the previous "entropy" system (auto-postponing stale cards after inactivity),
-which has been removed along with the `entropies` table and the hourly auto-postpone job.
+### Keys and card numbers
 
-### Web endpoints (REST resources)
+Primary keys are plain autoincrementing integers, so what a `SELECT` prints is the id the app
+and the API use. `Card#number` is a **separate**, **per-board** sequence drawn from
+`boards.cards_count` (`board.increment!(:cards_count)`), and it is what the API addresses cards
+by. Two boards can each hold a card `1`, and a card moved between boards is renumbered on
+arrival. A bare number never names a card on its own: search treats a number as plain text, and
+`Prompts::CardsController` prepends every match.
+
+### Web endpoints
 
 Routes (`config/routes.rb`) model behavior as CRUD on resources. **Cards nest under their
-board** (`/boards/:board_id/cards/:number`) because `Card#number` is a per-board sequence;
+board** (`/boards/:board_id/cards/:number`), because the number is a per-board sequence;
 `resolve "Card"` keeps `url_for(card)` and `link_to card` working without the board at every
-call site. Nested resources on `cards`: `notes`, and — for the browser alone —
-`board` and `column` (the two picker screens), `goldness` (the star), `steps`, and
-`drops/column` (the drag-and-drop target, which repaints both lanes).
+call site. Every declaration that serves fewer than all seven actions names them with
+`only:`/`except:`, so `bin/rails routes` lists what is served rather than what `resources` would
+imply.
 
-**A card is one resource, not eleven.** Its board, its lane, its goldness, and its steps are
-all attributes of the card, so a client reads them from `GET .../cards/:number` — which
-carries the board, the column, every step, and the tail of the note log — and writes them
-back with a single `PUT`, via `board_id`, `column_id`, `golden`, and `steps_attributes`
-(`accepts_nested_attributes_for :steps`). The browser's one-thing-at-a-time endpoints are the
-same associations by another door. **JSON is opt-in:** each controller names the actions it
-answers in JSON with `serves_json` (`ServesJson`, in `ApplicationController`), and a JSON
-request to any other action is a 406 **before** the action runs — so an endpoint that never
-thought about JSON can't write and then fail to render. Notes are the exception that stays a collection: a card can carry thousands, so it
-embeds only the most recent `Card::Notable::EMBEDDED_NOTES_LIMIT` and points at its notes
-index for the rest.
+Nested under a card are `notes`, and, for the browser alone, `board` and `column` (the two
+picker screens), `goldness` (the star), `steps`, and `drops/column` (the drag-and-drop target,
+which repaints both lanes).
 
-The card index answers at both levels: `/cards` spans every board, `/boards/:board_id/cards` narrows to one, and the
-same filters apply to either — including `column_ids[]`, which is how a single lane is read
-now that columns have no endpoints of their own, `lane` (a lane by name on every board) and
-`due=soon` (open cards due by tomorrow, the most overdue first). `/prompts/cards` (the mention autocomplete)
-stays cross-board. A board's four fixed columns travel with the board itself
+**A card is one resource.** Its board, lane, goldness, and steps are attributes of the card, so
+a client reads them from `GET …/cards/:number` and writes them back with a single `PUT`
+(`steps_attributes` via `accepts_nested_attributes_for :steps`). The browser's
+one-thing-at-a-time endpoints are the same associations by another door. Notes stay a
+collection, since a card can carry thousands; it embeds only the most recent
+`Card::Notable::EMBEDDED_NOTES_LIMIT`.
+
+The card index answers at both levels: `/cards` spans every board and `/boards/:board_id/cards`
+narrows to one, with the same filters. A board's four columns travel with the board
 (`boards/show.json.jbuilder`); what is left under `boards/:id/columns` is the browser's lane
-frame and colour picker.
+frame and colour picker. `/prompts/cards` is the `#` card-reference autocomplete, and stays
+cross-board.
 
-Every declaration carries `only:`/`except:` naming exactly the actions its controller
-implements, so `bin/rails routes` lists what is served rather than what `resources` would
-imply. A route with no action behind it is a 404 that reads like an endpoint.
+**JSON** lives on the same URLs, rendered by jbuilder views; there is no separate API surface.
+The contract is [API.md](API.md). The mechanics:
 
-Every resource also renders a JSON representation (jbuilder views) that mirrors the web UI,
-on the same URL — there is no separate API surface. A browser authenticates with its session
-cookie; a script or agent presents the same session as `Authorization: Bearer <token>`
-(`make token LABEL=…`). **Every** failure comes back as `{ "errors": { "field": ["message"] } }`
-via the `JsonErrors` concern — the 401 and 403 refused by `Authentication`/`Authorization`
-as much as the record errors. Indexes answer with `{ "data": [...], "paging": {...} }`
-(`PaginationHelper#paging_for`), and an unrecognised query parameter is a 422 rather
-than silently ignored — each endpoint declaring what it answers to with
-`allows_query_params` (`StrictQueryParams`). See [API.md](API.md).
+- **JSON is opt-in.** Each controller names the actions it answers in JSON with `serves_json`
+  (`ServesJson`, in `ApplicationController`), and a JSON request to any other action is a 406
+  **before** the action runs, so an endpoint that never thought about JSON can't write and then
+  fail to render.
+- **Every failure** comes back as `{ "errors": { "field": ["message"] } }` through `JsonErrors`,
+  the 401 and 403 from `Authentication` and `Authorization` included. Failures outside a
+  controller go through `lib/json_public_exceptions.rb`.
+- **Indexes** answer with `{ "data": [...], "paging": {...} }` (`PaginationHelper#paging_for`).
+- **Unrecognised query parameters** are a 422 on controllers that include `StrictQueryParams`
+  (boards, cards, notes, steps, columns, search). Each declares what it answers to with
+  `allows_query_params`.
 
 ### Web UI
 
-The browser is for an occasional look — agents do most of the work through the API — so the
-chrome is small and there are **no keyboard shortcuts** (keys only act inside the field being
-typed in: Enter or Ctrl/Cmd+Enter submits, Esc cancels).
+The browser is for an occasional look, since agents do most of the work through the API. The
+chrome is small and there are **no keyboard shortcuts**: keys only act inside the field being
+typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
+- **Landing.** `/` (`LandingsController`) sends you to the board you last had open, remembered
+  in `localStorage`. The `last-board` Stimulus controller writes it, and the landing page reads
+  it (an inline script on a full load, the `landing` controller on a Turbo visit).
 - **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
-  followed by the page's back link if it has one (`content_for :header_start`), the page title in
-  the centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
+  then the page's back link if it has one (`content_for :header_start`), the page title in the
+  centre, and the account menu (`my/_account_menu`: account settings, profile, API tokens,
   upgrade, sign out) on the right.
 - **Board title** (`boards/_title`): clicking the name renames the board in place
   (`inline-edit` controller), with "Delete board…" beside Save/Cancel. There is no board
   settings page.
-- **Switcher** — the ▾ beside a board or view title (`my/_switcher`), loading `my/menus#show`
-  on first open: every board (the current one ticked), the cross-board views in
+- **Switcher**: the ▾ beside a board or view title (`my/_switcher`), loading `my/menus#show` on
+  first open. It lists every board (the current one ticked), the cross-board views in
   `Filter::VIEWS` with their counts, and "New board" last.
 - **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
-  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board, one board
-  after another. The board page itself takes no filters. A `Filter` is read from the query for
-  each request and never stored; a value outside its list is refused (`400`, or `422` for JSON).
-- **Search** is a pill floating at the bottom centre (`bar/_bar`); results open above it,
-  grouped by board with the board searched from first, one row per card, the five latest per
-  board with a link to the rest (`User::Searcher#search_counts_by_board`, `#search_board`).
+  `?lane=doing`, `?indexed_by=golden`), drawn as cards grouped under their board. The board page
+  itself takes no filters. A `Filter` is read from the query for each request and never stored;
+  a value outside its list is refused (`400`, or `422` for JSON).
+- **Search** is a pill floating at the bottom centre (`bar/_bar`). Results open above it,
+  grouped by board with the board you searched from first: one row per card, the five latest per
+  board, and a link to the rest (`User::Searcher#search_counts_by_board`, `#search_board`).
 
-### Keys and Card Numbers
+### Background jobs
 
-Primary keys are plain autoincrementing integers — Rails' default, no extensions. What a
-`SELECT` prints is the id the app and the API use.
+Jobs run on Rails' in-process `:async` Active Job adapter (the `:test` adapter in tests), with
+no Solid Queue, Redis, or separate worker process.
 
-`Card#number` is a **separate** integer, and it is what the API addresses cards by. It is a
-**per-board** sequence drawn from `boards.cards_count`, unique only within its board — so
-two boards can each hold a card numbered `1`, a card moved between boards is renumbered on
-arrival, and a bare number never names a card on its own: search treats a number as plain
-text, and `Prompts::CardsController` prepends every match.
-
-See [ERD.md](ERD.md) for the full schema — every table, column, index, and relationship,
-cross-verified against a live database.
-
-### Background Jobs
-
-Jobs run on Rails' in-process `:async` Active Job adapter in every environment — no Solid
-Queue, no Redis, no separate worker process.
 - The `AccountTenanted` concern (`app/jobs/concerns/account_tenanted.rb`) is `prepend`ed in
-  `ApplicationJob`. It serializes `Current.account` as a GID and restores it via
-  `around_perform`, so jobs run in the correct tenant context.
-- We write shallow jobs that delegate to domain models, using `_later` / `_now` naming
-  (see `STYLE.md`).
-- The only job today is `SearchReindexJob`, a manual full-text-index repair run via
+  `ApplicationJob`. It serializes `Current.account` as a GID and restores it in `around_perform`,
+  so jobs run in the right tenant.
+- Jobs should be shallow and delegate to domain models, with `_later`/`_now` naming (see
+  [STYLE.md](STYLE.md#run-async-operations-in-jobs)).
+- The only job today is `SearchReindexJob`, a manual full-text-index repair run by
   `bin/rails search:reindex`.
 
-### Full-Text Search
+### Full-text search
 
-`app/models/search/` denormalizes searchable content (cards and notes) into `Search::Record`,
-which uses a single SQLite FTS5 virtual table (`search_records_fts`). Search spans every board
-in the account. Stemming is handled by the FTS5 `porter` tokenizer. The FTS table holds text
-folded by `Search::Normalizer` (Arabic only: harakat and tatweel stripped, alef/yeh/teh-marbuta
-folded, the article ال removed), and `Search::Query` folds the query the same way, so a search
-matches with or without vowel marks or the article. `search_records` keeps the text as written,
-and `Search::Highlighter` marks it in Ruby. A change to the normalizer needs `bin/rails
-search:reindex` (or a data migration that runs it, as `20261014000001` does).
+`app/models/search/` denormalizes cards and notes into `Search::Record`, backed by one SQLite
+FTS5 virtual table (`search_records_fts`) with the `porter` tokenizer. Search spans every board
+in the account, scoped through the card (`Search::Record.for_query` reads
+`user.accessible_cards`).
+
+The FTS table holds text folded by `Search::Normalizer`, and `Search::Query` folds the query the
+same way. The folding is Arabic only: harakat and tatweel are stripped, alef, yeh, and teh
+marbuta are folded, and the article ال is removed. So a search matches with or without vowel
+marks or the article. `search_records` keeps the text as written, and `Search::Highlighter`
+marks it in Ruby. A change to the normalizer needs `bin/rails search:reindex`, or a data
+migration that runs it, as `20261014000001` does.
 
 ### Internationalization
 
 The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`
 (`app/controllers/concerns/current_locale.rb`) picks each request's locale: the user's
-`user_settings.locale` (chosen on the profile page via `My::LocalesController`), else the
+`user_settings.locale` (chosen on the profile page through `My::LocalesController`), else the
 browser's `Accept-Language`, else English. URLs carry no locale.
-- **JSON — and so every MCP tool call — always answers in English**, whatever the user chose:
-  errors, enum values, lane names. A 401/403 refused before the action runs is English too.
+
+- **JSON, and so every MCP tool call, always answers in English**: errors, enum values, lane
+  names, and the 401/403 refused before the action runs.
 - **Lanes stay English keys** (`columns.name`, the API, `lane=`); only the display goes through
   `lane_name(column)` → `lanes.*`. Never compare against a translated name.
-- **Every HTML cache key carries `I18n.locale`** (card/note fragments, the column collection),
-  and `etag { I18n.locale }` keeps a conditional GET from serving the other language.
+- **Every HTML cache key carries `I18n.locale`** (card and note fragments, the column
+  collection), and `etag { I18n.locale }` keeps a conditional GET from serving the other
+  language.
 - Strings live in `config/locales/{en,ar}/*.yml`, one file per area, looked up lazily in views
-  (`t(".key")`). Missing translations raise in dev and test; `make i18n` (also part of `make
-  lint`) checks for missing, unused and unnormalized keys, and `test/i18n_test.rb` runs the same.
+  (`t(".key")`). Missing translations raise in dev and test. `make i18n` (also part of
+  `make lint`) checks for missing, unused, and unnormalized keys, and `test/i18n_test.rb` runs
+  the same checks.
 - `<html lang dir>` comes from the locale. CSS uses logical properties; where it can't, a
-  `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`,
-  OFL), loaded only for Arabic code points. Dates show Western digits (`-u-nu-latn`).
+  `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
+  loaded only for Arabic code points. Dates show Western digits (`-u-nu-latn`).
 - The `public/*.html` error pages are static, so each carries both languages.
 
 ### MCP
 
-`/mcp` serves the JSON API to AI agents as MCP tools (Streamable HTTP, stateless, bearer
-token only). `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`) is a middleware ahead of
-`ActionDispatch::Executor`; each tool is one in-process JSON API request made with the
-client's token, so tools carry no business logic. `lib/mudda` is required, not autoloaded —
-restart after changing it. See [MCP.md](MCP.md).
-
-## Tools
-
-### Chrome MCP (Local Dev)
-
-URL: `http://app.mudda.localhost:3006`
-Login: `MUDDA_OWNER_EMAIL` + `MUDDA_OWNER_PASSWORD` (dev: `saksham@nexusai.world` / `mudda-dev-password`).
-Enrolling a passkey is optional; to exercise that flow, use a WebAuthn virtual authenticator to drive
-the passkey ceremony.
-
-Use Chrome MCP tools to interact with the running dev app for UI testing and debugging.
+`/mcp` serves the JSON API to AI agents as MCP tools. `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`)
+is a middleware ahead of `ActionDispatch::Executor`, and each tool is one in-process JSON API
+request made with the client's token, so tools carry no business logic. `lib/mudda` is required,
+not autoloaded, so restart after changing it. See [MCP.md](MCP.md#how-it-works).
 
 ## Coding style
 
-@STYLE.md
+See [STYLE.md](STYLE.md).

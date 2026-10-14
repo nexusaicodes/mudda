@@ -15,9 +15,9 @@ module Mudda::Mcp::Tools
     tool_name "search_cards"
     title "Search cards"
     description <<~TEXT
-      Full-text search over card titles, descriptions, and notes across every board. A query
-      that is exactly a card number returns that card while only one board has a card with
-      that number. Paged: follow paging.next or pass `page`.
+      Full-text search over card titles, descriptions, and notes across every board. A card
+      number is searched as plain text; fetch a card by its number with get_card. Paged: follow
+      paging.next or pass `page`.
     TEXT
     arguments(
       properties: {

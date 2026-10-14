@@ -1,22 +1,15 @@
 # Mudda — Entity Relationship Diagram
 
-Generated from `db/schema_sqlite.rb` (version `2026_08_28_000000`) and the association
-declarations in `app/models/`, then verified against a live database: all tables, every
-column name, and all 28 indexes with their uniqueness flags match. Regenerate after any
-migration.
+The schema of `db/schema_sqlite.rb` (version `2026_10_14_000001`) and the associations declared
+in `app/models/`. Update it with every migration. What the records *do* (the card lifecycle,
+sessions and tokens, search) is in [AGENTS.md](AGENTS.md).
 
-> **There are no database-level foreign keys.** `pragma foreign_key_list(<table>)` returns
-> nothing for every table in this schema. Every relationship drawn below is enforced by
-> Active Record alone — the `REFERENCES` clauses do not exist on disk. Nothing at the
-> storage layer prevents an orphaned `column_id`, which is why `Cards::ColumnsController`
-> checks board membership itself.
-
-Every key is a plain autoincrementing integer. `SELECT` in a SQL client prints the same ids
-the app and the API use, and `sqlite_sequence` holds the counters.
-
-`cards.number` is a **separate** integer, not a key: a per-board sequence drawn from
-`boards.cards_count`, and the number the URLs and the API address a card by. It is unique
-only within its board.
+- **There are no database-level foreign keys.** Every relationship below is enforced by Active
+  Record alone. Nothing at the storage layer prevents an orphaned id, which is why, for example,
+  `Card::Triageable#column_on_its_board` validates that a card's lane is on its board.
+- **Every key is a plain autoincrementing integer**, so `SELECT` prints the same ids the app and
+  the API use. `cards.number` is not a key: it is a per-board sequence drawn from
+  `boards.cards_count`, unique only within its board.
 
 ---
 
@@ -28,35 +21,40 @@ erDiagram
     ACCOUNTS ||--o{ BOARDS : "has_many dependent-destroy"
 
     USERS ||--o{ SESSIONS : "has_many dependent-destroy — browser or token"
-    USERS ||--o{ ACTION_PACK_PASSKEYS : "has_passkeys polymorphic-holder"
+    USERS ||--o{ ACTION_PACK_PASSKEYS : "has_passkeys dependent-destroy, polymorphic holder"
     USERS ||--o| USER_SETTINGS : "has_one dependent-destroy"
     USERS ||--o{ SEARCH_QUERIES : "has_many dependent-destroy"
     USERS ||--o{ BOARDS : "creator_id"
     USERS ||--o{ CARDS : "creator_id"
     USERS ||--o{ NOTES : "creator_id dependent-destroy"
     USERS ||--o{ EVENTS : "creator_id"
+    USERS ||--o{ OAUTH_ACCESS_GRANTS : "resource_owner_id"
+    USERS ||--o{ OAUTH_ACCESS_TOKENS : "resource_owner_id"
 
-    BOARDS ||--o{ COLUMNS : "has_many dependent-destroy — always 5"
+    OAUTH_APPLICATIONS ||--o{ SESSIONS : "oauth_application_id — one per user and client"
+    OAUTH_APPLICATIONS ||--o{ OAUTH_ACCESS_GRANTS : "application_id"
+    OAUTH_APPLICATIONS ||--o{ OAUTH_ACCESS_TOKENS : "application_id"
+
+    BOARDS ||--o{ COLUMNS : "has_many dependent-destroy — always 4"
     BOARDS ||--o{ CARDS : "has_many dependent-destroy"
 
-    COLUMNS ||--o{ CARDS : "has_many dependent-destroy — the lifecycle"
+    COLUMNS ||--o{ CARDS : "a card is in exactly one"
 
     CARDS ||--o{ NOTES : "has_many dependent-destroy"
     CARDS ||--o{ STEPS : "has_many dependent-destroy"
-    CARDS ||--o{ SEARCH_RECORDS : "card_id"
+    CARDS ||--o{ SEARCH_RECORDS : "card_id — its own row and its notes' rows"
     CARDS ||--o| ACTION_TEXT_RICH_TEXTS : "has_rich_text description"
     CARDS ||--o{ EVENTS : "polymorphic eventable"
 
     NOTES ||--o| ACTION_TEXT_RICH_TEXTS : "has_rich_text body"
     NOTES ||--o{ EVENTS : "polymorphic eventable"
-    NOTES ||--o| SEARCH_RECORDS : "polymorphic searchable"
 
     ACTIVE_STORAGE_BLOBS ||--o{ ACTIVE_STORAGE_ATTACHMENTS : "blob_id"
     ACTIVE_STORAGE_BLOBS ||--o{ ACTIVE_STORAGE_VARIANT_RECORDS : "blob_id"
     SEARCH_RECORDS ||--|| SEARCH_RECORDS_FTS : "rowid = id"
 
     ACCOUNTS {
-        bigint id PK
+        integer id PK
         string name "limit 255 NOT NULL"
         integer cards_created_count "NOT NULL DEFAULT 0 — only goes up (MUDDA_CARD_LIMIT)"
         datetime created_at "NOT NULL"
@@ -64,9 +62,9 @@ erDiagram
     }
 
     USERS {
-        bigint id PK
+        integer id PK
         bigint account_id FK "NOT NULL"
-        string email_address UK "limit 255 NOT NULL — the principal"
+        string email_address UK "limit 255 NOT NULL"
         string name "limit 255 NOT NULL"
         boolean active "default true NOT NULL"
         datetime verified_at "nullable"
@@ -75,29 +73,29 @@ erDiagram
     }
 
     USER_SETTINGS {
-        bigint id PK
-        bigint user_id FK "UNIQUE — enforces has_one"
-        string locale "limit 255 nullable — en or ar; NULL follows the browser"
+        integer id PK
+        bigint user_id FK "NOT NULL UNIQUE — enforces has_one"
+        string locale "limit 255 nullable — NULL follows the browser"
         string timezone_name "limit 255 nullable"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }
 
     SESSIONS {
-        bigint id PK
+        integer id PK
         bigint user_id FK "NOT NULL"
-        string kind "limit 255 default browser NOT NULL — browser or token"
+        string kind "limit 255 default browser NOT NULL"
         string label "limit 255 — present iff kind is token"
-        string scopes "limit 255 — space-separated read write delete; present iff kind is token"
-        bigint oauth_application_id FK "the OAuth client a token session was granted to; null for minted tokens"
+        string scopes "limit 255 — space-separated; present iff kind is token"
+        bigint oauth_application_id FK "set only on an OAuth client's token session"
         string ip_address "limit 255"
         string user_agent "limit 4096"
-        datetime created_at "NOT NULL — no expiry column; it is signed into the token"
+        datetime created_at "NOT NULL — no expiry column"
         datetime updated_at "NOT NULL"
     }
 
     ACTION_PACK_PASSKEYS {
-        bigint id PK
+        integer id PK
         bigint holder_id FK "NOT NULL — always a User"
         string holder_type "limit 255 NOT NULL"
         string credential_id UK "limit 255 NOT NULL"
@@ -111,8 +109,47 @@ erDiagram
         datetime updated_at "NOT NULL"
     }
 
+    OAUTH_APPLICATIONS {
+        integer id PK
+        string name "limit 255 NOT NULL — the client's own name"
+        string uid UK "limit 255 NOT NULL — the client_id"
+        string secret "limit 255 NOT NULL — hashed"
+        text redirect_uri "limit 65535 NOT NULL"
+        string scopes "limit 255 default '' NOT NULL"
+        boolean confidential "default true NOT NULL"
+        datetime created_at "NOT NULL"
+        datetime updated_at "NOT NULL"
+    }
+
+    OAUTH_ACCESS_GRANTS {
+        integer id PK
+        bigint resource_owner_id FK "NOT NULL — a users.id"
+        bigint application_id FK "NOT NULL"
+        string token UK "limit 255 NOT NULL — the authorization code, hashed"
+        integer expires_in "NOT NULL"
+        text redirect_uri "limit 65535 NOT NULL"
+        string scopes "limit 255 default '' NOT NULL"
+        string code_challenge "limit 255 — PKCE"
+        string code_challenge_method "limit 255 — PKCE, always S256"
+        datetime revoked_at "nullable"
+        datetime created_at "NOT NULL — no updated_at"
+    }
+
+    OAUTH_ACCESS_TOKENS {
+        integer id PK
+        bigint resource_owner_id FK "nullable — a users.id"
+        bigint application_id FK "NOT NULL"
+        string token UK "limit 255 NOT NULL — hashed"
+        string refresh_token UK "limit 255 — hashed"
+        string previous_refresh_token "limit 255 default '' NOT NULL"
+        integer expires_in
+        string scopes "limit 255"
+        datetime revoked_at "nullable"
+        datetime created_at "NOT NULL — no updated_at"
+    }
+
     BOARDS {
-        bigint id PK
+        integer id PK
         bigint account_id FK "NOT NULL"
         bigint creator_id FK "NOT NULL — User"
         string name "limit 255 NOT NULL"
@@ -122,9 +159,9 @@ erDiagram
     }
 
     COLUMNS {
-        bigint id PK
+        integer id PK
         bigint board_id FK "NOT NULL"
-        string name "limit 255 NOT NULL — Backlog Todo Doing Done"
+        string name "limit 255 NOT NULL"
         integer position "default 0 NOT NULL — ascending in lane order"
         string color "limit 255 NOT NULL — the only editable field"
         datetime created_at "NOT NULL"
@@ -132,38 +169,38 @@ erDiagram
     }
 
     CARDS {
-        bigint id PK
+        integer id PK
         bigint board_id FK "NOT NULL"
-        bigint column_id FK "NOT NULL — single source of lifecycle truth"
+        bigint column_id FK "NOT NULL — the card's lifecycle"
         bigint creator_id FK "NOT NULL — User"
-        bigint number "NOT NULL — per-board sequence the API addresses"
-        string title "limit 255 NULLABLE"
-        date due_on "NULLABLE — required by the model in Todo and Doing"
-        boolean golden "default false NOT NULL — the pin"
+        bigint number "NOT NULL"
+        string title "limit 255 nullable — the model fills in a default"
+        date due_on "nullable — the model requires it in Todo and Doing"
+        boolean golden "default false NOT NULL"
         datetime last_active_at "NOT NULL"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }
 
     STEPS {
-        bigint id PK
+        integer id PK
         bigint card_id FK "NOT NULL"
         text content "limit 65535 NOT NULL"
         boolean completed "default false NOT NULL"
-        datetime created_at "NOT NULL — no position column: unorderable"
+        datetime created_at "NOT NULL — there is no position column"
         datetime updated_at "NOT NULL"
     }
 
     NOTES {
-        bigint id PK
+        integer id PK
         bigint card_id FK "NOT NULL"
-        bigint creator_id FK "NOT NULL — only creator may edit"
+        bigint creator_id FK "NOT NULL"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }
 
     EVENTS {
-        bigint id PK
+        integer id PK
         bigint creator_id FK "NOT NULL — User"
         bigint eventable_id FK "NOT NULL"
         string eventable_type "limit 255 NOT NULL — Card or Note"
@@ -175,7 +212,7 @@ erDiagram
     }
 
     SEARCH_QUERIES {
-        bigint id PK
+        integer id PK
         bigint user_id FK "NOT NULL"
         string terms "limit 2000 NOT NULL"
         datetime created_at "NOT NULL"
@@ -183,42 +220,42 @@ erDiagram
     }
 
     SEARCH_RECORDS {
-        bigint id PK "the FTS rowid"
-        bigint card_id FK "NOT NULL — always resolves to a Card"
+        integer id PK "the FTS rowid"
+        bigint card_id FK "NOT NULL — the card, or the note's card"
         bigint searchable_id FK "NOT NULL"
         string searchable_type "limit 255 NOT NULL — Card or Note"
-        string title "limit 255 nullable"
-        text content "limit 65535 nullable"
-        datetime created_at "NOT NULL"
+        string title "limit 255 nullable — as written"
+        text content "limit 65535 nullable — as written"
+        datetime created_at "NOT NULL — copied from the card or note; no updated_at"
     }
 
     SEARCH_RECORDS_FTS {
-        integer rowid PK "= search_records.id"
-        text title "fts5 indexed"
-        text content "fts5 indexed"
+        integer rowid PK
+        text title "fts5, normalized"
+        text content "fts5, normalized"
     }
 
     ACTION_TEXT_RICH_TEXTS {
-        bigint id PK
+        integer id PK
         bigint record_id FK "NOT NULL"
         string record_type "limit 255 NOT NULL — Card or Note"
-        string name "limit 255 NOT NULL — description or body"
-        text body "limit 4294967295 — the actual card text lives HERE"
+        string name "limit 255 NOT NULL"
+        text body "limit 4294967295 — card and note text lives here"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }
 
     ACTIVE_STORAGE_ATTACHMENTS {
-        bigint id PK
+        integer id PK
         bigint record_id FK "NOT NULL"
-        string record_type "limit 255 NOT NULL — User or ActionText::RichText"
-        string name "limit 255 NOT NULL — avatar or embeds"
+        string record_type "limit 255 NOT NULL"
+        string name "limit 255 NOT NULL"
         bigint blob_id FK "NOT NULL"
         datetime created_at "NOT NULL"
     }
 
     ACTIVE_STORAGE_BLOBS {
-        bigint id PK
+        integer id PK
         string key UK "limit 255 NOT NULL"
         string filename "limit 255 NOT NULL"
         string content_type "limit 255"
@@ -230,20 +267,9 @@ erDiagram
     }
 
     ACTIVE_STORAGE_VARIANT_RECORDS {
-        bigint id PK
+        integer id PK
         bigint blob_id FK "NOT NULL"
         string variation_digest "limit 255 NOT NULL"
-    }
-
-    SCHEMA_MIGRATIONS {
-        string version PK "limit 255 — one row per applied migration"
-    }
-
-    AR_INTERNAL_METADATA {
-        string key PK "limit 255 — environment and schema_sha1"
-        string value "limit 255"
-        datetime created_at "NOT NULL"
-        datetime updated_at "NOT NULL"
     }
 ```
 
@@ -251,37 +277,24 @@ erDiagram
 
 ## Focused views
 
-### Authentication chain
-
-`Current` (`app/models/current.rb`) resolves **session → user → account**. A deactivated user
-is still named — `Authorization` is what refuses them — but has no account, so a browser is
-signed out and a JSON client gets a 403 rather than a 401.
+### Sessions and OAuth
 
 ```mermaid
 erDiagram
+    ACCOUNTS ||--o{ USERS : "the tenant"
     USERS ||--o{ SESSIONS : "credential — cookie or bearer"
-    USERS ||--o{ ACTION_PACK_PASSKEYS : "optional, never required"
-    USERS }o--|| ACCOUNTS : "the tenant"
-    USERS ||--o| USER_SETTINGS : "timezone, locale"
+    USERS ||--o{ ACTION_PACK_PASSKEYS : "optional"
+    OAUTH_APPLICATIONS ||--o{ SESSIONS : "a connected client's token session"
+    OAUTH_APPLICATIONS ||--o{ OAUTH_ACCESS_TOKENS : "hour-long, refreshable"
 ```
 
-There is **no password column anywhere** — the owner secret lives only in
-`ENV["MUDDA_OWNER_PASSWORD"]` and is compared by `OwnerPassword` with `secure_compare`.
-`sessions.kind` says how a user is present: a `browser` cookie, or a `token` minted by
-`make token LABEL=…` or the JSON sign-in. A token carries a `label`, and a browser session
-never does; the label is the unit of revocation, and one label holds one live token.
-
-A token session with an `oauth_application_id` belongs to an MCP client connected over OAuth
-(`Session::Oauth`) — one per user and client. Doorkeeper's `oauth_applications` (registered
-clients; secrets hashed), `oauth_access_grants` (authorization codes, with the PKCE challenge),
-and `oauth_access_tokens` (hour-long access tokens and rotating refresh tokens, hashed) hold the
-protocol's state; `resource_owner_id` is a `users.id`. An access token is honoured only while
-its client's session exists. Like the rest of the schema, none of it is held together by
-foreign keys.
+There is **no password column anywhere**: the owner's password lives only in the environment
+(see [AGENTS.md → Authentication](AGENTS.md#authentication)). A minted token's expiry is signed
+into the token itself, and an OAuth session's is reckoned from its client's latest access
+token, so neither needs a column. `oauth_applications`, `oauth_access_grants`, and
+`oauth_access_tokens` are Doorkeeper's, in its standard shape plus the PKCE columns.
 
 ### Card lifecycle
-
-`column_id` is the single source of truth — there are no closed/backlog state tables.
 
 ```mermaid
 erDiagram
@@ -291,28 +304,21 @@ erDiagram
     CARDS ||--o{ NOTES : "rich-text log"
 ```
 
-| Order | Column | Predicate derived in `Card::Triageable` |
-|---|---|---|
-| 1 | Backlog | `backlogged?` — default for new cards; `due_on` optional |
-| 2 | Todo | queued |
-| 3 | Doing | in progress |
-| 4 | Done | `closed?`; `due_on` optional |
-
-`position` only orders a board's lanes; its values aren't contiguous on boards that once had
-a Triage lane (folded into Backlog by `20261011000000_fold_triage_into_backlog`).
-
-`active?` = in neither Done nor Backlog. `open?` = not Done. `golden?` is the
-pin, and it is a column on the card.
+`column_id` is the only lifecycle state; there are no closed or backlog tables (see
+[AGENTS.md → Card Lifecycle](AGENTS.md#card-lifecycle-fixed-columns)). `position` only orders a
+board's lanes. Its values aren't contiguous on boards that once had a Triage lane, which
+`20261011000000_fold_triage_into_backlog` folded into Backlog.
 
 ### Text and attachments
 
-Card and note **bodies are not in their own tables** — this trips up every raw-SQL query:
+Card and note **bodies are not in their own tables**, which trips up every raw-SQL query:
 
 ```mermaid
 erDiagram
     CARDS ||--o| ACTION_TEXT_RICH_TEXTS : "name = description"
     NOTES ||--o| ACTION_TEXT_RICH_TEXTS : "name = body"
     USERS ||--o| ACTIVE_STORAGE_ATTACHMENTS : "name = avatar"
+    ACTION_TEXT_RICH_TEXTS ||--o{ ACTIVE_STORAGE_ATTACHMENTS : "name = embeds"
     ACTIVE_STORAGE_ATTACHMENTS }o--|| ACTIVE_STORAGE_BLOBS : "blob_id"
     ACTIVE_STORAGE_BLOBS ||--o{ ACTIVE_STORAGE_VARIANT_RECORDS : "derivatives"
 ```
@@ -328,20 +334,18 @@ left join action_text_rich_texts rt
 
 ```mermaid
 erDiagram
-    CARDS ||--o{ SEARCH_RECORDS : "searchable_type = Card"
+    CARDS ||--o| SEARCH_RECORDS : "searchable_type = Card"
     NOTES ||--o| SEARCH_RECORDS : "searchable_type = Note"
     SEARCH_RECORDS ||--|| SEARCH_RECORDS_FTS : "rowid = id"
     USERS ||--o{ SEARCH_QUERIES : "recent searches"
 ```
 
-`search_records` denormalizes both cards and notes into one table; **every row carries
-`card_id`**, so a note match still resolves to the card that owns it, and the card is what
-scopes a query to the searcher's account (`Search::Record.for_query` reads
-`user.accessible_cards`). Neither `search_records` nor `events` keeps a copy of the board: both
-reach it through their card, so a moved card's index rows and audit trail follow it with
-nothing to re-home. `search_records_fts`
-is an FTS5 virtual table (`tokenize='porter'`) joined by rowid, with the usual FTS5 shadow
-tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should ignore.
+`search_records` holds one row per card and per note. **Every row carries `card_id`**, so a
+note's match resolves to its card. Neither `search_records` nor `events` keeps a copy of the
+board: both reach it through their card. `search_records_fts` is an FTS5 virtual table
+(`tokenize='porter'`) joined by rowid, holding the text as `Search::Normalizer` folds it, while
+`search_records` keeps it as written. Ignore its FTS5 shadow tables (`_config`, `_content`,
+`_data`, `_docsize`, `_idx`).
 
 ---
 
@@ -384,40 +388,47 @@ tables (`_config`, `_content`, `_data`, `_docsize`, `_idx`) that you should igno
 
 ## Enumerated values
 
-**`sessions.kind`** — `browser` (default, a cookie) · `token` (an API token, always labelled).
+**`sessions.kind`**: `browser` (the default, a cookie) · `token` (a script, agent, or OAuth client).
 
-**`sessions.scopes`** — space-separated, any of `read` · `write` · `delete`. Tokens only;
-defaults to `read write`.
+**`sessions.scopes`**: space-separated, any of `read` · `write` · `delete`. Tokens default to `read write`.
 
-**`columns.name`** — `Backlog` · `Todo` · `Doing` · `Done`. Created together by
-`Board::Triageable` on every board; not creatable, reorderable, or deletable.
+**`user_settings.locale`**: `en` · `ar` · `NULL` (follow the browser).
 
-**`events.action`** — written by `Eventable#track_event` as `<type>_<action>`:
+**`columns.name`**: `Backlog` · `Todo` · `Doing` · `Done`, created together by
+`Board::Triageable` on every board, in that order.
+
+**`columns.color`**: a CSS value from `Color::COLORS`: `var(--color-card-default)` or
+`var(--color-card-1)` through `var(--color-card-8)`. New lanes get card-2, card-3, card-5, and
+card-4 in lane order.
+
+**`events.action`**: written by `Eventable#track_event` as `<type>_<action>`:
 
 | Action | Eventable | `particulars` | Written by |
 |---|---|---|---|
-| `card_created` | Card | `{}` | `Card::Eventable` (on create) |
-| `card_triaged` | Card | `{column}` | `Card::Triageable` (on any change of `column_id`) |
+| `card_created` | Card | `{}` | `Card::Eventable`, on create |
+| `card_triaged` | Card | `{column}` (the lane's name) | `Card::Triageable`, on any change of `column_id` after create, a move to another board's Backlog included |
 | `card_title_changed` | Card | `{old_title, new_title}` | `Card::Eventable` |
-| `card_board_changed` | Card | `{old_board, new_board}` | `Card#track_board_change` |
+| `card_board_changed` | Card | `{old_board, new_board}` (board names) | `Card#track_board_change` |
 | `note_created` | Note | `{}` | `Note::Eventable` |
 
-**`action_text_rich_texts.name`** — `description` (on Card) · `body` (on Note).
-**`active_storage_attachments.name`** — `avatar` (on User) · `embeds` (on ActionText::RichText, for rich text attachments).
+**`action_text_rich_texts.name`**: `description` (on Card) · `body` (on Note).
+
+**`active_storage_attachments`** (`record_type`: `name`): `User`: `avatar` ·
+`ActionText::RichText`: `embeds` · `ActiveStorage::VariantRecord`: `image` (a processed variant
+of either).
 
 ---
 
-## Notes on infrastructure tables
+## Infrastructure tables
 
-- **`schema_migrations`** and **`ar_internal_metadata`** are Rails-owned and do not appear in
-  `db/schema_sqlite.rb` — Rails creates them in every database. `schema_migrations` holds one
-  `version` row per applied migration; `db:migrate` compares it against `db/migrate/`.
-  `ar_internal_metadata`'s `environment` row is what makes `db:drop`/`db:reset` refuse to run
-  against production. Never edit it.
-- **`sqlite_sequence`** holds the autoincrement high-water mark for every table with an
-  integer primary key. SQLite maintains it; nothing in the app reads it.
-- **`oauth_applications`**, **`oauth_access_grants`**, **`oauth_access_tokens`** are
-  Doorkeeper's, in its standard shape plus PKCE columns; see Authentication chain above.
+These don't appear in `db/schema_sqlite.rb`:
+
+- **`schema_migrations`** holds one `version` row per applied migration; `db:migrate` compares
+  it against `db/migrate/`.
+- **`ar_internal_metadata`** holds the `environment` row that makes `db:drop` and `db:reset`
+  refuse to run against production, plus the `schema_sha1`. Never edit it.
+- **`sqlite_sequence`** holds the autoincrement high-water mark for each table. SQLite maintains
+  it, and nothing in the app reads it.
 
 ## Regenerating
 
@@ -425,6 +436,6 @@ defaults to `read write`.
 # schema (after a migration)
 docker compose exec web bin/rails db:migrate     # rewrites db/schema_sqlite.rb
 
-# verify a table against the live DB
+# check a table against the live database
 docker compose exec -T web sqlite3 storage/development.sqlite3 ".schema --indent cards"
 ```
