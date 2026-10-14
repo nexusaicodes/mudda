@@ -13,14 +13,10 @@ ar:
       empty_placeholder:
         drag_cards: اسحب البطاقات إلى هنا
         no_cards: لا توجد بطاقات هنا
-      show:
-        title: 'العمود: %{lane}'
     show:
       color_picker:
         column_color: لون العمود
         save_color: حفظ اللون
-      column:
-        maximize: تكبير العمود
   cards:
     boards:
       edit:

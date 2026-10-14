@@ -13,13 +13,13 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
     assert_current_path filter_url, ignore_query: false
   end
 
-  # Only the card indexes are worth returning to, so arriving from anywhere else — a
-  # maximized lane, here — leaves the back link pointing at the card's own board.
+  # Only the card indexes are worth returning to, so arriving from anywhere else — the board
+  # itself, here — leaves the back link pointing at the card's own board.
   test "card back link is not rewritten when navigating from a non-filter page" do
     sign_in_as(users(:david))
 
-    visit board_column_url(boards(:writebook), columns(:writebook_backlog))
-    click_on cards(:logo).title
+    visit board_url(boards(:writebook))
+    click_on cards(:text).title
 
     assert_selector "a.btn--back strong", text: "Back to Writebook"
   end

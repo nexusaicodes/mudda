@@ -66,6 +66,21 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
       assert_current_path %r{/boards/}
     end
 
+    # Narrows the window to a phone. The browser outlives the test, so pair it with
+    # +back_on_a_desktop+ in a teardown.
+    def on_a_phone
+      page.current_window.resize_to(375, 812)
+    end
+
+    def back_on_a_desktop
+      page.current_window.resize_to(1200, 1000)
+    end
+
+    def assert_no_horizontal_scroll
+      assert page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth"),
+        "The page scrolls sideways at #{page.evaluate_script("window.innerWidth")}px"
+    end
+
     # The editor is a custom element, so Capybara's fill_in cannot reach it.
     def fill_in_lexxy(selector = "lexxy-editor", with:)
       editor_element = find(selector)

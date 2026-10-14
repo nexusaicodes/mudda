@@ -294,14 +294,13 @@
 
     .cards.is-expanded & {
       display: grid;
-      grid-template-areas: "menu expander maximize";
+      grid-template-areas: "menu expander .";
       grid-template-columns: var(--column-width-collapsed) 1fr var(--column-width-collapsed);
       padding-inline: var(--column-padding);
     }
   }
 
-  .cards__menu .btn--circle,
-  .cards__maximize-button {
+  .cards__menu .btn--circle {
     --btn-background: transparent;
 
     block-size: var(--column-width-collapsed);
@@ -322,10 +321,6 @@
   .cards__menu {
     position: relative;
     z-index: var(--z-popup);
-  }
-
-  .cards__maximize-button {
-    grid-area: maximize;
   }
 
   .cards__expander {

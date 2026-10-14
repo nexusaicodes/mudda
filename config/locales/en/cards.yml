@@ -13,14 +13,10 @@ en:
       empty_placeholder:
         drag_cards: Drag cards here
         no_cards: No cards here
-      show:
-        title: 'Column: %{lane}'
     show:
       color_picker:
         column_color: Column color
         save_color: Save color
-      column:
-        maximize: Maximize column
   cards:
     boards:
       edit:

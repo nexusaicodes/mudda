@@ -5,13 +5,22 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "show" do
-    get board_column_path(boards(:writebook), columns(:writebook_doing))
+  test "a lane's cards load into its frame on the board" do
+    get board_column_path(boards(:writebook), columns(:writebook_doing)), headers: { "Turbo-Frame" => "column_#{columns(:writebook_doing).id}_cards" }
+
     assert_response :success
+    assert_select "turbo-frame#cards_column_#{columns(:writebook_doing).id}"
+    assert_select "h1", count: 0
+  end
+
+  test "a lane has no page of its own, so a plain visit goes to the board" do
+    get board_column_path(boards(:writebook), columns(:writebook_doing))
+
+    assert_redirected_to board_path(boards(:writebook), anchor: "column_#{columns(:writebook_doing).id}")
   end
 
   test "a lane's cards don't name the board they are already on" do
-    get board_column_path(boards(:writebook), columns(:writebook_doing))
+    get board_column_path(boards(:writebook), columns(:writebook_doing)), headers: { "Turbo-Frame" => "cards" }
 
     assert_select ".card .card__title"
     assert_select ".card .card__details-board", count: 0
