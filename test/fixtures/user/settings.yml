@@ -12,3 +12,9 @@ kevin_settings:
 
 system_settings:
   user: system
+
+mike_settings:
+  user: mike
+
+system_initech_settings:
+  user: system_initech

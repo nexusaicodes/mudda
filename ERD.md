@@ -74,7 +74,7 @@ erDiagram
         integer id PK
         bigint user_id FK "NOT NULL UNIQUE — enforces has_one"
         string locale "limit 255 nullable — NULL follows the browser"
-        string timezone_name "limit 255 nullable — IANA; the zone for requests with no browser zone"
+        string timezone_name "limit 255 nullable — as the browser reported it; the zone for requests with no browser zone"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }

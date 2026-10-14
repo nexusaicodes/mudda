@@ -1,5 +1,14 @@
 require "test_helper"
 
+# A page anyone may load, which reports the zone it ran in.
+class TimeZoneProbesController < ApplicationController
+  allow_unauthenticated_access
+
+  def show
+    render plain: Time.zone.name
+  end
+end
+
 # Which day "today" is, for every kind of request (see CurrentTimezone). The clock is stopped at
 # 20:00 UTC on 14 October, when it is already 01:30 on the 15th in Kolkata and 13:00 on the
 # 14th in Los Angeles, so the three zones disagree about due dates.
@@ -131,19 +140,42 @@ class TimeZoneTest < ActionDispatch::IntegrationTest
 
     get board_path(@board)
 
-    assert_select "form[action='#{my_timezone_path}'] input[name='timezone[timezone_name]'][value='America/Los_Angeles']"
+    assert_select "form[action='#{my_timezone_path}'] input[name='timezone'][value='America/Los_Angeles']"
   end
 
-  test "a browser reporting a zone by its old name gets that zone, and doesn't resave it" do
-    save_zone "Asia/Kolkata"
+  test "a browser reporting a zone by an alias saves it as reported, and then leaves it" do
     sign_in_as @user
     cookies[:timezone] = "Asia/Calcutta" # what Chromium reports for India
 
-    get my_user_path(format: :json)
-    assert_equal "Asia/Kolkata", @response.parsed_body["timezone"]
+    get board_card_path(@board, @card)
+    assert_select ".card__due--overdue"
+    assert_select "form[action='#{my_timezone_path}'] input[name='timezone'][value='Asia/Calcutta']"
+
+    save_zone "Asia/Calcutta"
 
     get board_path(@board)
     assert_select "form[action='#{my_timezone_path}']", count: 0
+  end
+
+  test "a browser in UTC with nothing saved has nothing to save" do
+    sign_in_as @user
+    cookies[:timezone] = "UTC"
+
+    get board_path(@board)
+
+    assert_select "form[action='#{my_timezone_path}']", count: 0
+  end
+
+  test "a page anyone may load still runs in the signed-in owner's saved zone" do
+    save_zone "Asia/Kolkata"
+    headers = bearer_headers_for(@user)
+
+    with_routing do |routes|
+      routes.draw { get "probe", to: "time_zone_probes#show" }
+
+      get "/probe", headers: headers
+      assert_equal "Asia/Kolkata", response.body
+    end
   end
 
   test "a browser doesn't resave a zone that is already saved" do

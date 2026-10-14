@@ -365,13 +365,14 @@ in one zone (`CurrentTimezone`, `app/controllers/concerns/current_timezone.rb`):
 3. else UTC.
 
 `layouts/shared/_time_zone` saves the browser's zone through `My::TimezonesController` whenever
-it differs from the saved one, so the saved zone follows the browser the owner used last. Every
-zone name goes through `User::Settings.timezone_named`, which resolves it to its canonical IANA
-zone, so the old alias a browser may report (Chromium says `Asia/Calcutta`) is the same zone as
-the saved `Asia/Kolkata`. The aliases resolve because the `tzinfo-data` gem bundles the whole
-zone database; don't rely on the OS's, which leaves them out. HTML
-caches that hold a date are keyed on `Date.current`, and the resolved zone is part of every
-ETag, so neither is served across a change of day or zone.
+it differs from the saved one, so the saved zone follows the browser the owner used last. Zone
+names are saved as the browser reports them, aliases included (Chromium says `Asia/Calcutta` for
+India): canonicalising would turn zones tzdata merged into links into another city's
+(`Europe/Amsterdam` into `Europe/Brussels`). The aliases resolve because the `tzinfo-data` gem
+bundles the whole zone database; don't rely on the OS's, which leaves them out. The saved zone
+needs the signed-in user, so `allow_unauthenticated_access` resumes the session ahead of every
+other callback. HTML caches that hold a date are keyed on `Date.current`, and the resolved zone
+is part of every ETag, so neither is served across a change of day or zone.
 
 ### Internationalization
 

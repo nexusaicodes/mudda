@@ -9,6 +9,9 @@
 #
 # Timestamps on a page are rendered by the browser (local-time), so this decides dates the
 # server works out: due-date labels and colours, overdue ordering, and the date filters.
+#
+# The saved zone needs the signed-in user, so this runs after the session is resumed; see
+# Authentication.allow_unauthenticated_access.
 module CurrentTimezone
   extend ActiveSupport::Concern
 
@@ -26,12 +29,18 @@ module CurrentTimezone
     end
 
     def timezone_for_request
-      timezone_from_cookie || Current.user&.timezone
+      if defined?(@timezone_for_request)
+        @timezone_for_request
+      else
+        @timezone_for_request = timezone_from_cookie || Current.user&.timezone
+      end
     end
 
     def timezone_from_cookie
-      if cookies[:timezone].present?
-        @timezone_from_cookie ||= User::Settings.timezone_named(cookies[:timezone])
+      if defined?(@timezone_from_cookie)
+        @timezone_from_cookie
+      else
+        @timezone_from_cookie = (ActiveSupport::TimeZone[cookies[:timezone]] if cookies[:timezone].present?)
       end
     end
 end

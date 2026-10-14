@@ -138,9 +138,9 @@ boards and notes take nothing but those three.
 Timestamps in a response are UTC. "Today", though (what `overdue`, `due=soon`, and `creation`
 compare against), is the owner's day: a token has no browser zone of its own, so it gets the
 zone saved from the owner's browser, which `GET /my/user.json` reports as `timezone`. Until a
-browser has saved one, it is UTC. The browser saves its zone whenever it changes, so a zone
-set with `PATCH /my/timezone.json` lasts until the owner next opens Mudda in a browser
-elsewhere.
+browser has saved one, it is UTC. Any page a browser loads saves the browser's zone if it isn't
+the one already saved, so a zone set with `PATCH /my/timezone.json` lasts only until the owner
+next loads a page in a browser set to another zone, the same browser included.
 
 ## Resources
 
@@ -152,7 +152,7 @@ elsewhere.
 | `GET` `PATCH` | `/users/:id.json` | `PATCH` takes `name` and `avatar`. Always the signed-in user, whatever the `:id` |
 | `DELETE` | `/users/:id/avatar.json` | Removes the avatar |
 | `GET` `PATCH` | `/account/settings.json` | The account's `id`, `name`, and `created_at`; `PATCH` takes `name` and answers `204` |
-| `PATCH` | `/my/timezone.json` | `timezone_name`: an IANA name (`Asia/Kolkata`). Saves the owner's zone under its canonical name (`Asia/Calcutta` is saved as `Asia/Kolkata`; see [Time zone](#time-zone)) and answers `204`. A name that isn't a zone is a `422`, and `null` or `""` clears it |
+| `PATCH` | `/my/timezone.json` | `timezone`: an IANA name (`Asia/Kolkata`), the same key `/my/user.json` reports. Saves the owner's zone (see [Time zone](#time-zone)) and answers `204`. A missing or blank zone is a `400`, and a name that isn't a zone a `422` |
 
 A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `avatar_url`.
 
