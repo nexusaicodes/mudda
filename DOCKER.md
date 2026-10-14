@@ -31,7 +31,7 @@ seed runs once, when `db:prepare` creates the database:
 | Variable | Purpose | Dev default |
 |---|---|---|
 | `MUDDA_OWNER_EMAIL` | The owner's email address. Required outside development | `saksham@nexusai.world` |
-| `MUDDA_OWNER_NAME` | Display name. Defaults to the email's local part | `Saksham Saxena` |
+| `MUDDA_OWNER_NAME` | Display name. Defaults to the email's local part, capitalized | `Saksham Saxena` |
 | `MUDDA_OWNER_ACCOUNT` | The account's name | `Mudda` |
 | `MUDDA_OWNER_PASSWORD` | The sign-in password, checked against this variable on every sign-in and never stored | `mudda-dev-password` |
 
@@ -41,8 +41,8 @@ sign-in.
 
 **Before exposing the app, set a strong `MUDDA_OWNER_PASSWORD`.** It takes effect when the
 container is recreated (`make start`); there is nothing to reseed. Set `MUDDA_OWNER_EMAIL` before
-the first `make setup`: the seed finds the owner by email, so changing it later provisions a
-second account rather than renaming the first.
+the first `make setup`: the owner is found by email, so changing it later leaves no owner under
+the new address, and reseeding then provisions a second account rather than renaming the first.
 
 Lost or broken passkeys? `make reset-auth` removes them all and ends every session; sign back in
 with the password. Driving the app from a script or agent? See [API.md](API.md) and
@@ -56,10 +56,10 @@ more. A self-hoster leaves both unset.
 | Variable | Purpose |
 |---|---|
 | `MUDDA_CARD_LIMIT` | Cards the account may ever create. Deleting one doesn't free its slot. Unset, blank, negative, or not a whole number: no limit |
-| `MUDDA_UPGRADE_URL` | Where the upgrade links (near the limit, in Account Settings, and in the Settings menu) and `/account/upgrade` (after sign-in) send the owner |
+| `MUDDA_UPGRADE_URL` | Where the upgrade links and `/account/upgrade` send the owner (see [AGENTS.md → Core domain models](AGENTS.md#core-domain-models)) |
 
 `docker-compose.yml` doesn't pass these through, so to try them in development add them to the
-`web` service's `environment:`.
+`web` service's `environment:`, as you would `MUDDA_OWNER_ACCOUNT`.
 
 ### Commands
 
@@ -90,8 +90,8 @@ container.
 | `make lint-fix` | RuboCop with autocorrect |
 | `make i18n` | The translation checks alone |
 
-State (the SQLite database, uploads, logs, and caches) lives in named volumes, so the host
-checkout is only ever read, and `make fresh` (`down -v`, then a rebuild) is a complete reset.
+State (the SQLite database, uploads, logs, and caches) lives in named volumes, so no runtime
+state lands in the host checkout, and `make fresh` (`down -v`, then a rebuild) is a complete reset.
 
 ### Configuration
 
@@ -99,14 +99,17 @@ checkout is only ever read, and `make fresh` (`down -v`, then a rebuild) is a co
 |---|---|---|
 | `PORT` | `3006` | Host port published for the web server |
 
-Override it and the `MUDDA_OWNER_*` variables per invocation (`PORT=4000 make up`) or in a
-`.env` file next to `docker-compose.yml` (it is gitignored). The Ruby version is fixed in
+Override it, `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, and `MUDDA_OWNER_PASSWORD` per invocation
+(`PORT=4000 make up`) or in a `.env` file next to `docker-compose.yml` (it is gitignored). The Ruby version is fixed in
 `docker-compose.yml`; see [AGENTS.md → Toolchain](AGENTS.md#toolchain).
 
 ### Troubleshooting
 
 - **`app.mudda.localhost` won't resolve**: use http://localhost:3006, or add
   `127.0.0.1 app.mudda.localhost` to your hosts file.
+- **"Blocked host"**: development accepts only the hosts listed in `config.hosts` in
+  `config/environments/development.rb` (the two above, `mudda.localhost`, `127.0.0.1`, and
+  `*.ts.net` and `*.nip.io` names). Add yours there.
 - **Port already in use**: start with `PORT=4000 make up`.
 - **Stuck or odd state**: `make fresh`.
 

@@ -39,8 +39,7 @@ claude mcp add --transport http mudda https://your-mudda/mcp \
 
 Any client that speaks Streamable HTTP and can send a header works the same way. The token is
 the only credential `/mcp` accepts; a browser's session cookie is not. A refusal is the API's
-own: `401` for no token or a revoked or expired one, `403` for a deactivated user, and `429`
-(with `Retry-After`) for a token over its rate limit.
+own (see [API.md → Errors](API.md#errors)), and a `429` keeps its `Retry-After`.
 
 ## Tools
 
@@ -62,6 +61,8 @@ own: `401` for no token or a revoked or expired one, `403` for a deactivated use
 | `delete_board` | `DELETE /boards/:id` |
 | `delete_card` | `DELETE /boards/:board_id/cards/:number` |
 | `delete_note` | `DELETE /boards/:board_id/cards/:number/notes/:id` |
+
+Cards are addressed by board id and per-board `number`, as in the API.
 
 **A client is offered only the tools its token's scopes allow.** Reading tools need `read`, the
 create and update tools need `write`, and the three delete tools need `delete`. Calling a tool
@@ -87,10 +88,9 @@ Arguments are checked against the tool's schema before anything reaches the API.
 fails that check is also a tool error, but its text is the MCP library's plain message naming
 the argument, with no envelope.
 
-**Rate limit.** Every request to `/mcp` checks the credential, and that check is an API request
-of its own. A tool call therefore spends two of the token's 600 requests a minute, and so does
-every other MCP message (`initialize`, `tools/list`, `ping`). That allows at most 300 tool calls
-a minute.
+**Rate limit.** Every request to `/mcp` checks the credential with an API request of its own,
+so any MCP message (`initialize`, `tools/list`, `ping`) spends one of the token's 600 requests a
+minute, and a tool call spends two. That allows at most 300 tool calls a minute.
 
 ## OAuth
 
@@ -131,14 +131,14 @@ What is enforced:
 - Tokens and client secrets are stored hashed. Access tokens last an hour, and each refresh
   rotates the refresh token. A refresh token unused for 90 days (`Session::Oauth::IDLE_EXPIRY`)
   is refused, so a client that stopped being used has to ask the user again.
-- Registration is open but grants nothing on its own, and is limited to 20 an hour per address.
+- Registration is open but grants nothing on its own, and is limited to 20 an hour per IP address.
 
 **A connected client is a token session like any other** (`Session::Oauth`), labelled with the
 client's name and carrying the scopes granted. There is one per client, held by a unique index.
 Consenting under a name that another client's session already holds replaces that session, the
 way minting replaces a token of the same label. Claude Code re-registers on each
 `claude mcp add`, so that is how its old connection is dropped. A client's access tokens
-resolve to its session.
+resolve to its session, so its work is attributed to the client's name (`agent_name`).
 
 Revoking it under API tokens, or with `make revoke LABEL=<its name>`, revokes its access and
 refresh tokens, and consenting again brings it back. `make revoke` also revokes a minted token

@@ -8,8 +8,8 @@ sessions and tokens, search) is in [AGENTS.md](AGENTS.md).
   Record alone. Nothing at the storage layer prevents an orphaned id, which is why, for example,
   `Card::Triageable#column_on_its_board` validates that a card's lane is on its board.
 - **Every key is a plain autoincrementing integer**, so `SELECT` prints the same ids the app and
-  the API use. `cards.number` is not a key: it is a per-board sequence drawn from
-  `boards.cards_count`, unique only within its board.
+  the API use. `cards.number` is not a key but a per-board sequence (see
+  [AGENTS.md → Keys and card numbers](AGENTS.md#keys-and-card-numbers)).
 
 ---
 
@@ -304,8 +304,8 @@ erDiagram
     CARDS ||--o{ NOTES : "rich-text log"
 ```
 
-`column_id` is the only lifecycle state; there are no closed or backlog tables (see
-[AGENTS.md → Card Lifecycle](AGENTS.md#card-lifecycle-fixed-columns)). `position` only orders a
+`column_id` is a card's whole lifecycle (see
+[AGENTS.md → Card lifecycle](AGENTS.md#card-lifecycle-fixed-columns)). `position` only orders a
 board's lanes. Its values aren't contiguous on boards that once had a Triage lane, which
 `20261011000000_fold_triage_into_backlog` folded into Backlog.
 
@@ -341,8 +341,7 @@ erDiagram
 ```
 
 `search_records` holds one row per card and per note. **Every row carries `card_id`**, so a
-note's match resolves to its card. Neither `search_records` nor `events` keeps a copy of the
-board: both reach it through their card. `search_records_fts` is an FTS5 virtual table
+note's match resolves to its card; neither it nor `events` stores a board. `search_records_fts` is an FTS5 virtual table
 (`tokenize='porter'`) joined by rowid, holding the text as `Search::Normalizer` folds it, while
 `search_records` keeps it as written. Ignore its FTS5 shadow tables (`_config`, `_content`,
 `_data`, `_docsize`, `_idx`).

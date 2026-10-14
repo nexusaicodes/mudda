@@ -43,14 +43,16 @@ curl -X POST https://your-mudda/session/password.json \
 ```
 
 - `label` names the token, as `make token LABEL=…` does. Without one it is `json-sign-in`.
-  **Give every client its own label**: a label holds one live token (below), so two clients
-  sharing the default would revoke each other on every sign-in.
+  **Give every client its own label**: a [label holds one live token](#managing-tokens), so
+  two clients sharing the default would revoke each other on every sign-in.
 - `scopes` (a string or a list) chooses what the token may do; without it the token reads and
   writes. An unknown scope is a `422`.
 
-Sign-in is rate limited to 10 attempts every 3 minutes per address. `POST /session/passkey.json`
-completes a passkey sign-in the same way; it always mints a `json-sign-in` token with the default
-scopes.
+The credentials may also be wrapped: `{"session":{"email_address":"…","password":"…"}}`.
+Sign-in is rate limited to 10 attempts every 3 minutes per IP address.
+
+`POST /session/passkey.json` completes a passkey sign-in and answers `{"session_token":"…"}`. It
+always mints a `json-sign-in` token with the default scopes.
 
 ### Scopes
 
@@ -77,9 +79,10 @@ Browser sessions are never limited by scope. Tokens minted before scopes existed
 
 ### Rate limit
 
-Each token may make **600 requests a minute**, across every endpoint. Past that it gets a `429`
-with `Retry-After: 60`. Requests refused before they reach the action (`401`, `403`, `406`)
-don't count, and browsers aren't limited.
+Each token may make **600 requests a minute**, across the app's endpoints (Active Storage and
+the OAuth endpoints aren't counted). Past that it gets a `429` with `Retry-After: 60`. Requests
+refused for their credential, scope, or format (a `401`, the scope or deactivation `403`, a
+`406`) don't count, and browsers aren't limited.
 
 ### Managing tokens
 
@@ -116,8 +119,9 @@ are ignored.
 
 A create answers `201` with the record and a `Location`; a delete answers `204`.
 
-**Query parameters are checked.** Each endpoint declares the ones it answers to, and anything
-else is a `422` naming the parameter, as is a value outside a filter's list. A mistaken filter
+**Query parameters are checked** on every board, card, note, and search endpoint. Each declares
+the ones it answers to, and anything else is a `422` naming the parameter, as is a value outside
+a filter's list. A mistaken filter
 fails loudly instead of quietly widening the results:
 
 ```json
@@ -126,7 +130,8 @@ fails loudly instead of quietly widening the results:
 ```
 
 `page`, `previous`, and `format` are accepted everywhere. Each endpoint is checked against its
-own list: `q` is a `422` on `/cards.json`, and `column_ids[]` is a `422` on `/search.json`.
+own list: `q` is a `422` on `/cards.json`, `column_ids[]` is a `422` on `/search.json`, and
+boards and notes take nothing but those three.
 
 Dates and times are UTC. A bearer request has no browser time zone, so "today", "overdue", and
 `due=soon` are reckoned in UTC.
@@ -137,8 +142,8 @@ Dates and times are UTC. A bearer request has no browser time zone, so "today", 
 
 | Verb | Path | Notes |
 |---|---|---|
-| `GET` | `/my/user.json` | The signed-in user, with the `account` (`id`, `name`) nested in it, and, for a token, `"token": { "label": "claude", "scopes": ["read", "write"] }` |
-| `PATCH` | `/users/:id.json` | `name`, `avatar`. Always the signed-in user, whatever the `:id` |
+| `GET` | `/my/user.json` | The signed-in user, with the `account` (`id`, `name`, `created_at`) nested in it, and, for a token, `"token": { "label": "claude", "scopes": ["read", "write"] }` |
+| `GET` `PATCH` | `/users/:id.json` | `PATCH` takes `name` and `avatar`. Always the signed-in user, whatever the `:id` |
 | `DELETE` | `/users/:id/avatar.json` | Removes the avatar |
 | `GET` `PATCH` | `/account/settings.json` | The account's `id`, `name`, and `created_at`; `PATCH` takes `name` and answers `204` |
 | `PATCH` | `/my/timezone.json` | `timezone_name`. Stores the browser's zone preference and answers `204`; it doesn't change how the API reckons dates |
@@ -157,7 +162,7 @@ A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `ava
 
 Every board has the same four fixed lanes: Backlog, Todo, Doing, Done. They can't be created,
 reordered, or deleted, so **columns have no endpoints of their own**. Each one in the board's
-`columns` carries `id`, `name`, `color`, `position`, and a `cards_url`: the board's card index
+`columns` carries `id`, `name`, `color`, `position`, `created_at`, and a `cards_url`: the board's card index
 narrowed to that lane with `column_ids[]`. Lane colour is set from the board page only.
 
 ### Cards
@@ -181,7 +186,7 @@ again.
 (in Backlog), `overdue`, `color` (its lane's), `last_active_at`, `created_at`, `url`, `board`,
 `column`, `creator`, and `notes_url`. In an index that is all. A single card adds all of its
 `steps` (`id`, `content`, `completed`), its most recent 20 `notes`, and `notes_truncated`. When
-that is `true`, `notes_url` pages through the whole log.
+that is `true`, `notes_url` pages through the whole log ([Notes](#notes)).
 
 **What a card takes:** `title`, `description` (rich text, as plain text or HTML), `due_on`
 (`YYYY-MM-DD`), `golden`, `created_at`, `last_active_at`, and `steps_attributes`. Write the
@@ -199,7 +204,8 @@ POST /boards/1/cards.json
   "steps_attributes": [ { "content": "First" }, { "content": "Second" } ] }
 ```
 
-On a deployment with a card limit, a create past it is a `422`:
+On a deployment with a card limit (`MUDDA_CARD_LIMIT`; see
+[DOCKER.md → Card limit](DOCKER.md#card-limit)), a create past it is a `422`:
 `{ "errors": { "base": ["This account has used all 100 of its cards"] } }`.
 
 **And edited in one request.** A card's board, lane, goldness, and steps are attributes of the
@@ -245,7 +251,9 @@ recorded as its own event (`card_title_changed`, `card_triaged`, `card_board_cha
 
 ### Notes
 
-Notes stay a collection of their own, because a card can carry thousands of them.
+Notes stay a collection of their own, because a card can carry thousands of them. For most
+cards the 20 embedded in the card are all there is, and the index is only needed when
+`notes_truncated` is `true`.
 
 | Verb | Path | Notes |
 |---|---|---|
@@ -253,8 +261,7 @@ Notes stay a collection of their own, because a card can carry thousands of them
 | `GET` `PUT` `DELETE` | `/boards/:board_id/cards/:number/notes/:id.json` | Only the note's creator may change or delete it |
 
 A note reports `id`, `body` (`{ "plain_text": …, "html": … }`), `created_at`, `updated_at`,
-`creator`, `url`, and `card` (its database `id` and `url`). For most cards the 20 embedded in
-the card are all there is, and the index is only needed when `notes_truncated` is `true`.
+`creator`, `url`, and `card` (its database `id` and `url`).
 
 ### Search
 
@@ -270,7 +277,7 @@ behind. `bin/rails routes` lists browser and API routes together, so build a cli
 tables above, not from the route list.
 
 The browser has endpoints for things the API reads and writes as fields. A card's lane
-(`…/cards/:number/column`), board (`…/board`), star (`…/goldness`), steps (`…/steps`), and
+(`…/cards/:number/column`), board picker (`…/board/edit`), star (`…/goldness`), steps (`…/steps`), and
 drop target (`…/drops/column`), the compose screen (`…/cards/new`), and a lane's colour
 (`/boards/:board_id/columns/:id`) all answer `406`. `PUT` or `POST` the card, or read the
 board, instead. Every `new` and `edit` page, `/`, `/landing`, `/my/menu`, `/my/tokens`,

@@ -110,15 +110,15 @@ the code.
 - **Owner password.** The owner signs in with their email and the deployment secret in
   `ENV["MUDDA_OWNER_PASSWORD"]`. `OwnerPassword` (`app/models/owner_password.rb`) verifies it
   with `secure_compare` and is `enabled?` whenever the secret is set.
-  `Sessions::PasswordsController` handles `POST /session/password`. There is **no password
-  column**, and the password stays available whether or not passkeys exist.
+  `Sessions::PasswordsController` handles `POST /session/password`. Nothing stores the
+  password, and it stays available whether or not passkeys exist.
 - **Passkeys are optional**: WebAuthn via `User has_passkeys`, `lib/action_pack/passkey/`, and
   the `sessions/passkeys` and `my/passkeys` controllers. There is no `Credential` model. Adding or
   removing passkeys never disables the password.
 - **Provisioning and recovery.** `db/seeds.rb` provisions the owner user and account from the
   `MUDDA_OWNER_*` env vars. With neither a password secret nor a passkey there is no way to sign
   in, so the seed warns locally and aborts elsewhere. `bin/rails auth:reset` (`make reset-auth`)
-  deletes every passkey, session (API tokens included), and OAuth grant.
+  is the recovery path.
 - **`Session#kind`** says how the user is present: `browser` (a cookie) or `token` (a script or
   agent). A token always carries a `label` and a browser session never does; both are validated.
   `Session#token` is the single definition of the credential, and minted tokens expire after
@@ -137,7 +137,8 @@ the code.
   `Session::DEFAULT_SCOPES`.
 - **Deactivation.** `Current` still names a deactivated user but gives them no account, and
   `Authorization` refuses the request by the session's kind, not the format asked for: a token
-  keeps its session and gets a 403, while a browser is signed out.
+  keeps its session and gets a 403, while a browser is signed out (sent to the login page, or a
+  403 if it asked for JSON).
 - **Agent attribution.** Every token is the same single user, so `creator` stays that user;
   `Current.agent_name` (the token's label, `nil` for a browser) is written to
   `events.agent_name` by `Eventable#track_event`. There is no per-agent actor model.
@@ -166,11 +167,12 @@ can't both take the last one, and raises `RecordInvalid` past the ceiling, which
 JSON and MCP. Under a ceiling:
 - The compose screen warns within `Account::CardLimited::NEAR_LIMIT` cards of it.
 - The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL` once it is reached.
-- Account Settings shows a Plan section (cards used of the limit).
+- Account Settings shows a Plan section (cards used of the limit), which links to
+  `/account/upgrade` while `MUDDA_UPGRADE_URL` is set.
 
-While `MUDDA_UPGRADE_URL` is set, Account Settings and the Settings menu link to
-`/account/upgrade` at any time. `GET /account/upgrade` (`Account::UpgradesController`) hands the
-signed-in owner to `MUDDA_UPGRADE_URL`, signing them in first if needed and passing on `billing`
+While `MUDDA_UPGRADE_URL` is set, the account menu links to `/account/upgrade` at any time.
+`GET /account/upgrade` (`Account::UpgradesController`) hands the signed-in owner to
+`MUDDA_UPGRADE_URL`, signing them in first if needed and passing on `billing`
 (`monthly`/`yearly`), or sends them back to the board when there is no URL. The platform's "Go
 Premium" sends returning customers there.
 
@@ -251,8 +253,8 @@ Backlog. People and agents move cards the same way, and there is no review lane.
 
 ### Keys and card numbers
 
-Primary keys are plain autoincrementing integers, so what a `SELECT` prints is the id the app
-and the API use. `Card#number` is a **separate**, **per-board** sequence drawn from
+Primary keys are plain autoincrementing integers ([ERD.md](ERD.md)). `Card#number` is a
+**separate**, **per-board** sequence drawn from
 `boards.cards_count` (`board.increment!(:cards_count)`), and it is what the API addresses cards
 by. Two boards can each hold a card `1`, and a card moved between boards is renumbered on
 arrival. A bare number never names a card on its own: search treats a number as plain text, and
@@ -306,7 +308,7 @@ chrome is small and there are **no keyboard shortcuts**: keys only act inside th
 typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
 - **Landing.** `/` (`LandingsController`) sends you to the board you last had open, remembered
-  in `localStorage`. The `last-board` Stimulus controller writes it, and the landing page reads
+  in `localStorage`, or else the most recently active one. The `last-board` Stimulus controller writes it, and the landing page reads
   it (an inline script on a full load, the `landing` controller on a Turbo visit).
 - **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
   then the page's back link if it has one (`content_for :header_start`), the page title in the
@@ -329,7 +331,9 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 ### Background jobs
 
 Jobs run on Rails' in-process `:async` Active Job adapter (the `:test` adapter in tests), with
-no Solid Queue, Redis, or separate worker process.
+no Solid Queue, Redis, or separate worker process. Likewise the cache is a memory store (the null
+store in tests, and in development unless caching is toggled on), which is why the rate limiters
+keep `MemoryStore`s of their own.
 
 - The `AccountTenanted` concern (`app/jobs/concerns/account_tenanted.rb`) is `prepend`ed in
   `ApplicationJob`. It serializes `Current.account` as a GID and restores it in `around_perform`,
