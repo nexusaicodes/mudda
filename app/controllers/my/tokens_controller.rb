@@ -1,5 +1,5 @@
 # The tokens scripts and agents sign in with, managed from the browser — so a deployment with
-# no shell (a cloud tenant) can still mint and revoke them. A token's own credential is shown
+# no shell can still mint and revoke them. A token's own credential is shown
 # once, when it is minted, and never again.
 class My::TokensController < ApplicationController
   require_browser_session

@@ -1,5 +1,8 @@
 json.partial! "users/user", user: @user
 
+# The zone this request's dates were reckoned in (see CurrentTimezone).
+json.timezone Time.zone.name
+
 json.account do
   json.partial! "my/users/account", account: Current.account
 end

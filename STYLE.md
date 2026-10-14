@@ -142,13 +142,13 @@ We model web endpoints as CRUD operations on resources (REST). When an action do
 ```ruby
 # Bad
 resources :cards do
-  post :close
-  post :reopen
+  post :gild
+  post :ungild
 end
 
 # Good
 resources :cards do
-  resource :closure
+  resource :goldness, only: %i[ create destroy ]
 end
 ```
 
@@ -179,7 +179,7 @@ end
 When justified, it is fine to use services or form objects, but don't treat those as special artifacts:
 
 ```ruby
-Signup.new(email_address: email_address).create_identity
+OwnerPassword.authenticate(email_address, password)
 ```
 
 ## Run async operations in jobs
@@ -188,6 +188,8 @@ As a general rule, we write shallow job classes that delegate the logic itself t
 
 * We typically use the suffix `_later` to flag methods that enqueue a job.
 * A common scenario is having a model class that enqueues a job that, when executed, invokes some method in that same class. In this case, we use the suffix `_now` for the regular synchronous method.
+
+An illustration (Mudda has no event relaying):
 
 ```ruby
 module Event::Relaying

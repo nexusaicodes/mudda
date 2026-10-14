@@ -274,11 +274,9 @@
 
   /* Assign grid areas */
   .card__meta-avatars--author { grid-area: avatars-author; }
-  .card__meta-avatars--assignees { grid-area: avatars-assignees; }
   .card__meta-text--added { grid-area: text-added; }
   .card__meta-text--author { grid-area: text-author; }
   .card__meta-text--updated { grid-area: text-updated; }
-  .card__meta-text--assignees { grid-area: text-assignees; }
 
   .card__meta-avatars {
     align-self: center;
@@ -286,30 +284,6 @@
 
   .card__meta-avatars--author {
     margin-inline-end: var(--meta-spacer-inline);
-  }
-
-  .card__meta-avatars--assignees {
-    display: flex;
-    margin-inline-start: var(--meta-spacer-inline);
-
-    .avatar {
-      margin-inline-end: calc(-1 * var(--meta-spacer-inline));
-    }
-  }
-
-  .card__assignees-trigger {
-    background: transparent;
-    border: none;
-    padding: 0;
-    display: flex;
-
-    &:focus-visible {
-      outline: none;
-
-      .btn {
-        box-shadow: 0 0 0 var(--focus-ring-size) var(--focus-ring-color);
-      }
-    }
   }
 
   .card__meta-text {
@@ -351,8 +325,7 @@
       inline-size: 100%;
     }
 
-    .card__meta-avatars--author,
-    .card__meta-avatars--assignees .avatar {
+    .card__meta-avatars--author {
       display: none;
     }
   }
@@ -391,23 +364,12 @@
 
     .cards & {
       display: none;
-
-      .cards--grid &,
-      .cards--on-deck & {
-        &.card__closed--system {
-          display: flex;
-        }
-      }
     }
   }
 
   .card:has(.card__closed),
   .card-perma:has(.card__closed) {
     --card-color: var(--color-card-complete) !important;
-
-    .bubble {
-      display: none;
-    }
   }
 
   .card__closed-title {
@@ -419,15 +381,6 @@
     text-transform: uppercase;
   }
 
-  .card__closed-date {
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-  }
-
-  .card__closed-by {
-    border-block-end: 1px dashed currentcolor;
-  }
-
   /* Misc bits
   /* ------------------------------------------------------------------------ */
 
@@ -436,115 +389,5 @@
     inset: 0;
     position: absolute;
     z-index: -1;
-  }
-
-  .card:nth-child(2n+1) .bubble { --bubble-rotate: -90deg; }
-  .card:nth-child(3n+1) .bubble { --bubble-rotate: 45deg; }
-
-  /* Variants
-  /* ------------------------------------------------------------------------ */
-
-  .card--notification {
-    --card-color: var(--color-card-default);
-    --card-padding-inline: 1ch;
-    --card-padding-block: 1ch;
-
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-
-    &.card--closed {
-      --card-color: var(--color-card-complete) !important;
-    }
-
-    .card__body {
-      padding-block-end: 0;
-    }
-
-    .card__board {
-      font-size: var(--text-xx-small);
-      padding-block: 0.5ch;
-      padding-inline-start: var(--inline-space-double);
-    }
-
-    .card__header {
-      margin-block-start: calc(-1.1 * var(--card-padding-block));
-      margin-inline: calc(-1 * var(--card-padding-inline));
-      max-inline-size: unset;
-    }
-
-    .card__timestamp {
-      opacity: 0.66;
-    }
-
-    .card__notification-body {
-      font-size: var(--text-x-small);
-    }
-
-    .card__notification-meta {
-      font-size: var(--text-xx-small);
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .card__notification-mentioner {
-      background-color: var(--color-highlight);
-      border-radius: 0.7em 0.2em 0.7em 0.2em;
-      color: inherit;
-      display: inline-flex;
-      padding: 0.1em 0.3em;
-    }
-
-    .card__title {
-      font-size: var(--text-small);
-      font-weight: bold;
-      min-block-size: 0;
-    }
-  }
-
-  .card__notification-unread-indicator {
-    --btn-background: var(--color-marker);
-    --btn-border-color: var(--color-canvas);
-    --btn-color: var(--color-ink-inverted);
-    --btn-icon-size: 0.5em;
-    --btn-padding: 0;
-    --btn-size: 1.6em;
-
-    font-size: var(--text-xx-small);
-    font-weight: 600;
-    margin: 2px;
-    position: relative;
-    z-index: 1;
-
-    .icon {
-      opacity: 0;
-      transition: opacity 150ms ease;
-    }
-
-    @media (hover: hover) {
-      .card:hover & {
-        --btn-background: var(--color-ink-lightest);
-        --btn-color: var(--color-ink);
-
-        .badge-count { opacity: 0; }
-               .icon { opacity: 1; }
-      }
-    }
-  }
-
-  .card__board-public-description {
-    max-inline-size: 66ch;
-
-    > *:first-child { margin-block-start: 0; }
-    > *:last-child { margin-block-end: 0; }
-
-    ul, ol {
-      inline-size: fit-content;
-      margin-inline: auto;
-      text-align: start;
-    }
-
-    code {
-      text-align: left;
-    }
   }
 }

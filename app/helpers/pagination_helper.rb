@@ -11,14 +11,8 @@ module PaginationHelper
     }
   end
 
-  # The same block for an index that returns everything it has, so a client reads one shape
-  # across every index rather than checking which ones paginate.
-  def paging_for_all(records)
-    { total: records.size, page: 1, pages: 1, next: nil }
-  end
-
   def pagination_frame_tag(namespace, page, data: {}, **attributes, &)
-    turbo_frame_tag pagination_frame_id_for(namespace, page.number), data: { timeline_target: "frame", **data }, role: "presentation", **attributes, &
+    turbo_frame_tag pagination_frame_id_for(namespace, page.number), data: data, role: "presentation", **attributes, &
   end
 
   def link_to_next_page(namespace, page, activate_when_observed: false, label: default_pagination_label(activate_when_observed), data: {}, **attributes)

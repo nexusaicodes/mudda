@@ -2,25 +2,21 @@ david:
   name: David
   email_address: david@example.com
   account: 37s
-  verified_at: <%= Time.current.to_fs(:db) %>
 
 jz:
   name: JZ
   email_address: jz@example.com
   account: 37s
-  verified_at: <%= Time.current.to_fs(:db) %>
 
 jason:
   name: Jason
   email_address: jason@example.com
   account: 37s
-  verified_at: <%= Time.current.to_fs(:db) %>
 
 kevin:
   name: Kevin
   email_address: kevin@example.com
   account: 37s
-  verified_at: <%= Time.current.to_fs(:db) %>
 
 system:
   name: System
@@ -31,7 +27,6 @@ mike:
   name: Mike
   email_address: mike@example.com
   account: initech
-  verified_at: <%= Time.current.to_fs(:db) %>
 
 system_initech:
   name: System

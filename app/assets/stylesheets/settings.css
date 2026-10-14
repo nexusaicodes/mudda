@@ -1,7 +1,6 @@
 @layer components {
   .settings {
     --settings-spacer: var(--block-space);
-    --settings-item-padding-inline: 0.5ch;
 
     align-items: start;
     display: flex;
@@ -60,77 +59,5 @@
     &:is(:first-child):has(h2) {
       margin-top: -0.33lh; /* Align h2 letters caps with panel padding */
     }
-  }
-
-  .settings__section--negative {
-    h2 {
-      color: var(--color-negative);
-    }
-
-    .divider {
-      --divider-color: oklch(var(--lch-red-light));
-    }
-  }
-
-  .settings__section:has(.settings__scrollable-list) {
-    @media (min-width: 640px) {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      min-height: 0;
-    }
-  }
-
-  .settings__scrollable-list {
-    flex: 1 1 auto;
-    list-style: none;
-    margin: calc(var(--settings-spacer) / -4) calc(-1 * var(--settings-item-padding-inline));
-    padding: 0;
-    overflow: auto;
-
-    li {
-      border-radius: 0.5em;
-
-      /* Add padding if it's not already on a link within */
-      &:not(:has(a:first-child)) { padding-inline-end: var(--settings-item-padding-inline); }
-      &:not(:has(a:last-child)) { padding-inline-end: var(--settings-item-padding-inline); }
-    }
-
-    a {
-      padding: calc(var(--settings-spacer) / 4) var(--settings-item-padding-inline);
-
-      @media(any-hover: hover) {
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-    }
-
-    /* Only add a BG color when you can actually navigate */
-    .settings__user-filter:focus-within & {
-      [aria-selected] {
-        background: var(--color-selected);
-      }
-    }
-  }
-
-  /* Users
-  /* ------------------------------------------------------------------------ */
-
-  .settings__user-filter {
-    --btn-size: 3.5ch;
-    --avatar-size: var(--btn-size);
-
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--settings-spacer) / 2);
-    min-height: 0;
-  }
-
-  .settings__user-filter--bg {
-    background-color: var(--color-ink-lightest);
-    border-radius: 0.5em;
-    margin-block: 0;
-    padding: var(--settings-spacer);
   }
 }

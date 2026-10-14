@@ -7,12 +7,8 @@
 /.bundle
 
 # Ignore documentation
-/docs/
-/README.md
-/CLAUDE.md
-/AGENTS.md
-/STYLE.md
-/CONTRIBUTING.md
+/*.md
+!/LICENSE.md
 
 # Ignore all environment files (except templates).
 /.env*

@@ -5,18 +5,41 @@ class My::TimezonesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
   end
 
-  test "update" do
-    time_zone = ActiveSupport::TimeZone["America/New_York"]
+  test "the browser saves its zone" do
+    put my_timezone_path, params: { timezone: "America/New_York" }
 
-    assert_not_equal time_zone, users(:kevin).timezone
-    patch my_timezone_path, params: { timezone_name: "America/New_York" }
-    assert_equal time_zone, users(:kevin).reload.timezone
+    assert_response :no_content
+    assert_equal ActiveSupport::TimeZone["America/New_York"], users(:kevin).reload.timezone
   end
 
-  test "update as JSON" do
-    assert_not_equal ActiveSupport::TimeZone["America/Chicago"], users(:kevin).timezone
-    patch my_timezone_path, params: { timezone_name: "America/Chicago" }, as: :json
+  test "a zone sent as JSON, under the key GET /my/user reports it by" do
+    patch my_timezone_path, params: { timezone: "Asia/Kolkata" }, as: :json
     assert_response :no_content
-    assert_equal ActiveSupport::TimeZone["America/Chicago"], users(:kevin).reload.timezone
+
+    get my_user_path(format: :json)
+    reported = @response.parsed_body["timezone"]
+    assert_equal "Asia/Kolkata", reported
+
+    patch my_timezone_path, params: { timezone: reported }, as: :json
+    assert_response :no_content
+  end
+
+  test "a name that isn't a zone is refused, and the saved one kept" do
+    users(:kevin).settings.update!(timezone_name: "Asia/Kolkata")
+
+    patch my_timezone_path, params: { timezone: "Mars/Olympus_Mons" }, as: :json
+
+    assert_response :unprocessable_entity
+    assert_equal [ "is invalid" ], @response.parsed_body.dig("errors", "timezone")
+    assert_equal "Asia/Kolkata", users(:kevin).reload.settings.timezone_name
+  end
+
+  test "a request naming no zone is refused" do
+    [ {}, { timezone: "" }, { timezone: nil } ].each do |body|
+      patch my_timezone_path, params: body, as: :json
+
+      assert_response :bad_request
+      assert_equal [ "is required" ], @response.parsed_body.dig("errors", "timezone")
+    end
   end
 end

@@ -35,11 +35,8 @@ Rails.application.configure do
     "Cache-Control" => "public, max-age=#{5.minutes.to_i}"
   }
 
-  # Select Active Storage service via env var; default to local disk.
-  # Don't overwrite if it's already been set (e.g. by mudda-saas)
-  if config.active_storage.service.blank?
-    config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "local").to_sym
-  end
+  # Uploads live on local disk, under storage/ with the database.
+  config.active_storage.service = :local
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"

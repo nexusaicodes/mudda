@@ -16,9 +16,7 @@ gem "puma", "~> 7.2", ">= 7.2.1"
 gem "sqlite3", ">= 2.0"
 
 # Features
-gem "bcrypt", "~> 3.1.22"
 gem "geared_pagination", "~> 1.2"
-gem "rqrcode"
 gem "rouge"
 gem "jbuilder"
 gem "lexxy", "0.9.14.beta"
@@ -28,6 +26,7 @@ gem "useragent", bc: "useragent"
 gem "mcp", "~> 1.6"
 gem "doorkeeper", "~> 5.9"
 gem "rails-i18n"
+gem "tzinfo-data" # the whole zone database, aliases a browser may report (Asia/Calcutta) included, whatever the OS ships
 
 # Operations
 gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so here to quash warnings
@@ -35,7 +34,6 @@ gem "benchmark" # indirect dependency, being removed from Ruby 3.5 stdlib so her
 group :development, :test do
   gem "i18n-tasks", require: false
   gem "debug"
-  gem "faker"
   gem "rubocop-rails-omakase", require: false
 end
 

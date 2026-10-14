@@ -29,16 +29,4 @@ class User < ApplicationRecord
   def deactivate
     update! active: false
   end
-
-  def setup?
-    name != email_address
-  end
-
-  def verified?
-    verified_at.present?
-  end
-
-  def verify
-    update!(verified_at: Time.current) unless verified?
-  end
 end

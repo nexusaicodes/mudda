@@ -7,7 +7,7 @@
 rm -f tmp/pids/server.pid
 
 # A production host may pass the owner password base64-encoded (MUDDA_OWNER_PASSWORD_B64)
-# so arbitrary characters ($, #, quotes) survive docker compose's env-file parsing intact.
+# so arbitrary characters ($, #, quotes) survive env-file parsing intact.
 # Decode it into the plain value the app reads. Dev sets MUDDA_OWNER_PASSWORD directly, so
 # this is skipped there.
 if [ -n "${MUDDA_OWNER_PASSWORD_B64:-}" ] && [ -z "${MUDDA_OWNER_PASSWORD:-}" ]; then

@@ -1,5 +1,5 @@
 class Search::Record < ApplicationRecord
-  include const_get(connection.adapter_name)
+  include SQLite
 
   belongs_to :searchable, polymorphic: true
   belongs_to :card

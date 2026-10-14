@@ -1,10 +1,8 @@
 require "test_helper"
 
 class ColumnLimitsTest < ActiveSupport::TestCase
-  # Database errors for exceeding column limits:
-  # - MySQL: ActiveRecord::ValueTooLong
-  # - SQLite: ActiveRecord::CheckViolation
-  COLUMN_LIMIT_ERRORS = [ ActiveRecord::ValueTooLong, ActiveRecord::CheckViolation ]
+  # SQLite enforces the limits with CHECK constraints; see config/initializers/table_definition_column_limits.rb.
+  COLUMN_LIMIT_ERRORS = [ ActiveRecord::CheckViolation ]
 
   test "account name rejects strings over 255 characters" do
     account = Account.new(name: "a" * 256)

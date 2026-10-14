@@ -40,6 +40,7 @@ class McpTest < ActionDispatch::IntegrationTest
 
     assert_equal "mudda", result.dig("serverInfo", "name")
     assert_match "Backlog, Todo, Doing, Done", result["instructions"]
+    assert_match "owner's time zone", result["instructions"]
   end
 
   test "tools/list offers every tool to a token holding every scope, each marked for what it does" do
@@ -99,6 +100,16 @@ class McpTest < ActionDispatch::IntegrationTest
 
   test "whoami reports the token's user" do
     assert_equal users(:david).id, call_tool("whoami")["id"]
+  end
+
+  test "an agent's today is the owner's" do
+    travel_to Time.utc(2026, 10, 14, 20, 0) # already the 15th in Kolkata
+    users(:david).settings.update!(timezone_name: "Asia/Kolkata")
+    Current.user = users(:david)
+    card = @board.cards.create!(title: "Due on the 14th", due_on: Date.new(2026, 10, 14), creator: users(:david))
+
+    assert_equal "Asia/Kolkata", call_tool("whoami")["timezone"]
+    assert call_tool("get_card", board_id: @board.id, number: card.number)["overdue"]
   end
 
   test "list_cards narrows to one board and one lane" do

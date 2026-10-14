@@ -1,6 +1,4 @@
 class Event < ApplicationRecord
-  include Promptable
-
   belongs_to :creator, class_name: "User"
   belongs_to :eventable, polymorphic: true
 

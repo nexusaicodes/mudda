@@ -28,9 +28,7 @@
 
   /* Browsers usually disable backgrounds on print, so this ensures icons
     (which use BG masks) will show up. */
-  .icon,
-  .knob,
-  .switch {
+  .icon {
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
     print-color-adjust: exact;
@@ -75,54 +73,9 @@
     font-weight: bold;
   }
 
-  /* Events
-  /* ------------------------------------------------------------------------ */
-
-  .events__columns {
-    border-inline: none;
-  }
-
-  .events__column-header {
-    background: none;
-    margin: 0;
-    padding-block: 1ch;
-  }
-
-  .events__time-block {
-    padding: 0 1ch;
-
-    .events__column:first-child & {
-      padding-inline-start: 0;
-    }
-
-    .events__column:last-child & {
-      padding-inline-end: 0;
-    }
-  }
-
-  .events__none {
-    padding-block: 2ch;
-  }
-
-  .event {
-    --card-color: var(--color-ink) !important;
-
-    background: var(--color-canvas);
-    border: var(--border-light);
-    box-shadow: none;
-    break-inside: avoid;
-    color: var(--color-ink);
-
-    .avatar {
-      --avatar-size: 2lh;
-    }
-  }
-
   /* Boards
   /* ------------------------------------------------------------------------ */
 
-  .card--new,
-  .cards__decoration,
   .card-columns:before {
     display: none;
   }
@@ -133,7 +86,6 @@
     min-block-size: unset;
   }
 
-  .cards--on-deck,
   .cards--doing {
     padding-inline: 0;
   }
@@ -205,16 +157,8 @@
     text-align: start;
   }
 
-  .reactions {
-    margin-block-start: 0;
-  }
-
   /* Settings
   /* ------------------------------------------------------------------------ */
-
-  .settings__user-filter .input {
-    display: none;
-  }
 
   .settings__panel {
     border: none;
@@ -245,21 +189,6 @@
 
     .btn:not(:has(input:checked)) {
       opacity: 0;
-    }
-  }
-
-  .settings__panel--entropy {
-    display: none;
-  }
-
-  .settings__user-filter {
-    background: none;
-    margin: 0;
-    padding: 0;
-
-    /* Hide the "Everyone" switch */
-    > li:first-child {
-      display: none;
     }
   }
 }

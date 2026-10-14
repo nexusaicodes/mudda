@@ -19,7 +19,7 @@ setup: ## Build the image, prepare the database, and start the app (first run)
 	$(COMPOSE) up -d
 	@echo
 	@echo "  Mudda is starting at http://app.mudda.localhost:3006 (or http://localhost:3006)"
-	@echo "  Day 0: sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD, then enroll a passkey."
+	@echo "  Sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD (a passkey is optional)."
 
 .PHONY: up
 up: ## Start the app in the foreground (Ctrl-C to stop)
@@ -38,7 +38,7 @@ down: ## Stop the app, keeping data
 	$(COMPOSE) down
 
 .PHONY: fresh
-fresh: ## Wipe all data, rebuild, prepare the database, and start (no customer data)
+fresh: ## Wipe all data, rebuild, prepare the database, and start
 	$(COMPOSE) down -v
 	$(COMPOSE) build
 	$(MAKE) prepare
@@ -85,7 +85,7 @@ reset-db: ## Drop, recreate, and reseed the database
 	$(EXEC) bin/rails db:reset
 
 .PHONY: reset-auth
-reset-auth: ## Remove all passkeys and sign out every session (passkey recovery)
+reset-auth: ## Remove all passkeys and end every session, API token, and OAuth grant
 	$(RUN) bin/rails auth:reset
 
 .PHONY: token
@@ -93,7 +93,7 @@ token: ## Mint an API token for a script or agent (make token LABEL=claude [SCOP
 	$(COMPOSE) run --rm -e LABEL="$(LABEL)" -e SCOPES="$(SCOPES)" $(SERVICE) bin/rails auth:token
 
 .PHONY: tokens
-tokens: ## List the API tokens that have been minted
+tokens: ## List the API tokens and connected OAuth clients
 	$(RUN) bin/rails auth:tokens
 
 .PHONY: revoke

@@ -20,9 +20,11 @@ module Authentication
       before_action :redirect_authenticated_user, **options
     end
 
+    # Resumed ahead of every other callback, where require_authentication would have resumed it,
+    # so what depends on the signed-in user (the saved time zone, in CurrentTimezone) sees them.
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
-      before_action :resume_session, **options
+      before_action :resume_session, prepend: true, **options
       allow_unauthorized_access **options
     end
   end

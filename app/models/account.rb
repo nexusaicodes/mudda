@@ -9,7 +9,7 @@ class Account < ApplicationRecord
   class << self
     def create_with_owner(account:, owner:)
       create!(**account).tap do |account|
-        account.users.create!(**owner.with_defaults(verified_at: Time.current))
+        account.users.create!(**owner)
       end
     end
   end

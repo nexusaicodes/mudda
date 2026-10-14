@@ -39,6 +39,8 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_equal "http://www.example.com/oauth/authorize", metadata["authorization_endpoint"]
     assert_equal "http://www.example.com/oauth/token", metadata["token_endpoint"]
     assert_equal "http://www.example.com/oauth/registrations", metadata["registration_endpoint"]
+    assert_equal "http://www.example.com/oauth/revoke", metadata["revocation_endpoint"]
+    assert_equal "http://www.example.com/oauth/introspect", metadata["introspection_endpoint"]
     assert_equal [ "S256" ], metadata["code_challenge_methods_supported"]
     assert_equal %w[ authorization_code refresh_token ], metadata["grant_types_supported"]
   end
@@ -273,6 +275,19 @@ class OauthTest < ActionDispatch::IntegrationTest
 
     get my_user_path(format: :json), headers: bearer(tokens["access_token"])
     assert_response :unauthorized
+  end
+
+  test "the client may introspect its own token" do
+    tokens = connect
+
+    post oauth_introspect_path, params: { token: tokens["access_token"], client_id: @client_id }
+    assert_response :ok
+    assert @response.parsed_body["active"]
+    assert_equal "read write", @response.parsed_body["scope"]
+
+    post oauth_revoke_path, params: { token: tokens["access_token"], client_id: @client_id }
+    post oauth_introspect_path, params: { token: tokens["access_token"], client_id: @client_id }
+    assert_not @response.parsed_body["active"]
   end
 
   test "an OAuth session's own signed id is not a credential" do

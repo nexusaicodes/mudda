@@ -1,5 +1,10 @@
-class Search::Query < ApplicationRecord
-  belongs_to :user, optional: true
+# What a person typed into search, cleaned up for FTS5: stray punctuation and unbalanced quotes
+# removed, and folded the way the index is (Search::Normalizer).
+class Search::Query
+  include ActiveModel::Model
+  include ActiveModel::Validations::Callbacks
+
+  attr_accessor :terms
 
   validates :terms, presence: true
   before_validation :sanitize_terms

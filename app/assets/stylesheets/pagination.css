@@ -16,18 +16,5 @@
         display: none;
       }
     }
-
-    &[aria-busy="true"] {
-      .spinner {
-        display: block;
-      }
-    }
-  }
-
-  .day-timeline-pagination-link {
-    block-size: 1px;
-    display: block;
-    inline-size: 1px;
-    overflow: clip;
   }
 }

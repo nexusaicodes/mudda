@@ -913,8 +913,10 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "a JSON request to a browser-only write is refused before it writes" do
     headers = bearer_headers_for(@user)
 
-    assert_no_difference -> { @user.search_queries.count } do
-      post searches_queries_path(format: :json), params: { q: "anything" }, headers: headers, as: :json
+    card = cards(:layout)
+
+    assert_no_changes -> { card.reload.golden? } do
+      post board_card_goldness_path(card.board, card, format: :json), headers: headers, as: :json
     end
     assert_response :not_acceptable
   end
