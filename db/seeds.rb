@@ -15,7 +15,13 @@ end
 owner = User.find_by(email_address: email_address.strip.downcase) ||
   Account.create_with_owner(
     owner: { name: owner_name, email_address: }
-  ).users.first!
+  ).users.first!.tap do |user|
+    # The language the owner signed up in on a hosting platform starts as their choice; from then on
+    # it's theirs to change on the profile, so a later run leaves it alone.
+    if (locale = ENV["MUDDA_OWNER_LOCALE"].presence) && !user.settings.update(locale:)
+      warn "Ignoring MUDDA_OWNER_LOCALE=#{locale}: not one of #{I18n.available_locales.join(", ")}."
+    end
+  end
 
 puts %(Seeded account ##{owner.account_id} — owner #{owner.email_address})
 

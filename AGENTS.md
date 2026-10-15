@@ -383,7 +383,9 @@ is part of every ETag, so neither is served across a change of day or zone.
 
 The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`
 (`app/controllers/concerns/current_locale.rb`) picks each request's locale: the user's
-`user_settings.locale` (chosen on the profile page through `My::PreferencesController`, which also saves the theme), else the
+`user_settings.locale` (chosen on the profile page through `My::PreferencesController`, which also saves the theme,
+and seeded once from `MUDDA_OWNER_LOCALE` when `db/seeds.rb` creates the owner, so a hosted board
+opens in the language its owner signed up in), else the
 browser's `Accept-Language`, else English. URLs carry no locale.
 
 - **JSON, and so every MCP tool call, always answers in English**: errors, enum values, lane

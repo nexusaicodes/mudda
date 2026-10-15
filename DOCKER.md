@@ -32,6 +32,7 @@ seed runs once, when `db:prepare` creates the database:
 |---|---|---|
 | `MUDDA_OWNER_EMAIL` | The owner's email address. Required outside development | `saksham@nexusai.world` |
 | `MUDDA_OWNER_NAME` | Display name. Defaults to the email's local part, capitalized | `Saksham Saxena` |
+| `MUDDA_OWNER_LOCALE` | The owner's starting language, `en` or `ar`, applied once when the owner is first created; after that it's changed on the profile. Unset: the browser's language | `ar` |
 | `MUDDA_OWNER_PASSWORD` | The sign-in password, checked against this variable on every sign-in and never stored | `mudda-dev-password` |
 
 Sign in with `MUDDA_OWNER_EMAIL` and `MUDDA_OWNER_PASSWORD`. The password always works.
@@ -99,7 +100,7 @@ state lands in the host checkout, and `make fresh` (`down -v`, then a rebuild) i
 |---|---|---|
 | `PORT` | `3006` | Host port published for the web server |
 
-Override it, `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, and `MUDDA_OWNER_PASSWORD` per invocation
+Override it, `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, `MUDDA_OWNER_LOCALE`, and `MUDDA_OWNER_PASSWORD` per invocation
 (`PORT=4000 make up`) or in a `.env` file next to `docker-compose.yml` (it is gitignored). The Ruby version is fixed in
 `docker-compose.yml`; see [AGENTS.md → Toolchain](AGENTS.md#toolchain).
 
@@ -136,7 +137,7 @@ To run it:
 | Variable | Purpose |
 |---|---|
 | `SECRET_KEY_BASE` | Required. Any long random string, stable across restarts |
-| `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME` | The owner, as above |
+| `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, `MUDDA_OWNER_LOCALE` | The owner, as above |
 | `MUDDA_OWNER_PASSWORD` | Required. The owner's password |
 | `MUDDA_OWNER_PASSWORD_B64` | An alternative to the above, base64-encoded so any character survives an env file. The entrypoint decodes it when `MUDDA_OWNER_PASSWORD` is empty |
 | `BASE_URL` | The public URL (`https://mudda.example.com`), for links built outside a request |
