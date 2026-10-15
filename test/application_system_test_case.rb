@@ -77,8 +77,8 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     end
 
     def assert_no_horizontal_scroll
-      assert page.evaluate_script("document.documentElement.scrollWidth <= window.innerWidth"),
-        "The page scrolls sideways at #{page.evaluate_script("window.innerWidth")}px"
+      assert page.evaluate_script("document.documentElement.scrollWidth <= document.documentElement.clientWidth"),
+        "The page scrolls sideways at #{page.evaluate_script("document.documentElement.clientWidth")}px"
     end
 
     # The editor is a custom element, so Capybara's fill_in cannot reach it.

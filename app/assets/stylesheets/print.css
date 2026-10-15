@@ -174,21 +174,4 @@
       }
     }
   }
-
-  .settings__panel--users {
-    form:has(.btn--negative) {
-      display: none;
-    }
-
-    .btn {
-      background-color: transparent;
-      border: none;
-      color: var(--color-ink);
-      opacity: 1;
-    }
-
-    .btn:not(:has(input:checked)) {
-      opacity: 0;
-    }
-  }
 }

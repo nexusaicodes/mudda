@@ -66,6 +66,17 @@ class My::PreferencesControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "en", "light" ], [ users(:kevin).reload.locale, users(:kevin).theme ]
   end
 
+  test "a body wrapped in the resource name is accepted" do
+    patch my_preferences_path, params: { preferences: { theme: "dark" } }, as: :json
+    assert_response :no_content
+    assert_equal "dark", users(:kevin).reload.theme
+  end
+
+  test "a browser reading preferences is sent to the profile" do
+    get my_preferences_path
+    assert_redirected_to user_path(users(:kevin))
+  end
+
   test "an unknown theme or locale is a 422 as JSON" do
     patch my_preferences_path, params: { theme: "sepia" }, as: :json
     assert_response :unprocessable_entity

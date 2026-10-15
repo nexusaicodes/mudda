@@ -229,54 +229,6 @@
     }
   }
 
-  /* Cards grid; used when filtering
-  /* -------------------------------------------------------------------------- */
-
-  .cards--grid {
-    --cards-gap: 1rem;
-    --card-grid-columns: 1;
-
-    container-type: inline-size;
-    inline-size: 100%;
-    margin-inline: auto;
-    max-inline-size: var(--main-width);
-
-    @media (min-width: 640px) {
-      --card-grid-columns: 2;
-    }
-
-    @media (min-width: 960px) {
-      --card-grid-columns: 3;
-    }
-
-    .cards__list {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: var(--cards-gap);
-      justify-content: center;
-      padding: 1ch;
-    }
-
-    .card {
-      inline-size: calc((100% - var(--cards-gap) * (var(--card-grid-columns) - 1) ) / var(--card-grid-columns));
-    }
-
-    .card__details-lane {
-      border: 1px solid currentColor;
-      border-radius: 0.2em;
-      color: var(--card-color);
-      display: block;
-      margin-inline-start: auto;
-      padding: 0.05em 0.5em;
-      text-transform: uppercase;
-    }
-
-    .blank-slate--drag {
-      display: none;
-    }
-  }
-
   /* Column Elements
   /* ------------------------------------------------------------------------ */
 

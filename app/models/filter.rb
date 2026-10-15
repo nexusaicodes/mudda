@@ -27,10 +27,6 @@ class Filter
     def name
       I18n.t("filters.views.#{key}", lane: params[:lane] && I18n.t("lanes.#{params[:lane]}"))
     end
-
-    def [](attribute)
-      public_send(attribute)
-    end
   end
 
   VIEWS = [
@@ -98,7 +94,7 @@ class Filter
 
   # The name of the view this filter is, if it is exactly one of them.
   def view
-    VIEWS.find { |view| Filter.new(creator, view.params).as_params == as_params }
+    @view ||= VIEWS.find { |view| Filter.new(creator, view.params).as_params == as_params }
   end
 
   def view_name

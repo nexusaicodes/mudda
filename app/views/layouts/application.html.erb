@@ -2,7 +2,7 @@
 <html lang="<%= I18n.locale %>" dir="<%= html_direction %>" <%= tag.attributes(data: { theme: html_theme }) %>>
   <%= render "layouts/shared/head" %>
 
-  <body class="<%= @body_class %>"
+  <body class="<%= @body_class %>" <%= tag.attributes(data: { html_theme: html_theme }) %>
     data-controller="local-time timezone-cookie turbo-navigation"
     data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
     data-turbo-navigation-label-value="<%= @page_title %>"

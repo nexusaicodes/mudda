@@ -2,7 +2,7 @@
 <html lang="<%= I18n.locale %>" dir="<%= html_direction %>" <%= tag.attributes(data: { theme: html_theme }) %>>
   <%= render "layouts/shared/head" %>
 
-  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
+  <body class="public <%= @body_class %>" <%= tag.attributes(data: { html_theme: html_theme }) %> data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
     <div id="global-container">
       <header class="header" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t(".skip") %></a>

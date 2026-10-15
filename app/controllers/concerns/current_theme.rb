@@ -10,8 +10,9 @@ module CurrentTheme
   end
 
   private
-    def html_theme
-      theme = Current.user&.theme
-      theme unless theme.nil? || theme == "auto"
-    end
+
+  def html_theme
+    theme = Current.user&.theme
+    theme unless theme.nil? || theme == "auto"
+  end
 end
