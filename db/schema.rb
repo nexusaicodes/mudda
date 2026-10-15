@@ -10,11 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2026_10_15_000002) do
+ActiveRecord::Schema[8.2].define(version: 2026_10_16_000000) do
   create_table "accounts", force: :cascade do |t|
+    t.integer "card_limit"
     t.integer "cards_created_count", default: 0, null: false
     t.datetime "created_at", null: false
+    t.bigint "platform_seq", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.string "upgrade_url", limit: 2048
   end
 
   create_table "action_pack_passkeys", force: :cascade do |t|
@@ -226,9 +229,24 @@ ActiveRecord::Schema[8.2].define(version: 2026_10_15_000002) do
     t.datetime "created_at", null: false
     t.string "email_address", limit: 255, null: false
     t.string "name", limit: 255, null: false
+    t.datetime "name_changed_at"
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
+  create_table "webhook_deliveries", force: :cascade do |t|
+    t.integer "attempts", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "delivered_at"
+    t.string "event_id", limit: 255, null: false
+    t.string "kind", limit: 255, null: false
+    t.string "last_error", limit: 255
+    t.datetime "next_attempt_at"
+    t.text "payload", limit: 65535, null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_webhook_deliveries_on_event_id", unique: true
+    t.index ["next_attempt_at"], name: "index_webhook_deliveries_on_next_attempt_at"
   end
   execute "CREATE VIRTUAL TABLE search_records_fts USING fts5(\n        title,\n        content,\n        tokenize='porter'\n      )"
 

@@ -54,6 +54,10 @@ Rails.application.routes.draw do
     skip_controllers :applications, :authorized_applications, :token_info
   end
 
+  namespace :platform do
+    resources :messages, only: :create
+  end
+
   namespace :oauth do
     resources :registrations, only: :create
   end

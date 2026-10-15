@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  include Accessor, Avatar, Configurable, Named, Searcher
+  include Accessor, Avatar, Configurable, Named, Searcher, Syncable
 
   has_passkeys name: :email_address, display_name: -> { name }
 

@@ -6,6 +6,12 @@ email_address = ENV.fetch("MUDDA_OWNER_EMAIL") do
 end
 owner_name = ENV.fetch("MUDDA_OWNER_NAME", email_address.split("@").first.capitalize)
 
+# The owner's email is set once and never changes, so an owner already here under another email
+# means the environment is wrong; carrying on would create a second user.
+if (existing = User.order(:id).first) && existing.email_address != email_address.strip.downcase
+  abort "MUDDA_OWNER_EMAIL is #{email_address}, but this board's owner is #{existing.email_address}."
+end
+
 owner = User.find_by(email_address: email_address.strip.downcase) ||
   Account.create_with_owner(
     owner: { name: owner_name, email_address: }

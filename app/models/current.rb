@@ -3,6 +3,8 @@
 class Current < ActiveSupport::CurrentAttributes
   attribute :session, :user, :account
   attribute :http_method, :request_id, :user_agent, :ip_address, :referrer
+  # Set while applying a change the hosting platform sent, so it isn't sent back.
+  attribute :syncing
 
   def session=(value)
     super(value)

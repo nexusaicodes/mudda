@@ -156,7 +156,8 @@ the code.
 
 **Account**: the tenant. Concerns: `CardLimited`, `Searchable`. Has users and boards; `#cards`
 reaches cards through the boards. `create_with_owner` provisions the single user.
-`CardLimited` applies the optional `MUDDA_CARD_LIMIT` ceiling. `accounts.cards_created_count`
+`CardLimited` applies the optional ceiling: the hosting platform's plan once it has pushed one,
+else `MUDDA_CARD_LIMIT`. `accounts.cards_created_count`
 only goes up. A `Card` `before_create` claims a slot in one conditional `UPDATE`, so two creates
 can't both take the last one, and raises `RecordInvalid` past the ceiling, which is a `422` for
 JSON and MCP. Under a ceiling:
@@ -336,8 +337,9 @@ keep `MemoryStore`s of their own.
   so jobs run in the right tenant.
 - Jobs should be shallow and delegate to domain models, with `_later`/`_now` naming (see
   [STYLE.md](STYLE.md#run-async-operations-in-jobs)).
-- The only job today is `SearchReindexJob`, a manual full-text-index repair run by
-  `bin/rails search:reindex`.
+- `SearchReindexJob` is a manual full-text-index repair run by `bin/rails search:reindex`, and
+  `WebhookDeliveryJob` sends one event to the hosting platform (see
+  [Hosting platform sync](#hosting-platform-sync)).
 
 ### Full-text search
 
@@ -398,6 +400,32 @@ browser's `Accept-Language`, else English. URLs carry no locale.
   `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
   loaded only for Arabic code points. Dates show Western digits (`-u-nu-latn`).
 - The `public/*.html` error pages are static, so each carries both languages.
+
+### Hosting platform sync
+
+A hosting platform (Mudda Cloud) keeps the board in step with its tenant record. It is optional:
+with none of its env vars set ([DOCKER.md](DOCKER.md#hosting-platform-sync)), as when
+self-hosting, the board behaves as if it didn't exist.
+
+- **Platform → board** (`Platform::Message`, `Platform::MessagesController` at
+  `POST /platform/messages`): messages signed with the platform's Ed25519 key. The signature is
+  the only credential, so no session or token the owner holds can send one, and the owner can't
+  lift their own card limit. A message must name a trusted `kid`, be addressed to `BASE_URL`'s
+  host, be at most five minutes old, and carry a `seq` above `accounts.platform_seq`, which is
+  claimed in the same `UPDATE` that applies it. Kinds: `plan.updated` (sets `card_limit` and
+  `upgrade_url`, which then override the env vars), `name.updated`, and `state.requested` (the
+  reconcile's read of the owner's name, email, and `platform_seq`).
+- **Board → platform** (`WebhookDelivery`): a rename (`user.updated`) and the card that takes the
+  last slot (`cards.limit_reached`) are written to `webhook_deliveries` in their own transaction
+  and POSTed after commit, HMAC-signed, retried with backoff for a week. Pending rows are sent
+  again at boot and whenever the platform asks for the state, since the in-process job queue
+  doesn't survive a restart.
+- **The name** may change on either side; `users.name_changed_at` decides, the newer winning and
+  a tie keeping the local name (`User::Syncable`). A rename applied from the platform isn't sent
+  back.
+- **The email never changes**, anywhere: the board has no way to edit it, a message whose payload
+  names an email is refused, and `db/seeds.rb` aborts rather than create a second owner when
+  `MUDDA_OWNER_EMAIL` doesn't match.
 
 ### MCP
 

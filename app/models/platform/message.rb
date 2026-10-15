@@ -1,0 +1,154 @@
+# A message from the hosting platform that runs this board: a new plan, a new owner name, or a
+# request for the board's state. Only the platform holds the private key, so the owner can't
+# lift their own card limit; the board holds the public keys in MUDDA_PLATFORM_KEYS
+# ("kid:base64,kid:base64", the current key and the next during a rotation). With no keys set,
+# as when self-hosting, the board accepts no messages.
+#
+# A message is "<base64url claims>.<base64url Ed25519 signature of the first part>". The claims:
+#
+#   { "kid", "aud" (this board's host), "seq", "iat", "exp", "kind", "payload" }
+#
+# A message is refused unless it is signed by a known key, addressed to this board, fresh, and
+# numbered above the last one applied, which stops a replay and an old plan arriving late.
+# The owner's email is set once, at signup, so a payload that names one is refused.
+class Platform::Message
+  class Invalid < StandardError; end
+
+  MAX_BYTES = 8.kilobytes
+  MAX_LIFETIME = 5.minutes
+  CLOCK_LEEWAY = 1.minute
+  KINDS = %w[ plan.updated name.updated state.requested ]
+
+  attr_reader :kind, :seq, :payload
+
+  class << self
+    def enabled?
+      keys.any?
+    end
+
+    # The board's own host, from BASE_URL, so a request's Host header can't choose which board a
+    # message counts as addressed to. Without BASE_URL (local development) it is the request's.
+    def audience(request_host = nil)
+      ENV["BASE_URL"].presence&.then { URI.parse(it).host } || request_host
+    end
+
+    # Fresh is false for the plan handed over at boot in MUDDA_PLAN, which is written by the
+    # host and may be older than a message's lifetime; its sequence number still orders it.
+    def verify(token, host:, fresh: true, now: Time.current)
+      raise Invalid, "too large" if token.bytesize > MAX_BYTES
+
+      encoded_claims, encoded_signature = token.strip.split(".", 2)
+      claims = decode_json(encoded_claims)
+      key = keys[claims["kid"]] or raise Invalid, "unknown key"
+
+      raise Invalid, "bad signature" unless key.verify(nil, decode(encoded_signature), encoded_claims)
+      raise Invalid, "wrong audience" unless claims["aud"] == host
+      raise Invalid, "expired" if fresh && !fresh?(claims, now)
+
+      new(claims)
+    end
+
+    def keys
+      ENV["MUDDA_PLATFORM_KEYS"].to_s.split(",").to_h do |entry|
+        kid, public_key = entry.strip.split(":", 2)
+        [ kid, OpenSSL::PKey.new_raw_public_key("ED25519", Base64.strict_decode64(public_key.to_s)) ]
+      end
+    rescue ArgumentError, OpenSSL::PKey::PKeyError
+      raise Invalid, "MUDDA_PLATFORM_KEYS is malformed"
+    end
+
+    private
+      def decode_json(encoded)
+        JSON.parse(decode(encoded)).tap do |claims|
+          raise Invalid, "malformed" unless claims.is_a?(Hash)
+        end
+      rescue JSON::ParserError
+        raise Invalid, "malformed"
+      end
+
+      def decode(encoded)
+        Base64.urlsafe_decode64(encoded.to_s)
+      rescue ArgumentError
+        raise Invalid, "malformed"
+      end
+
+      def fresh?(claims, now)
+        issued_at, expires_at = claims.values_at("iat", "exp")
+
+        issued_at.is_a?(Integer) && expires_at.is_a?(Integer) &&
+          issued_at <= (now + CLOCK_LEEWAY).to_i &&
+          expires_at <= issued_at + MAX_LIFETIME.to_i &&
+          expires_at > now.to_i
+      end
+  end
+
+  def initialize(claims)
+    @kind, @seq, @payload = claims.values_at("kind", "seq", "payload")
+
+    raise Invalid, "unknown kind" unless KINDS.include?(kind)
+    raise Invalid, "bad sequence number" unless seq.is_a?(Integer) && seq.positive?
+    raise Invalid, "bad payload" unless payload.is_a?(Hash)
+    raise Invalid, "email can't be changed" if names_an_email?(payload)
+  end
+
+  # Applies the message to the account and returns what to answer: the board's state for a
+  # state request, else nil. A message numbered at or below the last one applied changes nothing.
+  def apply(account)
+    case kind
+    when "plan.updated"    then apply_plan(account)
+    when "name.updated"    then apply_name(account)
+    when "state.requested" then state_of(account)
+    end
+  end
+
+  private
+    def names_an_email?(value)
+      case value
+      when Hash  then value.any? { |key, nested| key.to_s.match?(/email/i) || names_an_email?(nested) }
+      when Array then value.any? { names_an_email?(it) }
+      else false
+      end
+    end
+
+    def apply_plan(account)
+      card_limit, upgrade_url = payload.values_at("card_limit", "upgrade_url")
+
+      raise Invalid, "bad card limit" unless card_limit.nil? || (card_limit.is_a?(Integer) && !card_limit.negative?)
+      raise Invalid, "bad upgrade URL" unless upgrade_url.nil? || https_url?(upgrade_url)
+
+      claim_seq(account, card_limit: card_limit, upgrade_url: upgrade_url)
+      nil
+    end
+
+    def apply_name(account)
+      name, changed_at = payload["name"], Time.iso8601(payload["name_changed_at"].to_s)
+
+      account.transaction do
+        account.users.order(:id).first!.sync_name(name, changed_at: changed_at) if claim_seq(account)
+      end
+      nil
+    rescue ArgumentError
+      raise Invalid, "bad name_changed_at"
+    rescue ActiveRecord::RecordInvalid
+      raise Invalid, "bad name"
+    end
+
+    def state_of(account)
+      owner = account.users.order(:id).first!
+
+      { name: owner.name, name_changed_at: owner.name_changed_at&.iso8601(6),
+        email: owner.email_address, platform_seq: account.reload.platform_seq }
+    end
+
+    # Takes the sequence number in the same statement that checks it, so two messages applied
+    # at once can't both pass.
+    def claim_seq(account, **changes)
+      Account.where(id: account.id, platform_seq: ...seq).update_all(platform_seq: seq, **changes).positive?
+    end
+
+    def https_url?(value)
+      value.is_a?(String) && value.length <= 2048 && URI.parse(value).is_a?(URI::HTTPS)
+    rescue URI::InvalidURIError
+      false
+    end
+end

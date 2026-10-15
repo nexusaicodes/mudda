@@ -18,7 +18,7 @@ module ActiveSupport
     fixtures :all
 
     include ActiveJob::TestHelper
-    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, EnvTestHelper, SessionTestHelper
+    include ActionTextTestHelper, CachingTestHelper, CardTestHelper, ChangeTestHelper, EnvTestHelper, PlatformMessageTestHelper, SessionTestHelper
 
     # Jobs must carry their own account context via AccountTenanted,
     # not rely on Current.account leaking from the test setup.

@@ -55,6 +55,9 @@ erDiagram
     ACCOUNTS {
         integer id PK
         integer cards_created_count "NOT NULL DEFAULT 0 — only goes up (MUDDA_CARD_LIMIT)"
+        integer card_limit "the platform's plan; NULL = no limit"
+        string upgrade_url "limit 2048 — the platform's plan"
+        bigint platform_seq "NOT NULL DEFAULT 0 — last platform message applied; 0 = env rules"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
     }
@@ -64,6 +67,7 @@ erDiagram
         bigint account_id FK "NOT NULL"
         string email_address UK "limit 255 NOT NULL"
         string name "limit 255 NOT NULL"
+        datetime name_changed_at "precision 6 — the newer rename wins against the platform's"
         boolean active "default true NOT NULL"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"
@@ -260,6 +264,19 @@ erDiagram
         integer id PK
         bigint blob_id FK "NOT NULL"
         string variation_digest "limit 255 NOT NULL"
+    }
+
+    WEBHOOK_DELIVERIES {
+        integer id PK
+        string event_id UK "limit 255 NOT NULL — same on every retry"
+        string kind "limit 255 NOT NULL — user.updated, cards.limit_reached"
+        text payload "limit 65535 NOT NULL — JSON"
+        integer attempts "NOT NULL DEFAULT 0"
+        datetime next_attempt_at "NULL once delivered or given up"
+        datetime delivered_at
+        string last_error "limit 255"
+        datetime created_at "NOT NULL"
+        datetime updated_at "NOT NULL"
     }
 ```
 

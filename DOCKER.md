@@ -60,6 +60,21 @@ more. A self-hoster leaves both unset.
 `docker-compose.yml` doesn't pass these through, so to try them in development add them to the
 `web` service's `environment:`, as you would `MUDDA_OWNER_NAME`.
 
+### Hosting platform sync
+
+A hosting platform (Mudda Cloud) can keep the board in step with its own records: it pushes the
+plan and the owner's name, and the board reports renames back. A self-hoster leaves all of these
+unset, and the board then accepts no platform messages and sends nothing.
+
+| Variable | Purpose |
+|---|---|
+| `MUDDA_PLATFORM_KEYS` | Ed25519 public keys the board trusts for messages to `POST /platform/messages`, as `kid:base64,kid:base64` (the current key and the next while rotating). Once a plan arrives it overrides `MUDDA_CARD_LIMIT` and `MUDDA_UPGRADE_URL` |
+| `MUDDA_PLAN` | The platform's latest signed plan message, applied at boot unless a newer one has been |
+| `MUDDA_WEBHOOK_URL`, `MUDDA_WEBHOOK_SECRET` | Where to POST events (`user.updated`, `cards.limit_reached`), signed with HMAC-SHA256 in `Mudda-Signature`. Both must be set |
+
+The message format and its checks are in `app/models/platform/message.rb`, and the webhook's in
+`app/models/webhook_delivery.rb`. Message audiences are matched against `BASE_URL`'s host.
+
 ### Commands
 
 A `Makefile` wraps `docker compose`; run `make` to list every target. Targets marked * run
@@ -141,6 +156,7 @@ To run it:
 | `BASE_URL` | The public URL (`https://mudda.example.com`), for links built outside a request |
 | `ASSUME_SSL` / `FORCE_SSL` | Both default to `true`, for a TLS-terminating proxy that sends `X-Forwarded-Proto: https`: secure cookies, HSTS, and HTTP redirected to HTTPS. `DISABLE_SSL=true` turns off both, unless either is set explicitly |
 | `MUDDA_CARD_LIMIT`, `MUDDA_UPGRADE_URL` | Optional; see [Card limit](#card-limit) |
+| `MUDDA_PLATFORM_KEYS`, `MUDDA_PLAN`, `MUDDA_WEBHOOK_URL`, `MUDDA_WEBHOOK_SECRET` | Optional; see [Hosting platform sync](#hosting-platform-sync) |
 | `RAILS_LOG_LEVEL` | Defaults to `info` |
 | `CSP_*`, `DISABLE_CSP` | Extra Content-Security-Policy sources per directive (`CSP_IMG_SRC`, `CSP_CONNECT_SRC`, …); see `config/initializers/content_security_policy.rb` |
 
