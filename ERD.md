@@ -54,9 +54,11 @@ erDiagram
 
     ACCOUNTS {
         integer id PK
-        integer cards_created_count "NOT NULL DEFAULT 0 — only goes up (MUDDA_CARD_LIMIT)"
-        integer card_limit "the platform's plan; NULL = no limit"
-        string upgrade_url "limit 2048 — the platform's plan"
+        integer cards_created_count "NOT NULL DEFAULT 0 — only goes up"
+        string plan "limit 255 — free, premium (Account::CardLimited::PLANS); NULL = free while hosted"
+        string upgrade_url "limit 2048 — from the platform"
+        string webhook_url "limit 2048 — from the platform"
+        string webhook_secret "limit 255 — from the platform; signs webhooks"
         bigint platform_seq "NOT NULL DEFAULT 0 — last platform message applied; 0 = env rules"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"

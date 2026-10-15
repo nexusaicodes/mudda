@@ -171,7 +171,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "create past the card ceiling renders the form with the upgrade link" do
     accounts("37s").update_column :cards_created_count, 100
 
-    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => "https://example.com/upgrade") do
+    on_the_free_plan(upgrade_url: "https://example.com/upgrade") do
       assert_no_difference -> { Card.count } do
         post board_cards_path(boards(:writebook)), params: { card: { title: "Over", due_on: 1.week.from_now.to_date } }
       end
@@ -185,7 +185,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "the board swaps Add a card for an upgrade link at the card ceiling" do
     accounts("37s").update_column :cards_created_count, 100
 
-    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => "https://example.com/upgrade") do
+    on_the_free_plan(upgrade_url: "https://example.com/upgrade") do
       get board_path(boards(:writebook))
 
       assert_select "a[href='#{new_board_card_path(boards(:writebook))}']", count: 0
@@ -196,7 +196,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "create past the card ceiling is a 422 for JSON" do
     accounts("37s").update_column :cards_created_count, 100
 
-    with_env("MUDDA_CARD_LIMIT" => "100") do
+    on_the_free_plan do
       post board_cards_path(boards(:writebook)), params: { title: "Over", due_on: 1.week.from_now.to_date }, as: :json
     end
 

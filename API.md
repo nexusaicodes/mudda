@@ -210,8 +210,8 @@ POST /boards/1/cards.json
   "steps_attributes": [ { "content": "First" }, { "content": "Second" } ] }
 ```
 
-On a deployment with a card limit (`MUDDA_CARD_LIMIT`; see
-[DOCKER.md → Card limit](DOCKER.md#card-limit)), a create past it is a `422`:
+On a hosted deployment whose plan has a card limit (see
+[DOCKER.md → Hosting platform sync](DOCKER.md#hosting-platform-sync)), a create past it is a `422`:
 `{ "errors": { "base": ["This account has used all 100 of its cards"] } }`.
 
 **And edited in one request.** A card's board, lane, pinned flag, and steps are attributes of the

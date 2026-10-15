@@ -229,7 +229,7 @@ class McpTest < ActionDispatch::IntegrationTest
   test "a card past the account's ceiling is a tool error saying so" do
     accounts("37s").update_column :cards_created_count, 100
 
-    result = with_env("MUDDA_CARD_LIMIT" => "100") do
+    result = on_the_free_plan do
       mcp("tools/call", name: "create_card", arguments: { board_id: @board.id, title: "Over", due_on: "2026-12-01" })
     end
 

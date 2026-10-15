@@ -1,8 +1,9 @@
-# A message from the hosting platform that runs this board: a new plan, a new owner name, or a
-# request for the board's state. Only the platform holds the private key, so the owner can't
+# A message from the hosting platform that runs this board: a new plan, where to send the board's
+# webhooks, a new owner name, or a request for the board's state. Only the platform holds the private key, so the owner can't
 # lift their own card limit; the board holds the public keys in MUDDA_PLATFORM_KEYS
-# ("kid:base64,kid:base64", the current key and the next during a rotation). With no keys set,
-# as when self-hosting, the board accepts no messages.
+# ("kid:base64,kid:base64", the current key and the next during a rotation), the one setting a
+# hosted board needs from its environment; everything else arrives in messages and is kept in the
+# database. With no keys set, as when self-hosting, the board accepts no messages.
 #
 # A message is "<base64url claims>.<base64url Ed25519 signature of the first part>". The claims:
 #
@@ -17,13 +18,13 @@ class Platform::Message
   MAX_BYTES = 8.kilobytes
   MAX_LIFETIME = 5.minutes
   CLOCK_LEEWAY = 1.minute
-  KINDS = %w[ plan.updated name.updated state.requested ]
+  KINDS = %w[ plan.updated sync.configured name.updated state.requested ]
 
   attr_reader :kind, :seq, :payload
 
   class << self
     def enabled?
-      keys.any?
+      ENV["MUDDA_PLATFORM_KEYS"].present?
     end
 
     # The board's own host, from BASE_URL, so a request's Host header can't choose which board a
@@ -32,9 +33,7 @@ class Platform::Message
       ENV["BASE_URL"].presence&.then { URI.parse(it).host } || request_host
     end
 
-    # Fresh is false for the plan handed over at boot in MUDDA_PLAN, which is written by the
-    # host and may be older than a message's lifetime; its sequence number still orders it.
-    def verify(token, host:, fresh: true, now: Time.current)
+    def verify(token, host:, now: Time.current)
       raise Invalid, "too large" if token.bytesize > MAX_BYTES
 
       encoded_claims, encoded_signature = token.strip.split(".", 2)
@@ -43,7 +42,7 @@ class Platform::Message
 
       raise Invalid, "bad signature" unless key.verify(nil, decode(encoded_signature), encoded_claims)
       raise Invalid, "wrong audience" unless claims["aud"] == host
-      raise Invalid, "expired" if fresh && !fresh?(claims, now)
+      raise Invalid, "expired" unless fresh?(claims, now)
 
       new(claims)
     end
@@ -96,6 +95,7 @@ class Platform::Message
   def apply(account)
     case kind
     when "plan.updated"    then apply_plan(account)
+    when "sync.configured" then apply_sync(account)
     when "name.updated"    then apply_name(account)
     when "state.requested" then state_of(account)
     end
@@ -110,13 +110,25 @@ class Platform::Message
       end
     end
 
+    # An unknown plan is refused rather than guessed at, so a platform ahead of this board's
+    # release keeps retrying until the board knows it.
     def apply_plan(account)
-      card_limit, upgrade_url = payload.values_at("card_limit", "upgrade_url")
+      plan, upgrade_url = payload.values_at("plan", "upgrade_url")
 
-      raise Invalid, "bad card limit" unless card_limit.nil? || (card_limit.is_a?(Integer) && !card_limit.negative?)
+      raise Invalid, "unknown plan" unless Account::CardLimited::PLANS.key?(plan)
       raise Invalid, "bad upgrade URL" unless upgrade_url.nil? || https_url?(upgrade_url)
 
-      claim_seq(account, card_limit: card_limit, upgrade_url: upgrade_url)
+      claim_seq(account, plan: plan, upgrade_url: upgrade_url)
+      nil
+    end
+
+    def apply_sync(account)
+      webhook_url, webhook_secret = payload.values_at("webhook_url", "webhook_secret")
+
+      raise Invalid, "bad webhook URL" unless https_url?(webhook_url)
+      raise Invalid, "bad webhook secret" unless webhook_secret.is_a?(String) && webhook_secret.length.between?(32, 255)
+
+      claim_seq(account, webhook_url: webhook_url, webhook_secret: webhook_secret)
       nil
     end
 
@@ -136,8 +148,9 @@ class Platform::Message
     def state_of(account)
       owner = account.users.order(:id).first!
 
-      { name: owner.name, name_changed_at: owner.name_changed_at&.iso8601(6),
-        email: owner.email_address, platform_seq: account.reload.platform_seq }
+      account.reload
+      { name: owner.name, name_changed_at: owner.name_changed_at&.iso8601(6), email: owner.email_address,
+        plan: account[:plan], webhook_configured: account.webhook_url.present?, platform_seq: account.platform_seq }
     end
 
     # Takes the sequence number in the same statement that checks it, so two messages applied

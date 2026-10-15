@@ -47,30 +47,16 @@ Lost or broken passkeys? `make reset-auth` removes them all and ends every sessi
 with the password. Driving the app from a script or agent? See [API.md](API.md) and
 [MCP.md](MCP.md).
 
-### Card limit
-
-Two optional variables cap how many cards the account may create, for a deployment that sells
-more. A self-hoster leaves both unset.
-
-| Variable | Purpose |
-|---|---|
-| `MUDDA_CARD_LIMIT` | Cards the account may ever create. Deleting one doesn't free its slot. Unset, blank, negative, or not a whole number: no limit |
-| `MUDDA_UPGRADE_URL` | Where the upgrade links and `/account/upgrade` send the owner (see [AGENTS.md → Core domain models](AGENTS.md#core-domain-models)) |
-
-`docker-compose.yml` doesn't pass these through, so to try them in development add them to the
-`web` service's `environment:`, as you would `MUDDA_OWNER_NAME`.
-
 ### Hosting platform sync
 
-A hosting platform (Mudda Cloud) can keep the board in step with its own records: it pushes the
-plan and the owner's name, and the board reports renames back. A self-hoster leaves all of these
-unset, and the board then accepts no platform messages and sends nothing.
+A hosting platform (Mudda Cloud) keeps the board in step with its own records: it names the
+board's plan (`Account::CardLimited::PLANS`: free is 100 cards, premium has no limit), tells it
+where to send its webhooks, and renames the owner; the board reports renames back. All of that
+travels in signed messages and is kept in the database. The one variable is the trust anchor:
 
 | Variable | Purpose |
 |---|---|
-| `MUDDA_PLATFORM_KEYS` | Ed25519 public keys the board trusts for messages to `POST /platform/messages`, as `kid:base64,kid:base64` (the current key and the next while rotating). Once a plan arrives it overrides `MUDDA_CARD_LIMIT` and `MUDDA_UPGRADE_URL` |
-| `MUDDA_PLAN` | The platform's latest signed plan message, applied at boot unless a newer one has been |
-| `MUDDA_WEBHOOK_URL`, `MUDDA_WEBHOOK_SECRET` | Where to POST events (`user.updated`, `cards.limit_reached`), signed with HMAC-SHA256 in `Mudda-Signature`. Both must be set |
+| `MUDDA_PLATFORM_KEYS` | Ed25519 public keys the board trusts for messages to `POST /platform/messages`, as `kid:base64,kid:base64` (the current key and the next while rotating). Set: the board is hosted, and on the free plan until told otherwise. Unset (self-hosting): no plan, no card limit, no messages, no webhooks |
 
 The message format and its checks are in `app/models/platform/message.rb`, and the webhook's in
 `app/models/webhook_delivery.rb`. Message audiences are matched against `BASE_URL`'s host.
@@ -155,8 +141,7 @@ To run it:
 | `MUDDA_OWNER_PASSWORD_B64` | An alternative to the above, base64-encoded so any character survives an env file. The entrypoint decodes it when `MUDDA_OWNER_PASSWORD` is empty |
 | `BASE_URL` | The public URL (`https://mudda.example.com`), for links built outside a request |
 | `ASSUME_SSL` / `FORCE_SSL` | Both default to `true`, for a TLS-terminating proxy that sends `X-Forwarded-Proto: https`: secure cookies, HSTS, and HTTP redirected to HTTPS. `DISABLE_SSL=true` turns off both, unless either is set explicitly |
-| `MUDDA_CARD_LIMIT`, `MUDDA_UPGRADE_URL` | Optional; see [Card limit](#card-limit) |
-| `MUDDA_PLATFORM_KEYS`, `MUDDA_PLAN`, `MUDDA_WEBHOOK_URL`, `MUDDA_WEBHOOK_SECRET` | Optional; see [Hosting platform sync](#hosting-platform-sync) |
+| `MUDDA_PLATFORM_KEYS` | Optional; see [Hosting platform sync](#hosting-platform-sync) |
 | `RAILS_LOG_LEVEL` | Defaults to `info` |
 | `CSP_*`, `DISABLE_CSP` | Extra Content-Security-Policy sources per directive (`CSP_IMG_SRC`, `CSP_CONNECT_SRC`, …); see `config/initializers/content_security_policy.rb` |
 

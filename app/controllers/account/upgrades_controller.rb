@@ -1,4 +1,4 @@
-# Hands the signed-in owner to the platform's upgrade page (MUDDA_UPGRADE_URL), passing on the
+# Hands the signed-in owner to the platform's upgrade page (the account's upgrade_url), passing on the
 # billing (monthly or yearly) they picked. The platform's "Go Premium" sends a returning
 # customer here, so signing in to their board is how they show it's theirs; a signed-out
 # visitor signs in first and comes back. With no upgrade URL there is nowhere to send them: the

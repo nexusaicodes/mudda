@@ -12,12 +12,14 @@
 
 ActiveRecord::Schema[8.2].define(version: 2026_10_16_000000) do
   create_table "accounts", force: :cascade do |t|
-    t.integer "card_limit"
     t.integer "cards_created_count", default: 0, null: false
     t.datetime "created_at", null: false
+    t.string "plan"
     t.bigint "platform_seq", default: 0, null: false
     t.datetime "updated_at", null: false
     t.string "upgrade_url", limit: 2048
+    t.string "webhook_secret"
+    t.string "webhook_url", limit: 2048
   end
 
   create_table "action_pack_passkeys", force: :cascade do |t|

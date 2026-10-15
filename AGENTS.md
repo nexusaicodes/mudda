@@ -156,18 +156,19 @@ the code.
 
 **Account**: the tenant. Concerns: `CardLimited`, `Searchable`. Has users and boards; `#cards`
 reaches cards through the boards. `create_with_owner` provisions the single user.
-`CardLimited` applies the optional ceiling: the hosting platform's plan once it has pushed one,
-else `MUDDA_CARD_LIMIT`. `accounts.cards_created_count`
+`CardLimited` applies the ceiling of the plan a hosting platform names (`PLANS`: free 100,
+premium none; a hosted board is free until told otherwise, a self-hosted one has no plan and no
+ceiling). `accounts.cards_created_count`
 only goes up. A `Card` `before_create` claims a slot in one conditional `UPDATE`, so two creates
 can't both take the last one, and raises `RecordInvalid` past the ceiling, which is a `422` for
 JSON and MCP. Under a ceiling:
 - The compose screen warns within `Account::CardLimited::NEAR_LIMIT` cards of it.
-- The board's "Add a card" becomes an upgrade link to `MUDDA_UPGRADE_URL` once it is reached.
+- The board's "Add a card" becomes an upgrade link to the platform's `upgrade_url` once it is reached.
 - The profile shows a Plan section (cards used of the limit).
 
-While `MUDDA_UPGRADE_URL` is set, the profile's Plan section links to `/account/upgrade` at any time.
-`GET /account/upgrade` (`Account::UpgradesController`) hands the signed-in owner to
-`MUDDA_UPGRADE_URL`, signing them in first if needed and passing on `billing`
+While the platform has given an `upgrade_url`, the profile's Plan section links to `/account/upgrade` at any time.
+`GET /account/upgrade` (`Account::UpgradesController`) hands the signed-in owner to that URL,
+signing them in first if needed and passing on `billing`
 (`monthly`/`yearly`), or sends them back to the board when there is no URL. The platform's "Go
 Premium" sends returning customers there.
 
@@ -404,20 +405,23 @@ browser's `Accept-Language`, else English. URLs carry no locale.
 ### Hosting platform sync
 
 A hosting platform (Mudda Cloud) keeps the board in step with its tenant record. It is optional:
-with none of its env vars set ([DOCKER.md](DOCKER.md#hosting-platform-sync)), as when
-self-hosting, the board behaves as if it didn't exist.
+without `MUDDA_PLATFORM_KEYS` ([DOCKER.md](DOCKER.md#hosting-platform-sync)), the only setting it
+needs, as when self-hosting, the board behaves as if it didn't exist. Everything else it sends is
+kept in the database.
 
 - **Platform → board** (`Platform::Message`, `Platform::MessagesController` at
   `POST /platform/messages`): messages signed with the platform's Ed25519 key. The signature is
   the only credential, so no session or token the owner holds can send one, and the owner can't
   lift their own card limit. A message must name a trusted `kid`, be addressed to `BASE_URL`'s
   host, be at most five minutes old, and carry a `seq` above `accounts.platform_seq`, which is
-  claimed in the same `UPDATE` that applies it. Kinds: `plan.updated` (sets `card_limit` and
-  `upgrade_url`, which then override the env vars), `name.updated`, and `state.requested` (the
-  reconcile's read of the owner's name, email, and `platform_seq`).
+  claimed in the same `UPDATE` that applies it. Kinds: `plan.updated` (`accounts.plan` and
+  `upgrade_url`; an unknown plan is refused so the platform retries until the board knows it),
+  `sync.configured` (`webhook_url` and `webhook_secret`), `name.updated`, and `state.requested`
+  (the reconcile's read of the owner's name and email, the plan, whether webhooks are configured,
+  and `platform_seq`).
 - **Board → platform** (`WebhookDelivery`): a rename (`user.updated`) and the card that takes the
   last slot (`cards.limit_reached`) are written to `webhook_deliveries` in their own transaction
-  and POSTed after commit, HMAC-signed, retried with backoff for a week. Pending rows are sent
+  and POSTed after commit to the configured URL, HMAC-signed with its secret, retried with backoff for a week. Pending rows are sent
   again at boot and whenever the platform asks for the state, since the in-process job queue
   doesn't survive a restart.
 - **The name** may change on either side; `users.name_changed_at` decides, the newer winning and

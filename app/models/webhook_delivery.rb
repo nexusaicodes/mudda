@@ -1,12 +1,14 @@
 # An event for the hosting platform, kept until it is delivered. It is written in the same
 # transaction as the change it reports, so neither exists without the other, and sent after
-# commit. Delivery is POST MUDDA_WEBHOOK_URL with the JSON body signed by MUDDA_WEBHOOK_SECRET:
+# commit. Delivery is a POST to the account's webhook_url with the JSON body signed by its
+# webhook_secret:
 #
 #   Mudda-Signature: t=<unix time>,v1=<hex HMAC-SHA256 of "<t>.<body>">
 #   Mudda-Event-Id:  <uuid, the same on every retry>
 #
-# Both come from the environment, never from the user. With either unset, as when
-# self-hosting, nothing is recorded.
+# Both come only from the platform, in a signed sync.configured message (see
+# Platform::Message), never from the user. Until then, and always when self-hosting, nothing is
+# recorded.
 class WebhookDelivery < ApplicationRecord
   RETRY_DELAYS = [ 1.minute, 5.minutes, 30.minutes, 2.hours, 6.hours ]
   GIVE_UP_AFTER = 7.days
@@ -21,7 +23,14 @@ class WebhookDelivery < ApplicationRecord
 
   class << self
     def enabled?
-      ENV["MUDDA_WEBHOOK_URL"].present? && ENV["MUDDA_WEBHOOK_SECRET"].present?
+      endpoint.present?
+    end
+
+    # The URL and secret to sign with, or nil when the platform hasn't configured them.
+    def endpoint
+      if Platform::Message.enabled? && (account = Account.first)
+        account.values_at(:webhook_url, :webhook_secret).then { |url, secret| [ url, secret ] if url.present? && secret.present? }
+      end
     end
 
     def record(kind, **payload)
@@ -41,7 +50,7 @@ class WebhookDelivery < ApplicationRecord
 
   def deliver_now
     if delivered_at.nil? && self.class.enabled?
-      response = post
+      response = post(*self.class.endpoint)
       response.is_a?(Net::HTTPSuccess) ? delivered : failed("HTTP #{response.code}")
     end
   rescue StandardError => error
@@ -49,8 +58,8 @@ class WebhookDelivery < ApplicationRecord
   end
 
   private
-    def post
-      uri = URI(ENV["MUDDA_WEBHOOK_URL"])
+    def post(url, secret)
+      uri = URI(url)
       body = { event: kind, id: event_id, data: payload }.to_json
       timestamp = Time.current.to_i
 
@@ -58,12 +67,8 @@ class WebhookDelivery < ApplicationRecord
         http.post uri.request_uri, body,
           "Content-Type" => "application/json",
           "Mudda-Event-Id" => event_id,
-          "Mudda-Signature" => "t=#{timestamp},v1=#{signature_for(timestamp, body)}"
+          "Mudda-Signature" => "t=#{timestamp},v1=#{OpenSSL::HMAC.hexdigest("SHA256", secret, "#{timestamp}.#{body}")}"
       end
-    end
-
-    def signature_for(timestamp, body)
-      OpenSSL::HMAC.hexdigest("SHA256", ENV["MUDDA_WEBHOOK_SECRET"], "#{timestamp}.#{body}")
     end
 
     def delivered

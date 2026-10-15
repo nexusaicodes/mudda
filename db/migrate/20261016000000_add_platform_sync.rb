@@ -1,11 +1,13 @@
-# What a hosting platform keeps in step with the board: the plan it last pushed (with the
-# sequence number that orders its messages), when the owner's name last changed, and the
-# outbox of events waiting to be sent to it.
+# What a hosting platform keeps in step with the board: the plan it last pushed and where to
+# upgrade from it, where and how to sign the board's webhooks, the sequence number that orders its
+# messages, when the owner's name last changed, and the outbox of events waiting to be sent.
 class AddPlatformSync < ActiveRecord::Migration[8.2]
   def change
     change_table :accounts do |t|
-      t.integer :card_limit
+      t.string :plan
       t.string :upgrade_url, limit: 2048
+      t.string :webhook_url, limit: 2048
+      t.string :webhook_secret
       t.bigint :platform_seq, null: false, default: 0
     end
 

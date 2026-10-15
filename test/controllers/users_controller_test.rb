@@ -11,7 +11,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "the profile holds security and sign out, and no plan without a ceiling or an upgrade" do
     sign_in_as :kevin
 
-    with_env("MUDDA_CARD_LIMIT" => nil, "MUDDA_UPGRADE_URL" => nil) { get user_path(users(:kevin)) }
+    with_env("MUDDA_PLATFORM_KEYS" => nil) { get user_path(users(:kevin)) }
     assert_select "a[href=?]", my_passkeys_path
     assert_select "a[href=?]", my_tokens_path
     assert_select "form[action=?] button.settings__sign-out", session_path
@@ -22,11 +22,11 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "the profile shows the plan under a ceiling, and the upgrade whenever there is somewhere to go" do
     sign_in_as :kevin
 
-    with_env("MUDDA_CARD_LIMIT" => "100", "MUDDA_UPGRADE_URL" => nil) { get user_path(users(:kevin)) }
+    on_the_free_plan(upgrade_url: nil) { get user_path(users(:kevin)) }
     assert_in_body "of 100 used"
     assert_select "a[href=?]", account_upgrade_path, count: 0
 
-    with_env("MUDDA_CARD_LIMIT" => nil, "MUDDA_UPGRADE_URL" => "https://mudda.example/upgrade") { get user_path(users(:kevin)) }
+    on_the_plan("premium", upgrade_url: "https://mudda.example/upgrade") { get user_path(users(:kevin)) }
     assert_select "a[href=?]", account_upgrade_path, text: "Upgrade for unlimited cards"
   end
 

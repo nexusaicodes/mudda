@@ -1,4 +1,4 @@
-<%# Shown only under a card ceiling (MUDDA_CARD_LIMIT), and only once it's close. %>
+<%# Shown only under a card ceiling (the account's plan has one), and only once it's close. %>
 <% if account.card_limit_near? %>
   <p class="txt-small <%= "txt-negative" if account.card_limit_reached? %>">
     <% if account.card_limit_reached? %>

@@ -9,35 +9,41 @@ class Platform::MessageTest < ActiveSupport::TestCase
     with_env("MUDDA_PLATFORM_KEYS" => nil) { assert_not Platform::Message.enabled? }
   end
 
-  test "a plan sets the card limit and upgrade URL, overriding the environment" do
+  test "a plan names the plan and the upgrade URL" do
     trusting_the_platform do
-      with_env("MUDDA_CARD_LIMIT" => "500") do
-        apply platform_message("plan.updated", { card_limit: 50, upgrade_url: "https://mudda.today/upgrade?t=x" })
+      apply platform_message("plan.updated", { plan: "free", upgrade_url: "https://mudda.today/upgrade?t=x" })
 
-        @account.reload
-        assert_equal 50, @account.card_limit
-        assert_equal "https://mudda.today/upgrade?t=x", @account.upgrade_url
-        assert_equal 1, @account.platform_seq
-      end
+      @account.reload
+      assert_equal [ "free", 100 ], [ @account.current_plan, @account.card_limit ]
+      assert_equal "https://mudda.today/upgrade?t=x", @account.upgrade_url
+      assert_equal 1, @account.platform_seq
     end
   end
 
-  test "a plan with no limit lifts it even when the environment sets one" do
+  test "premium lifts the ceiling" do
     trusting_the_platform do
-      with_env("MUDDA_CARD_LIMIT" => "10") do
-        apply platform_message("plan.updated", { card_limit: nil, upgrade_url: nil })
-        assert_not @account.reload.card_limited?
-      end
+      apply platform_message("plan.updated", { plan: "premium", upgrade_url: nil })
+      assert_not @account.reload.card_limited?
+    end
+  end
+
+  test "sync.configured sets where the board's webhooks go" do
+    trusting_the_platform do
+      apply platform_message("sync.configured", { webhook_url: "https://mudda.today/webhooks/boards/7", webhook_secret: "s" * 64 })
+      assert_equal "https://mudda.today/webhooks/boards/7", @account.reload.webhook_url
+
+      assert_refused "bad webhook URL", platform_message("sync.configured", { webhook_url: "http://x.example", webhook_secret: "s" * 64 }, seq: 2)
+      assert_refused "bad webhook secret", platform_message("sync.configured", { webhook_url: "https://x.example", webhook_secret: "short" }, seq: 2)
     end
   end
 
   test "an older or repeated message changes nothing" do
     trusting_the_platform do
-      apply platform_message("plan.updated", { card_limit: 50 }, seq: 5)
-      apply platform_message("plan.updated", { card_limit: 9 }, seq: 4)
-      apply platform_message("plan.updated", { card_limit: 9 }, seq: 5)
+      apply platform_message("plan.updated", { plan: "premium" }, seq: 5)
+      apply platform_message("plan.updated", { plan: "free" }, seq: 4)
+      apply platform_message("plan.updated", { plan: "free" }, seq: 5)
 
-      assert_equal [ 50, 5 ], @account.reload.values_at(:card_limit, :platform_seq)
+      assert_equal [ "premium", 5 ], @account.reload.values_at(:plan, :platform_seq)
     end
   end
 
@@ -58,19 +64,10 @@ class Platform::MessageTest < ActiveSupport::TestCase
 
   test "a tampered message is refused" do
     trusting_the_platform do
-      claims, signature = platform_message("plan.updated", { card_limit: 50 }).split(".")
-      forged = Base64.urlsafe_encode64(JSON.parse(Base64.urlsafe_decode64(claims)).merge("payload" => { "card_limit" => nil }).to_json, padding: false)
+      claims, signature = platform_message("plan.updated", { plan: "free" }).split(".")
+      forged = Base64.urlsafe_encode64(JSON.parse(Base64.urlsafe_decode64(claims)).merge("payload" => { "plan" => "premium" }).to_json, padding: false)
 
       assert_refused "bad signature", "#{forged}.#{signature}"
-    end
-  end
-
-  test "an expired plan is accepted at boot, where its sequence number orders it" do
-    trusting_the_platform do
-      plan = platform_message("plan.updated", { card_limit: 7 }, iat: 1.day.ago.to_i)
-
-      Platform::Message.verify(plan, host: Platform::Message.audience, fresh: false).apply(@account)
-      assert_equal 7, @account.reload.card_limit
     end
   end
 
@@ -83,10 +80,10 @@ class Platform::MessageTest < ActiveSupport::TestCase
 
   test "refuses a bad plan" do
     trusting_the_platform do
-      assert_refused "bad card limit", platform_message("plan.updated", { card_limit: -1 })
-      assert_refused "bad card limit", platform_message("plan.updated", { card_limit: "50" })
-      assert_refused "bad upgrade URL", platform_message("plan.updated", { upgrade_url: "http://insecure.example.com" })
-      assert_refused "bad upgrade URL", platform_message("plan.updated", { upgrade_url: "javascript:alert(1)" })
+      assert_refused "unknown plan", platform_message("plan.updated", { plan: "enterprise" })
+      assert_refused "unknown plan", platform_message("plan.updated", { card_limit: 50 })
+      assert_refused "bad upgrade URL", platform_message("plan.updated", { plan: "free", upgrade_url: "http://insecure.example.com" })
+      assert_refused "bad upgrade URL", platform_message("plan.updated", { plan: "free", upgrade_url: "javascript:alert(1)" })
     end
   end
 
@@ -95,7 +92,7 @@ class Platform::MessageTest < ActiveSupport::TestCase
     owner.update_columns name_changed_at: 1.hour.ago
 
     trusting_the_platform do
-      with_env("MUDDA_WEBHOOK_URL" => "https://mudda.today/webhooks", "MUDDA_WEBHOOK_SECRET" => "s") do
+      with_platform_webhooks(@account) do
         assert_no_difference -> { WebhookDelivery.count } do
           apply platform_message("name.updated", { name: "Renamed", name_changed_at: Time.current.iso8601(6) })
         end
@@ -133,6 +130,7 @@ class Platform::MessageTest < ActiveSupport::TestCase
 
       assert_equal @account.users.order(:id).first.email_address, state[:email]
       assert_equal 0, state[:platform_seq]
+      assert_equal [ nil, false ], state.values_at(:plan, :webhook_configured)
       assert_equal 0, @account.reload.platform_seq
     end
   end

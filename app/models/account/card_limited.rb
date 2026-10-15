@@ -1,22 +1,27 @@
-# An optional ceiling on how many cards the account may ever create. Deleting a card doesn't hand
-# its slot back, since cards_created_count only goes up. The upgrade URL, when set, is where the
-# app points the user to lift the ceiling.
+# How many cards the account may ever create, by plan. Deleting a card doesn't hand its slot
+# back, since cards_created_count only goes up.
 #
-# Once a hosting platform has pushed a plan (platform_seq above zero, see Platform::Message),
-# the stored card_limit and upgrade_url rule, a nil limit meaning no ceiling. Until then they
-# come from MUDDA_CARD_LIMIT (unset, blank, or not a whole number: no ceiling) and
-# MUDDA_UPGRADE_URL.
+# Only a board run by a hosting platform has a plan (see Platform::Message): the platform names
+# it, and with it the upgrade URL that lifts the ceiling. Until the first plan arrives such a board
+# is on the free plan. A board with no platform (self-hosted) has no plan and no ceiling.
 module Account::CardLimited
   extend ActiveSupport::Concern
 
+  # Each plan's ceiling; nil is none.
+  PLANS = { "free" => 100, "premium" => nil }.freeze
+  DEFAULT_PLAN = "free"
   NEAR_LIMIT = 10
 
+  included do
+    validates :plan, inclusion: { in: PLANS.keys }, allow_nil: true
+  end
+
+  def current_plan
+    self[:plan] || DEFAULT_PLAN if Platform::Message.enabled?
+  end
+
   def card_limit
-    if platform_managed?
-      self[:card_limit]
-    else
-      Integer(ENV["MUDDA_CARD_LIMIT"].to_s, 10, exception: false)&.then { |limit| limit unless limit.negative? }
-    end
+    PLANS.fetch(current_plan) if current_plan
   end
 
   def card_limited?
@@ -36,11 +41,7 @@ module Account::CardLimited
   end
 
   def upgrade_url
-    platform_managed? ? self[:upgrade_url] : ENV["MUDDA_UPGRADE_URL"].presence
-  end
-
-  def platform_managed?
-    platform_seq.positive?
+    self[:upgrade_url] if Platform::Message.enabled?
   end
 
   # Counts one new card, in a single statement that only matches while the account is under its

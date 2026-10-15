@@ -1,10 +1,8 @@
 require "test_helper"
 
 class WebhookDeliveryTest < ActiveSupport::TestCase
-  WEBHOOK_ENV = { "MUDDA_WEBHOOK_URL" => "https://mudda.today/webhooks/boards/7", "MUDDA_WEBHOOK_SECRET" => "secret" }
-
-  test "nothing is recorded without a webhook URL and secret" do
-    with_env("MUDDA_WEBHOOK_URL" => nil, "MUDDA_WEBHOOK_SECRET" => nil) do
+  test "nothing is recorded until the platform configures webhooks" do
+    trusting_the_platform do
       assert_no_difference -> { WebhookDelivery.count } do
         users(:kevin).update!(name: "Kevin Renamed")
       end
@@ -12,7 +10,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   end
 
   test "a rename is recorded with its time and sent after commit" do
-    with_env(WEBHOOK_ENV) do
+    with_platform_webhooks do
       assert_enqueued_with(job: WebhookDeliveryJob) do
         users(:kevin).update!(name: "Kevin Renamed")
       end
@@ -25,7 +23,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   end
 
   test "a rename that fails to save records nothing" do
-    with_env(WEBHOOK_ENV) do
+    with_platform_webhooks do
       assert_no_difference -> { WebhookDelivery.count } do
         assert_not users(:kevin).update(name: "")
       end
@@ -33,14 +31,14 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   end
 
   test "delivers signed, and marks it delivered" do
-    with_env(WEBHOOK_ENV) do
+    with_platform_webhooks do
       delivery = WebhookDelivery.record("user.updated", name: "K")
       http = mock
       http.expects(:post).with do |path, body, headers|
         timestamp, signature = headers["Mudda-Signature"].scan(/t=(\d+),v1=(\h+)/).first
 
         path == "/webhooks/boards/7" && headers["Mudda-Event-Id"] == delivery.event_id &&
-          signature == OpenSSL::HMAC.hexdigest("SHA256", "secret", "#{timestamp}.#{body}")
+          signature == OpenSSL::HMAC.hexdigest("SHA256", "s" * 64, "#{timestamp}.#{body}")
       end.returns(Net::HTTPOK.new("1.1", "200", "OK"))
       Net::HTTP.stubs(:start).yields(http).returns(Net::HTTPOK.new("1.1", "200", "OK"))
 
@@ -52,7 +50,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   end
 
   test "a failure backs off, keeps the same event id, and gives up after a week" do
-    with_env(WEBHOOK_ENV) do
+    with_platform_webhooks do
       delivery = WebhookDelivery.record("user.updated", name: "K")
       Net::HTTP.stubs(:start).raises(Errno::ECONNREFUSED)
 
@@ -70,7 +68,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   end
 
   test "what is due is sent again" do
-    with_env(WEBHOOK_ENV) do
+    with_platform_webhooks do
       due = WebhookDelivery.record("user.updated", name: "K")
       later = WebhookDelivery.record("user.updated", name: "L")
       later.update_columns next_attempt_at: 1.hour.from_now
@@ -84,10 +82,10 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
 
   test "the card that takes the last slot reports the limit reached" do
     account = boards(:writebook).account
-    account.update_columns cards_created_count: 0
+    account.update_columns cards_created_count: 99, plan: "free"
     Current.session = sessions(:david)
 
-    with_env(WEBHOOK_ENV.merge("MUDDA_CARD_LIMIT" => "1")) do
+    with_platform_webhooks(account) do
       assert_difference -> { WebhookDelivery.where(kind: "cards.limit_reached").count }, 1 do
         boards(:writebook).cards.create!(title: "Last one", creator: users(:david))
       end

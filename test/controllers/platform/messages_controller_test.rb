@@ -16,9 +16,9 @@ class Platform::MessagesControllerTest < ActionDispatch::IntegrationTest
 
   test "applies a signed plan" do
     trusting_the_platform do
-      send_message platform_message("plan.updated", { card_limit: 25, upgrade_url: nil })
+      send_message platform_message("plan.updated", { plan: "premium", upgrade_url: nil })
       assert_response :no_content
-      assert_equal 25, @account.reload.card_limit
+      assert_not @account.reload.card_limited?
     end
   end
 
@@ -26,7 +26,7 @@ class Platform::MessagesControllerTest < ActionDispatch::IntegrationTest
     trusting_the_platform do
       send_message platform_message("state.requested")
       assert_response :success
-      assert_equal %w[ email name name_changed_at platform_seq ], @response.parsed_body.keys.sort
+      assert_equal %w[ email name name_changed_at plan platform_seq webhook_configured ], @response.parsed_body.keys.sort
     end
   end
 
@@ -36,14 +36,14 @@ class Platform::MessagesControllerTest < ActionDispatch::IntegrationTest
       assert_response :unauthorized
       assert_equal [ "malformed" ], @response.parsed_body.dig("errors", "message")
 
-      message = platform_message("plan.updated", { card_limit: 25 })
+      message = platform_message("plan.updated", { plan: "premium" })
       send_message message
       assert_response :no_content
       send_message message
       assert_response :no_content
       assert_equal 1, @account.reload.platform_seq
 
-      send_message platform_message("plan.updated", { card_limit: 1 }, seq: 2, aud: "evil.example.com"), host: "evil.example.com"
+      send_message platform_message("plan.updated", { plan: "free" }, seq: 2, aud: "evil.example.com"), host: "evil.example.com"
       assert_response :unauthorized
     end
   end
@@ -52,7 +52,7 @@ class Platform::MessagesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as :kevin
 
     trusting_the_platform do
-      send_message platform_message("plan.updated", { card_limit: 1 }, key: OpenSSL::PKey.generate_key("ED25519"))
+      send_message platform_message("plan.updated", { plan: "free" }, key: OpenSSL::PKey.generate_key("ED25519"))
       assert_response :unauthorized
     end
   end
