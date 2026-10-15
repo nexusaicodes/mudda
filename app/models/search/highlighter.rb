@@ -1,5 +1,5 @@
-# Marks the words of a text that a query matched. Words are compared in their normalized
-# form, so an Arabic word is marked as written, vowels and article included. The text is
+# Marks the words of a text that a query matched. The query holds terms already normalized
+# by Search::Query; words of the text are normalized before comparing, so an Arabic word is marked as written, vowels and article included. The text is
 # HTML-escaped and only the marks are left as markup.
 class Search::Highlighter
   OPENING_MARK = "<mark class=\"circled-text\"><span></span>"
@@ -74,13 +74,13 @@ class Search::Highlighter
       normalize(word).start_with?(term_word)
     end
 
-    # Each term as its normalized words: a quoted phrase is one term of several words.
+    # Each term as its words: a quoted phrase is one term of several words.
     def term_words
       @term_words ||= begin
         phrases = query.scan(/"([^"]+)"/).map(&:first)
         words = query.gsub(/"[^"]+"/, " ").split(/\s+/)
 
-        (phrases + words).map { |term| normalize(term).scan(WORD) }.reject(&:empty?).uniq
+        (phrases + words).map { |term| term.downcase.scan(WORD) }.reject(&:empty?).uniq
       end
     end
 

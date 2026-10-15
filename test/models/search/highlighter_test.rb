@@ -91,6 +91,11 @@ class Search::HighlighterTest < ActiveSupport::TestCase
     assert_equal "&lt;b&gt;#{mark('بالكتاب')}&lt;/b&gt;", Search::Highlighter.new("كتاب").highlight("<b>بالكتاب</b>")
   end
 
+  test "highlight takes terms already normalized by the query" do
+    term = Search::Normalizer.normalize("الالتزام")
+    assert_equal "هذا #{mark('الالتزام')} مهم", Search::Highlighter.new(term).highlight("هذا الالتزام مهم")
+  end
+
   private
     def mark(text)
       "#{Search::Highlighter::OPENING_MARK}#{text}#{Search::Highlighter::CLOSING_MARK}"

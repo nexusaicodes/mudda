@@ -1,6 +1,6 @@
 # Give every string and text column a length limit when defining tables, and have SQLite
 # enforce it (it ignores declared lengths on its own) with a CHECK constraint per column. The
-# sizes are MySQL's, which this schema began on.
+# sizes follow MySQL's string and text types.
 #
 # For string columns: defaults to 255
 #

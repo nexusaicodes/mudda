@@ -3,7 +3,7 @@
 # with no Arabic letters is returned untouched, leaving English to the porter stemmer.
 module Search::Normalizer
   ARABIC = /\p{Arabic}/
-  HARAKAT_AND_TATWEEL = /[ً-ٰٟـ]/
+  HARAKAT_AND_TATWEEL = /[\u064B-\u065F\u0670\u0640]/
   LETTER_FOLDS = { "أ" => "ا", "إ" => "ا", "آ" => "ا", "ٱ" => "ا", "ى" => "ي", "ة" => "ه" }
   LETTERS_TO_FOLD = /[#{LETTER_FOLDS.keys.join}]/
   ARTICLE = /\A(?:وال|بال|كال|فال|ال)(?=\p{Arabic}{2})/

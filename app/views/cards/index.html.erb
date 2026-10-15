@@ -1,4 +1,4 @@
-<% @page_title = @filter.view_name || @filter.boards_label %>
+<% @page_title = @board&.name || @filter.view_name || @filter.boards_label %>
 <% turbo_exempts_page_from_cache %>
 
 <% content_for :header do %>

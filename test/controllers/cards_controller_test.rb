@@ -285,6 +285,18 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal card.closed?, @response.parsed_body["closed"]
     assert_equal card.backlogged?, @response.parsed_body["backlogged"]
     assert_equal 2, @response.parsed_body["steps"].size
+    assert_equal %w[ name value ], @response.parsed_body["color"].keys
+  end
+
+  test "index refuses a non-string filter value as JSON" do
+    get cards_path, params: { lane: 1 }, as: :json
+    assert_response :unprocessable_entity
+  end
+
+  test "create ignores filter fields in the body" do
+    assert_difference -> { Card.count } do
+      post board_cards_path(boards(:writebook)), params: { title: "Stray", lane: "nowhere" }, as: :json
+    end
   end
 
   test "create as JSON" do

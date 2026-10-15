@@ -6,6 +6,10 @@ class Search::NormalizerTest < ActiveSupport::TestCase
     assert_equal "كتاب", normalize("كتـــاب")
   end
 
+  test "keeps Arabic-Indic digits" do
+    assert_equal "فاتوره ٢٠٢٦", Search::Normalizer.normalize("فاتورة ٢٠٢٦")
+  end
+
   test "folds hamza forms, alef maqsura and taa marbuta" do
     assert_equal "احمد اسلام امن", normalize("أحمد إسلام آمن")
     assert_equal "الي مدرسه", normalize("إلى مدرسة")

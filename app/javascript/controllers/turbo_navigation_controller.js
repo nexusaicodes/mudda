@@ -31,7 +31,7 @@ export default class extends Controller {
 
     link.href = this.#referrerUrl
     const strong = link.querySelector("strong")
-    if (strong) { strong.textContent = this.backTemplateValue.replace("%{label}", this.#referrerLabel) }
+    if (strong) { strong.textContent = this.backTemplateValue.replace("%{label}", () => this.#referrerLabel) }
   }
 
   get #referrerPath() {

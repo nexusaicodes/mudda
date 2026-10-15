@@ -7,8 +7,8 @@ class User::Settings < ApplicationRecord
 
   validates :locale, inclusion: { in: -> { I18n.available_locales.map(&:to_s) } }, allow_nil: true
   validates :theme, inclusion: { in: THEMES }
-  # Only a zone being saved is checked, so a name saved before zones were validated doesn't
-  # block changing another setting; it reads as UTC until the browser replaces it.
+  # Only a zone being saved is checked, so a stored unknown name doesn't block changing another
+  # setting; it reads as UTC until the browser replaces it.
   validate :timezone_name_names_a_zone, if: -> { timezone_name && will_save_change_to_timezone_name? }
 
   def timezone

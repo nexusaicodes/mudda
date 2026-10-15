@@ -59,7 +59,7 @@ class Card < ApplicationRecord
 
   private
     def set_default_title
-      self.title = I18n.t("cards.untitled") if title.blank?
+      self.title = I18n.t("cards.untitled", locale: :en) if title.blank?
     end
 
     # A move names where the card ends up. A lane named alongside the board is kept, and

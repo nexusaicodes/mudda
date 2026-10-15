@@ -100,7 +100,7 @@ class CardsController < ApplicationController
     # A board whose cards began on an earlier page already has its heading there.
     def set_board_headings_from(cards)
       @board_counts = cards.reorder(nil).where(board_id: @page.records.map(&:board_id)).group(:board_id).count
-      @continued_board_id = @page.recordset.page(@page.number - 1).records.to_a.last&.board_id unless @page.first?
+      @continued_board_id = cards.grouped_by_board.offset(@page.records.offset_value - 1).pick(:board_id) unless @page.first?
     end
 
     def set_board

@@ -43,10 +43,6 @@ class Search::Record < ApplicationRecord
       .select(:id, :searchable_type, :searchable_id, :card_id, :title, :content, :created_at, *search_fields(query))
   end
 
-  def source
-    searchable_type == "Note" ? searchable : card
-  end
-
   def note
     searchable if searchable_type == "Note"
   end

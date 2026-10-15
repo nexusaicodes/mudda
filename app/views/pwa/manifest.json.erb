@@ -1,6 +1,5 @@
 {
-  "lang": <%= I18n.locale.to_s.to_json.html_safe %>,
-  "dir": <%= (I18n.locale == :ar ? "rtl" : "ltr").to_json.html_safe %>,
+  "lang": "en",
   "name": <%= [ t(".name"), Rails.env.production? ? nil : Rails.env ].compact.join(" - ").to_json.html_safe %>,
   "icons": [
     {

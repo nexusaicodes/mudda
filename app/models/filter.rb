@@ -53,9 +53,9 @@ class Filter
     @creator    = creator
     @indexed_by = params[:indexed_by].to_s
     @sorted_by  = params[:sorted_by].to_s
-    @creation   = params[:creation].presence
-    @due        = params[:due].presence
-    @lane       = params[:lane].presence&.downcase
+    @creation   = params[:creation].to_s.presence
+    @due        = params[:due].to_s.presence
+    @lane       = params[:lane].to_s.downcase.presence
     @terms      = Array(params[:terms]).compact_blank
     @card_ids   = Array(params[:card_ids]).compact_blank.uniq
     @column_ids = Array(params[:column_ids]).compact_blank.uniq

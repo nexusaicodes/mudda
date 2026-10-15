@@ -17,14 +17,9 @@ export default class extends Controller {
     }
   }
 
-  // Right-to-left scroll positions run from 0 at the start down to negative values
+  // In right-to-left, offsetLeft and scrollLeft both run negative from the start edge, so one
+  // formula centres the target either way
   get #centredScrollLeft() {
-    const left = this.targetTarget.offsetLeft - this.element.offsetWidth / 2 + this.targetTarget.offsetWidth / 2
-
-    if (getComputedStyle(this.element).direction === "rtl") {
-      return left - (this.element.scrollWidth - this.element.clientWidth)
-    } else {
-      return left
-    }
+    return this.targetTarget.offsetLeft - this.element.offsetWidth / 2 + this.targetTarget.offsetWidth / 2
   }
 }

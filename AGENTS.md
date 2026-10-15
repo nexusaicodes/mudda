@@ -322,7 +322,7 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   a value outside its list is refused (`400`, or `422` for JSON).
 - **Search** is a pill floating at the bottom centre (`bar/_bar`). Results open above it,
   grouped by board with the board you searched from first: one row per card, the five latest per
-  board, and a link to the rest (`User::Searcher#search_counts_by_board`, `#search_board`).
+  board, and a link to the rest (`User::Searcher#search_counts_by_board`, `#search_boards`).
 
 ### Background jobs
 

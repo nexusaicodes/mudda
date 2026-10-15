@@ -27,10 +27,11 @@ class SearchesController < ApplicationController
     # the boards with the most matching cards.
     def grouped_matches
       counts = Current.user.search_counts_by_board(@query)
+      matches = Current.user.search_boards(@query, limit: RESULTS_PER_BOARD)
 
       Current.user.boards.where(id: counts.keys)
         .sort_by { |board| [ board.id == searched_from_board_id ? 0 : 1, -counts[board.id], board.name.downcase ] }
-        .map { |board| [ board, counts[board.id], Current.user.search_board(@query, board, limit: RESULTS_PER_BOARD) ] }
+        .map { |board| [ board, counts[board.id], matches.fetch(board.id, []) ] }
     end
 
     # The search box sits in the page footer and reads no page state, so the board is taken

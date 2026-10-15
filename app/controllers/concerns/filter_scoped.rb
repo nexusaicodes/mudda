@@ -9,7 +9,7 @@ module FilterScoped
 
     allows_query_params(*FILTER_QUERY_PARAMS)
 
-    before_action :set_filter
+    before_action :set_filter, only: :index
   end
 
   private
