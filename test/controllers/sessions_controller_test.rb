@@ -7,6 +7,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a hosted board shows the password form before its password arrives" do
+    with_env("MUDDA_OWNER_PASSWORD" => nil) do
+      trusting_the_platform { get new_session_path }
+    end
+
+    assert_select "form[action=?]", session_password_path
+  end
+
   test "new redirects authenticated users" do
     sign_in_as :kevin
 

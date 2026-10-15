@@ -1,5 +1,5 @@
 # A message from the hosting platform that runs this board: a new plan, where to send the board's
-# webhooks, a new owner name, a reset owner password, or a request for the board's state. Only the platform holds the private key, so the owner can't
+# webhooks, a new owner name, the owner's password, or a request for the board's state. Only the platform holds the private key, so the owner can't
 # lift their own card limit; the board holds the public keys in MUDDA_PLATFORM_KEYS
 # ("kid:base64,kid:base64", the current key and the next during a rotation), the one setting a
 # hosted board needs from its environment; everything else arrives in messages and is kept in the
@@ -18,7 +18,7 @@ class Platform::Message
   MAX_BYTES = 8.kilobytes
   MAX_LIFETIME = 5.minutes
   CLOCK_LEEWAY = 1.minute
-  KINDS = %w[ plan.updated sync.configured name.updated password.reset state.requested ]
+  KINDS = %w[ plan.updated sync.configured name.updated password.set state.requested ]
   BCRYPT_DIGEST = %r{\A\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}\z}
 
   attr_reader :kind, :seq, :payload
@@ -98,7 +98,7 @@ class Platform::Message
     when "plan.updated"    then apply_plan(account)
     when "sync.configured" then apply_sync(account)
     when "name.updated"    then apply_name(account)
-    when "password.reset"  then apply_password(account)
+    when "password.set"    then apply_password(account)
     when "state.requested" then state_of(account)
     end
   end
@@ -147,8 +147,9 @@ class Platform::Message
       raise Invalid, "bad name"
     end
 
-    # The platform's forgot-password flow sends a bcrypt hash, never the password itself. Taking it
-    # signs out every browser; tokens and passkeys stay.
+    # The owner's password, chosen at signup or through the platform's forgot-password flow, as a
+    # bcrypt hash, never the password itself. Taking it signs out every browser; tokens and
+    # passkeys stay.
     def apply_password(account)
       digest = payload["password_digest"]
 

@@ -55,7 +55,9 @@ password, and ends every session; sign back in with `MUDDA_OWNER_PASSWORD`. Driv
 
 A hosting platform (Mudda Cloud) keeps the board in step with its own records: it names the
 board's plan (`Account::CardLimited::PLANS`: free is 100 cards, premium has no limit), tells it
-where to send its webhooks, and renames the owner; the board reports renames back. All of that
+where to send its webhooks, renames the owner, and sends the owner's password as a bcrypt hash
+(at signup and from its forgot-password flow), so a hosted board needs no password in its env;
+the board reports renames back. All of that
 travels in signed messages and is kept in the database. The one variable is the trust anchor:
 
 | Variable | Purpose |
@@ -141,8 +143,8 @@ To run it:
 |---|---|
 | `SECRET_KEY_BASE` | Required. Any long random string, stable across restarts |
 | `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, `MUDDA_OWNER_LOCALE` | The owner, as above |
-| `MUDDA_OWNER_PASSWORD` | Required. The owner's starting password |
-| `MUDDA_OWNER_PASSWORD_B64` | An alternative to the above, base64-encoded so any character survives an env file. The entrypoint decodes it when `MUDDA_OWNER_PASSWORD` is empty |
+| `MUDDA_OWNER_PASSWORD` | Required when self-hosting. The owner's starting password. A hosted board (with `MUDDA_PLATFORM_KEYS`) gets its password from the platform instead |
+| `MUDDA_OWNER_PASSWORD_B64` | An alternative to the above, base64-encoded so any character survives an env file. The entrypoint decodes it when `MUDDA_OWNER_PASSWORD` is empty. Hosted boards made before the platform sent passwords still carry it |
 | `BASE_URL` | The public URL (`https://mudda.example.com`), for links built outside a request |
 | `ASSUME_SSL` / `FORCE_SSL` | Both default to `true`, for a TLS-terminating proxy that sends `X-Forwarded-Proto: https`: secure cookies, HSTS, and HTTP redirected to HTTPS. `DISABLE_SSL=true` turns off both, unless either is set explicitly |
 | `MUDDA_PLATFORM_KEYS` | Optional; see [Hosting platform sync](#hosting-platform-sync) |

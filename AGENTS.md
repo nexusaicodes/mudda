@@ -102,11 +102,12 @@ sessions. The API-facing rules (token lifetime, scopes, labels, rate limits) are
 [API.md](API.md#authenticating), and OAuth in [MCP.md](MCP.md#oauth). This section maps them to
 the code.
 
-- **Owner password.** `ENV["MUDDA_OWNER_PASSWORD"]` is the starting password. Once the owner
-  changes it on the profile (`My::PasswordsController`, `/my/password/edit`) or resets it through
-  the hosting platform (the `password.reset` message), its bcrypt hash lives in
-  `users.password_digest` (`has_secure_password`, at least 8 characters) and the env secret no
-  longer signs anyone in. `OwnerPassword` (`app/models/owner_password.rb`) checks whichever is in
+- **Owner password.** A self-hosted board starts with `ENV["MUDDA_OWNER_PASSWORD"]`. A hosted
+  board gets no password in its env: the platform sends the one chosen at signup as a bcrypt
+  hash (the `password.set` message), and sends it again from its forgot-password flow. Once the
+  owner has a hash, from the platform or from changing it on the profile
+  (`My::PasswordsController`, `/my/password/edit`), it lives in `users.password_digest`
+  (`has_secure_password`, at least 8 characters) and the env secret no longer signs anyone in. `OwnerPassword` (`app/models/owner_password.rb`) checks whichever is in
   force and is `enabled?` when either exists. `Sessions::PasswordsController` handles
   `POST /session/password`. A change signs out the owner's other browsers; a reset signs out
   every browser. Tokens and passkeys survive both, and the password stays available whether or
@@ -423,9 +424,9 @@ kept in the database.
   host, be at most five minutes old, and carry a `seq` above `accounts.platform_seq`, which is
   claimed in the same `UPDATE` that applies it. Kinds: `plan.updated` (`accounts.plan` and
   `upgrade_url`; an unknown plan is refused so the platform retries until the board knows it),
-  `sync.configured` (`webhook_url` and `webhook_secret`), `name.updated`, `password.reset` (a
-  bcrypt hash from the platform's forgot-password flow, never the password; anything else is
-  refused), and `state.requested`
+  `sync.configured` (`webhook_url` and `webhook_secret`), `name.updated`, `password.set` (the owner's
+  password from signup or the forgot-password flow, as a bcrypt hash, never the password itself;
+  anything else is refused), and `state.requested`
   (the reconcile's read of the owner's name and email, the plan, whether webhooks are configured,
   and `platform_seq`).
 - **Board → platform** (`WebhookDelivery`): a rename (`user.updated`) and the card that takes the

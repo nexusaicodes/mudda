@@ -1,8 +1,9 @@
 # The owner's password for this deployment.
 #
-# Mudda runs one user per deployment. ENV["MUDDA_OWNER_PASSWORD"] is the starting password. Once
-# the owner changes it on their profile, or resets it through the hosting platform, its bcrypt
-# hash lives in users.password_digest and the env secret no longer signs anyone in. Either way
+# Mudda runs one user per deployment. A self-hosted board starts with ENV["MUDDA_OWNER_PASSWORD"];
+# a hosted one is sent the owner's bcrypt hash by the platform (Platform::Message, password.set).
+# Once the owner has a hash, from the platform or from changing it on their profile, it lives in
+# users.password_digest and the env secret no longer signs anyone in. Either way
 # the comparison is constant-time. Passkeys are an optional convenience layered on top (see
 # My::PasskeysController) and never disable the password.
 module OwnerPassword
@@ -15,9 +16,10 @@ module OwnerPassword
       end
     end
 
-    # Password sign-in is available whenever the owner has a stored password or a secret is configured.
+    # Password sign-in is available whenever the owner has a stored password or a secret is
+    # configured, and on a hosted board, whose password arrives from the platform after it boots.
     def enabled?
-      User.where.not(password_digest: nil).exists? || configured?
+      User.where.not(password_digest: nil).exists? || configured? || Platform::Message.enabled?
     end
 
     def configured?

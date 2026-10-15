@@ -135,14 +135,14 @@ class Platform::MessageTest < ActiveSupport::TestCase
     end
   end
 
-  test "password.reset stores the hash and signs out every browser" do
+  test "password.set stores the hash and signs out every browser" do
     owner = @account.users.order(:id).first
     browser = owner.sessions.create!
     token = owner.sessions.create!(kind: :token, label: "agent", scopes: "read")
     digest = BCrypt::Password.create("reset-password", cost: BCrypt::Engine::MIN_COST).to_s
 
     trusting_the_platform do
-      apply platform_message("password.reset", { password_digest: digest })
+      apply platform_message("password.set", { password_digest: digest })
     end
 
     assert_equal owner, OwnerPassword.authenticate(owner.email_address, "reset-password")
@@ -152,20 +152,20 @@ class Platform::MessageTest < ActiveSupport::TestCase
     assert_equal 1, @account.reload.platform_seq
   end
 
-  test "password.reset refuses anything but a bcrypt hash" do
+  test "password.set refuses anything but a bcrypt hash" do
     trusting_the_platform do
-      assert_refused "bad password digest", platform_message("password.reset", { password_digest: "plaintext-password" })
-      assert_refused "bad password digest", platform_message("password.reset", {})
+      assert_refused "bad password digest", platform_message("password.set", { password_digest: "plaintext-password" })
+      assert_refused "bad password digest", platform_message("password.set", {})
     end
     assert_nil @account.users.order(:id).first.password_digest
   end
 
-  test "password.reset at an old sequence number changes nothing" do
+  test "password.set at an old sequence number changes nothing" do
     digest = BCrypt::Password.create("reset-password", cost: BCrypt::Engine::MIN_COST).to_s
 
     trusting_the_platform do
       apply platform_message("name.updated", { name: "Ada", name_changed_at: Time.current.iso8601(6) }, seq: 2)
-      apply platform_message("password.reset", { password_digest: digest }, seq: 2)
+      apply platform_message("password.set", { password_digest: digest }, seq: 2)
     end
     assert_nil @account.users.order(:id).first.reload.password_digest
   end

@@ -45,6 +45,15 @@ class OwnerPasswordTest < ActiveSupport::TestCase
     end
   end
 
+  test "enabled? on a hosted board waiting for its password from the platform" do
+    with_env("MUDDA_OWNER_PASSWORD" => nil) do
+      trusting_the_platform do
+        assert OwnerPassword.enabled?
+        assert_nil OwnerPassword.authenticate(users(:david).email_address, "")
+      end
+    end
+  end
+
   test "not enabled with neither a stored password nor a secret" do
     with_env("MUDDA_OWNER_PASSWORD" => nil) do
       assert_not OwnerPassword.enabled?
