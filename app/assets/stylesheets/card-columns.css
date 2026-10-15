@@ -94,6 +94,7 @@
       inline-size: var(--column-width-collapsed);
 
       .pagination-link.pagination-link--active-when-observed,
+      .blank-slate,
       .card {
         display: none;
       }

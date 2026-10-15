@@ -1,9 +1,11 @@
 <% @page_title = t(".title") %>
+<% @body_class = "sign-in" %>
 
 <% passkeys_exist = ActionPack::Passkey.exists? %>
 <% password_enabled = OwnerPassword.enabled? %>
 
 <div class="panel panel--centered flex flex-column gap-half">
+  <%= image_tag "logo.png", alt: "", class: "sign-in__logo" %>
   <h1 class="txt-x-large font-weight-black margin-block-end"><%= t(".heading") %></h1>
 
   <% if password_enabled %>

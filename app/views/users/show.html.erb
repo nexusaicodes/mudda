@@ -56,8 +56,5 @@
     </section>
   </div>
 
-  <%= button_to session_path, method: :delete, class: "btn settings__sign-out", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } do %>
-    <%= icon_tag "logout" %>
-    <span><%= t(".sign_out") %></span>
-  <% end %>
+  <%= button_to t(".sign_out"), session_path, method: :delete, class: "settings__sign-out", form: { class: "settings__sign-out-form", data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } %>
 </div>

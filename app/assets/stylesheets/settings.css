@@ -47,9 +47,23 @@
     }
   }
 
+  .settings__sign-out-form {
+    text-align: center;
+  }
+
   .settings__sign-out {
-    inline-size: 100%;
-    justify-content: center;
-    min-block-size: 2.75rem;
+    background: none;
+    border: 0;
+    color: var(--color-ink-dark);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--text-small);
+    padding: 0.5em;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+
+    &:hover {
+      color: var(--color-ink);
+    }
   }
 }

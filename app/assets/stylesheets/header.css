@@ -97,6 +97,12 @@
       padding: 0.325em 0.275em 0.225em 0.275em;
       place-content: center;
       width: 1.5em;
+
+      img {
+        block-size: 100%;
+        inline-size: 100%;
+        object-fit: contain;
+      }
     }
 
     svg {
@@ -107,5 +113,15 @@
       overflow: visible;
       width: auto;
     }
+  }
+
+  .sign-in .header__logo {
+    display: none;
+  }
+
+  .sign-in__logo {
+    block-size: 3.5rem;
+    inline-size: auto;
+    margin-inline: auto;
   }
 }
