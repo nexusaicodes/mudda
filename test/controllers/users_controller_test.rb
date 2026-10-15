@@ -14,6 +14,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     with_env("MUDDA_PLATFORM_KEYS" => nil) { get user_path(users(:kevin)) }
     assert_select "a[href=?]", my_passkeys_path
     assert_select "a[href=?]", my_tokens_path
+    assert_select "a[href=?]", edit_my_password_path
     assert_select "form[action=?] button.settings__sign-out", session_path
     assert_select "a[href=?]", account_upgrade_path, count: 0
     assert_no_match "Plan", response.body

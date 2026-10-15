@@ -70,6 +70,7 @@ erDiagram
         string email_address UK "limit 255 NOT NULL"
         string name "limit 255 NOT NULL"
         datetime name_changed_at "precision 6 — the newer rename wins against the platform's"
+        string password_digest "bcrypt hash once the owner changes or resets the password; null while MUDDA_OWNER_PASSWORD is it"
         boolean active "default true NOT NULL"
         datetime created_at "NOT NULL"
         datetime updated_at "NOT NULL"

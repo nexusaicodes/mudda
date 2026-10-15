@@ -1,12 +1,13 @@
 namespace :auth do
-  desc "Remove all passkeys and end every session, API token, and OAuth grant (recovery for lost or broken passkeys)"
+  desc "Remove all passkeys and any changed password, and end every session, API token, and OAuth grant (recovery for a lost password or passkey)"
   task reset: :environment do
     passkeys = ActionPack::Passkey.delete_all
     sessions = Session.delete_all
     Doorkeeper::AccessToken.delete_all
     Doorkeeper::AccessGrant.delete_all
+    User.update_all(password_digest: nil)
 
-    puts "Deleted #{passkeys} passkey(s) and #{sessions} session(s)."
+    puts "Deleted #{passkeys} passkey(s) and #{sessions} session(s), and any changed password."
     puts "Sign in with MUDDA_OWNER_EMAIL + MUDDA_OWNER_PASSWORD; enrolling a passkey again is optional."
   end
 

@@ -1,0 +1,41 @@
+<% @page_title = t(".title") %>
+
+<% content_for :header_start do %>
+  <%= back_link_to t(".back"), user_path(Current.user) %>
+<% end %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+  <% if Current.user.errors.any? %>
+    <ul class="txt-negative margin-none" role="alert">
+      <% Current.user.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <%= form_with url: my_password_path, method: :patch, html: { class: "flex flex-column gap" } do |form| %>
+    <div class="flex flex-column gap-half">
+      <strong><%= form.label :current_password, t(".current") %></strong>
+      <%= form.password_field :current_password, required: true, autofocus: true, class: "input", autocomplete: "current-password", dir: "ltr" %>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <strong><%= label_tag "user_password", t(".new") %></strong>
+      <%= password_field_tag "user[password]", nil, id: "user_password", required: true, minlength: 8, class: "input", autocomplete: "new-password", dir: "ltr" %>
+      <small class="txt-subtle"><%= t(".hint") %></small>
+    </div>
+
+    <div class="flex flex-column gap-half">
+      <strong><%= label_tag "user_password_confirmation", t(".confirm") %></strong>
+      <%= password_field_tag "user[password_confirmation]", nil, id: "user_password_confirmation", required: true, minlength: 8, class: "input", autocomplete: "new-password", dir: "ltr" %>
+    </div>
+
+    <%= form.submit t(".save"), class: "btn btn--link center" %>
+  <% end %>
+
+  <p class="txt-small txt-subtle txt-balance margin-none"><%= t(".note") %></p>
+</section>

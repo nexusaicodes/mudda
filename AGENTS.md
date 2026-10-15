@@ -102,18 +102,23 @@ sessions. The API-facing rules (token lifetime, scopes, labels, rate limits) are
 [API.md](API.md#authenticating), and OAuth in [MCP.md](MCP.md#oauth). This section maps them to
 the code.
 
-- **Owner password.** The owner signs in with their email and the deployment secret in
-  `ENV["MUDDA_OWNER_PASSWORD"]`. `OwnerPassword` (`app/models/owner_password.rb`) verifies it
-  with `secure_compare` and is `enabled?` whenever the secret is set.
-  `Sessions::PasswordsController` handles `POST /session/password`. Nothing stores the
-  password, and it stays available whether or not passkeys exist.
+- **Owner password.** `ENV["MUDDA_OWNER_PASSWORD"]` is the starting password. Once the owner
+  changes it on the profile (`My::PasswordsController`, `/my/password/edit`) or resets it through
+  the hosting platform (the `password.reset` message), its bcrypt hash lives in
+  `users.password_digest` (`has_secure_password`, at least 8 characters) and the env secret no
+  longer signs anyone in. `OwnerPassword` (`app/models/owner_password.rb`) checks whichever is in
+  force and is `enabled?` when either exists. `Sessions::PasswordsController` handles
+  `POST /session/password`. A change signs out the owner's other browsers; a reset signs out
+  every browser. Tokens and passkeys survive both, and the password stays available whether or
+  not passkeys exist.
 - **Passkeys are optional**: WebAuthn via `User has_passkeys`, `lib/action_pack/passkey/`, and
   the `sessions/passkeys` and `my/passkeys` controllers. There is no `Credential` model. Adding or
   removing passkeys never disables the password.
 - **Provisioning and recovery.** `db/seeds.rb` provisions the owner user and account from the
-  `MUDDA_OWNER_*` env vars. With neither a password secret nor a passkey there is no way to sign
-  in, so the seed warns locally and aborts elsewhere. `bin/rails auth:reset` (`make reset-auth`)
-  is the recovery path.
+  `MUDDA_OWNER_*` env vars. With no password secret, stored password, or passkey there is no way
+  to sign in, so the seed warns locally and aborts elsewhere. `bin/rails auth:reset` (`make
+  reset-auth`) is the recovery path: it also clears a stored password, so `MUDDA_OWNER_PASSWORD`
+  works again.
 - **`Session#kind`** says how the user is present: `browser` (a cookie) or `token` (a script or
   agent). A token always carries a `label` and a browser session never does; both are validated.
   `Session#token` is the single definition of the credential, and minted tokens expire after
@@ -308,7 +313,7 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 - **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
   then the page's back link if it has one (`content_for :header_start`), the page title in the
   centre, and the avatar on the right (`my/_account_link`), a plain link to the profile. The
-  profile (`users/show`) holds appearance, language, the plan, passkeys, API tokens, and sign
+  profile (`users/show`) holds appearance, language, the plan, password, passkeys, API tokens, and sign
   out; there is no account settings page and no account name.
 - **Board title** (`boards/_title`): clicking the name renames the board in place
   (`inline-edit` controller) with just Save and Cancel; the input takes the title's own type, so
@@ -418,7 +423,9 @@ kept in the database.
   host, be at most five minutes old, and carry a `seq` above `accounts.platform_seq`, which is
   claimed in the same `UPDATE` that applies it. Kinds: `plan.updated` (`accounts.plan` and
   `upgrade_url`; an unknown plan is refused so the platform retries until the board knows it),
-  `sync.configured` (`webhook_url` and `webhook_secret`), `name.updated`, and `state.requested`
+  `sync.configured` (`webhook_url` and `webhook_secret`), `name.updated`, `password.reset` (a
+  bcrypt hash from the platform's forgot-password flow, never the password; anything else is
+  refused), and `state.requested`
   (the reconcile's read of the owner's name and email, the plan, whether webhooks are configured,
   and `platform_seq`).
 - **Board → platform** (`WebhookDelivery`): a rename (`user.updated`) and the card that takes the

@@ -24,6 +24,7 @@ gem "image_processing", "~> 1.14"
 gem "platform_agent"
 gem "useragent", bc: "useragent"
 gem "mcp", "~> 1.6"
+gem "bcrypt", "~> 3.1" # the owner password the board stores once it is changed or reset
 gem "doorkeeper", "~> 5.9"
 gem "rails-i18n"
 gem "tzinfo-data" # the whole zone database, aliases a browser may report (Asia/Calcutta) included, whatever the OS ships

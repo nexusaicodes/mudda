@@ -134,6 +134,7 @@ GEM
     ansi (1.6.0)
     ast (2.4.3)
     base64 (0.3.0)
+    bcrypt (3.1.22)
     benchmark (0.5.0)
     bigdecimal (4.1.2)
     bindex (0.8.1)
@@ -410,6 +411,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  bcrypt (~> 3.1)
   benchmark
   bootsnap
   capybara

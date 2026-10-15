@@ -33,19 +33,22 @@ seed runs once, when `db:prepare` creates the database:
 | `MUDDA_OWNER_EMAIL` | The owner's email address. Required outside development | `saksham@nexusai.world` |
 | `MUDDA_OWNER_NAME` | Display name. Defaults to the email's local part, capitalized | `Saksham Saxena` |
 | `MUDDA_OWNER_LOCALE` | The owner's starting language, `en` or `ar`, applied once when the owner is first created; after that it's changed on the profile. Unset: the browser's language | `ar` |
-| `MUDDA_OWNER_PASSWORD` | The sign-in password, checked against this variable on every sign-in and never stored | `mudda-dev-password` |
+| `MUDDA_OWNER_PASSWORD` | The starting sign-in password, used until the owner changes it on their profile | `mudda-dev-password` |
 
-Sign in with `MUDDA_OWNER_EMAIL` and `MUDDA_OWNER_PASSWORD`. The password always works.
+Sign in with `MUDDA_OWNER_EMAIL` and `MUDDA_OWNER_PASSWORD`. Changing the password on the profile
+(Security → Change password) stores its hash in the database, and from then on that password is
+the one that works.
 Enrolling a passkey (under `my/passkeys`) is an optional convenience for biometric or device
 sign-in.
 
 **Before exposing the app, set a strong `MUDDA_OWNER_PASSWORD`.** It takes effect when the
-container is recreated (`make start`); there is nothing to reseed. Set `MUDDA_OWNER_EMAIL` before
+container is recreated (`make start`), as long as the password hasn't been changed on the profile;
+there is nothing to reseed. Set `MUDDA_OWNER_EMAIL` before
 the first `make setup`: the owner is found by email, so changing it later leaves no owner under
 the new address, and reseeding then provisions a second account rather than renaming the first.
 
-Lost or broken passkeys? `make reset-auth` removes them all and ends every session; sign back in
-with the password. Driving the app from a script or agent? See [API.md](API.md) and
+Lost password or broken passkeys? `make reset-auth` removes every passkey and any changed
+password, and ends every session; sign back in with `MUDDA_OWNER_PASSWORD`. Driving the app from a script or agent? See [API.md](API.md) and
 [MCP.md](MCP.md).
 
 ### Hosting platform sync
@@ -83,7 +86,7 @@ container.
 | `make migrate`* | Run pending migrations |
 | `make seed`* | Run `db/seeds.rb` (idempotent) |
 | `make reset-db`* | Drop, recreate, and reseed the database |
-| `make reset-auth` | Remove every passkey and end every session, API token, and OAuth grant |
+| `make reset-auth` | Remove every passkey and any changed password, and end every session, API token, and OAuth grant |
 | `make token` / `make tokens` / `make revoke` | Mint, list, and revoke API tokens (see [API.md → Managing tokens](API.md#managing-tokens)) |
 | `make test` | The unit and integration tests |
 | `make test-system` | The system tests, in a `selenium` Chromium container that it starts and then removes |
@@ -138,7 +141,7 @@ To run it:
 |---|---|
 | `SECRET_KEY_BASE` | Required. Any long random string, stable across restarts |
 | `MUDDA_OWNER_EMAIL`, `MUDDA_OWNER_NAME`, `MUDDA_OWNER_LOCALE` | The owner, as above |
-| `MUDDA_OWNER_PASSWORD` | Required. The owner's password |
+| `MUDDA_OWNER_PASSWORD` | Required. The owner's starting password |
 | `MUDDA_OWNER_PASSWORD_B64` | An alternative to the above, base64-encoded so any character survives an env file. The entrypoint decodes it when `MUDDA_OWNER_PASSWORD` is empty |
 | `BASE_URL` | The public URL (`https://mudda.example.com`), for links built outside a request |
 | `ASSUME_SSL` / `FORCE_SSL` | Both default to `true`, for a TLS-terminating proxy that sends `X-Forwarded-Proto: https`: secure cookies, HSTS, and HTTP redirected to HTTPS. `DISABLE_SSL=true` turns off both, unless either is set explicitly |

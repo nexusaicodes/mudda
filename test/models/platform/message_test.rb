@@ -135,6 +135,41 @@ class Platform::MessageTest < ActiveSupport::TestCase
     end
   end
 
+  test "password.reset stores the hash and signs out every browser" do
+    owner = @account.users.order(:id).first
+    browser = owner.sessions.create!
+    token = owner.sessions.create!(kind: :token, label: "agent", scopes: "read")
+    digest = BCrypt::Password.create("reset-password", cost: BCrypt::Engine::MIN_COST).to_s
+
+    trusting_the_platform do
+      apply platform_message("password.reset", { password_digest: digest })
+    end
+
+    assert_equal owner, OwnerPassword.authenticate(owner.email_address, "reset-password")
+    assert_nil OwnerPassword.authenticate(owner.email_address, owner_password)
+    assert_not Session.exists?(browser.id)
+    assert Session.exists?(token.id)
+    assert_equal 1, @account.reload.platform_seq
+  end
+
+  test "password.reset refuses anything but a bcrypt hash" do
+    trusting_the_platform do
+      assert_refused "bad password digest", platform_message("password.reset", { password_digest: "plaintext-password" })
+      assert_refused "bad password digest", platform_message("password.reset", {})
+    end
+    assert_nil @account.users.order(:id).first.password_digest
+  end
+
+  test "password.reset at an old sequence number changes nothing" do
+    digest = BCrypt::Password.create("reset-password", cost: BCrypt::Engine::MIN_COST).to_s
+
+    trusting_the_platform do
+      apply platform_message("name.updated", { name: "Ada", name_changed_at: Time.current.iso8601(6) }, seq: 2)
+      apply platform_message("password.reset", { password_digest: digest }, seq: 2)
+    end
+    assert_nil @account.users.order(:id).first.reload.password_digest
+  end
+
   private
     def apply(token)
       Platform::Message.verify(token, host: Platform::Message.audience).apply(@account)

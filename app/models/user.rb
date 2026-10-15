@@ -2,6 +2,10 @@ class User < ApplicationRecord
   include Accessor, Avatar, Configurable, Named, Searcher, Syncable
 
   has_passkeys name: :email_address, display_name: -> { name }
+  has_secure_password validations: false
+
+  # Set only once the owner changes their password; until then MUDDA_OWNER_PASSWORD is it (see OwnerPassword).
+  validates :password, length: { minimum: 8 }, confirmation: true, allow_nil: true
 
   belongs_to :account
 

@@ -25,9 +25,9 @@ owner = User.find_by(email_address: email_address.strip.downcase) ||
 
 puts %(Seeded account ##{owner.account_id} — owner #{owner.email_address})
 
-# Without a password secret and with no passkey yet, there is no way to sign in. Fail fast in a
+# Without a password secret, a stored password, or a passkey, there is no way to sign in. Fail fast in a
 # real deployment; only tolerate it locally, where the secret is usually supplied at runtime.
-if ENV["MUDDA_OWNER_PASSWORD"].blank? && !ActionPack::Passkey.exists?
+unless OwnerPassword.enabled? || ActionPack::Passkey.exists?
   message = "MUDDA_OWNER_PASSWORD is not set and no passkey exists — there is no way to sign in."
   Rails.env.local? ? warn("WARNING: #{message} Sign-in is unavailable until you set it.") : abort(message)
 end
