@@ -81,8 +81,12 @@ API's error envelope plus the HTTP status, so an agent can tell a missing card (
 bad field (`422`):
 
 ```json
-{ "status": 422, "errors": { "due_on": ["can't be blank in Todo or Doing"] } }
+{ "status": 422, "errors": { "due_on": ["can't be blank in Todo or Doing"] }, "request_id": "5f0c1e9a-…" }
 ```
+
+`request_id` is the MCP request's id, the same as its `X-Request-Id` response header (send your
+own and it is kept). A JSON-RPC error carries it too, in `error.data.request_id`. Quote it when
+reporting a problem.
 
 Arguments are checked against the tool's schema before anything reaches the API. A call that
 fails that check is also a tool error, but its text is the MCP library's plain message naming
@@ -157,8 +161,8 @@ Code, Cursor) don't need them.
 
 ## How it works
 
-`Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`) is a Rack middleware mounted in front of
-`ActionDispatch::Executor` by `config/initializers/mcp.rb`. It intercepts only the exact path
+`Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`) is a Rack middleware mounted right after
+`ActionDispatch::RequestId` by `config/initializers/mcp.rb`, inside the executor. It intercepts only the exact path
 `/mcp`. On each request it:
 
 1. Checks the credential by calling `GET /my/user.json` as the client, which runs the same
@@ -170,11 +174,13 @@ Code, Cursor) don't need them.
    scopes allow (`Mudda::Mcp::Tools.granted`). It answers in plain JSON and keeps no sessions, so
    any process can answer any call. A `GET` for a server-sent event stream is refused.
 3. Runs each tool call as an in-process request to the JSON API (`Mudda::Mcp::Api`). The request
-   carries the client's `Authorization` header, host, and forwarding headers, but never its
-   cookie.
+   carries the client's `Authorization` header, host, forwarding headers and request id, but
+   never its cookie.
 
-It sits ahead of the executor because each tool call is a full request of its own, and a
-request started inside a running executor would reset the outer request's state.
+One MCP request is one executor run with one request id, which every tool call shares; `Current`
+is cleared before each call, as a request of its own would find it. Each JSON-RPC call is logged
+as `mcp.request.completed` (method, tool, duration, error type), and an exception in the MCP
+library is reported with the method and tool name, never the tool's arguments.
 
 `lib/mudda` is required rather than autoloaded, so a change there needs a server restart
 (`make restart`). Tests are in `test/integration/mcp_test.rb`, and for OAuth in

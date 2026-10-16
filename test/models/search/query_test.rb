@@ -10,7 +10,22 @@ class Search::QueryTest < ActiveSupport::TestCase
     assert_equal "a b", sanitized("a-b")
   end
 
+  test "the match expression quotes every word and phrase" do
+    assert_equal %("ship" "OR" "not"), expression("ship OR not")
+    assert_equal %("a b" "NEAR"), expression(%("a b" NEAR))
+    assert_equal %("NOT"), expression("NOT")
+  end
+
+  test "terms that leave nothing to match are invalid" do
+    assert_not Search::Query.new(terms: %("")).valid?
+    assert_not Search::Query.new(terms: "(*)").valid?
+  end
+
   private
+    def expression(terms)
+      Search::Query.new(terms: terms).tap(&:validate).match_expression
+    end
+
     def sanitized(terms)
       query = Search::Query.new(terms: terms)
       query.validate

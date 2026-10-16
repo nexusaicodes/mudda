@@ -30,7 +30,9 @@ class ActionPack::PasskeyTest < ActiveSupport::TestCase
     assertion = build_assertion(challenge: challenge)
     assertion[:signature] = Base64.urlsafe_encode64("invalid", padding: false)
 
-    assert_nil @passkey.authenticate(assertion)
+    assert_event_reported("auth.passkey.rejected", payload: { passkey_id: @passkey.id }) do
+      assert_nil @passkey.authenticate(assertion)
+    end
   end
 
   test "authenticate updates sign count and backed_up" do

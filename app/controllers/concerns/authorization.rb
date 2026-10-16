@@ -33,6 +33,8 @@ module Authorization
     # bouncing it back to root forever.
     def ensure_can_access_account
       unless Current.user&.active?
+        log_refusal "user deactivated"
+
         if Current.session.token?
           render_forbidden "Not authorized"
         else
@@ -47,6 +49,7 @@ module Authorization
     # session is never limited.
     def ensure_token_permits_request
       unless Current.session.permits?(scope_for_request)
+        log_refusal "token lacks the #{scope_for_request} scope"
         render_forbidden "This token is not granted the #{scope_for_request} scope"
       end
     end
@@ -62,7 +65,10 @@ module Authorization
     end
 
     def ensure_browser_session
-      head :forbidden unless Current.session.browser?
+      unless Current.session.browser?
+        log_refusal "token on a browser-only page"
+        head :forbidden
+      end
     end
 
     # Nested attributes marked `_destroy` (a card's steps) are deleted as surely as by a DELETE.
@@ -75,6 +81,10 @@ module Authorization
       else
         false
       end
+    end
+
+    def log_refusal(reason)
+      StructuredLog.warn("auth.authorization.refused", reason: reason, controller: controller_path, action: action_name)
     end
 
     def refuse_signed_out_browser

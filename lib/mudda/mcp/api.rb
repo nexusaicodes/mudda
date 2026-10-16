@@ -10,18 +10,18 @@ module Mudda::Mcp
       end
     end
 
-    # What a call inherits from the request that carried it: who is asking, from where, and the
-    # host and scheme the API builds its URLs from. Never the cookie — /mcp answers to the
-    # Authorization header alone.
+    # What a call inherits from the request that carried it: who is asking, from where, the host
+    # and scheme the API builds its URLs from, and the request id, so every call and the MCP
+    # request share one. Never the cookie — /mcp answers to the Authorization header alone.
     INHERITED_ENV = %w[
-      HTTP_AUTHORIZATION HTTP_HOST HTTP_USER_AGENT
+      HTTP_AUTHORIZATION HTTP_HOST HTTP_USER_AGENT HTTP_X_REQUEST_ID
       HTTP_X_FORWARDED_FOR HTTP_X_FORWARDED_HOST HTTP_X_FORWARDED_PORT HTTP_X_FORWARDED_PROTO
-      REMOTE_ADDR SERVER_NAME SERVER_PORT HTTPS rack.url_scheme
+      REMOTE_ADDR SERVER_NAME SERVER_PORT HTTPS rack.url_scheme action_dispatch.request_id
     ]
 
     def initialize(app, env)
       @app = app
-      @inherited_env = env.slice(*INHERITED_ENV)
+      @inherited_env = env.slice(*INHERITED_ENV).merge("HTTP_X_REQUEST_ID" => env["action_dispatch.request_id"]).compact
     end
 
     def get(path, query = {})
@@ -41,9 +41,28 @@ module Mudda::Mcp
     end
 
     private
+      # Every call runs inside the MCP request's executor, so what a request keeps in Current is
+      # cleared first, as a request of its own would find it.
       def request(method, path, query: {}, body: nil)
-        status, headers, rack_body = @app.call(env_for(method, path, query, body))
-        Response.new(status: status, headers: headers, body: parse(read(rack_body)))
+        ActiveSupport::CurrentAttributes.clear_all
+        traced method, path do
+          status, headers, rack_body = @app.call(env_for(method, path, query, body))
+          Response.new(status: status, headers: headers, body: parse(read(rack_body)))
+        end
+      end
+
+      # While tracing is on, each call is a span of its own under the MCP request's, standing in
+      # for the server span the call would have over HTTP: the controller names it for its route
+      # ("POST /boards/:board_id/cards") and the actor's fields land on it.
+      def traced(method, path)
+        return yield unless defined?(OpenTelemetry::Trace)
+
+        StructuredLog.in_span(method, { "http.request.method" => method, "url.path" => "#{path}.json" }) do |span|
+          OpenTelemetry::Instrumentation::Rack.with_span(span) { yield }.tap do |response|
+            span.set_attribute "http.response.status_code", response.status
+            span.status = OpenTelemetry::Trace::Status.error if response.status >= 500
+          end
+        end
       end
 
       # The app's env_config — key generator, cookie and parameter settings — is merged into a

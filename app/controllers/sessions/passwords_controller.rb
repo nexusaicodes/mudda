@@ -21,6 +21,9 @@ class Sessions::PasswordsController < ApplicationController
         format.json { render json: { session_token: session_token, scopes: Current.session.scopes } }
       end
     else
+      StructuredLog.warn("auth.signin.failed", method: "password", reason: "invalid_credentials",
+        ip: request.remote_ip, email: (StructuredLog.mask_email(email_address) if email_address.is_a?(String)))
+
       respond_to do |format|
         format.html { redirect_to new_session_path, alert: t(".failed") }
         format.json { render_unauthorized "Invalid credentials" }

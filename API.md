@@ -273,7 +273,9 @@ A note reports `id`, `body` (`{ "plain_text": …, "html": … }`), `created_at`
 
 `GET /search.json?q=…` searches card titles, descriptions, and notes across every board, and
 returns the matching cards, most recently active first. A blank `q` returns nothing. A card
-number is searched as plain text, so fetch a card by its number from its board.
+number is searched as plain text, so fetch a card by its number from its board. Every word
+must match, and `OR`, `AND`, `NOT` and `NEAR` are searched for as words, not operators; wrap
+words in double quotes to match them as a phrase.
 
 ## What isn't here
 
@@ -297,8 +299,12 @@ includes failures with no record behind them and ones that never reach a control
 unknown route or a crash:
 
 ```json
-{ "errors": { "due_on": ["can't be blank in Todo or Doing"] } }
+{ "errors": { "due_on": ["can't be blank in Todo or Doing"] }, "request_id": "5f0c1e9a-…" }
 ```
+
+`request_id` is the request's reference, the same value as the `X-Request-Id` response header.
+Quote it when reporting a problem: it finds the request in the server's logs. Send your own
+`X-Request-Id` and it is used instead, so your logs and the board's share the id.
 
 | Status | When |
 |---|---|
@@ -307,9 +313,10 @@ unknown route or a crash:
 | `403` | The user is deactivated, the note isn't yours to change, or the token lacks the scope (see [Scopes](#scopes)) |
 | `404` | No such record or route, including a `column_id` that isn't on the board the card ends on |
 | `406` | The endpoint doesn't answer JSON (see [What isn't here](#what-isnt-here)) |
-| `422` | Validation failed, a required field was sent as `null`, or a query parameter isn't recognised; the keys name the fields |
+| `409` | A concurrent change took the same unique value; retry |
+| `422` | Validation failed, a required field was sent as `null`, a query parameter isn't recognised, or a search can't be parsed; the keys name the fields |
 | `429` | The sign-in rate limit, or the token's request allowance (see [Rate limit](#rate-limit)) |
-| `500` | A bug, still in the envelope, under `base` |
+| `500` | A bug, still in the envelope, under `base`; it is reported, and `request_id` identifies it |
 
 ## Pagination
 

@@ -214,3 +214,53 @@ class Event::RelayJob < ApplicationJob
   end
 end
 ```
+
+## Logging and errors
+
+Logs are structured events, not prose. `lib/structured_log.rb` turns every `Rails.event`
+notification, the framework's own included, into one line: JSON in production
+(`RAILS_LOG_FORMAT`), readable `event key=value` text locally. `RAILS_LOG_LEVEL` decides what
+is written, and production runs at `warn`.
+
+```ruby
+# Bad
+Rails.logger.error "WebhookDelivery #{event_id} abandoned: #{error}"
+
+# Good
+StructuredLog.error("board.delivery.abandoned", event_id: event_id, attempts: attempts, last_error: error)
+```
+
+- **Name events `domain.object.outcome`**: `board.delivery.abandoned`, `auth.signin.failed`,
+  `mcp.request.completed`, `rate_limit.hit`.
+- **Pick the level by what it means.** `error`: a user's work lost or blocked, or a bug. `warn`:
+  degraded but handled, such as a failure that will be retried, a refused credential or
+  signature, a rate-limit hit. `info`: a normal milestone, dropped in production, so anything
+  that must be kept is written to the database (an `Event`, a delivery's `last_error`).
+  `debug`: diagnostics.
+- **Context comes for free.** Every line in a request carries `request_id`, and once a session
+  is known, `account_id`, `user_id`, `session_kind` and, for a token, `agent_name`. Every line in
+  a job carries `job_id`, `job` and the enqueuing request's `request_id` (`lib/job_context.rb`).
+  Don't repeat them in the payload.
+- **Never log a secret or PII.** No passwords, tokens, OAuth `code`/`code_verifier`, signatures
+  or webhook secrets. Mask emails with `StructuredLog.mask_email`. Job arguments are never logged.
+- **Spans follow the same rules.** Tracing is opt-in (`config/initializers/opentelemetry.rb`,
+  inert unless `OTEL_*` is set), so code never assumes it: wrap a domain operation in
+  `StructuredLog.in_span("domain.operation", { "mudda.thing.id" => id })`, which yields the
+  span or `nil`. Attributes are ids, kinds and outcomes, never what a user wrote (card text,
+  search terms, tool arguments). SQL spans carry obfuscated statements only.
+
+Errors follow one contract:
+
+- **Classify before handling.** A client's mistake (validation, not found, a refused
+  credential, a rate limit) is a precise 4xx in the `JsonErrors` envelope and is never reported.
+  A dependency failure (the platform's webhook endpoint) is retried, logged at `warn` per
+  attempt, and reported at `error` once attempts run out. Anything else is a bug: a 500, reported
+  through `Rails.error`, whose `request_id` is the reference the user sees.
+- **Rescue narrowly; report at the boundary.** Inner code raises. `rescue StandardError` belongs
+  only at a boundary (a controller, a job, a middleware, an after-commit callback whose write
+  already happened), and a boundary rescue calls `Rails.error.report`, which logs one
+  `error.reported` line. Don't also log the same failure.
+- **Every error response carries the request id**: `request_id` in the JSON envelope, a
+  bilingual "Reference" on the HTML error pages (`JsonPublicExceptions`), and in MCP results.
+- **Test what is reported**, with `assert_error_reported`, `assert_no_error_reported` and
+  `assert_event_reported`, never by reading the log.

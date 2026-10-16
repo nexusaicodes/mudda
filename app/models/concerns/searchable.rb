@@ -3,10 +3,12 @@ module Searchable
 
   SEARCH_CONTENT_LIMIT = 32.kilobytes
 
+  # The write the index follows has already committed, so a failure to index it is reported
+  # rather than failing the request; bin/rails search:reindex repairs the index.
   included do
-    after_create_commit :create_in_search_index
-    after_update_commit :update_in_search_index
-    after_destroy_commit :remove_from_search_index
+    after_create_commit  { reporting_index_failure { create_in_search_index } }
+    after_update_commit  { reporting_index_failure { update_in_search_index } }
+    after_destroy_commit { reporting_index_failure { remove_from_search_index } }
   end
 
   def reindex
@@ -14,6 +16,13 @@ module Searchable
   end
 
   private
+    def reporting_index_failure
+      yield
+    rescue StandardError => error
+      Rails.error.report error, handled: true, severity: :error, source: "mudda.search_index",
+        context: { searchable_type: self.class.name, searchable_id: id }
+    end
+
     def create_in_search_index
       search_record_class.create!(search_record_attributes)
     end

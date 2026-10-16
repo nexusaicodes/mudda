@@ -48,3 +48,10 @@ group :test do
   gem "mocha"
   gem "selenium-webdriver"
 end
+
+# Tracing, inert unless OTEL_EXPORTER_OTLP_ENDPOINT or OTEL_TRACES_EXPORTER is set (config/initializers/opentelemetry.rb).
+gem "opentelemetry-sdk", require: false
+gem "opentelemetry-exporter-otlp", require: false
+gem "opentelemetry-instrumentation-rails", require: false
+gem "opentelemetry-instrumentation-net_http", require: false
+gem "opentelemetry-helpers-sql-processor", require: false

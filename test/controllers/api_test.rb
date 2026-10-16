@@ -436,6 +436,29 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_error_envelope "base"
   end
 
+  test "a failed sign-in is logged at warn with the email masked" do
+    assert_event_reported("auth.signin.failed", payload: { method: "password", email: "d***@example.com" }) do
+      post session_password_path(format: :json), params: { email_address: "david@example.com", password: "wrong" }
+    end
+  end
+
+  test "an authorization refusal is logged with its reason" do
+    headers = bearer_headers_for(@user, scopes: %w[ read ])
+
+    assert_event_reported("auth.authorization.refused", payload: { reason: "token lacks the write scope" }) do
+      post boards_path(format: :json), params: { board: { name: "X" } }, headers: headers, as: :json
+    end
+    assert_response :forbidden
+  end
+
+  test "a rate limit hit is logged once, by the shared subscriber" do
+    10.times { post session_password_path(format: :json), params: { email_address: "x@example.com", password: "wrong" } }
+
+    assert_event_reported("rate_limit.hit", payload: { scope: "sessions/passwords", limit: 10 }) do
+      post session_password_path(format: :json), params: { email_address: "x@example.com", password: "wrong" }
+    end
+  end
+
   test "the sign-in rate limit carries the error envelope" do
     11.times do
       post session_password_path(format: :json),
@@ -464,6 +487,30 @@ class ApiTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
     assert_match "<html", @response.body
+    assert_match "Reference: <code>#{@response.headers["x-request-id"]}</code>", @response.body
+    assert_match "المرجع:", @response.body
+  end
+
+  test "a crash is reported and answers a 500 envelope carrying the request id" do
+    BoardsController.any_instance.stubs(:index).raises(RuntimeError, "boom")
+
+    assert_error_reported(RuntimeError) do
+      get boards_path(format: :json), headers: bearer_headers_for(@user)
+    end
+
+    assert_response :internal_server_error
+    assert_error_envelope "base"
+  end
+
+  test "a lost race for a unique value is a 409" do
+    BoardsController.any_instance.stubs(:index).raises(ActiveRecord::RecordNotUnique)
+
+    assert_no_error_reported do
+      get boards_path(format: :json), headers: bearer_headers_for(@user)
+    end
+
+    assert_response :conflict
+    assert_error_envelope "base"
   end
 
   test "a JSON request to an endpoint that serves none carries the error envelope" do
@@ -947,5 +994,6 @@ class ApiTest < ActionDispatch::IntegrationTest
       assert errors.is_a?(Hash), "Expected an errors object, got #{@response.parsed_body.inspect}"
       assert errors[key].is_a?(Array), "Expected errors[#{key.inspect}] to be an array of messages"
       assert errors[key].all?(&:present?), "Expected every message to say something"
+      assert_equal @response.headers["x-request-id"], @response.parsed_body["request_id"], "Expected the request id as a reference"
     end
 end

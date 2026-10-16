@@ -156,7 +156,12 @@ the code.
   the client's tokens. A minted token is `Session.token.minted`; an OAuth session's own signed
   id is never a credential.
 - **Rate limits.** `TokenRateLimit` gives each token its allowance, in its own `MemoryStore`
-  (cleared in `test_helper.rb`). Password and passkey sign-in have their own limits.
+  (cleared in `test_helper.rb`). Password and passkey sign-in have their own limits, each in its
+  own store. Every limiter's hit is logged as `rate_limit.hit` by one subscriber
+  (`config/initializers/rate_limit_logging.rb`).
+- **Security events** are logged at warn: `auth.signin.failed` (method, reason, IP, masked
+  email), `auth.passkey.rejected` (the WebAuthn reason, the sign count's included) and
+  `auth.authorization.refused` (the reason, controller and action).
 
 ### Core domain models
 
@@ -294,9 +299,11 @@ The contract is [API.md](API.md). The mechanics:
   (`ServesJson`, in `ApplicationController`), and a JSON request to any other action is a 406
   **before** the action runs, so an endpoint that never thought about JSON can't write and then
   fail to render.
-- **Every failure** comes back as `{ "errors": { "field": ["message"] } }` through `JsonErrors`,
-  the 401 and 403 from `Authentication` and `Authorization` included. Failures outside a
-  controller go through `lib/json_public_exceptions.rb`.
+- **Every failure** comes back as `{ "errors": { "field": ["message"] }, "request_id": "…" }`
+  through `JsonErrors`, the 401 and 403 from `Authentication` and `Authorization` included; a bug
+  is reported and answered with a 500 in the same shape. Failures outside a controller go
+  through `lib/json_public_exceptions.rb`, which also puts the request id on the HTML error pages.
+  Logging and error handling follow [STYLE.md → Logging and errors](STYLE.md#logging-and-errors).
 - **Indexes** answer with `{ "data": [...], "paging": {...} }` (`PaginationHelper#paging_for`).
 - **Unrecognised query parameters** are a 422 on controllers that include `StrictQueryParams`
   (boards, cards, notes, steps, columns, search). Each declares what it answers to with
@@ -344,7 +351,9 @@ keep `MemoryStore`s of their own.
   so jobs run in the right tenant.
 - Jobs should be shallow and delegate to domain models, with `_later`/`_now` naming (see
   [STYLE.md](STYLE.md#run-async-operations-in-jobs)).
-- `SearchReindexJob` is a manual full-text-index repair run by `bin/rails search:reindex`, and
+- `SearchReindexJob` is a manual full-text-index repair run by `bin/rails search:reindex`, which
+  prints what was indexed, skipped (rich text over the limit) and failed, and exits non-zero if
+  anything failed; each failure is reported. And
   `WebhookDeliveryJob` sends one event to the hosting platform (see
   [Hosting platform sync](#hosting-platform-sync)).
 
@@ -431,9 +440,15 @@ kept in the database.
   and `platform_seq`).
 - **Board → platform** (`WebhookDelivery`): a rename (`user.updated`) and the card that takes the
   last slot (`cards.limit_reached`) are written to `webhook_deliveries` in their own transaction
-  and POSTed after commit to the configured URL, HMAC-signed with its secret, retried with backoff for a week. Pending rows are sent
-  again at boot and whenever the platform asks for the state, since the in-process job queue
-  doesn't survive a restart.
+  and POSTed after commit to the configured URL, HMAC-signed with its secret, retried with backoff for a week. Every pending row
+  is queued again at boot, and due rows whenever the platform asks for the state, since the
+  in-process job queue doesn't survive a restart. A job claims its row in one conditional
+  `UPDATE` before sending, so two jobs queued for one row can't both POST it. Only transport
+  failures (timeouts, refused connections, TLS) and non-2xx answers are retried, each logged as
+  `board.delivery.failed`; one given up on is logged as `board.delivery.abandoned` and reported.
+- **Refusals** are logged as `platform.message.refused` with the reason, and a replayed `seq` as
+  `platform.message.stale` (debug). Malformed `MUDDA_PLATFORM_KEYS` is the board's fault, so it
+  answers `503` and logs `platform.keys.malformed` rather than refusing the message.
 - **The name** may change on either side; `users.name_changed_at` decides, the newer winning and
   a tie keeping the local name (`User::Syncable`). A rename applied from the platform isn't sent
   back.
@@ -444,7 +459,7 @@ kept in the database.
 ### MCP
 
 `/mcp` serves the JSON API to AI agents as MCP tools. `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`)
-is a middleware ahead of `ActionDispatch::Executor`, and each tool is one in-process JSON API
+is a middleware inside the executor, right after `ActionDispatch::RequestId`, and each tool is one in-process JSON API
 request made with the client's token, so tools carry no business logic. `lib/mudda` is required,
 not autoloaded, so restart after changing it. See [MCP.md](MCP.md#how-it-works).
 

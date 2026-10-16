@@ -138,8 +138,11 @@ module Authentication
       end
     end
 
+    # Returns the session, which resume_session answers with.
     def set_current_session(session)
       Current.session = session
+      StructuredLog.set_actor(session)
+      session
     end
 
     # A token goes back in the response body; only a browser keeps its session in a cookie. So

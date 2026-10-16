@@ -67,6 +67,32 @@ travels in signed messages and is kept in the database. The one variable is the 
 The message format and its checks are in `app/models/platform/message.rb`, and the webhook's in
 `app/models/webhook_delivery.rb`. Message audiences are matched against `BASE_URL`'s host.
 
+### Logging
+
+The app logs to stdout in production and to `log/<env>.log` locally. Every line carries the
+request id, and an error page or JSON error shows the same id as its reference, so a user's
+report leads straight to the line. The contract is in
+[STYLE.md → Logging and errors](STYLE.md#logging-and-errors).
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `RAILS_LOG_FORMAT` | `json` (one object per line, for a log shipper) or `text` (readable `event key=value` lines) | `json` in production, `text` elsewhere |
+| `RAILS_LOG_LEVEL` | The lowest level written: `debug`, `info`, `warn` or `error`. SQL and other diagnostics appear only at `debug` | `warn` in production, `debug` elsewhere |
+
+### Tracing
+
+OpenTelemetry tracing is off unless one of the first two variables is set; then requests, SQL,
+jobs, outbound HTTP, MCP tool calls and webhook deliveries become spans, exported over OTLP
+(http/protobuf) to your collector, and every log line carries `trace_id` and `span_id`. Any
+other standard `OTEL_*` variable (`OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, …) applies
+too.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | The collector's OTLP/HTTP base URL, such as `http://otel-collector:4318`. Set: tracing is on | unset (off) |
+| `OTEL_TRACES_EXPORTER` | `otlp`, `console` (print spans to stdout) or `none`. Set: tracing is on | `otlp` once tracing is on |
+| `OTEL_PROPAGATORS` | Trace context formats read from and sent with requests | `tracecontext` (no baggage) |
+
 ### Commands
 
 A `Makefile` wraps `docker compose`; run `make` to list every target. Targets marked * run

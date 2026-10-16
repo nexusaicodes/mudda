@@ -20,7 +20,11 @@ class Platform::MessagesController < ActionController::API
       head :no_content
     end
   rescue Platform::Message::Invalid => error
+    StructuredLog.warn("platform.message.refused", reason: error.message)
     render_error error.message, status: :unauthorized
+  rescue Platform::Message::Misconfigured => error
+    StructuredLog.error("platform.keys.malformed", reason: error.message)
+    render_error "The board can't verify messages; try again later", status: :service_unavailable
   end
 
   private
@@ -29,6 +33,6 @@ class Platform::MessagesController < ActionController::API
     end
 
     def render_error(message, status:)
-      render json: { errors: { message: [ message ] } }, status: status
+      render json: { errors: { message: [ message ] }, request_id: request.request_id }, status: status
     end
 end

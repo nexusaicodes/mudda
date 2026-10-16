@@ -55,18 +55,14 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = ENV.fetch("FORCE_SSL", ssl_enabled) == "true"
 
-  # Log to STDOUT by default
-  config.logger = ActiveSupport::Logger.new(STDOUT)
-                                       .tap  { |logger| logger.formatter = ::Logger::Formatter.new }
-                                       .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
+  # Log to STDOUT, one JSON line per event (see lib/structured_log.rb); the request id is a field.
+  config.logger = ActiveSupport::TaggedLogging.logger(STDOUT)
 
-  # Prepend all log lines with the following tags.
-  config.log_tags = [ :request_id ]
+  # warn keeps production to what needs attention; "debug" logs everything.
+  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "warn")
 
-  # "info" includes generic and useful information about system operation, but avoids logging too much
-  # information to avoid inadvertent exposure of personally identifiable information (PII). If you
-  # want to log everything, set the level to "debug".
-  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
+  # Prevent health checks from clogging up the logs.
+  config.silence_healthcheck_path = "/up"
 
   # In-memory cache store; no external cache backend.
   config.cache_store = :memory_store
