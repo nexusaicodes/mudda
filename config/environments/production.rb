@@ -54,6 +54,8 @@ Rails.application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = ENV.fetch("FORCE_SSL", ssl_enabled) == "true"
+  # /metrics is scraped over plain http from the docker host, so it is never redirected to https.
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/metrics" } } }
 
   # Log to STDOUT, one JSON line per event (see lib/structured_log.rb); the request id is a field.
   config.logger = ActiveSupport::TaggedLogging.logger(STDOUT)

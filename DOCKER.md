@@ -93,6 +93,32 @@ too.
 | `OTEL_TRACES_EXPORTER` | `otlp`, `console` (print spans to stdout) or `none`. Set: tracing is on | `otlp` once tracing is on |
 | `OTEL_PROPAGATORS` | Trace context formats read from and sent with requests | `tracecontext` (no baggage) |
 
+### Metrics
+
+`GET /metrics` serves Prometheus text exposition (`text/plain; version=0.0.4`) once a token is
+set; without one it answers 404. A scrape sends `Authorization: Bearer <token>`; a wrong or
+missing token gets 401 and a warn-level `metrics.scrape.refused` log line (the token is never
+logged). The path is never redirected to https, so it can be scraped over plain http from the
+docker host, on the container's port 3006.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `MUDDA_METRICS_TOKEN` | Bearer token a scraper must send to `GET /metrics`. Set: the endpoint is on | unset (404) |
+
+Every series is an instance-wide gauge, with no per-board or per-user labels:
+
+| Metric | Labels | Meaning |
+|---|---|---|
+| `mudda_board_accounts`, `_users`, `_boards`, `_notes` | — | Row counts |
+| `mudda_board_cards` | `column` (`Backlog`, `Todo`, `Doing`, `Done`) | Cards per lane |
+| `mudda_board_webhook_deliveries` | `state`: `pending` (due now), `scheduled` (awaiting a retry, or claimed by a sender), `abandoned`, `delivered` | Hosting-platform webhook deliveries; always 0 when self-hosting |
+| `mudda_board_webhook_delivery_oldest_pending_age_seconds` | — | Age of the oldest pending or scheduled delivery; 0 when none |
+| `mudda_board_database_size_bytes`, `_wal_size_bytes` | — | Size of the primary SQLite file and its `-wal` file; 0 when absent |
+| `mudda_board_build_info` | `version` (`GIT_SHA`, else `unknown`) | Always 1 |
+
+Background jobs run on the in-process async adapter, which keeps no queryable backlog, so there
+are no queue metrics.
+
 ### Commands
 
 A `Makefile` wraps `docker compose`; run `make` to list every target. Targets marked * run
