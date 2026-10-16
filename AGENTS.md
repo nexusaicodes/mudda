@@ -107,17 +107,24 @@ the code.
   hash (the `password.set` message), and sends it again from its forgot-password flow. Once the
   owner has a hash, from the platform or from changing it on the profile
   (`My::PasswordsController`, `/my/password/edit`), it lives in `users.password_digest`
-  (`has_secure_password`, at least 8 characters) and the env secret no longer signs anyone in. `OwnerPassword` (`app/models/owner_password.rb`) checks whichever is in
-  force and is `enabled?` when either exists. `Sessions::PasswordsController` handles
-  `POST /session/password`. A change signs out the owner's other browsers; a reset signs out
-  every browser. Tokens and passkeys survive both, and the password stays available whether or
-  not passkeys exist.
+  (`has_secure_password`, at least 8 characters, never blank) and the env secret no longer
+  signs anyone in. `OwnerPassword` (`app/models/owner_password.rb`) checks whichever is in force,
+  with one bcrypt comparison per attempt whether or not the email matches, so timing gives away
+  neither. It is `enabled?` (the sign-in page offers the password form) when either exists, and
+  also whenever `MUDDA_PLATFORM_KEYS` is set, since a hosted board's password arrives from the
+  platform after it boots. `Sessions::PasswordsController` handles `POST /session/password`.
+  Changing the password asks for the current one, so the profile offers it only when
+  `OwnerPassword.set_for?` the owner (a stored hash or the env secret); an owner on passkeys alone
+  has none to change. A change signs out the owner's other browsers; a reset signs out every
+  browser. Tokens and passkeys survive both, and the password stays available whether or not
+  passkeys exist.
 - **Passkeys are optional**: WebAuthn via `User has_passkeys`, `lib/action_pack/passkey/`, and
   the `sessions/passkeys` and `my/passkeys` controllers. There is no `Credential` model. Adding or
   removing passkeys never disables the password.
 - **Provisioning and recovery.** `db/seeds.rb` provisions the owner user and account from the
-  `MUDDA_OWNER_*` env vars. With no password secret, stored password, or passkey there is no way
-  to sign in, so the seed warns locally and aborts elsewhere. `bin/rails auth:reset` (`make
+  `MUDDA_OWNER_*` env vars, and masks the owner's email in what it prints, since that reaches
+  the deployment's logs. With no password secret, stored password, hosting platform to send one,
+  or passkey there is no way to sign in, so the seed warns locally and aborts elsewhere. `bin/rails auth:reset` (`make
   reset-auth`) is the recovery path: it also clears a stored password, so `MUDDA_OWNER_PASSWORD`
   works again.
 - **`Session#kind`** says how the user is present: `browser` (a cookie) or `token` (a script or
@@ -447,7 +454,8 @@ kept in the database.
   and POSTed after commit to the configured URL, HMAC-signed with its secret, retried with backoff for a week. Every pending row
   is queued again at boot, and due rows whenever the platform asks for the state, since the
   in-process job queue doesn't survive a restart. A job claims its row in one conditional
-  `UPDATE` before sending, so two jobs queued for one row can't both POST it. Only transport
+  `UPDATE` before sending, and only while the row is due, so two jobs queued for one row can't
+  both POST it, and a job can't send a row early while it backs off. Only transport
   failures (timeouts, refused connections, TLS) and non-2xx answers are retried, each logged as
   `board.delivery.failed`; one given up on is logged as `board.delivery.abandoned` and reported.
 - **Refusals** are logged as `platform.message.refused` with the reason, and a replayed `seq` as
