@@ -48,6 +48,31 @@ class Platform::MessagesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a refusal is logged at warn with its reason, and a replay at debug" do
+    trusting_the_platform do
+      assert_event_reported("platform.message.refused", payload: { reason: "malformed" }) do
+        send_message "garbage"
+      end
+
+      message = platform_message("plan.updated", { plan: "premium" })
+      send_message message
+      assert_event_reported("platform.message.stale", payload: { kind: "plan.updated", seq: 1 }) do
+        send_message message
+      end
+    end
+  end
+
+  test "malformed platform keys are the board's fault: a 503 and an error, not a refusal" do
+    with_env("MUDDA_PLATFORM_KEYS" => "k1:not base64!", "BASE_URL" => "https://#{PLATFORM_HOST}") do
+      assert_event_reported("platform.keys.malformed") do
+        send_message platform_message("plan.updated", { plan: "premium" })
+      end
+    end
+
+    assert_response :service_unavailable
+    assert @response.parsed_body["request_id"]
+  end
+
   test "ignores a session or token, which can't stand in for a signature" do
     sign_in_as :kevin
 

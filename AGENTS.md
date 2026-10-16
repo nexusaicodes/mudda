@@ -433,9 +433,15 @@ kept in the database.
   and `platform_seq`).
 - **Board → platform** (`WebhookDelivery`): a rename (`user.updated`) and the card that takes the
   last slot (`cards.limit_reached`) are written to `webhook_deliveries` in their own transaction
-  and POSTed after commit to the configured URL, HMAC-signed with its secret, retried with backoff for a week. Pending rows are sent
-  again at boot and whenever the platform asks for the state, since the in-process job queue
-  doesn't survive a restart.
+  and POSTed after commit to the configured URL, HMAC-signed with its secret, retried with backoff for a week. Every pending row
+  is queued again at boot, and due rows whenever the platform asks for the state, since the
+  in-process job queue doesn't survive a restart. A job claims its row in one conditional
+  `UPDATE` before sending, so two jobs queued for one row can't both POST it. Only transport
+  failures (timeouts, refused connections, TLS) and non-2xx answers are retried, each logged as
+  `board.delivery.failed`; one given up on is logged as `board.delivery.abandoned` and reported.
+- **Refusals** are logged as `platform.message.refused` with the reason, and a replayed `seq` as
+  `platform.message.stale` (debug). Malformed `MUDDA_PLATFORM_KEYS` is the board's fault, so it
+  answers `503` and logs `platform.keys.malformed` rather than refusing the message.
 - **The name** may change on either side; `users.name_changed_at` decides, the newer winning and
   a tie keeping the local name (`User::Syncable`). A rename applied from the platform isn't sent
   back.

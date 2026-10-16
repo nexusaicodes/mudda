@@ -14,6 +14,9 @@
 # The owner's email is set once, at signup, so a payload that names one is refused.
 class Platform::Message
   class Invalid < StandardError; end
+  # The board's own configuration is at fault, not the message, so the platform should retry
+  # once it is fixed rather than treat the message as refused.
+  class Misconfigured < StandardError; end
 
   MAX_BYTES = 8.kilobytes
   MAX_LIFETIME = 5.minutes
@@ -54,7 +57,7 @@ class Platform::Message
         [ kid, OpenSSL::PKey.new_raw_public_key("ED25519", Base64.strict_decode64(public_key.to_s)) ]
       end
     rescue ArgumentError, OpenSSL::PKey::PKeyError
-      raise Invalid, "MUDDA_PLATFORM_KEYS is malformed"
+      raise Misconfigured, "MUDDA_PLATFORM_KEYS is malformed"
     end
 
     private
@@ -135,16 +138,20 @@ class Platform::Message
     end
 
     def apply_name(account)
-      name, changed_at = payload["name"], Time.iso8601(payload["name_changed_at"].to_s)
+      name, changed_at = payload["name"], name_changed_at
 
       account.transaction do
         account.users.order(:id).first!.sync_name(name, changed_at: changed_at) if claim_seq(account)
       end
       nil
-    rescue ArgumentError
-      raise Invalid, "bad name_changed_at"
     rescue ActiveRecord::RecordInvalid
       raise Invalid, "bad name"
+    end
+
+    def name_changed_at
+      Time.iso8601(payload["name_changed_at"].to_s)
+    rescue ArgumentError
+      raise Invalid, "bad name_changed_at"
     end
 
     # The owner's password, chosen at signup or through the platform's forgot-password flow, as a
@@ -176,7 +183,9 @@ class Platform::Message
     # Takes the sequence number in the same statement that checks it, so two messages applied
     # at once can't both pass.
     def claim_seq(account, **changes)
-      Account.where(id: account.id, platform_seq: ...seq).update_all(platform_seq: seq, **changes).positive?
+      Account.where(id: account.id, platform_seq: ...seq).update_all(platform_seq: seq, **changes).positive?.tap do |claimed|
+        StructuredLog.debug("platform.message.stale", kind: kind, seq: seq) unless claimed
+      end
     end
 
     def https_url?(value)

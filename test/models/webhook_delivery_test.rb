@@ -67,6 +67,63 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
     end
   end
 
+  test "a failed attempt is logged at warn, and the one given up on at error and reported" do
+    with_platform_webhooks do
+      delivery = WebhookDelivery.record("user.updated", name: "K")
+      Net::HTTP.stubs(:start).returns(Net::HTTPBadGateway.new("1.1", "502", "Bad Gateway"))
+
+      assert_event_reported("board.delivery.failed", payload: { event_id: delivery.event_id, status: 502, attempts: 1 }) do
+        delivery.deliver_now
+      end
+
+      delivery.update_columns created_at: 8.days.ago, attempts: 9
+      assert_event_reported("board.delivery.abandoned", payload: { event_id: delivery.event_id, attempts: 10 }) do
+        assert_error_reported(WebhookDelivery::Abandoned) { delivery.deliver_now }
+      end
+    end
+  end
+
+  test "a delivery is sent by one job only" do
+    with_platform_webhooks do
+      delivery = WebhookDelivery.record("user.updated", name: "K")
+      stale = WebhookDelivery.find(delivery.id)
+      Net::HTTP.expects(:start).once.returns(Net::HTTPBadGateway.new("1.1", "502", "Bad Gateway"))
+
+      delivery.deliver_now
+      stale.deliver_now
+
+      assert_equal 1, delivery.reload.attempts
+    end
+  end
+
+  test "a bug after the platform accepted is raised, not retried as a transport failure" do
+    with_platform_webhooks do
+      delivery = WebhookDelivery.record("user.updated", name: "K")
+      Net::HTTP.stubs(:start).returns(Net::HTTPOK.new("1.1", "200", "OK"))
+      delivery.stubs(:update!).raises(ActiveRecord::RecordInvalid)
+
+      assert_raises(ActiveRecord::RecordInvalid) { delivery.deliver_now }
+      assert_equal 0, delivery.reload.attempts
+      assert_nil delivery.last_error
+    end
+  end
+
+  test "every pending delivery is queued again at boot, each for when it is due" do
+    with_platform_webhooks do
+      due = WebhookDelivery.record("user.updated", name: "K")
+      later = WebhookDelivery.record("user.updated", name: "L")
+      later.update_columns next_attempt_at: 1.hour.from_now
+      WebhookDelivery.record("user.updated", name: "M").update_columns delivered_at: Time.current, next_attempt_at: nil
+      clear_enqueued_jobs
+
+      WebhookDelivery.deliver_pending_later
+
+      assert_enqueued_jobs 2, only: WebhookDeliveryJob
+      assert_enqueued_with(job: WebhookDeliveryJob, args: [ due ])
+      assert_enqueued_with(job: WebhookDeliveryJob, args: [ later ], at: later.next_attempt_at)
+    end
+  end
+
   test "what is due is sent again" do
     with_platform_webhooks do
       due = WebhookDelivery.record("user.updated", name: "K")
