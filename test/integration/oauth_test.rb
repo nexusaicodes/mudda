@@ -235,6 +235,29 @@ class OauthTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "no code, verifier or token reaches an event, log line or redirect in the log" do
+    events = []
+    collector = Object.new.tap { |c| c.define_singleton_method(:emit) { |event| events << event } }
+    Rails.event.subscribe(collector)
+
+    sign_in_as :david
+    @client_id = register["client_id"]
+    code = approve(@client_id)
+    post oauth_token_path, params: { grant_type: "authorization_code", code: code, client_id: @client_id,
+      redirect_uri: REDIRECT_URI, code_verifier: @verifier }
+    tokens = @response.parsed_body
+    post oauth_token_path, params: { grant_type: "refresh_token", refresh_token: tokens["refresh_token"], client_id: @client_id }
+
+    assert_response :success
+    logged = events.map(&:inspect).join
+    assert_includes logged, "[FILTERED]"
+    [ code, @verifier, tokens["access_token"], tokens["refresh_token"], @response.parsed_body["access_token"] ].each do |secret|
+      assert_not_includes logged, secret
+    end
+  ensure
+    Rails.event.unsubscribe(collector)
+  end
+
   test "a refresh token unused for the idle expiry buys nothing" do
     tokens = connect
 

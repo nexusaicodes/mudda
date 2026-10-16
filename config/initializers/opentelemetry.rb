@@ -15,6 +15,26 @@ require "opentelemetry/instrumentation/net/http"
 require "opentelemetry/helpers/sql_processor"
 require "opentelemetry/instrumentation/active_support/span_subscriber"
 
+# A query string can carry an OAuth code or a token, so every span's URL attributes keep a
+# query only with its filter_parameters values replaced (see StructuredLog.filter_query).
+# Rack and Net::HTTP set these when they start a span, so on_start sees them.
+class FilteredQuerySpans < OpenTelemetry::SDK::Trace::SpanProcessor
+  QUERY = "url.query"
+  WITH_QUERY = %w[ http.target http.url url.full ].freeze
+
+  def on_start(span, _parent_context)
+    attributes = span.attributes || {}
+    span.set_attribute(QUERY, StructuredLog.filter_query(attributes[QUERY])) if attributes[QUERY]
+    WITH_QUERY.each do |key|
+      value = attributes[key]
+      next unless value.is_a?(String) && value.include?("?")
+
+      base, query = value.split("?", 2)
+      span.set_attribute(key, "#{base}?#{StructuredLog.filter_query(query)}")
+    end
+  end
+end
+
 OpenTelemetry::SDK.configure do |c|
   c.service_name = StructuredLog::SERVICE
   c.service_version = ENV["GIT_SHA"] if ENV["GIT_SHA"]
@@ -29,6 +49,9 @@ OpenTelemetry::SDK.configure do |c|
     "OpenTelemetry::Instrumentation::ActiveRecord" => { enabled: false }
   )
 end
+
+# Added after configure, so the exporters chosen by OTEL_* variables stay in place.
+OpenTelemetry.tracer_provider.add_span_processor FilteredQuerySpans.new
 
 # SQLite has no driver instrumentation, so SQL spans come from Active Record's own
 # notifications. The transform replaces the whole payload, so bind values never reach a span.
