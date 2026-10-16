@@ -84,7 +84,8 @@ report leads straight to the line. The contract is in
 
 OpenTelemetry tracing is off unless one of the first two variables is set; then requests, SQL,
 jobs, outbound HTTP, MCP tool calls and webhook deliveries become spans, exported over OTLP
-(http/protobuf) to your collector, and every log line carries `trace_id` and `span_id`. Any
+(http/protobuf) to your collector, and every log line carries `trace_id` and `span_id`. Health
+checks (`/up`) and metrics scrapes (`/metrics`) aren't traced. Any
 other standard `OTEL_*` variable (`OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, …) applies
 too.
 

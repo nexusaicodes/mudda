@@ -42,9 +42,10 @@ OpenTelemetry::SDK.configure do |c|
 
   # Every instrumentation required above: Rails (Rack, Action Pack/View/Mailer, Active
   # Job/Storage/Support) and Net::HTTP. Active Record's ORM patches stay off: they aren't
-  # tested against edge Rails, and SQL spans come from the subscriber below.
+  # tested against edge Rails, and SQL spans come from the subscriber below. Health checks
+  # and metrics scrapes (every minute) aren't traced, nor is anything under them.
   c.use_all(
-    "OpenTelemetry::Instrumentation::Rack" => { untraced_endpoints: [ "/up" ] },
+    "OpenTelemetry::Instrumentation::Rack" => { untraced_endpoints: [ "/up", "/metrics" ] },
     "OpenTelemetry::Instrumentation::ActiveJob" => { propagation_style: :child },
     "OpenTelemetry::Instrumentation::ActiveRecord" => { enabled: false }
   )
