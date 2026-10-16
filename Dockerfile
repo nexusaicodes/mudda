@@ -122,6 +122,11 @@ RUN groupadd --system --gid 1000 rails && \
     chown -R rails:rails db log storage tmp
 USER 1000:1000
 
+# The commit this image was built from: the `version` on log lines, traces and
+# /metrics. Unset in a local build, which reports "unknown".
+ARG GIT_SHA
+ENV GIT_SHA=$GIT_SHA
+
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 EXPOSE 3006

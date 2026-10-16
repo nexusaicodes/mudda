@@ -33,12 +33,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Short commit
+        id: commit
+        run: echo "sha=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           target: production
           push: true
+          build-args: GIT_SHA=${{ steps.commit.outputs.sha }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ github.ref == 'refs/heads/main' && format('{0}:latest', env.IMAGE_NAME) || '' }}

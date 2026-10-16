@@ -78,6 +78,7 @@ report leads straight to the line. The contract is in
 |---|---|---|
 | `RAILS_LOG_FORMAT` | `json` (one object per line, for a log shipper) or `text` (readable `event key=value` lines) | `json` in production, `text` elsewhere |
 | `RAILS_LOG_LEVEL` | The lowest level written: `debug`, `info`, `warn` or `error`. SQL and other diagnostics appear only at `debug` | `warn` in production, `debug` elsewhere |
+| `GIT_SHA` | The commit the image was built from, reported as `version` on log lines, traces and `/metrics`. Published images set it at build time (`--build-arg GIT_SHA=...`) | `unknown` |
 
 ### Tracing
 
