@@ -7,6 +7,26 @@ class Note::SearchableTest < ActiveSupport::TestCase
     @card = @board.cards.create!(title: "Test Card", due_on: 1.week.from_now, creator: @user)
   end
 
+  test "a note whose indexing fails is still saved, and the failure reported" do
+    Search::Record.stubs(:create!).raises(ActiveRecord::StatementInvalid, "database is locked")
+
+    note = nil
+    assert_error_reported(ActiveRecord::StatementInvalid) do
+      note = @card.notes.create!(body: "unindexed", creator: @user)
+    end
+    assert note.persisted?
+  end
+
+  test "a note whose audit event fails is still saved, and the failure reported" do
+    Event.any_instance.stubs(:save!).raises(ActiveRecord::RecordInvalid)
+
+    note = nil
+    assert_error_reported(ActiveRecord::RecordInvalid) do
+      note = @card.notes.create!(body: "unaudited", creator: @user)
+    end
+    assert note.persisted?
+  end
+
   test "note search" do
     search_record_class = Search::Record
     # Note is indexed on create

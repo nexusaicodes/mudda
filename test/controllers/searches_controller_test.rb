@@ -76,6 +76,38 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Layout is broken", body.first["title"]
   end
 
+  test "FTS5 operators are searched for as words" do
+    @board.cards.create!(title: "Ship it OR NOT", due_on: 1.week.from_now, creator: @user)
+
+    %w[ OR NOT AND NEAR ].each do |operator|
+      get search_path(q: operator), as: :json
+      assert_response :success, "#{operator} alone"
+    end
+
+    get search_path(q: "broken OR haggis NOT"), as: :json
+    assert_response :success
+    assert_empty @response.parsed_body["data"], "the operators are words the cards must contain too"
+
+    get search_path(q: "ship OR not"), as: :json
+    assert_equal [ "Ship it OR NOT" ], @response.parsed_body["data"].pluck("title")
+
+    get search_path(q: "NEAR(broken haggis)")
+    assert_response :success
+  end
+
+  test "a search FTS5 can't parse is a 422, not a crash" do
+    Search::Query.any_instance.stubs(:match_expression).returns(%("broken" OR))
+
+    assert_no_error_reported do
+      get search_path(q: "broken"), as: :json
+    end
+    assert_response :unprocessable_entity
+    assert_equal [ "is not a valid search" ], @response.parsed_body.dig("errors", "q")
+
+    get search_path(q: "broken")
+    assert_response :unprocessable_entity
+  end
+
   test "search as JSON deduplicates cards with multiple search hits" do
     get search_path(q: "haggis"), as: :json
     assert_response :success

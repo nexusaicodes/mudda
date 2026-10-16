@@ -28,7 +28,7 @@ class Search::Record < ApplicationRecord
     query = Search::Query.wrap(query)
 
     if query.valid?
-      matching(query.to_s).where(card: user.accessible_cards)
+      matching(query.match_expression).where(card: user.accessible_cards)
     else
       none
     end

@@ -294,9 +294,11 @@ The contract is [API.md](API.md). The mechanics:
   (`ServesJson`, in `ApplicationController`), and a JSON request to any other action is a 406
   **before** the action runs, so an endpoint that never thought about JSON can't write and then
   fail to render.
-- **Every failure** comes back as `{ "errors": { "field": ["message"] } }` through `JsonErrors`,
-  the 401 and 403 from `Authentication` and `Authorization` included. Failures outside a
-  controller go through `lib/json_public_exceptions.rb`.
+- **Every failure** comes back as `{ "errors": { "field": ["message"] }, "request_id": "…" }`
+  through `JsonErrors`, the 401 and 403 from `Authentication` and `Authorization` included; a bug
+  is reported and answered with a 500 in the same shape. Failures outside a controller go
+  through `lib/json_public_exceptions.rb`, which also puts the request id on the HTML error pages.
+  Logging and error handling follow [STYLE.md → Logging and errors](STYLE.md#logging-and-errors).
 - **Indexes** answer with `{ "data": [...], "paging": {...} }` (`PaginationHelper#paging_for`).
 - **Unrecognised query parameters** are a 422 on controllers that include `StrictQueryParams`
   (boards, cards, notes, steps, columns, search). Each declares what it answers to with

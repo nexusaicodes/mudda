@@ -243,3 +243,19 @@ StructuredLog.error("board.delivery.abandoned", event_id: event_id, attempts: at
   Don't repeat them in the payload.
 - **Never log a secret or PII.** No passwords, tokens, OAuth `code`/`code_verifier`, signatures
   or webhook secrets. Mask emails with `StructuredLog.mask_email`. Job arguments are never logged.
+
+Errors follow one contract:
+
+- **Classify before handling.** A client's mistake (validation, not found, a refused
+  credential, a rate limit) is a precise 4xx in the `JsonErrors` envelope and is never reported.
+  A dependency failure (the platform's webhook endpoint) is retried, logged at `warn` per
+  attempt, and reported at `error` once attempts run out. Anything else is a bug: a 500, reported
+  through `Rails.error`, whose `request_id` is the reference the user sees.
+- **Rescue narrowly; report at the boundary.** Inner code raises. `rescue StandardError` belongs
+  only at a boundary (a controller, a job, a middleware, an after-commit callback whose write
+  already happened), and a boundary rescue calls `Rails.error.report`, which logs one
+  `error.reported` line. Don't also log the same failure.
+- **Every error response carries the request id**: `request_id` in the JSON envelope, a
+  bilingual "Reference" on the HTML error pages (`JsonPublicExceptions`), and in MCP results.
+- **Test what is reported**, with `assert_error_reported`, `assert_no_error_reported` and
+  `assert_event_reported`, never by reading the log.

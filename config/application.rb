@@ -35,6 +35,8 @@ module Mudda
     config.i18n.default_locale = :en
     config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
 
+    config.action_dispatch.rescue_responses["Search::Query::Invalid"] = :unprocessable_entity
+
     # Resolved per request, since lib/ isn't autoloadable while this file is read.
     config.exceptions_app = ->(env) { JsonPublicExceptions.new(Rails.public_path).call(env) }
 

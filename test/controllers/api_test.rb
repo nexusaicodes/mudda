@@ -464,6 +464,30 @@ class ApiTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
     assert_match "<html", @response.body
+    assert_match "Reference: <code>#{@response.headers["x-request-id"]}</code>", @response.body
+    assert_match "المرجع:", @response.body
+  end
+
+  test "a crash is reported and answers a 500 envelope carrying the request id" do
+    BoardsController.any_instance.stubs(:index).raises(RuntimeError, "boom")
+
+    assert_error_reported(RuntimeError) do
+      get boards_path(format: :json), headers: bearer_headers_for(@user)
+    end
+
+    assert_response :internal_server_error
+    assert_error_envelope "base"
+  end
+
+  test "a lost race for a unique value is a 409" do
+    BoardsController.any_instance.stubs(:index).raises(ActiveRecord::RecordNotUnique)
+
+    assert_no_error_reported do
+      get boards_path(format: :json), headers: bearer_headers_for(@user)
+    end
+
+    assert_response :conflict
+    assert_error_envelope "base"
   end
 
   test "a JSON request to an endpoint that serves none carries the error envelope" do
@@ -947,5 +971,6 @@ class ApiTest < ActionDispatch::IntegrationTest
       assert errors.is_a?(Hash), "Expected an errors object, got #{@response.parsed_body.inspect}"
       assert errors[key].is_a?(Array), "Expected errors[#{key.inspect}] to be an array of messages"
       assert errors[key].all?(&:present?), "Expected every message to say something"
+      assert_equal @response.headers["x-request-id"], @response.parsed_body["request_id"], "Expected the request id as a reference"
     end
 end
