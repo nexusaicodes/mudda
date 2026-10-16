@@ -1,9 +1,10 @@
 module Mudda::Mcp
   # Serves MCP at /mcp, over Streamable HTTP, and passes every other request through.
   #
-  # It sits in front of ActionDispatch::Executor because each tool call is a request of its own
-  # through the rest of the stack (see Api): a request made from inside a running executor would
-  # reset the outer one's state — Current, the database connection — on its way in.
+  # It sits inside ActionDispatch::Executor, right after the request id is settled, so one MCP
+  # request is one unit of work with one request id: every tool call is a request of its own
+  # through the rest of the stack (see Api), sharing that id, and every log line, error report
+  # and error result names it.
   #
   # The transport is stateless and answers in plain JSON, so nothing is held between requests
   # and any server process can answer any call. Who is calling is settled per request, by the
@@ -21,6 +22,19 @@ module Mudda::Mcp
       follow the owner's time zone, which whoami reports. Errors carry the HTTP status and
       `{ "errors": { field: [messages] } }`.
     TEXT
+
+    # The JSON-RPC method and tool a request names, and nothing else it carries. The request
+    # arrives as its raw JSON text or as a parsed message.
+    def self.call_named_by(request)
+      message = request.is_a?(String) ? JSON.parse(request) : request
+      message = message.first if message.is_a?(Array)
+      message = message.is_a?(Hash) ? message.with_indifferent_access : {}
+      params = message[:params].is_a?(Hash) ? message[:params] : {}
+
+      { mcp_method: message[:method], mcp_tool: params[:name] }.select { |_, value| value.is_a?(String) }
+    rescue JSON::ParserError
+      {}
+    end
 
     def initialize(app)
       @app = app
@@ -40,9 +54,42 @@ module Mudda::Mcp
         identity = api.get("/my/user")
 
         if identity.success?
-          transport_for(api, scopes: identity.body.dig("token", "scopes").to_a).call(env)
+          with_request_id env, transport_for(api, scopes: identity.body.dig("token", "scopes").to_a).call(env)
         else
           refusal_for identity, env
+        end
+      end
+
+      # A JSON-RPC error names the request it answered in error.data.request_id, as a failed
+      # tool's result does in the API's envelope.
+      def with_request_id(env, response)
+        status, headers, body = response
+        text = read(body)
+        headers = headers.to_h.transform_keys(&:downcase)
+        payload = JSON.parse(text) if text.present? && headers["content-type"].to_s.include?("json")
+
+        messages = payload.is_a?(Array) ? payload : [ payload ]
+
+        if messages.any? { it.is_a?(Hash) && it["error"].is_a?(Hash) }
+          messages.each { stamp_error(it, env["action_dispatch.request_id"]) }
+          text = JSON.generate(payload)
+          headers = headers.merge("content-length" => text.bytesize.to_s)
+        end
+
+        [ status, headers, [ text ] ]
+      rescue JSON::ParserError
+        [ status, headers, [ text ] ]
+      end
+
+      def read(body)
+        String.new.tap { |buffer| body.each { buffer << it } }
+      ensure
+        body.close if body.respond_to?(:close)
+      end
+
+      def stamp_error(message, request_id)
+        if message.is_a?(Hash) && (error = message["error"]).is_a?(Hash)
+          error["data"] = error["data"].is_a?(Hash) ? error["data"].merge("request_id" => request_id) : { "request_id" => request_id, "detail" => error["data"] }.compact
         end
       end
 
@@ -57,12 +104,7 @@ module Mudda::Mcp
 
       def server_for(api, scopes:)
         MCP::Server.new name: "mudda", title: "Mudda", version: Mudda::Mcp::VERSION,
-          instructions: INSTRUCTIONS, tools: Tools.granted(scopes), server_context: { api: api },
-          configuration: MCP::Configuration.new(exception_reporter: method(:report_exception))
-      end
-
-      def report_exception(exception, context)
-        Rails.error.report exception, handled: true, context: context, source: "mudda.mcp"
+          instructions: INSTRUCTIONS, tools: Tools.granted(scopes), server_context: { api: api }
       end
 
       # The API's own refusal: a 401 for no credential or a bad one, a 403 for a deactivated

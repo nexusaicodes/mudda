@@ -10,18 +10,18 @@ module Mudda::Mcp
       end
     end
 
-    # What a call inherits from the request that carried it: who is asking, from where, and the
-    # host and scheme the API builds its URLs from. Never the cookie — /mcp answers to the
-    # Authorization header alone.
+    # What a call inherits from the request that carried it: who is asking, from where, the host
+    # and scheme the API builds its URLs from, and the request id, so every call and the MCP
+    # request share one. Never the cookie — /mcp answers to the Authorization header alone.
     INHERITED_ENV = %w[
-      HTTP_AUTHORIZATION HTTP_HOST HTTP_USER_AGENT
+      HTTP_AUTHORIZATION HTTP_HOST HTTP_USER_AGENT HTTP_X_REQUEST_ID
       HTTP_X_FORWARDED_FOR HTTP_X_FORWARDED_HOST HTTP_X_FORWARDED_PORT HTTP_X_FORWARDED_PROTO
-      REMOTE_ADDR SERVER_NAME SERVER_PORT HTTPS rack.url_scheme
+      REMOTE_ADDR SERVER_NAME SERVER_PORT HTTPS rack.url_scheme action_dispatch.request_id
     ]
 
     def initialize(app, env)
       @app = app
-      @inherited_env = env.slice(*INHERITED_ENV)
+      @inherited_env = env.slice(*INHERITED_ENV).merge("HTTP_X_REQUEST_ID" => env["action_dispatch.request_id"]).compact
     end
 
     def get(path, query = {})
@@ -41,7 +41,10 @@ module Mudda::Mcp
     end
 
     private
+      # Every call runs inside the MCP request's executor, so what a request keeps in Current is
+      # cleared first, as a request of its own would find it.
       def request(method, path, query: {}, body: nil)
+        ActiveSupport::CurrentAttributes.clear_all
         status, headers, rack_body = @app.call(env_for(method, path, query, body))
         Response.new(status: status, headers: headers, body: parse(read(rack_body)))
       end

@@ -446,7 +446,7 @@ kept in the database.
 ### MCP
 
 `/mcp` serves the JSON API to AI agents as MCP tools. `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`)
-is a middleware ahead of `ActionDispatch::Executor`, and each tool is one in-process JSON API
+is a middleware inside the executor, right after `ActionDispatch::RequestId`, and each tool is one in-process JSON API
 request made with the client's token, so tools carry no business logic. `lib/mudda` is required,
 not autoloaded, so restart after changing it. See [MCP.md](MCP.md#how-it-works).
 

@@ -177,6 +177,46 @@ class McpTest < ActionDispatch::IntegrationTest
     assert_equal 404, JSON.parse(result.dig("content", 0, "text"))["status"]
   end
 
+  # Request ids and reporting
+
+  test "a failed tool's result carries the request id the response names" do
+    result = mcp("tools/call", name: "get_card", arguments: { board_id: @board.id, number: 999_999 })
+
+    assert result["isError"]
+    assert_equal @response.headers["x-request-id"], JSON.parse(result.dig("content", 0, "text"))["request_id"]
+  end
+
+  test "a JSON-RPC error carries the request id in its data" do
+    post "/mcp", params: rpc("tools/call", name: "no_such_tool", arguments: {}).to_json, headers: mcp_headers(@headers)
+
+    assert_equal @response.headers["x-request-id"], @response.parsed_body.dig("error", "data", "request_id")
+  end
+
+  test "a client's request id is kept" do
+    post "/mcp", params: rpc("tools/list").to_json, headers: mcp_headers(@headers.merge("X-Request-Id" => "agent-run-42"))
+
+    assert_equal "agent-run-42", @response.headers["x-request-id"]
+  end
+
+  test "each call is logged with its method, tool and duration" do
+    assert_event_reported("mcp.request.completed", payload: { mcp_method: "tools/call", mcp_tool: "get_card" }) do
+      mcp("tools/call", name: "get_card", arguments: { board_id: @board.id, number: cards(:logo).number })
+    end
+  end
+
+  test "a crashing tool is reported without its arguments" do
+    Mudda::Mcp::Tools::GetCard.stubs(:call).raises(RuntimeError, "boom")
+
+    reports = capture_error_reports(RuntimeError) do
+      post "/mcp", params: rpc("tools/call", name: "get_card", arguments: { board_id: @board.id, number: 1 }).to_json,
+        headers: mcp_headers(@headers)
+    end
+
+    assert_equal 1, reports.size
+    assert_equal({ mcp_method: "tools/call", mcp_tool: "get_card" }, reports.first.context.slice(:mcp_method, :mcp_tool, :arguments, :request))
+    assert @response.parsed_body.dig("error", "data", "request_id")
+  end
+
   test "add_note appends to the card's log" do
     card = cards(:logo)
 
