@@ -68,18 +68,29 @@ class WebhookDelivery < ApplicationRecord
 
   # Sent only by the job that claims it, so two jobs queued for one delivery (at boot and on the
   # platform's request) can't both POST it.
+  #
+  # While tracing is on, each attempt is a board.delivery.deliver span carrying the delivery's
+  # id, kind, attempt number and outcome: delivered, retrying, abandoned or skipped.
   def deliver_now
-    if delivered_at.nil? && self.class.enabled? && claim
-      started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      response = post(*self.class.endpoint)
-      elapsed = elapsed_ms_since(started_at)
-      response.is_a?(Net::HTTPSuccess) ? delivered : failed("HTTP #{response.code}", status: response.code.to_i, duration_ms: elapsed)
+    StructuredLog.in_span("board.delivery.deliver", { "mudda.delivery.id" => id, "mudda.delivery.kind" => kind, "mudda.delivery.attempt" => attempts + 1 }) do |span|
+      attempt.tap { span&.set_attribute("mudda.delivery.outcome", it.to_s) }
     end
-  rescue *TRANSPORT_ERRORS => error
-    failed "#{error.class}: #{error.message}".truncate(255), duration_ms: elapsed_ms_since(started_at)
   end
 
   private
+    def attempt
+      if delivered_at.nil? && self.class.enabled? && claim
+        started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        response = post(*self.class.endpoint)
+        elapsed = elapsed_ms_since(started_at)
+        response.is_a?(Net::HTTPSuccess) ? delivered : failed("HTTP #{response.code}", status: response.code.to_i, duration_ms: elapsed)
+      else
+        :skipped
+      end
+    rescue *TRANSPORT_ERRORS => error
+      failed "#{error.class}: #{error.message}".truncate(255), duration_ms: elapsed_ms_since(started_at)
+    end
+
     # Takes the delivery in one conditional UPDATE, keyed on the attempt time it was read with,
     # and holds it for CLAIM_LEASE.
     def claim
@@ -114,6 +125,7 @@ class WebhookDelivery < ApplicationRecord
 
     def delivered
       update!(delivered_at: Time.current, next_attempt_at: nil, last_error: nil)
+      :delivered
     end
 
     # Retries back off, then stop a week after the event, leaving the row as the record of what
@@ -128,8 +140,10 @@ class WebhookDelivery < ApplicationRecord
       if retry_at
         StructuredLog.warn("board.delivery.failed", **fields, retry_at: retry_at.iso8601)
         deliver_later(wait_until: retry_at)
+        :retrying
       else
         abandoned fields
+        :abandoned
       end
     end
 

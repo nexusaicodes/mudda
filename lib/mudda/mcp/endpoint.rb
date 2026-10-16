@@ -50,14 +50,75 @@ module Mudda::Mcp
 
     private
       def serve(env)
-        api = Api.new(@app, env)
-        identity = api.get("/my/user")
+        traced env do
+          api = Api.new(@app, env)
+          identity = api.get("/my/user")
 
-        if identity.success?
-          with_request_id env, transport_for(api, scopes: identity.body.dig("token", "scopes").to_a).call(env)
-        else
-          refusal_for identity, env
+          if identity.success?
+            with_request_id env, transport_for(api, scopes: identity.body.dig("token", "scopes").to_a).call(env)
+          else
+            refusal_for identity, env
+          end
         end
+      end
+
+      # While tracing is on, the request is a SERVER span named for its JSON-RPC method and tool
+      # ("tools/call create_card"), and every API call it makes is a child of it (see Api). The
+      # span names the call and how it ended, never the tool's arguments. Only a well-formed
+      # method and a tool that exists make it into the name, so a client can't flood the names.
+      def traced(env)
+        return yield unless defined?(OpenTelemetry::Trace)
+
+        message = jsonrpc_message(env)
+        method, tool = message.values_at("method", "params").then { |name, params| [ name, params.is_a?(Hash) ? params["name"] : nil ] }
+        method = nil unless method.is_a?(String) && method.match?(%r{\A[\w/]{1,64}\z})
+        tool = nil unless Tools::ALL.any? { it.name_value == tool }
+
+        attributes = {
+          "mcp.method.name" => method,
+          "gen_ai.tool.name" => tool,
+          "gen_ai.operation.name" => ("execute_tool" if method == "tools/call"),
+          "jsonrpc.request.id" => message["id"]&.to_s
+        }
+
+        StructuredLog.in_span([ method || "mcp", tool ].compact.join(" "), attributes, kind: :server) do |span|
+          yield.tap do |response|
+            if (error_type = error_type_of(response))
+              span.set_attribute "error.type", error_type
+              span.status = OpenTelemetry::Trace::Status.error(error_type)
+            end
+          end
+        end
+      end
+
+      # The request's first JSON-RPC message, or an empty Hash. Reading the body leaves a fresh
+      # copy in its place for the transport.
+      def jsonrpc_message(env)
+        body = env["rack.input"]&.read.to_s
+        env["rack.input"] = StringIO.new(body)
+        message = JSON.parse(body)
+        message = message.first if message.is_a?(Array)
+        message.is_a?(Hash) ? message : {}
+      rescue JSON::ParserError
+        {}
+      end
+
+      # The HTTP status of a refusal, the JSON-RPC error code of a failed call, or tool_error for
+      # a tool that answered isError. Nil for success.
+      def error_type_of((status, _headers, body))
+        return status.to_s unless status.between?(200, 299)
+
+        payload = JSON.parse(body.join)
+        message = payload.is_a?(Array) ? payload.first : payload
+        return unless message.is_a?(Hash)
+
+        if message["error"].is_a?(Hash)
+          message["error"]["code"].to_s
+        elsif message.dig("result", "isError")
+          "tool_error"
+        end
+      rescue JSON::ParserError
+        nil
       end
 
       # A JSON-RPC error names the request it answered in error.data.request_id, as a failed

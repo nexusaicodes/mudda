@@ -79,6 +79,20 @@ report leads straight to the line. The contract is in
 | `RAILS_LOG_FORMAT` | `json` (one object per line, for a log shipper) or `text` (readable `event key=value` lines) | `json` in production, `text` elsewhere |
 | `RAILS_LOG_LEVEL` | The lowest level written: `debug`, `info`, `warn` or `error`. SQL and other diagnostics appear only at `debug` | `warn` in production, `debug` elsewhere |
 
+### Tracing
+
+OpenTelemetry tracing is off unless one of the first two variables is set; then requests, SQL,
+jobs, outbound HTTP, MCP tool calls and webhook deliveries become spans, exported over OTLP
+(http/protobuf) to your collector, and every log line carries `trace_id` and `span_id`. Any
+other standard `OTEL_*` variable (`OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, …) applies
+too.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | The collector's OTLP/HTTP base URL, such as `http://otel-collector:4318`. Set: tracing is on | unset (off) |
+| `OTEL_TRACES_EXPORTER` | `otlp`, `console` (print spans to stdout) or `none`. Set: tracing is on | `otlp` once tracing is on |
+| `OTEL_PROPAGATORS` | Trace context formats read from and sent with requests | `tracecontext` (no baggage) |
+
 ### Commands
 
 A `Makefile` wraps `docker compose`; run `make` to list every target. Targets marked * run

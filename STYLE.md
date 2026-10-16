@@ -243,6 +243,11 @@ StructuredLog.error("board.delivery.abandoned", event_id: event_id, attempts: at
   Don't repeat them in the payload.
 - **Never log a secret or PII.** No passwords, tokens, OAuth `code`/`code_verifier`, signatures
   or webhook secrets. Mask emails with `StructuredLog.mask_email`. Job arguments are never logged.
+- **Spans follow the same rules.** Tracing is opt-in (`config/initializers/opentelemetry.rb`,
+  inert unless `OTEL_*` is set), so code never assumes it: wrap a domain operation in
+  `StructuredLog.in_span("domain.operation", { "mudda.thing.id" => id })`, which yields the
+  span or `nil`. Attributes are ids, kinds and outcomes, never what a user wrote (card text,
+  search terms, tool arguments). SQL spans carry obfuscated statements only.
 
 Errors follow one contract:
 

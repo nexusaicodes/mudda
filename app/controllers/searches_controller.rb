@@ -9,14 +9,19 @@ class SearchesController < ApplicationController
 
   # A person gets matches grouped by board, read from the full-text index; a program gets a
   # paginated card list.
+  #
+  # While tracing is on, the search and its rendering are a search.query span, which names the
+  # format but never the terms.
   def show
     @query = params[:q].presence
 
-    respond_to do |format|
-      format.html { @groups = grouped_matches }
-      format.json do
-        set_page_and_extract_portion_from \
-          Current.user.accessible_cards.mentioning(@query, user: Current.user).distinct.latest.preloaded
+    StructuredLog.in_span("search.query", { "mudda.search.format" => request.format.symbol }) do
+      respond_to do |format|
+        format.html { @groups = grouped_matches }
+        format.json do
+          set_page_and_extract_portion_from \
+            Current.user.accessible_cards.mentioning(@query, user: Current.user).distinct.latest.preloaded
+        end
       end
     end
   end

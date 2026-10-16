@@ -30,10 +30,14 @@ module StructuredLog
     end
 
     # Who is acting: tags every later event, log line and error report in the request with
-    # account_id, user_id, session_kind and, for a token, agent_name.
+    # account_id, user_id, session_kind and, for a token, agent_name, and the request's span,
+    # when tracing is on, with all but the user id.
     def set_actor(session)
-      Rails.event.set_context(**{ account_id: Current.account&.id, user_id: session&.user_id,
-        session_kind: session&.kind, agent_name: Current.agent_name }.compact)
+      actor = { account_id: Current.account&.id, user_id: session&.user_id,
+        session_kind: session&.kind, agent_name: Current.agent_name }.compact
+
+      Rails.event.set_context(**actor)
+      request_span&.add_attributes(actor.except(:user_id).to_h { |key, value| [ "mudda.#{key}", value.is_a?(Integer) ? value : value.to_s ] })
     end
 
     def mask_email(text)
@@ -51,6 +55,32 @@ module StructuredLog
         handled: handled,
         source: source
       }.compact
+    end
+
+    # The current span's ids, so a log line links to its trace. Empty while tracing is off.
+    def trace_fields
+      return {} unless defined?(OpenTelemetry::Trace)
+
+      context = OpenTelemetry::Trace.current_span.context
+      context.valid? ? { trace_id: context.hex_trace_id, span_id: context.hex_span_id } : {}
+    end
+
+    # Runs the block in a span of its own, yielding the span, or nil while tracing is off.
+    # Attributes are ids and outcomes, never what a user wrote.
+    def in_span(name, attributes = {}, kind: :internal, &block)
+      if defined?(OpenTelemetry::Trace)
+        OpenTelemetry.tracer_provider.tracer(SERVICE).in_span(name, attributes: attributes.compact.transform_values { it.is_a?(Symbol) ? it.to_s : it }, kind: kind, &block)
+      else
+        yield nil
+      end
+    end
+
+    # The server span of the request being served (for an MCP tool call, the span of the inner
+    # API call), or nil while tracing is off.
+    def request_span
+      if defined?(OpenTelemetry::Instrumentation::Rack)
+        OpenTelemetry::Instrumentation::Rack.current_span.then { it.recording? ? it : nil }
+      end
     end
 
     def base_fields
@@ -103,7 +133,7 @@ module StructuredLog
 
     def call(severity, time, _progname, message)
       fields = message.is_a?(Hash) ? message.dup : { event: "log", msg: StructuredLog.mask_email(message.is_a?(Exception) ? message.message : message.to_s.strip) }
-      line = { ts: fields.delete(:ts) || time.utc, level: LEVELS.fetch(severity, "info"), **StructuredLog.base_fields, **Rails.event.context, **fields }
+      line = { ts: fields.delete(:ts) || time.utc, level: LEVELS.fetch(severity, "info"), **StructuredLog.base_fields, **Rails.event.context, **StructuredLog.trace_fields, **fields }
       StructuredLog.json? ? json(line) : text(line)
     end
 
@@ -128,12 +158,21 @@ module StructuredLog
       return if source.to_s.end_with?(".active_support") && source.start_with?("deprecation")
 
       id = context[:request_id] || Rails.event.context[:request_id] || SecureRandom.uuid
+      record_on_span(error, handled)
       StructuredLog.public_send(severity == :error || !handled ? :error : :warn, "error.reported",
         error: StructuredLog.error_fields(error, id: id, handled: handled, source: source),
         **context.except(:controller, :job, :request_id).transform_values { |value| loggable(value) })
     end
 
     private
+      def record_on_span(error, handled)
+        return unless defined?(OpenTelemetry::Trace)
+
+        span = OpenTelemetry::Trace.current_span
+        span.record_exception(error)
+        span.status = OpenTelemetry::Trace::Status.error(error.class.name) unless handled
+      end
+
       def loggable(value)
         case value
         when ActiveRecord::Base then value.to_gid.to_s

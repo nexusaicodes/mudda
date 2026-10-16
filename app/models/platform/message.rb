@@ -97,12 +97,14 @@ class Platform::Message
   # Applies the message to the account and returns what to answer: the board's state for a
   # state request, else nil. A message numbered at or below the last one applied changes nothing.
   def apply(account)
-    case kind
-    when "plan.updated"    then apply_plan(account)
-    when "sync.configured" then apply_sync(account)
-    when "name.updated"    then apply_name(account)
-    when "password.set"    then apply_password(account)
-    when "state.requested" then state_of(account)
+    StructuredLog.in_span("platform.message.apply", { "mudda.message.kind" => kind, "mudda.message.seq" => seq, "mudda.account_id" => account.id }) do
+      case kind
+      when "plan.updated"    then apply_plan(account)
+      when "sync.configured" then apply_sync(account)
+      when "name.updated"    then apply_name(account)
+      when "password.set"    then apply_password(account)
+      when "state.requested" then state_of(account)
+      end
     end
   end
 

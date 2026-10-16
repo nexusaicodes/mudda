@@ -45,8 +45,24 @@ module Mudda::Mcp
       # cleared first, as a request of its own would find it.
       def request(method, path, query: {}, body: nil)
         ActiveSupport::CurrentAttributes.clear_all
-        status, headers, rack_body = @app.call(env_for(method, path, query, body))
-        Response.new(status: status, headers: headers, body: parse(read(rack_body)))
+        traced method, path do
+          status, headers, rack_body = @app.call(env_for(method, path, query, body))
+          Response.new(status: status, headers: headers, body: parse(read(rack_body)))
+        end
+      end
+
+      # While tracing is on, each call is a span of its own under the MCP request's, standing in
+      # for the server span the call would have over HTTP: the controller names it for its route
+      # ("POST /boards/:board_id/cards") and the actor's fields land on it.
+      def traced(method, path)
+        return yield unless defined?(OpenTelemetry::Trace)
+
+        StructuredLog.in_span(method, { "http.request.method" => method, "url.path" => "#{path}.json" }) do |span|
+          OpenTelemetry::Instrumentation::Rack.with_span(span) { yield }.tap do |response|
+            span.set_attribute "http.response.status_code", response.status
+            span.status = OpenTelemetry::Trace::Status.error if response.status >= 500
+          end
+        end
       end
 
       # The app's env_config — key generator, cookie and parameter settings — is merged into a
