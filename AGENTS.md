@@ -156,7 +156,12 @@ the code.
   the client's tokens. A minted token is `Session.token.minted`; an OAuth session's own signed
   id is never a credential.
 - **Rate limits.** `TokenRateLimit` gives each token its allowance, in its own `MemoryStore`
-  (cleared in `test_helper.rb`). Password and passkey sign-in have their own limits.
+  (cleared in `test_helper.rb`). Password and passkey sign-in have their own limits, each in its
+  own store. Every limiter's hit is logged as `rate_limit.hit` by one subscriber
+  (`config/initializers/rate_limit_logging.rb`).
+- **Security events** are logged at warn: `auth.signin.failed` (method, reason, IP, masked
+  email), `auth.passkey.rejected` (the WebAuthn reason, the sign count's included) and
+  `auth.authorization.refused` (the reason, controller and action).
 
 ### Core domain models
 
@@ -346,7 +351,9 @@ keep `MemoryStore`s of their own.
   so jobs run in the right tenant.
 - Jobs should be shallow and delegate to domain models, with `_later`/`_now` naming (see
   [STYLE.md](STYLE.md#run-async-operations-in-jobs)).
-- `SearchReindexJob` is a manual full-text-index repair run by `bin/rails search:reindex`, and
+- `SearchReindexJob` is a manual full-text-index repair run by `bin/rails search:reindex`, which
+  prints what was indexed, skipped (rich text over the limit) and failed, and exits non-zero if
+  anything failed; each failure is reported. And
   `WebhookDeliveryJob` sends one event to the hosting platform (see
   [Hosting platform sync](#hosting-platform-sync)).
 

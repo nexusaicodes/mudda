@@ -6,8 +6,11 @@ namespace :search do
     ActiveRecord::Base.connection.execute("DELETE FROM search_records_fts")
 
     puts "Reindexing cards and notes..."
-    SearchReindexJob.perform_now
+    job = SearchReindexJob.new
+    job.perform_now
+    stats = job.stats
 
-    puts "Done! Reindexed #{Card.count} cards and #{Note.count} notes."
+    puts "Indexed #{stats[:indexed]}, skipped #{stats[:skipped]} with oversized rich text, failed #{stats[:failed]}."
+    abort "Search reindex incomplete: #{stats[:failed]} records failed (see the error.reported log lines)." if stats[:failed].positive?
   end
 end

@@ -44,6 +44,20 @@ class SearchReindexJobTest < ActiveJob::TestCase
     assert_not shard.exists?(searchable_type: "Card", searchable_id: big_card.id)
   end
 
+  test "counts what it skipped and what failed, reporting each failure" do
+    Current.account = accounts(:"37s")
+    Current.session = Session.new(user: users(:david))
+    boards(:writebook).cards.create!(creator: users(:david), title: "too big", due_on: 1.week.from_now, description: "x" * 5_000)
+    Note.any_instance.stubs(:reindex).raises(ActiveRecord::StatementInvalid, "disk I/O error")
+
+    job = SearchReindexJob.new(rich_text_limit: 1_000)
+
+    assert_event_reported("search.reindex.completed", payload: { skipped: 1, failed: Note.count }) do
+      assert_error_reported(ActiveRecord::StatementInvalid) { job.perform_now }
+    end
+    assert_equal Card.count - 1, job.stats[:indexed]
+  end
+
   # Repairing the index has to reach every card and note, since nothing is exempt from it.
   test "indexes cards and their notes" do
     Current.account = accounts(:"37s")

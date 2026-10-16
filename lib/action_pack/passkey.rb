@@ -72,9 +72,14 @@ class ActionPack::Passkey < Rails.configuration.action_pack.passkey.parent_class
 
     # Looks up a passkey by credential ID and verifies the assertion response from the browser.
     # Returns the authenticated Passkey record, or +nil+ if the credential is not found or
-    # verification fails.
+    # verification fails; either is logged at warn with its reason.
     def authenticate(passkey)
-      find_by(credential_id: passkey[:id])&.authenticate(passkey)
+      if record = find_by(credential_id: passkey[:id])
+        record.authenticate(passkey)
+      else
+        StructuredLog.warn("auth.passkey.rejected", reason: "unknown credential")
+        nil
+      end
     end
   end
 
@@ -86,7 +91,8 @@ class ActionPack::Passkey < Rails.configuration.action_pack.passkey.parent_class
     credential.authenticate(passkey)
     update!(sign_count: credential.sign_count, backed_up: credential.backed_up)
     self
-  rescue ActionPack::WebAuthn::InvalidResponseError
+  rescue ActionPack::WebAuthn::InvalidResponseError => error
+    StructuredLog.warn("auth.passkey.rejected", passkey_id: id, reason: error.message)
     nil
   end
 

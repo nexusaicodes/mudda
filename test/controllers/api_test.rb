@@ -436,6 +436,29 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_error_envelope "base"
   end
 
+  test "a failed sign-in is logged at warn with the email masked" do
+    assert_event_reported("auth.signin.failed", payload: { method: "password", email: "d***@example.com" }) do
+      post session_password_path(format: :json), params: { email_address: "david@example.com", password: "wrong" }
+    end
+  end
+
+  test "an authorization refusal is logged with its reason" do
+    headers = bearer_headers_for(@user, scopes: %w[ read ])
+
+    assert_event_reported("auth.authorization.refused", payload: { reason: "token lacks the write scope" }) do
+      post boards_path(format: :json), params: { board: { name: "X" } }, headers: headers, as: :json
+    end
+    assert_response :forbidden
+  end
+
+  test "a rate limit hit is logged once, by the shared subscriber" do
+    10.times { post session_password_path(format: :json), params: { email_address: "x@example.com", password: "wrong" } }
+
+    assert_event_reported("rate_limit.hit", payload: { scope: "sessions/passwords", limit: 10 }) do
+      post session_password_path(format: :json), params: { email_address: "x@example.com", password: "wrong" }
+    end
+  end
+
   test "the sign-in rate limit carries the error envelope" do
     11.times do
       post session_password_path(format: :json),
