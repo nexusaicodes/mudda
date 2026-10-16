@@ -2,8 +2,9 @@ require Rails.root.join("lib/structured_log").to_s
 
 # See lib/structured_log.rb for the log line contract and lib/job_context.rb for jobs.
 Rails.application.configure do
-  # Tagged loggers keep working; the request id travels in Rails.event's context instead.
-  formatter = -> { StructuredLog::Formatter.new.extend(ActiveSupport::TaggedLogging::Formatter) }
+  # The formatter is a tagged one, so logger.tagged keeps working, and a tag becomes a field of
+  # the line (see StructuredLog::Formatter). The request id travels in Rails.event's context.
+  formatter = -> { StructuredLog::Formatter.new }
   config.log_formatter = formatter.call
   loggers = Rails.logger.respond_to?(:broadcasts) ? Rails.logger.broadcasts : [ Rails.logger ]
   loggers.each { |logger| logger.formatter = formatter.call }

@@ -239,8 +239,9 @@ StructuredLog.error("board.delivery.abandoned", event_id: event_id, attempts: at
   `debug`: diagnostics.
 - **Context comes for free.** Every line in a request carries `request_id`, and once a session
   is known, `account_id`, `user_id`, `session_kind` and, for a token, `agent_name`. Every line in
-  a job carries `job_id`, `job` and the enqueuing request's `request_id` (`lib/job_context.rb`).
-  Don't repeat them in the payload.
+  a job carries `job_id`, `job` and the enqueuing request's `request_id` (`lib/job_context.rb`),
+  and a tagged logger's tags (Active Job's among them) arrive as a `tags` field, never as a
+  prefix that would flatten the line into a string. Don't repeat them in the payload.
 - **Never log a secret or PII.** No passwords, tokens, OAuth `code`/`code_verifier`, signatures
   or webhook secrets. Mask emails with `StructuredLog.mask_email`. Job arguments are never logged.
   Request parameters, redirects and span URLs are filtered by `config.filter_parameters` and

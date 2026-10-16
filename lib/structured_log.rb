@@ -142,26 +142,38 @@ module StructuredLog
 
   # Formats every Rails.logger line: a Hash from the Subscriber, or a plain string from
   # framework code or a stray Rails.logger call.
+  #
+  # It is a tagged logging formatter itself, so logger.tagged still works, but the tags (Active
+  # Job tags every line a job writes with "ActiveJob", its class and its id) become a tags
+  # field rather than a prefix, which would turn a structured event into a string.
   class Formatter < ::Logger::Formatter
+    include ActiveSupport::TaggedLogging::Formatter
+
     LEVELS = { "DEBUG" => "debug", "INFO" => "info", "WARN" => "warn", "ERROR" => "error", "FATAL" => "error", "ANY" => "error", "UNKNOWN" => "error" }.freeze
 
     def call(severity, time, _progname, message)
       fields = message.is_a?(Hash) ? message.dup : { event: "log", msg: StructuredLog.mask_email(message.is_a?(Exception) ? message.message : message.to_s.strip) }
-      line = { ts: fields.delete(:ts) || time.utc, level: LEVELS.fetch(severity, "info"), **StructuredLog.base_fields, **Rails.event.context, **StructuredLog.trace_fields, **fields }
+      line = { ts: fields.delete(:ts) || time.utc, level: LEVELS.fetch(severity, "info"), **StructuredLog.base_fields, **Rails.event.context, **StructuredLog.trace_fields, **tags_field, **fields }
       StructuredLog.json? ? json(line) : text(line)
     end
 
     private
+      def tags_field
+        current_tags.any? ? { tags: current_tags.dup } : {}
+      end
+
       def json(line)
         line[:ts] = line[:ts].iso8601(3)
         "#{line.to_json}\n"
       end
 
+      # Tags lead the line, as a tagged logger would write them: "[ActiveJob] [SomeJob] [id]".
       def text(line)
         line.except(:ts, :service, :env, :version) => { level:, event:, **rest }
         msg = rest.delete(:msg)
+        tags = rest.delete(:tags).to_a.map { "[#{it}]" }
         pairs = rest.map { |key, value| "#{key}=#{value.is_a?(String) ? value : value.to_json}" }
-        "#{level.upcase.ljust(5)} #{event == "log" ? msg : [ event, msg, *pairs ].compact.join(" ")}\n"
+        "#{level.upcase.ljust(5)} #{[ *tags, *(event == "log" ? [ msg ] : [ event, msg, *pairs ]) ].compact.join(" ")}\n"
       end
   end
 
