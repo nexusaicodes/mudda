@@ -1,3 +1,5 @@
+require "net/http"
+
 # An event for the hosting platform, kept until it is delivered. It is written in the same
 # transaction as the change it reports, so neither exists without the other, and sent after
 # commit. Delivery is a POST to the account's webhook_url with the JSON body signed by its
