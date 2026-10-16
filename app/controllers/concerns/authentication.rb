@@ -140,6 +140,7 @@ module Authentication
 
     def set_current_session(session)
       Current.session = session
+      StructuredLog.set_actor(session)
     end
 
     # A token goes back in the response body; only a browser keeps its session in a cookie. So

@@ -67,6 +67,18 @@ travels in signed messages and is kept in the database. The one variable is the 
 The message format and its checks are in `app/models/platform/message.rb`, and the webhook's in
 `app/models/webhook_delivery.rb`. Message audiences are matched against `BASE_URL`'s host.
 
+### Logging
+
+The app logs to stdout in production and to `log/<env>.log` locally. Every line carries the
+request id, and an error page or JSON error shows the same id as its reference, so a user's
+report leads straight to the line. The contract is in
+[STYLE.md → Logging and errors](STYLE.md#logging-and-errors).
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `RAILS_LOG_FORMAT` | `json` (one object per line, for a log shipper) or `text` (readable `event key=value` lines) | `json` in production, `text` elsewhere |
+| `RAILS_LOG_LEVEL` | The lowest level written: `debug`, `info`, `warn` or `error`. SQL and other diagnostics appear only at `debug` | `warn` in production, `debug` elsewhere |
+
 ### Commands
 
 A `Makefile` wraps `docker compose`; run `make` to list every target. Targets marked * run

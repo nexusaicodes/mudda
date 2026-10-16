@@ -214,3 +214,32 @@ class Event::RelayJob < ApplicationJob
   end
 end
 ```
+
+## Logging and errors
+
+Logs are structured events, not prose. `lib/structured_log.rb` turns every `Rails.event`
+notification, the framework's own included, into one line: JSON in production
+(`RAILS_LOG_FORMAT`), readable `event key=value` text locally. `RAILS_LOG_LEVEL` decides what
+is written, and production runs at `warn`.
+
+```ruby
+# Bad
+Rails.logger.error "WebhookDelivery #{event_id} abandoned: #{error}"
+
+# Good
+StructuredLog.error("board.delivery.abandoned", event_id: event_id, attempts: attempts, last_error: error)
+```
+
+- **Name events `domain.object.outcome`**: `board.delivery.abandoned`, `auth.signin.failed`,
+  `mcp.request.completed`, `rate_limit.hit`.
+- **Pick the level by what it means.** `error`: a user's work lost or blocked, or a bug. `warn`:
+  degraded but handled, such as a failure that will be retried, a refused credential or
+  signature, a rate-limit hit. `info`: a normal milestone, dropped in production, so anything
+  that must be kept is written to the database (an `Event`, a delivery's `last_error`).
+  `debug`: diagnostics.
+- **Context comes for free.** Every line in a request carries `request_id`, and once a session
+  is known, `account_id`, `user_id`, `session_kind` and, for a token, `agent_name`. Every line in
+  a job carries `job_id`, `job` and the enqueuing request's `request_id` (`lib/job_context.rb`).
+  Don't repeat them in the payload.
+- **Never log a secret or PII.** No passwords, tokens, OAuth `code`/`code_verifier`, signatures
+  or webhook secrets. Mask emails with `StructuredLog.mask_email`. Job arguments are never logged.

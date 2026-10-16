@@ -31,6 +31,7 @@ module AccountTenanted
       resolve_account!
 
       if account.present?
+        Rails.event.set_context(account_id: account.id)
         Current.with_account(account, &block)
       else
         yield

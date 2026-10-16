@@ -28,18 +28,12 @@ module Mudda
     # Include the `lib` directory in autoload paths. Use the `ignore:` option
     # to list subdirectories that don't contain `.rb` files or that shouldn't
     # be reloaded or eager loaded.
-    config.autoload_lib ignore: %w[ assets mudda tasks rails_ext ]
+    config.autoload_lib ignore: %w[ assets mudda tasks rails_ext structured_log.rb job_context.rb ]
 
     # English is the default and the language of the JSON API; Arabic is the second UI locale.
     config.i18n.available_locales = %i[ en ar ]
     config.i18n.default_locale = :en
     config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.yml")]
-
-    # Enable debug mode for Rails event logging so we get SQL query logs.
-    # This was made necessary by the change in https://github.com/rails/rails/pull/55900
-    config.after_initialize do
-      Rails.event.debug_mode = true
-    end
 
     # Resolved per request, since lib/ isn't autoloadable while this file is read.
     config.exceptions_app = ->(env) { JsonPublicExceptions.new(Rails.public_path).call(env) }

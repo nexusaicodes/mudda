@@ -61,9 +61,6 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
 
-  # Prepend all log lines with the following tags.
-  config.log_tags = [ :request_id ]
-
   config.hosts = [
     "app.mudda.localhost",
     "mudda.localhost", # here for backwards compat
