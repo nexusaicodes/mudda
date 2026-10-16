@@ -37,7 +37,9 @@ seed runs once, when `db:prepare` creates the database:
 
 Sign in with `MUDDA_OWNER_EMAIL` and `MUDDA_OWNER_PASSWORD`. Changing the password on the profile
 (Security → Change password) stores its hash in the database, and from then on that password is
-the one that works.
+the one that works. The profile offers the change only while there is a current password to
+confirm, so an owner who signs in with passkeys alone and has no `MUDDA_OWNER_PASSWORD` doesn't
+see it.
 Enrolling a passkey (under `my/passkeys`) is an optional convenience for biometric or device
 sign-in.
 

@@ -5,7 +5,9 @@ class User < ApplicationRecord
   has_secure_password validations: false
 
   # Set only once the owner changes their password; until then MUDDA_OWNER_PASSWORD is it (see OwnerPassword).
+  # A blank password is ignored by has_secure_password, so changing it requires one.
   validates :password, length: { minimum: 8 }, confirmation: true, allow_nil: true
+  validates :password, presence: true, on: :password_change
 
   belongs_to :account
 
@@ -26,6 +28,13 @@ class User < ApplicationRecord
     else
       first if count == 1
     end
+  end
+
+  # Takes a new password and its confirmation, refusing a blank one rather than keeping the old
+  # password and reporting it changed.
+  def change_password(attributes)
+    assign_attributes(attributes)
+    save(context: :password_change)
   end
 
   # Sessions survive: Authorization is what refuses a deactivated user, and it needs a live
