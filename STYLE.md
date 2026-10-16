@@ -257,7 +257,9 @@ Errors follow one contract:
 
 - **Classify before handling.** A client's mistake (validation, not found, a refused
   credential, a rate limit) is a precise 4xx in the `JsonErrors` envelope and is never reported.
-  A dependency failure (the platform's webhook endpoint) is retried, logged at `warn` per
+  Only the record the client sent is a validation 422: `ApplicationRecord#save!` turns a
+  `RecordInvalid` for a record a callback wrote into `ApplicationRecord::InvalidInCallback`, a
+  reported 500. A dependency failure (the platform's webhook endpoint) is retried, logged at `warn` per
   attempt, and reported at `error` once attempts run out. Anything else is a bug: a 500, reported
   through `Rails.error`, whose `request_id` is the reference the user sees.
 - **Rescue narrowly; report at the boundary.** Inner code raises. `rescue StandardError` belongs

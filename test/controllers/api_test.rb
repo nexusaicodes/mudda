@@ -284,6 +284,23 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal "Original", step.reload.content
   end
 
+  # Only the record the client sent is theirs to fix. A record a callback writes that fails
+  # validation is a bug: a 500 carrying the request id, reported once.
+  test "an invalid record written by a callback is a reported JSON 500, not a 422" do
+    headers = bearer_headers_for(@user)
+    Event.any_instance.stubs(:valid?).returns(false)
+
+    assert_no_difference -> { Card.count } do
+      assert_error_reported(ApplicationRecord::InvalidInCallback) do
+        post board_cards_path(boards(:writebook), format: :json), params: { title: "Evented" }, headers: headers, as: :json
+      end
+    end
+
+    assert_response :internal_server_error
+    assert_equal [ "Internal server error" ], @response.parsed_body.dig("errors", "base")
+    assert_equal @response.headers["x-request-id"], @response.parsed_body["request_id"]
+  end
+
   test "a blank new step row is dropped rather than failing the card" do
     card, headers = cards(:logo), bearer_headers_for(@user)
 

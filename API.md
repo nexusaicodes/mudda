@@ -314,9 +314,9 @@ Quote it when reporting a problem: it finds the request in the server's logs. Se
 | `404` | No such record or route, including a `column_id` that isn't on the board the card ends on |
 | `406` | The endpoint doesn't answer JSON (see [What isn't here](#what-isnt-here)) |
 | `409` | A concurrent change took the same unique value; retry |
-| `422` | Validation failed, a required field was sent as `null`, a query parameter isn't recognised, or a search can't be parsed; the keys name the fields |
+| `422` | Validation of what you sent failed, a required field was sent as `null`, a query parameter isn't recognised, or a search can't be parsed; the keys name the fields |
 | `429` | The sign-in rate limit, or the token's request allowance (see [Rate limit](#rate-limit)) |
-| `500` | A bug, still in the envelope, under `base`; it is reported, and `request_id` identifies it |
+| `500` | A bug (including a record the board writes on its own failing validation), still in the envelope, under `base`; it is reported, and `request_id` identifies it |
 
 ## Pagination
 

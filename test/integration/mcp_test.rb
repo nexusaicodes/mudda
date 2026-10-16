@@ -204,6 +204,19 @@ class McpTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a tool whose own record is invalid reports a 422, and a callback's invalid record a 500" do
+    result = mcp("tools/call", name: "create_card", arguments: { board_id: @board.id, title: "Bad date", due_on: "2026-02-30" })
+    assert result["isError"]
+    assert_equal 422, JSON.parse(result.dig("content", 0, "text"))["status"]
+
+    Event.any_instance.stubs(:valid?).returns(false)
+    assert_error_reported(ApplicationRecord::InvalidInCallback) do
+      result = mcp("tools/call", name: "create_card", arguments: { board_id: @board.id, title: "Evented" })
+    end
+    assert result["isError"]
+    assert_equal 500, JSON.parse(result.dig("content", 0, "text"))["status"]
+  end
+
   test "a crashing tool is reported without its arguments" do
     Mudda::Mcp::Tools::GetCard.stubs(:call).raises(RuntimeError, "boom")
 
