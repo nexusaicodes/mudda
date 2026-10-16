@@ -5,9 +5,9 @@ module Eventable
     has_many :events, as: :eventable, dependent: :destroy
   end
 
-  def track_event(action, creator: Current.user, particulars: {})
+  def track_event(action, creator: Current.user, agent_name: Current.agent_name, particulars: {})
     if should_track_event?
-      events.create!(action: "#{eventable_prefix}_#{action}", creator:, agent_name: Current.agent_name, particulars:)
+      events.create!(action: "#{eventable_prefix}_#{action}", creator:, agent_name:, particulars:)
     end
   end
 

@@ -23,6 +23,28 @@ class StructuredLogTest < ActiveSupport::TestCase
     end
   end
 
+  test "the parameter filter hides every OAuth secret" do
+    filter = ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
+    secrets = %w[ token access_token refresh_token client_secret code code_verifier authorization password ]
+
+    filtered = filter.filter(secrets.index_with("leak").merge("state" => "xyz", "Authorization" => "Bearer leak"))
+
+    assert_equal [ "[FILTERED]" ], filtered.except("state").values.uniq
+    assert_equal "xyz", filtered["state"]
+  end
+
+  test "filter_query hides secret values and keeps the rest" do
+    assert_equal "code=[FILTERED]&state=xyz&access_token=[FILTERED]", StructuredLog.filter_query("code=abc&state=xyz&access_token=t0k")
+    assert_nil StructuredLog.filter_query(nil)
+  end
+
+  test "a redirect carrying an OAuth code or token is filtered from the log" do
+    %w[ code access_token refresh_token ].each do |name|
+      assert Rails.application.config.filter_redirect.any? { "https://client.test/cb?state=x&#{name}=abc".match?(it) }, name
+    end
+    assert_not Rails.application.config.filter_redirect.any? { "https://board.test/boards/1?page=2".match?(it) }
+  end
+
   test "the logger level gates events" do
     @logger.level = :warn
     with_json do

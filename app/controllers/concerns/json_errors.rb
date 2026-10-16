@@ -87,6 +87,8 @@ module JsonErrors
       end
     end
 
+    # The record the client sent. One a callback wrote reaches here as
+    # ApplicationRecord::InvalidInCallback instead, a 500.
     def render_record_invalid(error)
       render_error error, status: :unprocessable_entity do
         error.record.errors

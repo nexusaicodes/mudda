@@ -44,6 +44,16 @@ module StructuredLog
       text.to_s.gsub(EMAIL) { "#{$1}***@#{$2}" }
     end
 
+    # A URL query string with each value the app's filter_parameters name (tokens, OAuth codes,
+    # secrets) replaced by [FILTERED], for anywhere a query leaves the request, such as a span.
+    def filter_query(query)
+      return query if query.blank?
+
+      Rack::Utils.build_query(query_filter.filter(Rack::Utils.parse_query(query))).gsub("%5BFILTERED%5D", "[FILTERED]")
+    rescue ArgumentError
+      "[FILTERED]"
+    end
+
     # The error fields every log line and report share.
     def error_fields(error, id: nil, handled: nil, source: nil)
       {
@@ -81,6 +91,10 @@ module StructuredLog
       if defined?(OpenTelemetry::Instrumentation::Rack)
         OpenTelemetry::Instrumentation::Rack.current_span.then { it.recording? ? it : nil }
       end
+    end
+
+    def query_filter
+      @query_filter ||= ActiveSupport::ParameterFilter.new(Rails.application.config.filter_parameters)
     end
 
     def base_fields

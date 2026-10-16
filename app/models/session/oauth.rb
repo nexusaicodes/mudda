@@ -28,10 +28,17 @@ module Session::Oauth
 
     validates :oauth_application, absence: true, unless: :token?
 
-    after_destroy_commit :revoke_oauth_tokens, if: :oauth?
+    after_destroy_commit -> { after_commit_side_effect(:revoke_oauth_tokens, oauth_application_id, user, on: self.class) }, if: :oauth?
   end
 
   class_methods do
+    # Revokes every token and grant a client holds for a user. Revoking is idempotent, so a
+    # failed revocation is repaired by running it again.
+    def revoke_oauth_tokens(oauth_application_id, user)
+      Doorkeeper::AccessToken.revoke_all_for oauth_application_id, user
+      Doorkeeper::AccessGrant.revoke_all_for oauth_application_id, user
+    end
+
     # The session an unexpired, unrevoked access token was issued under, if it is still there.
     def find_by_oauth_token(token)
       if (access_token = Doorkeeper::AccessToken.by_token(token))&.accessible?
@@ -59,10 +66,4 @@ module Session::Oauth
   def last_refreshed_at
     Doorkeeper::AccessToken.where(application_id: oauth_application_id, resource_owner_id: user_id).maximum(:created_at) || created_at
   end
-
-  private
-    def revoke_oauth_tokens
-      Doorkeeper::AccessToken.revoke_all_for oauth_application_id, user
-      Doorkeeper::AccessGrant.revoke_all_for oauth_application_id, user
-    end
 end
