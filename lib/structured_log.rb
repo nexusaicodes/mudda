@@ -98,7 +98,12 @@ module StructuredLog
     end
 
     def base_fields
-      @base_fields ||= { service: SERVICE, env: ENV.fetch("MUDDA_FLEET_ENV", Rails.env), version: ENV["GIT_SHA"] }.compact
+      @base_fields ||= { service: SERVICE, env: ENV.fetch("MUDDA_FLEET_ENV", Rails.env), version: version }
+    end
+
+    # The commit the image was built from. A build without the GIT_SHA build arg sets it empty.
+    def version
+      ENV["GIT_SHA"].presence || "unknown"
     end
   end
 

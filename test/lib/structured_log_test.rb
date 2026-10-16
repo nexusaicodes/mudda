@@ -119,6 +119,12 @@ class StructuredLogTest < ActiveSupport::TestCase
     assert_equal "WARN  [ActiveJob] [DeliveringJob] board.delivery.failed status=502\n", @io.string.lines.last
   end
 
+  test "a build without GIT_SHA, or with it empty, reports the version as unknown" do
+    with_env("GIT_SHA" => "") { assert_equal "unknown", StructuredLog.version }
+    with_env("GIT_SHA" => nil) { assert_equal "unknown", StructuredLog.version }
+    with_env("GIT_SHA" => "abc123") { assert_equal "abc123", StructuredLog.version }
+  end
+
   test "the actor names the account, user, session kind and agent" do
     session = users(:david).sessions.create!(kind: :token, label: "claude")
     Current.session = session

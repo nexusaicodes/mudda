@@ -37,7 +37,7 @@ end
 
 OpenTelemetry::SDK.configure do |c|
   c.service_name = StructuredLog::SERVICE
-  c.service_version = ENV["GIT_SHA"] if ENV["GIT_SHA"]
+  c.service_version = StructuredLog.version
   c.resource = OpenTelemetry::SDK::Resources::Resource.create("deployment.environment.name" => StructuredLog.base_fields[:env].to_s)
 
   # Every instrumentation required above: Rails (Rack, Action Pack/View/Mailer, Active
