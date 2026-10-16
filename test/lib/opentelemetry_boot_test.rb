@@ -5,13 +5,14 @@ require "open3"
 # initializer or a bind value leaking onto a SQL span fails here, and with it off in
 # production, so code leaning on a library only tracing happens to load fails too.
 class OpentelemetryBootTest < ActiveSupport::TestCase
-  test "with OTEL_TRACES_EXPORTER set, SQL spans carry obfuscated statements, URLs carry no secrets and logs carry trace ids" do
+  test "with OTEL_TRACES_EXPORTER set, SQL spans carry obfuscated statements, URLs carry no secrets, scrapes go untraced and logs carry trace ids" do
     script = <<~RUBY
       OpenTelemetry.tracer_provider.tracer("test").in_span("probe") do
         User.where(email_address: "secret@example.com").count
         puts StructuredLog.trace_fields.to_json
       end
       Rack::MockRequest.new(Rails.application).get("/oauth/authorize?code=one-time-code&access_token=leaky-token&state=xyz")
+      Rack::MockRequest.new(Rails.application).get("/metrics")
       OpenTelemetry.tracer_provider.shutdown
     RUBY
     output, status = Open3.capture2e({ "OTEL_TRACES_EXPORTER" => "console", "RAILS_ENV" => "test" }, "bin/rails", "runner", script, chdir: Rails.root.to_s)
@@ -22,6 +23,8 @@ class OpentelemetryBootTest < ActiveSupport::TestCase
     assert_no_match(/secret@example\.com/, output)
     assert_match(/state=xyz/, output)
     assert_no_match(/one-time-code|leaky-token/, output)
+    assert_match(%r{"url\.path"\s*=>\s*"/oauth/authorize"}, output)
+    assert_no_match(%r{"url\.path"\s*=>\s*"/metrics"}, output, "metrics scrapes aren't traced")
   end
 
   # Production, because the test environment's own gems load libraries production lacks.
