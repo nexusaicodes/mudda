@@ -161,7 +161,8 @@ the code.
   (`config/initializers/rate_limit_logging.rb`).
 - **Security events** are logged at warn: `auth.signin.failed` (method, reason, IP, masked
   email), `auth.passkey.rejected` (the WebAuthn reason, the sign count's included) and
-  `auth.authorization.refused` (the reason, controller and action).
+  `auth.authorization.refused` (the reason, controller and action), and
+  `metrics.scrape.refused` (the reason and IP; see DOCKER.md → Metrics).
 
 ### Core domain models
 

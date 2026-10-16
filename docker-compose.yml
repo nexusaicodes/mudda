@@ -19,6 +19,8 @@ services:
       MUDDA_OWNER_NAME: "${MUDDA_OWNER_NAME:-Saksham Saxena}"
       MUDDA_OWNER_LOCALE: "${MUDDA_OWNER_LOCALE:-}"
       MUDDA_OWNER_PASSWORD: "${MUDDA_OWNER_PASSWORD:-mudda-dev-password}"
+      # Set: GET /metrics serves Prometheus metrics to this bearer token. Unset: 404.
+      MUDDA_METRICS_TOKEN: "${MUDDA_METRICS_TOKEN:-}"
     volumes:
       # Live code reload: the host checkout is the source of truth at /rails.
       - .:/rails
