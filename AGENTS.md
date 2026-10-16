@@ -353,7 +353,10 @@ keep `MemoryStore`s of their own.
   [STYLE.md](STYLE.md#run-async-operations-in-jobs)).
 - `SearchReindexJob` is a manual full-text-index repair run by `bin/rails search:reindex`, which
   prints what was indexed, skipped (rich text over the limit) and failed, and exits non-zero if
-  anything failed; each failure is reported. And
+  anything failed; each failure is reported. `AfterCommitRepairJob` retries a side effect that
+  failed after its write committed (see `AfterCommitSideEffects`: search indexing, a note's
+  event, cache touches, OAuth token revocation); a failed image variant is queued for Active
+  Storage's `CreateVariantsJob` instead, and the original is served until it exists. And
   `WebhookDeliveryJob` sends one event to the hosting platform (see
   [Hosting platform sync](#hosting-platform-sync)).
 

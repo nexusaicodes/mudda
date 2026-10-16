@@ -264,6 +264,9 @@ Errors follow one contract:
   only at a boundary (a controller, a job, a middleware, an after-commit callback whose write
   already happened), and a boundary rescue calls `Rails.error.report`, which logs one
   `error.reported` line. Don't also log the same failure.
+- **A side effect of a committed write never fails the request.** Run it through
+  `after_commit_side_effect(:method, *args)` (`AfterCommitSideEffects`), which reports a failure
+  and queues `AfterCommitRepairJob` to retry it; the method must be public and idempotent.
 - **Every error response carries the request id**: `request_id` in the JSON envelope, a
   bilingual "Reference" on the HTML error pages (`JsonPublicExceptions`), and in MCP results.
 - **Test what is reported**, with `assert_error_reported`, `assert_no_error_reported` and

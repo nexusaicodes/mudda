@@ -3,37 +3,25 @@ module Searchable
 
   SEARCH_CONTENT_LIMIT = 32.kilobytes
 
-  # The write the index follows has already committed, so a failure to index it is reported
-  # rather than failing the request; bin/rails search:reindex repairs the index.
+  # The index follows a write that has already committed, so a failure to index it is reported
+  # and repaired later (see AfterCommitSideEffects) rather than failing the request. Both side
+  # effects are idempotent: reindex upserts, and removal finds nothing the second time.
   included do
-    after_create_commit  { reporting_index_failure { create_in_search_index } }
-    after_update_commit  { reporting_index_failure { update_in_search_index } }
-    after_destroy_commit { reporting_index_failure { remove_from_search_index } }
+    after_save_commit    { after_commit_side_effect(:reindex) }
+    after_destroy_commit { after_commit_side_effect(:remove_from_search_index, id, on: self.class) }
+  end
+
+  class_methods do
+    def remove_from_search_index(id)
+      Search::Record.find_by(searchable_type: name, searchable_id: id)&.destroy
+    end
   end
 
   def reindex
-    update_in_search_index
+    search_record_class.upsert!(search_record_attributes)
   end
 
   private
-    def reporting_index_failure
-      yield
-    rescue StandardError => error
-      Rails.error.report error, handled: true, severity: :error, source: "mudda.search_index",
-        context: { searchable_type: self.class.name, searchable_id: id }
-    end
-
-    def create_in_search_index
-      search_record_class.create!(search_record_attributes)
-    end
-
-    def update_in_search_index
-      search_record_class.upsert!(search_record_attributes)
-    end
-
-    def remove_from_search_index
-      search_record_class.find_by(searchable_type: self.class.name, searchable_id: id)&.destroy
-    end
 
     def search_record_attributes
       {
