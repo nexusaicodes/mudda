@@ -15,8 +15,7 @@ The single user can reach every board and card in their account.
 | Doc | Covers |
 |---|---|
 | [DOCKER.md](DOCKER.md) | Running it: every `make` target, the owner and env vars, the production image |
-| [API.md](API.md) | The JSON API a script or agent drives: tokens, scopes, resources, errors, pagination |
-| [MCP.md](MCP.md) | The MCP endpoint at `/mcp`, its tools, and the OAuth server |
+| [docs.mudda.today](https://docs.mudda.today) | The public developer docs (the mudda-docs repo): the JSON API's guides and reference, and MCP. API.md and MCP.md point there |
 | [ERD.md](ERD.md) | The database schema: every table, column, index, and enumerated value |
 | [STYLE.md](STYLE.md) | House style |
 | [docs/openapi.yaml](docs/openapi.yaml) | The JSON API as OpenAPI 3.1, published by the docs site |
@@ -106,7 +105,8 @@ endpoint work.
 
 The `User` is the principal: it carries the `email_address`, holds the passkeys, and owns the
 sessions. The API-facing rules (token lifetime, scopes, labels, rate limits) are specified in
-[API.md](API.md#authenticating), and OAuth in [MCP.md](MCP.md#oauth). This section maps them to
+[the docs](https://docs.mudda.today/guides/authentication/), and OAuth in
+[MCP → OAuth](https://docs.mudda.today/mcp/oauth/). This section maps them to
 the code.
 
 - **Owner password.** A self-hosted board starts with `ENV["MUDDA_OWNER_PASSWORD"]`. A hosted
@@ -308,7 +308,8 @@ frame and colour picker. `/prompts/cards` is the `#` card-reference autocomplete
 cross-board.
 
 **JSON** lives on the same URLs, rendered by jbuilder views; there is no separate API surface.
-The contract is [API.md](API.md). The mechanics:
+The contract is [docs/openapi.yaml](docs/openapi.yaml), published at
+<https://docs.mudda.today/reference/>. The mechanics:
 
 - **JSON is opt-in.** Each controller names the actions it answers in JSON with `serves_json`
   (`ServesJson`, in `ApplicationController`), and a JSON request to any other action is a 406
@@ -480,7 +481,27 @@ kept in the database.
 `/mcp` serves the JSON API to AI agents as MCP tools. `Mudda::Mcp::Endpoint` (`lib/mudda/mcp/`)
 is a middleware inside the executor, right after `ActionDispatch::RequestId`, and each tool is one in-process JSON API
 request made with the client's token, so tools carry no business logic. `lib/mudda` is required,
-not autoloaded, so restart after changing it. See [MCP.md](MCP.md#how-it-works).
+not autoloaded, so restart after changing it. On each request the endpoint:
+
+1. Checks the credential by calling `GET /my/user.json` as the client, which runs the same
+   `Authentication` as any API request (minted token or OAuth access token alike) and also
+   reports the token's scopes. A `401` gains the `WWW-Authenticate` header that starts OAuth,
+   and a `429` keeps its `Retry-After`.
+2. Builds a stateless MCP server (name `mudda`, with instructions describing the lanes and card
+   addressing) over the official `mcp` gem's Streamable HTTP transport, offering the tools those
+   scopes allow (`Mudda::Mcp::Tools.granted`). It answers in plain JSON and keeps no sessions, so
+   any process can answer any call. A `GET` for a server-sent event stream is refused.
+3. Runs each tool call as an in-process request to the JSON API (`Mudda::Mcp::Api`), carrying
+   the client's `Authorization` header, host, forwarding headers and request id, but never its
+   cookie.
+
+One MCP request is one executor run with one request id, which every tool call shares; `Current`
+is cleared before each call. Each JSON-RPC call is logged as `mcp.request.completed` (method,
+tool, duration, error type), and an exception in the MCP library is reported with the method and
+tool name, never the tool's arguments. Every tool declares the API operations it `calls`, which
+`bin/rails mcp:schema` publishes to `docs/mcp-tools.json`. Tests are in
+`test/integration/mcp_test.rb`, and for OAuth in `test/integration/oauth_test.rb` and
+`test/models/session/oauth_test.rb`.
 
 ## Coding style
 

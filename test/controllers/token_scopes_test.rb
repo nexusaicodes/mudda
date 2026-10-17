@@ -1,6 +1,6 @@
 require "test_helper"
 
-# A token does what its scopes grant, read off the request's verb. See API.md → Scopes.
+# A token does what its scopes grant, read off the request's verb. See docs.mudda.today → Authentication → Scopes.
 class TokenScopesTest < ActionDispatch::IntegrationTest
   setup do
     @board = boards(:writebook)

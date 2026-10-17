@@ -45,7 +45,7 @@ tags:
   - name: Tokens
     description: |
       Minting tokens over JSON. Tokens are also minted from the profile's API tokens page,
-      `make token`, and OAuth (see MCP.md); those are not JSON endpoints.
+      `make token`, and OAuth (see https://docs.mudda.today/mcp/oauth/); those are not JSON endpoints.
   - name: Sessions
     description: Ending the session that makes the request.
 
