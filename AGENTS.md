@@ -19,6 +19,13 @@ The single user can reach every board and card in their account.
 | [MCP.md](MCP.md) | The MCP endpoint at `/mcp`, its tools, and the OAuth server |
 | [ERD.md](ERD.md) | The database schema: every table, column, index, and enumerated value |
 | [STYLE.md](STYLE.md) | House style |
+| [docs/openapi.yaml](docs/openapi.yaml) | The JSON API as OpenAPI 3.1, published by the docs site |
+| [docs/mcp-tools.json](docs/mcp-tools.json) | Every MCP tool with its input schema and the API call it makes, written by `bin/rails mcp:schema` |
+
+`docs/openapi.yaml` and `docs/mcp-tools.json` are the published contract the mudda-docs repo
+renders, so they change in the same commit as the endpoint or tool they describe.
+`test/integration/published_contract_test.rb` fails when a route serving JSON and the spec
+disagree, when a tool calls an operation the spec lacks, or when `docs/mcp-tools.json` is stale.
 
 ### Not in Mudda
 

@@ -17,4 +17,9 @@ module Mudda::Mcp::Tools
   def self.granted(scopes)
     ALL.select { |tool| scopes.include?(tool.scope) }
   end
+
+  # The published tool list, docs/mcp-tools.json, which `bin/rails mcp:schema` writes.
+  def self.contract
+    JSON.pretty_generate(ALL.map(&:to_contract).as_json) + "\n"
+  end
 end

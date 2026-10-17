@@ -1,0 +1,708 @@
+[
+  {
+    "name": "whoami",
+    "title": "Who am I",
+    "description": "The signed-in user (id, name, email) and their account.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {},
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/my/user.json"
+      }
+    ]
+  },
+  {
+    "name": "search_cards",
+    "title": "Search cards",
+    "description": "Full-text search over card titles, descriptions, and notes across every board. A card\nnumber is searched as plain text; fetch a card by its number with get_card. Paged: follow\npaging.next or pass `page`.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "q": {
+          "type": "string",
+          "description": "The search text"
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "q"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/search.json"
+      }
+    ]
+  },
+  {
+    "name": "list_boards",
+    "title": "List boards",
+    "description": "Every board in the account. Paged: follow paging.next or pass `page`.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/boards.json"
+      }
+    ]
+  },
+  {
+    "name": "get_board",
+    "title": "Get a board",
+    "description": "One board with its four fixed columns, in order: Backlog, Todo, Doing, Done.\nColumn ids from here are what `update_card` takes as `column_id` and `list_cards` as\n`column_ids`.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "board_id"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/boards/{id}.json"
+      }
+    ]
+  },
+  {
+    "name": "create_board",
+    "title": "Create a board",
+    "description": "Creates a board. It comes with the four fixed columns; they can't be added, removed, or renamed.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "write",
+    "calls": [
+      {
+        "method": "POST",
+        "path": "/boards.json"
+      }
+    ]
+  },
+  {
+    "name": "rename_board",
+    "title": "Rename a board",
+    "description": "Renames a board.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "board_id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "write",
+    "calls": [
+      {
+        "method": "PUT",
+        "path": "/boards/{id}.json"
+      }
+    ]
+  },
+  {
+    "name": "delete_board",
+    "title": "Delete a board",
+    "description": "Permanently deletes a board and every card and note on it. This can't be undone.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "board_id"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "delete",
+    "calls": [
+      {
+        "method": "DELETE",
+        "path": "/boards/{id}.json"
+      }
+    ]
+  },
+  {
+    "name": "list_cards",
+    "title": "List cards",
+    "description": "Cards across every board, or on one board when `board_id` is given; the filters narrow\neither. To read one lane, pass its column id (from `get_board`) in `column_ids`, or name it\nin `lane` to read that lane on every board. `due: \"soon\"` gives the open cards due by\ntomorrow, the most overdue first. Paged: follow paging.next or pass `page`.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "Only this board's cards"
+        },
+        "board_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "column_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "card_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Full-text terms"
+        },
+        "creation": {
+          "type": "string",
+          "enum": [
+            "today",
+            "yesterday",
+            "thisweek",
+            "thismonth",
+            "thisyear",
+            "lastweek",
+            "lastmonth",
+            "lastyear"
+          ],
+          "description": "When the card was created"
+        },
+        "due": {
+          "type": "string",
+          "enum": [
+            "soon"
+          ],
+          "description": "soon: open cards due by tomorrow, overdue first"
+        },
+        "lane": {
+          "type": "string",
+          "enum": [
+            "backlog",
+            "todo",
+            "doing",
+            "done"
+          ],
+          "description": "A lane by name, on every board"
+        },
+        "indexed_by": {
+          "type": "string",
+          "enum": [
+            "all",
+            "pinned"
+          ]
+        },
+        "sorted_by": {
+          "type": "string",
+          "enum": [
+            "latest",
+            "newest",
+            "oldest"
+          ]
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/cards.json"
+      },
+      {
+        "method": "GET",
+        "path": "/boards/{board_id}/cards.json"
+      }
+    ]
+  },
+  {
+    "name": "get_card",
+    "title": "Get a card",
+    "description": "The whole card: its fields, board, column, every step, and its 20 most recent notes. When\n`notes_truncated` is true, `list_notes` pages through the rest.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        }
+      },
+      "required": [
+        "board_id",
+        "number"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/boards/{board_id}/cards/{number}.json"
+      }
+    ]
+  },
+  {
+    "name": "create_card",
+    "title": "Create a card",
+    "description": "Creates a card, complete, in the board's Backlog column. `due_on` is optional there, and\nrequired before the card moves to Todo or Doing. Steps are created with it, in order.\nThe result carries the card's `number`, which together with the board addresses it from\nnow on.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "due_on": {
+          "type": "string",
+          "format": "date",
+          "description": "YYYY-MM-DD"
+        },
+        "description": {
+          "type": "string",
+          "description": "Rich text; plain text or HTML"
+        },
+        "pinned": {
+          "type": "boolean",
+          "description": "Pinned to the top of its lane"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Checklist steps, in order"
+        }
+      },
+      "required": [
+        "board_id",
+        "title"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "write",
+    "calls": [
+      {
+        "method": "POST",
+        "path": "/boards/{board_id}/cards.json"
+      }
+    ]
+  },
+  {
+    "name": "update_card",
+    "title": "Update a card",
+    "description": "Changes any of a card's fields in one write — all of it applies or none of it does. Move\nit between lanes with `column_id` (a column of the board it ends up on). Move it to\nanother board with `to_board_id`: it is renumbered there, so use the `number` and `url`\nin the result from then on; with no `column_id` it lands in that board's Backlog. In Todo\nand Doing a card needs a `due_on`, so set one in the same write that moves it there. Steps:\nan entry with no `id` adds one; with an `id` it edits that step, or removes it when\n`remove` is true.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        },
+        "title": {
+          "type": "string"
+        },
+        "due_on": {
+          "type": "string",
+          "format": "date",
+          "description": "YYYY-MM-DD"
+        },
+        "description": {
+          "type": "string",
+          "description": "Rich text; replaces the whole description"
+        },
+        "pinned": {
+          "type": "boolean",
+          "description": "Pinned to the top of its lane"
+        },
+        "column_id": {
+          "type": "integer",
+          "description": "The lane to move the card to"
+        },
+        "to_board_id": {
+          "type": "integer",
+          "description": "The board to move the card to"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "content": {
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "remove": {
+                "type": "boolean",
+                "description": "Delete this step; needs the delete scope"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "board_id",
+        "number"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "write",
+    "calls": [
+      {
+        "method": "PUT",
+        "path": "/boards/{board_id}/cards/{number}.json"
+      }
+    ]
+  },
+  {
+    "name": "delete_card",
+    "title": "Delete a card",
+    "description": "Permanently deletes a card with its steps and notes. This can't be undone; to put a card\naside, move it to Backlog or Done with `update_card` instead.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        }
+      },
+      "required": [
+        "board_id",
+        "number"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "delete",
+    "calls": [
+      {
+        "method": "DELETE",
+        "path": "/boards/{board_id}/cards/{number}.json"
+      }
+    ]
+  },
+  {
+    "name": "list_notes",
+    "title": "List a card's notes",
+    "description": "A card's whole note log. `get_card` already embeds the 20 most recent, so this is only\nneeded when its `notes_truncated` is true. Paged: follow paging.next or pass `page`.\n",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "board_id",
+        "number"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "scope": "read",
+    "calls": [
+      {
+        "method": "GET",
+        "path": "/boards/{board_id}/cards/{card_number}/notes.json"
+      }
+    ]
+  },
+  {
+    "name": "add_note",
+    "title": "Add a note",
+    "description": "Adds a timestamped note to a card's log.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        },
+        "body": {
+          "type": "string",
+          "description": "Rich text; plain text or HTML"
+        }
+      },
+      "required": [
+        "board_id",
+        "number",
+        "body"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "write",
+    "calls": [
+      {
+        "method": "POST",
+        "path": "/boards/{board_id}/cards/{card_number}/notes.json"
+      }
+    ]
+  },
+  {
+    "name": "update_note",
+    "title": "Edit a note",
+    "description": "Replaces a note's body. Only the note's creator may edit it.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        },
+        "note_id": {
+          "type": "integer"
+        },
+        "body": {
+          "type": "string",
+          "description": "Rich text; plain text or HTML"
+        }
+      },
+      "required": [
+        "board_id",
+        "number",
+        "note_id",
+        "body"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "write",
+    "calls": [
+      {
+        "method": "PUT",
+        "path": "/boards/{board_id}/cards/{card_number}/notes/{id}.json"
+      }
+    ]
+  },
+  {
+    "name": "delete_note",
+    "title": "Delete a note",
+    "description": "Permanently deletes a note from a card's log. Only the note's creator may delete it.",
+    "inputSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "properties": {
+        "board_id": {
+          "type": "integer",
+          "description": "The board the card is on"
+        },
+        "number": {
+          "type": "integer",
+          "description": "The card's number on that board (not its id)"
+        },
+        "note_id": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "board_id",
+        "number",
+        "note_id"
+      ],
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "scope": "delete",
+    "calls": [
+      {
+        "method": "DELETE",
+        "path": "/boards/{board_id}/cards/{card_number}/notes/{id}.json"
+      }
+    ]
+  }
+]
