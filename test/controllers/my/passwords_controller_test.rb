@@ -44,6 +44,28 @@ class My::PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_nil users(:kevin).reload.password_digest
   end
 
+  test "a blank new password is refused, and nothing is signed out" do
+    other_browser = users(:kevin).sessions.create!
+
+    patch my_password_path, params: { current_password: owner_password, user: { password: "", password_confirmation: "" } }
+
+    assert_response :unprocessable_entity
+    assert_nil users(:kevin).reload.password_digest
+    assert Session.exists?(other_browser.id)
+  end
+
+  test "without a password to confirm there is nothing to change" do
+    with_env("MUDDA_OWNER_PASSWORD" => nil) do
+      get edit_my_password_path
+      assert_redirected_to user_path(users(:kevin))
+
+      patch my_password_path, params: { current_password: "", user: { password: "brand-new-pw", password_confirmation: "brand-new-pw" } }
+      assert_redirected_to user_path(users(:kevin))
+    end
+
+    assert_nil users(:kevin).reload.password_digest
+  end
+
   test "a token can't change the password" do
     patch my_password_path, params: { current_password: owner_password, user: { password: "brand-new-pw", password_confirmation: "brand-new-pw" } },
       headers: bearer_headers_for(:kevin)

@@ -4,12 +4,15 @@ class StructuredLogTest < ActiveSupport::TestCase
   setup do
     @io = StringIO.new
     @logger = ActiveSupport::TaggedLogging.logger(@io)
-    @logger.formatter = StructuredLog::Formatter.new.extend(ActiveSupport::TaggedLogging::Formatter)
-    @previous = Rails.logger
-    Rails.logger = @logger
+    @logger.formatter = StructuredLog::Formatter.new
+    @previous, @previous_job_logger = Rails.logger, ActiveJob::Base.logger
+    Rails.logger = ActiveJob::Base.logger = @logger
   end
 
-  teardown { Rails.logger = @previous }
+  teardown do
+    Rails.logger = @previous
+    ActiveJob::Base.logger = @previous_job_logger
+  end
 
   test "domain events are one JSON line with the request context and masked emails" do
     with_json do
@@ -95,6 +98,31 @@ class StructuredLogTest < ActiveSupport::TestCase
     StructuredLog.warn("board.delivery.failed", status: 502)
 
     assert_equal "WARN  board.delivery.failed status=502\n", @io.string.lines.last
+  end
+
+  test "a line a job writes stays structured, with the job's tags as a field" do
+    job = Class.new(ApplicationJob) do
+      def self.name = "DeliveringJob"
+      def perform = StructuredLog.warn("board.delivery.failed", attempts: 1)
+    end.new
+
+    with_json { job.perform_now }
+
+    line = JSON.parse(@io.string.lines.find { it.include?("board.delivery.failed") })
+    assert_equal [ "warn", "board.delivery.failed", 1 ], line.values_at("level", "event", "attempts")
+    assert_equal [ "ActiveJob", "DeliveringJob", job.job_id ], line["tags"]
+  end
+
+  test "text mode leads a tagged line with its tags" do
+    @logger.tagged("ActiveJob", "DeliveringJob") { StructuredLog.warn("board.delivery.failed", status: 502) }
+
+    assert_equal "WARN  [ActiveJob] [DeliveringJob] board.delivery.failed status=502\n", @io.string.lines.last
+  end
+
+  test "a build without GIT_SHA, or with it empty, reports the version as unknown" do
+    with_env("GIT_SHA" => "") { assert_equal "unknown", StructuredLog.version }
+    with_env("GIT_SHA" => nil) { assert_equal "unknown", StructuredLog.version }
+    with_env("GIT_SHA" => "abc123") { assert_equal "abc123", StructuredLog.version }
   end
 
   test "the actor names the account, user, session kind and agent" do

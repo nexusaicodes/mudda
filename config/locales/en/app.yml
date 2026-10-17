@@ -105,8 +105,6 @@ en:
         title: Passkeys
       passkey:
         unnamed: Passkey
-    switcher:
-      switch: Switch board
     passwords:
       edit:
         back: Profile
@@ -114,12 +112,15 @@ en:
         current: Current password
         hint: At least 8 characters.
         new: New password
-        note: Your other browsers will be signed out. Passkeys and API tokens keep working.
+        note: Your other browsers will be signed out. Passkeys and API tokens keep
+          working.
         save: Change password
         title: Change password
       update:
         changed: Password changed.
         wrong_password: That isn’t your current password.
+    switcher:
+      switch: Switch board
     tokens:
       create:
         api: Or call the API
@@ -223,9 +224,9 @@ en:
         one: "%{count} card of %{limit} used."
         other: "%{count} cards of %{limit} used."
     show:
-      change_password: Change password
       avatar_alt: Profile avatar for %{name}
       back: Home
+      change_password: Change password
       edit: Edit profile
       passkeys: Manage passkeys
       security: Security

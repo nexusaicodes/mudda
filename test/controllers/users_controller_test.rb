@@ -20,6 +20,14 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "Plan", response.body
   end
 
+  test "the profile offers no password change when there is no password to confirm" do
+    sign_in_as :kevin
+
+    with_env("MUDDA_OWNER_PASSWORD" => nil) { get user_path(users(:kevin)) }
+    assert_select "a[href=?]", edit_my_password_path, count: 0
+    assert_select "a[href=?]", my_passkeys_path
+  end
+
   test "the profile shows the plan under a ceiling, and the upgrade whenever there is somewhere to go" do
     sign_in_as :kevin
 

@@ -6,10 +6,12 @@ email_address = ENV.fetch("MUDDA_OWNER_EMAIL") do
 end
 owner_name = ENV.fetch("MUDDA_OWNER_NAME", email_address.split("@").first.capitalize)
 
+# What this prints reaches the deployment's logs, so an email in it is masked (a***@example.com).
+#
 # The owner's email is set once and never changes, so an owner already here under another email
 # means the environment is wrong; carrying on would create a second user.
 if (existing = User.order(:id).first) && existing.email_address != email_address.strip.downcase
-  abort "MUDDA_OWNER_EMAIL is #{email_address}, but this board's owner is #{existing.email_address}."
+  abort "MUDDA_OWNER_EMAIL is #{StructuredLog.mask_email(email_address)}, but this board's owner is #{StructuredLog.mask_email(existing.email_address)}."
 end
 
 owner = User.find_by(email_address: email_address.strip.downcase) ||
@@ -23,7 +25,7 @@ owner = User.find_by(email_address: email_address.strip.downcase) ||
     end
   end
 
-puts %(Seeded account ##{owner.account_id} — owner #{owner.email_address})
+puts %(Seeded account ##{owner.account_id} — owner #{StructuredLog.mask_email(owner.email_address)})
 
 # Without a password secret, a stored password, a hosting platform to send one, or a passkey,
 # there is no way to sign in. Fail fast in a real deployment; only tolerate it locally, where the

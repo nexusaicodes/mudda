@@ -43,9 +43,11 @@
     <section class="settings__section">
       <h2><%= t(".security") %></h2>
       <div class="settings__actions">
-        <%= link_to edit_my_password_path, class: "btn" do %>
-          <%= icon_tag "password" %>
-          <span><%= t(".change_password") %></span>
+        <% if OwnerPassword.set_for?(Current.user) %>
+          <%= link_to edit_my_password_path, class: "btn" do %>
+            <%= icon_tag "password" %>
+            <span><%= t(".change_password") %></span>
+          <% end %>
         <% end %>
 
         <%= link_to my_passkeys_path, class: "btn" do %>

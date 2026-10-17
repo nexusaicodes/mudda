@@ -5,8 +5,8 @@ class Metrics::Exposition
   CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
   PREFIX = "mudda_board_"
 
-  def initialize(now: Time.current, database_path: Metrics::Exposition.database_path, version: ENV["GIT_SHA"])
-    @now, @database_path, @version = now, database_path, version.presence || "unknown"
+  def initialize(now: Time.current, database_path: Metrics::Exposition.database_path, version: StructuredLog.version)
+    @now, @database_path, @version = now, database_path, version
     @lines = []
   end
 

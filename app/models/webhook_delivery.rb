@@ -18,6 +18,10 @@ class WebhookDelivery < ApplicationRecord
   # How long a claimed delivery is held by the job sending it. Past it, a delivery whose sender
   # died mid-send is pending again and is picked up at the next boot.
   CLAIM_LEASE = 1.minute
+  # A job scheduled for a delivery's next attempt may start a moment before it, by the clock
+  # it is checked against, so a delivery due this soon can be claimed. It is far shorter than
+  # the lease and every retry delay, so neither a claimed delivery nor one backing off is due.
+  CLAIM_LEEWAY = 5.seconds
 
   # What a POST can fail with on its way to the platform and back. Anything else is a bug, so it
   # is raised and reported rather than retried as if the platform were down.
@@ -68,8 +72,9 @@ class WebhookDelivery < ApplicationRecord
     WebhookDeliveryJob.set(wait_until: wait_until).perform_later(self)
   end
 
-  # Sent only by the job that claims it, so two jobs queued for one delivery (at boot and on the
-  # platform's request) can't both POST it.
+  # Sent only by the job that claims it, so two jobs queued for one delivery (at boot, after
+  # commit, or on the platform's request) can't both POST it, and a job that runs while the
+  # delivery is backing off can't send it early.
   #
   # While tracing is on, each attempt is a board.delivery.deliver span carrying the delivery's
   # id, kind, attempt number and outcome: delivered, retrying, abandoned or skipped.
@@ -93,17 +98,19 @@ class WebhookDelivery < ApplicationRecord
       failed "#{error.class}: #{error.message}".truncate(255), duration_ms: elapsed_ms_since(started_at)
     end
 
-    # Takes the delivery in one conditional UPDATE, keyed on the attempt time it was read with,
-    # and holds it for CLAIM_LEASE.
+    # Takes the delivery in one conditional UPDATE, only while it is due, and holds it for
+    # CLAIM_LEASE. A job that reads the delivery after another has claimed it finds it leased,
+    # and one that reads it after a failed attempt finds it waiting for its retry: not due.
     def claim
-      leased_until = Time.current + CLAIM_LEASE
+      now = Time.current
+      leased_until = now + CLAIM_LEASE
 
-      if self.class.where(id: id, delivered_at: nil, next_attempt_at: next_attempt_at).update_all(next_attempt_at: leased_until) == 1
+      if self.class.due(now + CLAIM_LEEWAY).where(id: id).update_all(next_attempt_at: leased_until) == 1
         self.next_attempt_at = leased_until
         clear_attribute_change :next_attempt_at
         true
       else
-        StructuredLog.debug("board.delivery.skipped", event_id: event_id, reason: "claimed elsewhere")
+        StructuredLog.debug("board.delivery.skipped", event_id: event_id, reason: "not due")
         false
       end
     end

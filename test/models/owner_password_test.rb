@@ -61,6 +61,27 @@ class OwnerPasswordTest < ActiveSupport::TestCase
     end
   end
 
+  test "every attempt costs one bcrypt comparison, whichever email and password it names" do
+    BCrypt::Password.any_instance.expects(:is_password?).times(3).returns(false)
+
+    OwnerPassword.authenticate("stranger@example.com", owner_password)
+    OwnerPassword.authenticate(users(:david).email_address, "not-the-password")
+
+    users(:david).update_column :password_digest, BCrypt::Password.create("a-new-password", cost: BCrypt::Engine::MIN_COST)
+    OwnerPassword.authenticate(users(:david).email_address, "not-the-password")
+  end
+
+  test "set_for? when the owner has a stored password or the env secret" do
+    assert OwnerPassword.set_for?(users(:david))
+
+    with_env("MUDDA_OWNER_PASSWORD" => nil) do
+      assert_not OwnerPassword.set_for?(users(:david))
+
+      users(:david).update!(password: "a-new-password")
+      assert OwnerPassword.set_for?(users(:david))
+    end
+  end
+
   private
     def create_passkey_for(user)
       user.passkeys.create!(

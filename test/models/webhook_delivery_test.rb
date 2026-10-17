@@ -60,7 +60,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
         assert_match "ECONNREFUSED", delivery.last_error
       end
 
-      delivery.update_columns created_at: 8.days.ago, attempts: 9
+      delivery.update_columns created_at: 8.days.ago, attempts: 9, next_attempt_at: Time.current
       delivery.deliver_now
       assert_nil delivery.reload.next_attempt_at
       assert_nil delivery.delivered_at
@@ -76,7 +76,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
         delivery.deliver_now
       end
 
-      delivery.update_columns created_at: 8.days.ago, attempts: 9
+      delivery.update_columns created_at: 8.days.ago, attempts: 9, next_attempt_at: Time.current
       assert_event_reported("board.delivery.abandoned", payload: { event_id: delivery.event_id, attempts: 10 }) do
         assert_error_reported(WebhookDelivery::Abandoned) { delivery.deliver_now }
       end
@@ -93,6 +93,35 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
       stale.deliver_now
 
       assert_equal 1, delivery.reload.attempts
+    end
+  end
+
+  test "a job that reads a delivery another has claimed doesn't send it" do
+    with_platform_webhooks do
+      delivery = WebhookDelivery.record("user.updated", name: "K")
+      Net::HTTP.expects(:start).never
+      second_job = nil
+
+      delivery.define_singleton_method(:post) do |*|
+        second_job = WebhookDelivery.find(id).deliver_now
+        Net::HTTPOK.new("1.1", "200", "OK")
+      end
+
+      assert_equal :delivered, delivery.deliver_now
+      assert_equal :skipped, second_job
+    end
+  end
+
+  test "a job that reads a delivery while it backs off doesn't send it early" do
+    with_platform_webhooks do
+      delivery = WebhookDelivery.record("user.updated", name: "K")
+      Net::HTTP.expects(:start).once.raises(Errno::ECONNREFUSED)
+
+      delivery.deliver_now
+
+      assert_equal :skipped, WebhookDelivery.find(delivery.id).deliver_now
+      assert_equal 1, delivery.reload.attempts
+      assert delivery.next_attempt_at.future?
     end
   end
 
