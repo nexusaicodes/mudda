@@ -4,40 +4,38 @@
 <% passkeys_exist = ActionPack::Passkey.exists? %>
 <% password_enabled = OwnerPassword.enabled? %>
 
-<div class="panel panel--centered flex flex-column gap-half">
-  <%= image_tag "logo.png", alt: "", class: "sign-in__logo" %>
-  <h1 class="txt-x-large font-weight-black margin-block-end"><%= t(".heading") %></h1>
+<div class="card bg-base-100 shadow-xl w-full max-w-sm m-auto">
+  <div class="card-body items-center gap-4">
+    <%= image_tag "logo.png", alt: "", class: "h-14 w-auto" %>
+    <h1 class="card-title text-2xl"><%= t(".heading") %></h1>
 
-  <% if password_enabled %>
-    <%= form_with url: session_password_path, class: "flex flex-column gap-half txt-medium" do |form| %>
-      <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username webauthn", placeholder: t(".email_placeholder") %>
-      </label>
-      <label class="flex align-center gap input input--actor">
-        <%= form.password_field :password, required: true, class: "input full-width", autocomplete: "current-password", placeholder: t(".password_placeholder") %>
-      </label>
-
-      <button type="submit" id="log_in" class="btn btn--link center">
-        <span><%= t(".submit") %></span>
-        <%= icon_tag "arrow-right" %>
-      </button>
-    <% end %>
-  <% end %>
-
-  <% if passkeys_exist %>
     <% if password_enabled %>
-      <p class="txt-subtle center txt-medium"><%= t(".or") %></p>
+      <%= form_with url: session_password_path, class: "w-full flex flex-col gap-3" do |form| %>
+        <%= form.email_field :email_address, required: true, class: "input w-full", autofocus: true, autocomplete: "username webauthn", placeholder: t(".email_placeholder"), aria: { label: t(".email_placeholder") } %>
+        <%= form.password_field :password, required: true, class: "input w-full", autocomplete: "current-password", placeholder: t(".password_placeholder"), aria: { label: t(".password_placeholder") } %>
+
+        <button type="submit" id="log_in" class="btn btn-primary btn-block">
+          <span><%= t(".submit") %></span>
+          <%= icon_tag "arrow-right" %>
+        </button>
+      <% end %>
     <% end %>
 
-    <%= passkey_sign_in_button t(".passkey"), session_passkey_path,
-          options: @authentication_options,
-          mediation: "conditional",
-          error: { class: "txt-negative margin-block-half", message: t(".passkey_error") },
-          cancellation: { class: "txt-subtle margin-block-half", message: t(".passkey_cancelled") },
-          class: "btn btn--link center" %>
-  <% end %>
+    <% if passkeys_exist %>
+      <% if password_enabled %>
+        <div class="divider my-0 w-full"><%= t(".or") %></div>
+      <% end %>
 
-  <% unless password_enabled || passkeys_exist %>
-    <p class="txt-medium txt-balance"><%= t(".unconfigured_html") %></p>
-  <% end %>
+      <%= passkey_sign_in_button t(".passkey"), session_passkey_path,
+            options: @authentication_options,
+            mediation: "conditional",
+            error: { class: "text-error text-sm", message: t(".passkey_error") },
+            cancellation: { class: "text-base-content/60 text-sm", message: t(".passkey_cancelled") },
+            class: "btn btn-block" %>
+    <% end %>
+
+    <% unless password_enabled || passkeys_exist %>
+      <p class="text-balance"><%= t(".unconfigured_html") %></p>
+    <% end %>
+  </div>
 </div>

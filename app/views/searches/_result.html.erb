@@ -4,21 +4,21 @@
 <% note_match = matches.find(&:note) %>
 
 <li>
-  <%= link_to board_card_path(card.board, card), class: "search__result", style: "--card-color: #{card.color}",
+  <%= link_to board_card_path(card.board, card), class: "flex items-center gap-3 rounded-field px-3 py-2 hover:bg-base-200", style: "--card-color: #{card.color}",
         data: { turbo_frame: "_top", action: "bar#close" } do %>
-    <div class="search__result-main">
-      <h4 class="search__title margin-none" dir="auto"><%= title_match.card_title %></h4>
+    <div class="grid gap-0.5 min-w-0 grow">
+      <h4 class="search__title text-sm font-semibold" dir="auto"><%= title_match.card_title %></h4>
 
       <% if title_match.note.nil? && (description = title_match.card_description).present? %>
-        <div class="search__excerpt" dir="auto"><%= description %></div>
+        <div class="search__excerpt text-xs text-base-content/70 truncate" dir="auto"><%= description %></div>
       <% elsif note_match %>
-        <div class="search__excerpt search__excerpt--note"><%= t(".in_a_note_html", note: tag.bdi(note_match.note_body)) %></div>
+        <div class="search__excerpt search__excerpt--note text-xs text-base-content/70 truncate"><%= t(".in_a_note_html", note: tag.bdi(note_match.note_body)) %></div>
       <% end %>
     </div>
 
-    <div class="search__meta">
+    <div class="flex shrink-0 items-center gap-1">
       <%= render "cards/display/preview/due", card: card %>
-      <span class="search__lane" style="--column-color: <%= card.column.color %>"><%= lane_name(card.column) %></span>
+      <span class="badge badge-sm badge-outline text-(--column-color) uppercase" style="--column-color: <%= card.column.color %>"><%= lane_name(card.column) %></span>
     </div>
   <% end %>
 </li>

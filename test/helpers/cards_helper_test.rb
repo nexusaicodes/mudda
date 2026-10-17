@@ -22,6 +22,12 @@ class CardsHelperTest < ActionView::TestCase
     assert_equal "later", card_due_tone(due(2))
   end
 
+  test "a due date's badge colour follows its tone" do
+    assert_equal "badge-error", card_due_badge_class(due(-1))
+    assert_equal "badge-warning", card_due_badge_class(due(1))
+    assert_equal "badge-ghost", card_due_badge_class(due(2))
+  end
+
   private
     def due(days)
       Card.new(due_on: Date.current + days)

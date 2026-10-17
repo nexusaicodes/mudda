@@ -1,16 +1,19 @@
 <div data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-  <button type="button" class="btn txt-negative borderless txt-small" data-action="dialog#open">
+  <button type="button" class="btn btn-sm text-error" data-action="dialog#open">
     <%= icon_tag "trash" %>
     <span><%= t(".delete_this_card") %></span>
   </button>
-  <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
-    <h3 class="txt-large txt-bold"><%= t(".title") %></h3>
-    <p class="txt-medium margin-block-half"><%= t(".confirm") %></p>
-    <div class="flex gap-half justify-center margin-block-start">
-      <button type="button" class="btn" data-action="dialog#close"><%= t(".cancel") %></button>
-      <%= button_to board_card_path(card.board, card), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
-        <span><%= t(".delete_card") %></span>
-      <% end %>
+  <dialog class="modal" data-dialog-target="dialog">
+    <div class="modal-box text-start">
+      <h3 class="text-lg font-bold"><%= t(".title") %></h3>
+      <p class="py-3"><%= t(".confirm") %></p>
+      <div class="modal-action">
+        <button type="button" class="btn" data-action="dialog#close"><%= t(".cancel") %></button>
+        <%= button_to board_card_path(card.board, card), method: :delete, class: "btn btn-error", data: { turbo_frame: "_top" } do %>
+          <span><%= t(".delete_card") %></span>
+        <% end %>
+      </div>
     </div>
+    <form method="dialog" class="modal-backdrop"><button><%= t(".cancel") %></button></form>
   </dialog>
 </div>

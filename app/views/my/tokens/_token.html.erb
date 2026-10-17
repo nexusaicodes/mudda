@@ -1,18 +1,18 @@
 <li class="credential">
-  <div class="credential__link">
-    <%= icon_tag "bolt", class: "flex-item-no-shrink" %>
-    <div class="flex flex-column min-width flex-item-grow">
-      <strong class="overflow-ellipsis" dir="auto"><%= token.label %></strong>
-      <span class="txt-small txt-subtle overflow-ellipsis">
+  <div class="list-row items-center">
+    <%= icon_tag "bolt", class: "shrink-0" %>
+    <div class="flex flex-col min-w-0 grow">
+      <strong class="truncate" dir="auto"><%= token.label %></strong>
+      <span class="text-sm text-base-content/60 truncate">
         <%= token.scopes.join(" · ") %> ·
         <% if token.oauth? %><%= t(".connected", date: l(token.created_at.to_date, format: :app_long)) %> ·<% end %>
         <%= token_expiry(token) %>
       </span>
     </div>
-    <%= button_to my_token_path(token), method: :delete, class: "btn txt-negative borderless txt-small",
+    <%= button_to my_token_path(token), method: :delete, class: "btn btn-ghost btn-sm text-error",
           data: { turbo_confirm: t(".confirm_revoke", label: token.label) } do %>
       <%= icon_tag "trash" %>
-      <span class="for-screen-reader"><%= t(".revoke", label: token.label) %></span>
+      <span class="sr-only"><%= t(".revoke", label: token.label) %></span>
     <% end %>
   </div>
 </li>

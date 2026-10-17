@@ -33,7 +33,7 @@ class My::TokensControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_select "p.txt-negative", text: /at least one/
+    assert_select "[role=alert]", text: /at least one/
   end
 
   test "minting without a name is refused" do

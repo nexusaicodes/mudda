@@ -1,11 +1,11 @@
 <% @page_title = t(".title") %>
 
-<div class="panel panel--wide shadow center txt-align-start flex flex-column gap">
-  <h1 class="txt-large margin-none"><%= t(".heading") %></h1>
+<div class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 text-start gap-4 flex-none">
+  <h1 class="text-lg font-bold m-0"><%= t(".heading") %></h1>
 
-  <p class="margin-none">
+  <p class="m-0">
     <%= local_assigns[:message] || (local_assigns[:error_response] || @pre_auth.error_response).body[:error_description] %>
   </p>
 
-  <p class="txt-small txt-subtle margin-none"><%= t(".retry_html", link: link_to(t(".back"), root_path)) %></p>
+  <p class="text-sm text-base-content/60 m-0"><%= t(".retry_html", link: link_to(t(".back"), root_path)) %></p>
 </div>

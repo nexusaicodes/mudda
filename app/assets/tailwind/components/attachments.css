@@ -1,4 +1,8 @@
-@layer components {
+/* Files and pictures in rich text. Action Text, Active Storage and Lexxy render this markup
+   (.attachment, .attachment__caption, …), so the class names are theirs; the colours are the theme's.
+   daisyUI's components live in the utilities layer, so this sheet does too. */
+
+@layer utilities {
   .attachment {
     block-size: auto;
     display: block;
@@ -13,8 +17,8 @@
   }
 
   .attachment__caption {
-    color: color-mix(in oklch, var(--color-ink) 66%, transparent);
-    font-size: var(--text-small);
+    color: color-mix(in oklch, var(--color-base-content) 66%, transparent);
+    font-size: 0.875rem;
 
     textarea {
       --input-border-radius: 0.3em;
@@ -50,7 +54,7 @@
     box-sizing: border-box;
     color: var(--attachment-icon-color);
     display: grid;
-    font-size: var(--text-small);
+    font-size: 0.875rem;
     font-weight: bold;
     inline-size: auto;
     padding-inline: 0.5ch;
@@ -85,7 +89,7 @@
   }
 
   .attachment--file {
-    --attachment-icon-color: var(--color-ink-medium);
+    --attachment-icon-color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
 
     align-items: center;
     display: flex;
@@ -101,7 +105,7 @@
     }
 
     .attachment__name {
-      color: var(--color-ink);
+      color: var(--color-base-content);
       font-weight: bold;
     }
 
@@ -124,7 +128,7 @@
   .attachment--svg,
   .attachment--ppt,
   .attachment--pptx {
-    --attachment-icon-color: oklch(var(--lch-red-medium));
+    --attachment-icon-color: var(--color-error);
   }
 
   .attachment--css,
@@ -137,7 +141,7 @@
   .attachment--erb,
   .attachment--ts,
   .attachment--js {
-    --attachment-icon-color: oklch(var(--lch-purple-medium));
+    --attachment-icon-color: var(--color-accent);
   }
 
   .attachment--txt,
@@ -146,18 +150,18 @@
   .attachment--md,
   .attachment--doc,
   .attachment--docx {
-    --attachment-icon-color: oklch(var(--lch-blue-medium));
+    --attachment-icon-color: var(--color-info);
   }
 
   .attachment--csv &,
   .attachment--numbers &,
   .attachment--xls &,
   .attachment--xlsx & {
-    --attachment-icon-color: oklch(var(--lch-green-medium));
+    --attachment-icon-color: var(--color-success);
   }
 
   .attachment__link {
-    color: var(--color-link);
+    color: var(--color-primary-content);
     text-decoration: underline;
   }
 
@@ -198,8 +202,8 @@
     }
 
     &.node--selected {
-      --attachment-bg-color: oklch(var(--lch-blue-dark));
-      --attachment-text-color: var(--color-ink-inverted);
+      --attachment-bg-color: var(--color-info);
+      --attachment-text-color: var(--color-info-content);
     }
   }
 }

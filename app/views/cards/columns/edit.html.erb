@@ -1,7 +1,5 @@
 <%= turbo_frame_tag @card, :columns do %>
-  <div class="card__stages" role="radiogroup" data-controller="scroll-to">
-    <legend class="for-screen-reader"><%= t(".legend") %></legend>
-
+  <div class="card__stages join grid grid-cols-4 sm:flex sm:flex-col w-full sm:w-36" role="radiogroup" aria-label="<%= t(".legend") %>" data-controller="scroll-to">
     <% @columns.each do |column| %>
       <%= button_to_set_column @card, column %>
     <% end %>

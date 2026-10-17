@@ -1,6 +1,6 @@
 <% if card.steps.any? %>
   <% completed, total = card.steps.count(&:completed?), card.steps.size %>
-  <span class="card__steps <%= "card__steps--complete" if completed == total %>" title="<%= t(".title", completed: completed, count: total) %>">
+  <span class="badge badge-sm <%= completed == total ? "badge-soft badge-success" : "badge-ghost" %>" title="<%= t(".title", completed: completed, count: total) %>">
     <%= icon_tag "check" %>
     <%= completed %>/<%= total %>
   </span>

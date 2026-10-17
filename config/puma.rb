@@ -7,6 +7,9 @@ pidfile ENV.fetch("PIDFILE", "tmp/pids/server.pid")
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
 
+# Rebuild app/assets/builds/tailwind.css as views and styles change.
+plugin :tailwindcss if ENV.fetch("RAILS_ENV", "development") == "development"
+
 # What escapes the Rails app altogether, or fails in Puma itself, is reported like any other
 # error and answered with a 500 whose reference matches the logged error.reported line.
 require "securerandom"

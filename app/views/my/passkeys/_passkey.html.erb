@@ -1,11 +1,11 @@
 <li class="credential" style="view-transition-name: <%= dom_id(passkey) %>">
-  <%= link_to edit_my_passkey_path(passkey), class: "credential__link" do %>
+  <%= link_to edit_my_passkey_path(passkey), class: "list-row items-center hover:bg-base-200 rounded-field" do %>
     <% if icon = passkey.authenticator&.icon %>
-      <%= image_tag icon[:light], size: 24, class: "flex-item-no-shrink", aria: { hidden: true } %>
+      <%= image_tag icon[:light], size: 24, class: "shrink-0", aria: { hidden: true } %>
     <% else %>
-      <%= image_tag "passkeys/generic_light.svg", size: 24, class: "flex-item-no-shrink", aria: { hidden: true } %>
+      <%= image_tag "passkeys/generic_light.svg", size: 24, class: "shrink-0", aria: { hidden: true } %>
     <% end %>
-    <strong class="overflow-ellipsis min-width" dir="auto"><%= passkey.name.presence || t(".unnamed") %></strong>
-    <strong class="credential__arrow">→</strong>
+    <strong class="truncate min-w-0" dir="auto"><%= passkey.name.presence || t(".unnamed") %></strong>
+    <strong class="opacity-50">→</strong>
   <% end %>
 </li>

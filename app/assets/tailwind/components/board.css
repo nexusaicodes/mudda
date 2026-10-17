@@ -1,0 +1,366 @@
+/* The board: four lanes and their cards. The kit has no kanban, so this sheet lays the lanes out and
+   keeps the hooks the lane scripts toggle; colours, radii and type come from the theme.
+
+   Hooks (kept for collapsible-columns, drag-and-drop and Ruby): .card-columns, .cards,
+   .cards__header, .cards__expander(-count/-title), .cards__transition-container, .cards__list,
+   .is-collapsed / .is-expanded / .no-transitions / .is-off-screen,
+   .drag-and-drop__dragged-item / .drag-and-drop__hover-container, body.contained-scrolling.
+   Each lane carries its colour as --card-color.
+
+   daisyUI puts its components (.card, .btn, …) in the utilities layer, so these rules live there
+   too, and win over the kit's by being more specific. */
+
+@layer utilities {
+  .card-columns {
+    --column-gap: 0.5rem;
+    --column-width-collapsed: 2.5rem;
+    --column-width-expanded: 22.5rem;
+    --column-height-collapsed: 11rem;
+    --column-transition-duration: 300ms;
+
+    display: flex;
+    flex: 1 1 0;
+    gap: var(--column-gap);
+    inline-size: 100%;
+    justify-content: safe center;
+    margin-inline: auto;
+    max-inline-size: 1400px;
+    min-block-size: min(20lh, 50dvh);
+    outline: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: relative;
+    text-align: start;
+  }
+
+  /* Lanes
+  /* ------------------------------------------------------------------------ */
+
+  .cards {
+    flex-shrink: 0;
+    inline-size: var(--column-width-expanded);
+    outline: none;
+    position: relative;
+    transition: inline-size var(--column-transition-duration) ease-out;
+
+    /* A collapsed lane is its header alone; its cards stay in the DOM for drag and drop. */
+    &.is-collapsed {
+      inline-size: var(--column-width-collapsed);
+
+      .cards__list {
+        display: none;
+      }
+    }
+
+    /* A lane whose cards have loaded and come to none needs only room for its hint. */
+    &.is-expanded:has(.blank-slate):not(:has(.card)) {
+      --column-width-expanded: 14rem;
+    }
+
+    .no-transitions & {
+      transition: none;
+    }
+  }
+
+  .cards__transition-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--column-gap);
+
+    .is-expanded & {
+      background-color: color-mix(in oklab, var(--card-color) 12%, var(--color-base-100));
+      block-size: 100%;
+      border-radius: var(--radius-box);
+      padding: var(--column-gap);
+    }
+
+    /* While a card is dragged over a lane, the lane outlines itself as the drop target. */
+    .drag-and-drop__hover-container & {
+      background-color: color-mix(in oklab, var(--card-color) 22%, var(--color-base-100));
+      border-radius: var(--radius-box);
+      outline: 2px dashed var(--card-color);
+      outline-offset: -2px;
+    }
+  }
+
+  .cards__list {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--column-gap);
+    min-block-size: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px;
+
+    /* The card the keyboard has reached */
+    [aria-selected] & .card[aria-selected] {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    &:has(.card) .blank-slate {
+      display: none;
+    }
+
+    /* Cards can be dragged here only on a wide screen, so each hint shows where it's true. */
+    [data-controller~="drag-and-drop"] & {
+      .blank-slate--default {
+        display: none;
+      }
+
+      @media (width < 40rem) {
+        .blank-slate--default {
+          display: block;
+        }
+
+        .blank-slate--drag {
+          display: none;
+        }
+      }
+    }
+  }
+
+  /* A lane's title and description clamp to a few lines; the phone tiers below change how many. */
+  .cards .card__title,
+  .cards .card__excerpt {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--lines, 2);
+    display: -webkit-box;
+    overflow: hidden;
+  }
+
+  .cards .card__title {
+    --lines: 3;
+  }
+
+  /* Lane headers: the count in a bead of the lane's colour, then the name
+  /* ------------------------------------------------------------------------ */
+
+  .cards__expander {
+    align-items: center;
+    background-color: color-mix(in oklab, var(--card-color) 8%, var(--color-base-100));
+    border: var(--border) solid color-mix(in oklab, var(--card-color) 30%, transparent);
+    border-radius: 999px;
+    color: var(--color-base-content);
+    cursor: pointer;
+    display: flex;
+    font-size: 0.75rem;
+    font-weight: 600;
+    gap: 0.5rem;
+    inline-size: 100%;
+    letter-spacing: 0.05em;
+    min-block-size: var(--column-width-collapsed);
+    padding: 0.25rem;
+    padding-inline-end: 0.75rem;
+    text-transform: uppercase;
+    transition: background-color 150ms ease-out;
+
+    &:hover {
+      background-color: color-mix(in oklab, var(--card-color) 18%, var(--color-base-100));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .is-expanded & {
+      background-color: color-mix(in oklab, var(--card-color) 22%, var(--color-base-100));
+    }
+  }
+
+  /* The bead's number is black or white, whichever reads on the lane's colour. */
+  .cards__expander-count {
+    background-color: var(--card-color);
+    block-size: 2rem;
+    border-radius: 999px;
+    color: oklch(from var(--card-color) round(1.15 - l) 0 0);
+    display: grid;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    inline-size: 2rem;
+    letter-spacing: 0;
+    place-items: center;
+  }
+
+  .cards__expander-title {
+    align-items: center;
+    display: flex;
+    gap: 0.25rem;
+    min-inline-size: 0;
+  }
+
+  .cards__expander-collapse {
+    opacity: 0.6;
+
+    .is-collapsed & {
+      display: none;
+    }
+  }
+
+  /* Wide screens: lanes side by side, a collapsed one a slim vertical pill
+  /* ------------------------------------------------------------------------ */
+
+  @media (width >= 40rem) {
+    .card-columns {
+      padding-block-end: var(--column-width-collapsed);
+    }
+
+    .cards.is-collapsed .cards__expander {
+      block-size: var(--column-height-collapsed);
+      flex-direction: column;
+      justify-content: start;
+      padding-inline: 0.25rem;
+      transition: block-size var(--column-transition-duration) ease-out;
+
+      .cards__expander-title {
+        writing-mode: vertical-rl;
+      }
+    }
+
+    /* While a card is being dragged, collapsed lanes run full height as drop targets. */
+    .card-columns:has(.drag-and-drop__dragged-item) .cards.is-collapsed .cards__expander {
+      block-size: calc(100% - var(--column-width-collapsed));
+    }
+
+    /* A lane scrolled out of view names itself at the top while a card is dragged over it. */
+    .cards.drag-and-drop__hover-container.is-off-screen::after {
+      background-color: var(--card-color);
+      border-radius: 999px;
+      color: oklch(from var(--card-color) round(1.15 - l) 0 0);
+      content: attr(data-column-name);
+      font-size: 0.75rem;
+      font-weight: 600;
+      inset-block-start: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      position: fixed;
+      text-transform: uppercase;
+      translate: -50%;
+      z-index: var(--z-popup);
+    }
+
+    .no-transitions .cards__expander {
+      transition: none;
+    }
+  }
+
+  /* Phones: the board on its side
+  /* ------------------------------------------------------------------------ */
+
+  /* A narrow screen has height to spare and no width, so the lanes stack top to bottom as bars and
+     the open lane's cards run sideways in a strip under its bar. The board fills the window and
+     never scrolls as a page. The stack is a size container, and each card takes its measure from
+     the height it leaves for the strip (the stack less the four bars): slim on a short screen,
+     roomier as it grows. A card always leaves the edge of the next in view, so the strip reads as
+     one to swipe. */
+  @media (width < 40rem) {
+    body.contained-scrolling {
+      block-size: 100dvh;
+      min-block-size: 0;
+      overflow: hidden;
+
+      #main {
+        min-block-size: 0;
+        overflow: hidden;
+      }
+    }
+
+    .card-columns {
+      --lane-bars: calc(4 * var(--column-width-collapsed) + 6 * var(--column-gap));
+
+      container: lane-stack / size;
+      flex-direction: column;
+      justify-content: start;
+      overflow: hidden;
+    }
+
+    .cards,
+    .cards.is-collapsed {
+      inline-size: 100%;
+    }
+
+    .cards.is-expanded {
+      display: flex;
+      flex: 0 1 auto;
+      flex-direction: column;
+      min-block-size: 0;
+    }
+
+    .cards.is-expanded .cards__transition-container {
+      background: none;
+      block-size: auto;
+      min-block-size: 0;
+      padding: 0;
+    }
+
+    .cards.is-expanded .cards__list {
+      align-items: start;
+      flex: 0 1 auto;
+      flex-direction: row;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      padding: 2px 2px var(--column-gap);
+      scroll-padding-inline: 2px;
+      scroll-snap-type: x mandatory;
+
+      .blank-slate {
+        inline-size: 100%;
+      }
+    }
+
+    /* Slim, for a short screen: the title and the badges only. */
+    .cards__list .card {
+      flex: 0 0 auto;
+      inline-size: clamp(8.5rem, 46cqi, 12rem);
+      max-block-size: calc(100cqb - var(--lane-bars));
+      overflow: hidden;
+      scroll-snap-align: start;
+
+      .card__title {
+        --lines: 2;
+      }
+
+      .card__excerpt {
+        display: none;
+      }
+    }
+
+    /* Compact: room for a short excerpt. */
+    @container lane-stack (min-height: 24rem) {
+      .cards__list .card {
+        inline-size: clamp(10rem, 64cqi, 15rem);
+
+        .card__excerpt {
+          --lines: 2;
+
+          display: -webkit-box;
+        }
+      }
+    }
+
+    /* Healthy: a taller screen gives each card more width, title and excerpt. */
+    @container lane-stack (min-height: 30rem) {
+      .cards__list .card {
+        inline-size: clamp(12rem, 80cqi, 19rem);
+
+        .card__title {
+          --lines: 3;
+        }
+
+        .card__excerpt {
+          --lines: 4;
+        }
+      }
+    }
+
+    /* Tall: the card can carry most of its description. */
+    @container lane-stack (min-height: 39rem) {
+      .cards__list .card .card__excerpt {
+        --lines: 8;
+      }
+    }
+  }
+}

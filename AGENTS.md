@@ -55,7 +55,8 @@ defaults are in `docker-compose.yml`.
 make test                                                         # unit and integration tests
 make test-system                                                  # system tests (test/system/), which make test skips
 make lint                                                         # RuboCop and the i18n checks
-docker compose run --rm web bin/rails test PATH                   # one test file
+make css                                                          # build the stylesheet (make test does it first)
+docker compose run --rm web bin/rails test PATH                   # one test file, after make css
 docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test  # a serial run
 ```
 
@@ -78,6 +79,14 @@ authenticator.
 - The `:bc` git_source (`github.com/basecamp/...`) in the `Gemfile` resolves real upstream gems.
   Do **not** repoint it.
 - Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`.
+- The UI is Tailwind CSS v4 with daisyUI 5 (the `retro` theme), and there is no Node. The
+  `tailwindcss-rails` gem carries the standalone Tailwind binary, and daisyUI's two plugin files
+  are vendored, unmodified, in `app/assets/tailwind/` (the version is noted in
+  `application.css`), so a build fetches nothing. `app/assets/tailwind/application.css` builds
+  to `app/assets/builds/tailwind.css` (git-ignored): the Puma plugin in `config/puma.rb` rebuilds
+  it while the dev server runs, `make test` builds it first, and `assets:precompile` builds it
+  for the production image. The layouts link `tailwind` and `lexxy` (the editor's theme,
+  `app/assets/stylesheets/lexxy.css`) by name.
 
 ## Architecture
 
@@ -325,12 +334,18 @@ The browser is for an occasional look, since agents do most of the work through 
 chrome is small and there are **no keyboard shortcuts**: keys only act inside the field being
 typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
-- **One look.** Every page sits on aged papyrus (`paper.css`): a golden-ochre ground, broad stains
+- **One look.** The components are daisyUI's, in its `retro` theme, the only theme and the
+  default (no `data-theme`, no dark mode): buttons, inputs, cards, badges, lists, modals,
+  dropdowns, toasts and tooltips come from the kit, and its palette also defines the lane
+  colours (`--color-card-*` in `app/assets/tailwind/theme.css`). Two things are the app's own:
+  the fonts (`fonts.css`, below) and the paper. Every page sits on aged papyrus
+  (`app/assets/tailwind/paper.css`): a golden-ochre ground, broad stains
   stretched over the window (`paper-stains.svg`), a woven layer of horizontal strips over
   vertical ones (`paper-fibres.svg`), a repeating fine grain (`paper-grain.svg`),
   and a ruled frame (one tight band: a vermilion rule with a dark-brown hairline against each
   side) fixed a little inside the window's edges (`--paper-inset`). `--paper-clearance` keeps the header, the page, and the lanes
-  inside the frame. There is no dark mode and no theme to choose.
+  inside the frame. The kit's own surfaces (cards, modals) sit on top of it. The static error
+  pages (`public/error.css`) mirror the look by hand, since they are served without the build.
 - **Home.** `/` is the boards list (`boards#index`, HTML; the JSON index is the API's): a big
   "New board" button, then every board by name with its card count, and at the top right of each
   row a pencil that renames it in place (`inline-edit` controller, Save and Cancel, Esc cancels)
@@ -350,8 +365,8 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   `?due=soon`, which narrows every lane (its header count and its frame, `boards/columns#show`
   with `due=soon`) to `Card.due_soon`: open cards due by tomorrow, overdue included. It is the
   only filter the board page takes. A lane repainted after a drop shows all its cards again.
-  On a phone (under 640px wide) the board turns on its side (`card-columns.css`, "Stacked
-  lanes"): the four lanes stack as bars, one open at a time, and the open lane's cards scroll
+  On a phone (under 640px wide) the board turns on its side (`app/assets/tailwind/components/board.css`,
+  "Phones"): the four lanes stack as bars, one open at a time, and the open lane's cards scroll
   sideways in a strip under its bar. The board fills the window and never scrolls as a page.
   Cards size themselves from the height the screen leaves for the strip (container queries on
   the lane stack): slim (title and due date) on a short screen, then compact, healthy, and tall,
@@ -446,8 +461,9 @@ never picks simply follows the browser (a blank `locale` through the API still r
   (`t(".key")`). Missing translations raise in dev and test. `make i18n` (also part of
   `make lint`) checks for missing, unused, and unnormalized keys, and `test/i18n_test.rb` runs
   the same checks.
-- `<html lang dir>` comes from the locale. CSS uses logical properties; where it can't, a
-  `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
+- `<html lang dir>` comes from the locale. daisyUI mirrors itself under `dir=rtl`, and the app's
+  utilities and CSS use logical directions (`ms-`, `pe-`, `start-`, `inset-inline`); where they
+  can't, a `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
   loaded only for Arabic code points. Latin text renders in El Messiri (`app/assets/fonts`, OFL, self-hosted, never fetched from Google). Dates show Western digits (`-u-nu-latn`).
 - The `public/*.html` error pages are static, so each carries both languages.
 

@@ -1,5 +1,4 @@
 import { Controller } from "@hotwired/stimulus"
-import { orient } from "helpers/orientation_helpers"
 import { isTouchDevice } from "helpers/platform_helpers"
 
 export default class extends Controller {
@@ -7,8 +6,7 @@ export default class extends Controller {
   static values = {
     modal: { type: Boolean, default: false },
     sizing: { type: Boolean, default: true },
-    autoOpen: { type: Boolean, default: false },
-    orient: { type: Boolean, default: true }
+    autoOpen: { type: Boolean, default: false }
   }
 
   connect() {
@@ -27,9 +25,6 @@ export default class extends Controller {
       this.dialogTarget.showModal()
     } else {
       this.dialogTarget.show()
-      if (this.orientValue) {
-        orient({ target: this.dialogTarget, anchor: this.element })
-      }
     }
 
     this.loadLazyFrames()
@@ -49,7 +44,6 @@ export default class extends Controller {
     this.dialogTarget.close()
     this.dialogTarget.setAttribute("aria-hidden", "true")
     this.dialogTarget.blur()
-    orient({ target: this.dialogTarget, reset: true })
     this.dispatch("close")
   }
 

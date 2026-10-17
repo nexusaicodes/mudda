@@ -2,8 +2,8 @@
   <%= render partial: "cards/notes/note", collection: card.notes.preloaded.chronologically, cached: ->(note) { [ note, I18n.locale ] } %>
   <%= render "cards/notes/new", card: card %>
 
-  <footer class="delete-card txt-align-center full-width flex flex-column margin-block-start-double">
-    <hr class="separator--horizontal full-width margin-block" style="--border-color: var(--color-ink-lighter)">
+  <footer class="flex flex-col items-center">
+    <div class="divider w-full"></div>
     <%= render "cards/delete", card: card %>
   </footer>
 <% end %>

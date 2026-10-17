@@ -1,0 +1,28 @@
+/* The app's one stylesheet: Tailwind CSS v4 with daisyUI 5 (retro theme), built by tailwindcss-rails
+   to app/assets/builds/tailwind.css. Use daisyUI components first and Tailwind utilities second;
+   write CSS only in components/ for what the kit can't express.
+
+   daisyui.mjs and daisyui-theme.mjs are vendored, unmodified, from daisyUI v5.7.50
+   (https://github.com/saadeghi/daisyui/releases/tag/v5.7.50), so builds fetch nothing. */
+
+@import "tailwindcss";
+
+@source "../../views";
+@source "../../helpers";
+@source "../../models/search";
+@source "../../javascript";
+
+@plugin "./daisyui.mjs" {
+  themes: retro --default;
+  logs: false;
+}
+
+@import "./theme.css";
+@import "./fonts.css";
+@import "./paper.css";
+
+@import "./components/behaviour.css";
+@import "./components/icons.css";
+@import "./components/board.css";
+@import "./components/attachments.css";
+@import "./components/print.css";

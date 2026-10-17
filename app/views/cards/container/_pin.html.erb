@@ -1,13 +1,7 @@
-<% if card.pinned? %>
-  <%= button_to board_card_pin_path(card.board, card), method: :delete, class: "btn btn--reversed btn--circle-mobile",
-        data: { controller: "tooltip" } do %>
+<% label = card.pinned? ? t(".unpin") : t(".pin") %>
+<div class="tooltip" data-tip="<%= label %>">
+  <%= button_to board_card_pin_path(card.board, card), method: (card.pinned? ? :delete : :post),
+        class: class_names("btn btn-circle", card.pinned? ? "btn-warning" : "btn-ghost bg-base-100"), aria: { label: label, pressed: card.pinned? } do %>
     <%= icon_tag "pin" %>
-    <span class="for-screen-reader"><%= t(".unpin") %></span>
   <% end %>
-<% else %>
-  <%= button_to board_card_pin_path(card.board, card), class: "btn btn--circle-mobile",
-        data: { controller: "tooltip" } do %>
-    <%= icon_tag "pin" %>
-    <span class="for-screen-reader"><%= t(".pin") %></span>
-  <% end %>
-<% end %>
+</div>

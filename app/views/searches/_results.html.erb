@@ -1,17 +1,17 @@
 <%# locals: (groups:, query:) -%>
-<section class="search">
+<section class="search flex flex-col gap-3 p-3 text-start">
   <% if query && groups.empty? %>
-    <div class="search__blank-slate blank-slate"><%= t(".no_matches") %></div>
+    <p class="search__blank-slate text-sm text-base-content/60 text-center py-4"><%= t(".no_matches") %></p>
   <% end %>
 
   <% groups.each do |board, count, cards| %>
     <section class="search__group">
-      <h3 class="search__group-title">
-        <span class="overflow-ellipsis" dir="auto"><%= board.name %></span>
-        <span class="search__group-count"><%= count %></span>
+      <h3 class="search__group-title flex items-center gap-2 px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-base-content/60">
+        <span class="truncate" dir="auto"><%= board.name %></span>
+        <span class="badge badge-sm ms-auto"><%= count %></span>
       </h3>
 
-      <ul class="search__list">
+      <ul class="search__list list">
         <% cards.each do |card, matches| %>
           <%= render "searches/result", card: card, matches: matches %>
         <% end %>
@@ -19,7 +19,7 @@
 
       <% if count > cards.size %>
         <%= link_to t(".show_all", count: count), cards_path(board_ids: [ board.id ], terms: [ query ]),
-              class: "search__more btn btn--plain txt-small", data: { turbo_frame: "_top", action: "bar#close" } %>
+              class: "search__more btn btn-ghost btn-sm mt-1", data: { turbo_frame: "_top", action: "bar#close" } %>
       <% end %>
     </section>
   <% end %>

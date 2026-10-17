@@ -1,7 +1,7 @@
 module NotesHelper
   def notes_tag(card, &)
     turbo_frame_tag dom_id(card, :notes),
-      class: "notes gap center",
+      class: "notes flex flex-col gap-4 w-full max-w-3xl mx-auto mt-6 text-start",
       style: "--card-color: #{card.color}",
       role: "group",
       aria: { label: t("cards.notes.label") }, &

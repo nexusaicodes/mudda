@@ -1,0 +1,101 @@
+/* Printing: ink on white paper, no chrome. The page's own content prints; the header, buttons,
+   dialogs and the paper's frame and texture don't (paper.css drops the background). */
+
+@media print {
+  @layer utilities {
+    #header,
+    #footer,
+    .btn,
+    .board-tools,
+    dialog,
+    .toast,
+    lexxy-toolbar,
+    body::before {
+      display: none !important;
+    }
+
+    :root {
+      --root-bg: white;
+    }
+
+    body {
+      color: black;
+    }
+
+    /* Cards print as outlined boxes in black, whatever their lane's colour. */
+    .card,
+    .card-perma {
+      --card-color: black;
+
+      background: white !important;
+      border: 1px solid black;
+      box-shadow: none !important;
+      break-inside: avoid;
+    }
+
+    .badge {
+      background: none !important;
+      border-color: black !important;
+      color: black !important;
+    }
+
+    /* Icons are masked backgrounds, which browsers skip when printing unless told otherwise. */
+    .icon {
+      print-color-adjust: exact;
+    }
+
+    /* Every lane prints open, one after another down the page. */
+    .card-columns {
+      display: block;
+      overflow: visible;
+    }
+
+    .cards,
+    .cards.is-collapsed {
+      inline-size: auto;
+      margin-block-end: 1rem;
+    }
+
+    .cards.is-collapsed .cards__list {
+      display: flex;
+    }
+
+    /* Lists take their natural height: on screen they share the lane's height and scroll. */
+    .cards__list {
+      flex: none;
+      overflow: visible;
+    }
+
+    .cards__transition-container {
+      background: none !important;
+      block-size: auto !important;
+      padding: 0 !important;
+    }
+
+    /* Each lane is a flat heading over its cards, however it sat on screen. */
+    .cards .cards__expander,
+    .cards.is-collapsed .cards__expander {
+      background: none;
+      block-size: auto;
+      border: 0;
+      border-block-end: 1px solid black;
+      border-radius: 0;
+      flex-direction: row;
+      justify-content: start;
+
+      .cards__expander-title {
+        writing-mode: horizontal-tb;
+      }
+    }
+
+    .cards__expander-count {
+      background: none;
+      border: 1px solid black;
+      color: black;
+    }
+
+    .cards__expander-collapse {
+      display: none;
+    }
+  }
+}

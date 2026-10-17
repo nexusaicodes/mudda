@@ -1,0 +1,92 @@
+@layer components {
+  .icon {
+    -webkit-touch-callout: none;
+    background-color: currentColor;
+    block-size: var(--icon-size, 1em);
+    display: inline-block;
+    flex-shrink: 0;
+    inline-size: var(--icon-size, 1em);
+    mask-image: var(--svg);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: var(--icon-size, 1em);
+    pointer-events: none;
+    position: relative;
+    user-select: none;
+  }
+
+  img.icon {
+    background: none;
+  }
+
+  .icon--add { --svg: url("add.svg"); }
+  .icon--arrow-left { --svg: url("arrow-left.svg"); }
+  .icon--arrow-right { --svg: url("arrow-right.svg"); }
+
+  /* Horizontal arrows point along the reading direction */
+  [dir=rtl] :is(.icon--arrow-left, .icon--arrow-right) { scale: -1 1; }
+
+  .icon--arrow-up { --svg: url("arrow-up.svg"); }
+  .icon--art { --svg: url("art.svg"); }
+  .icon--attachment { --svg: url("attachment.svg"); }
+  .icon--authentication { --svg: url("authentication.svg"); }
+  .icon--bell-alert { --svg: url("bell-alert.svg"); }
+  .icon--bolt { --svg: url("bolt.svg"); }
+  .icon--bookmark-outline { --svg: url("bookmark-outline.svg"); }
+  .icon--bookmark { --svg: url("bookmark.svg"); }
+  .icon--camera { --svg: url("camera.svg"); }
+  .icon--calendar { --svg: url("calendar.svg"); }
+  .icon--caret-down { --svg: url("caret-down.svg"); }
+  .icon--check { --svg: url("check.svg"); }
+  .icon--check-circle { --svg: url("check-circle.svg"); }
+  .icon--clipboard { --svg: url("clipboard.svg"); }
+  .icon--close { --svg: url("close.svg"); }
+  .icon--close-circle { --svg: url("close-circle.svg"); }
+  .icon--collapse { --svg: url("collapse.svg"); }
+  .icon--board { --svg: url("board.svg"); }
+  .icon--board-add { --svg: url("board-add.svg"); }
+  .icon--column-left { --svg: url("column-left.svg"); }
+  .icon--column-right { --svg: url("column-right.svg"); }
+  .icon--comment { --svg: url("comment.svg"); }
+  .icon--copy-paste { --svg: url("copy-paste.svg"); }
+  .icon--expand { --svg: url("expand.svg"); }
+  .icon--gear { --svg: url("gear.svg"); }
+  .icon--filter { --svg: url("filter.svg"); }
+  .icon--funnel { --svg: url("funnel.svg"); }
+  .icon--globe { --svg: url("globe.svg"); }
+  .icon--mudda {
+    --svg: url("mudda.svg");
+    top: -0.1em;
+    margin-inline-end: 0.1375em;
+  }
+  .icon--history { --svg: url("history.svg"); }
+  .icon--home { --svg: url("home.svg"); }
+  .icon--install-edge { --svg: url("install-edge.svg"); }
+  .icon--lifebuoy { --svg: url("lifebuoy.svg"); }
+  .icon--logout { --svg: url("logout.svg"); }
+  .icon--marker { --svg: url("marker.svg"); }
+  .icon--menu-dots-horizontal { --svg: url("menu-dots-horizontal.svg"); }
+  .icon--menu-dots-vertical { --svg: url("menu-dots-vertical.svg"); }
+  .icon--minus { --svg: url("minus.svg"); }
+  .icon--monitor { --svg: url("monitor.svg"); }
+  .icon--moon { --svg: url("moon.svg"); }
+  .icon--move { --svg: url("move.svg"); }
+  .icon--password { --svg: url("password.svg"); }
+  .icon--pin { --svg: url("pin.svg"); }
+  .icon--pencil { --svg: url("pencil.svg"); }
+  .icon--person { --svg: url("person.svg"); }
+  .icon--picture-add { --svg: url("picture-add.svg"); }
+  .icon--picture-remove { --svg: url("picture-remove.svg"); }
+  .icon--picture-zoom { --svg: url("picture-zoom.svg"); }
+  .icon--refresh { --svg: url("refresh.svg"); }
+  .icon--refresh--meta { --svg: url("refresh--meta.svg"); }
+  .icon--remove { --svg: url("remove.svg"); }
+  .icon--rename { --svg: url("rename.svg"); }
+  .icon--search { --svg: url("search.svg"); }
+  .icon--settings { --svg: url("settings.svg"); }
+  .icon--sliders { --svg: url("sliders.svg"); }
+  .icon--sun { --svg: url("sun.svg"); }
+  .icon--switch { --svg: url("switch.svg"); }
+  .icon--trash { --svg: url("trash.svg"); }
+  .icon--youtube { --svg: url("youtube.svg"); }
+}

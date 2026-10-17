@@ -45,7 +45,7 @@ class SearchTest < ActiveSupport::TestCase
     @board.cards.create!(title: "قرأت الكتابَ", creator: @user, due_on: 1.week.from_now)
 
     record = Search::Record.search("كتاب", user: @user).first
-    assert_includes record.card_title, "<mark class=\"circled-text\"><span></span>الكتابَ</mark>"
+    assert_includes record.card_title, "#{Search::Highlighter::OPENING_MARK}الكتابَ</mark>"
   end
 
   private
