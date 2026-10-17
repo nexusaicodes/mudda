@@ -1,12 +1,13 @@
 @layer components {
-  /* Equal-width options for one preference (theme, language). They wrap rather than spill out
-  /* of the panel, so three fit on a 320px phone as easily as on a desktop.
+  /* Equal-width options for one preference (language), always in one row. On a phone they
+  /* become tiles, like the profile's other actions: the icon over a label that may wrap.
   /* ------------------------------------------------------------------------ */
 
   .preference-choice {
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr));
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
 
     form {
       display: contents;
@@ -15,20 +16,32 @@
 
   .preference-choice__option {
     --btn-background: var(--color-ink-lightest);
-    --btn-border-radius: 0.5em;
     --btn-border-size: 1px;
     --btn-border-color: transparent;
     --btn-padding: 0.6em 0.8em;
 
     inline-size: 100%;
     justify-content: center;
-    min-block-size: 2.75rem;
+    min-block-size: var(--control-height);
     min-inline-size: 0;
 
     span {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    @media (max-width: 639px) {
+      --btn-border-radius: 1rem;
+      --btn-gap: 0.3em;
+      --btn-padding: 0.6em 0.4em;
+
+      flex-direction: column;
+      font-size: var(--text-small);
+
+      span {
+        white-space: normal;
+      }
     }
 
     &[aria-pressed=true] {

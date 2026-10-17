@@ -27,10 +27,19 @@ class My::PreferencesControllerTest < ActionDispatch::IntegrationTest
     assert_select "button.preference-choice__option", text: "Dark", count: 0
   end
 
-  test "the profile marks the chosen language" do
-    get user_path(users(:kevin))
+  test "with no language chosen, the profile marks the one the browser asked for" do
+    get user_path(users(:kevin)), headers: { "Accept-Language" => "ar" }
 
-    assert_select "button.preference-choice__option[aria-pressed=true]", text: "Automatic"
+    assert_select "button.preference-choice__option", count: 2
+    assert_select "button.preference-choice__option[aria-pressed=true]", text: "العربية"
+  end
+
+  test "the profile marks the chosen language over the browser's" do
+    users(:kevin).settings.update!(locale: "en")
+
+    get user_path(users(:kevin)), headers: { "Accept-Language" => "ar" }
+
+    assert_select "button.preference-choice__option[aria-pressed=true]", text: "English"
   end
 
   test "read and write as JSON" do

@@ -12,7 +12,7 @@ class PhoneLayoutTest < ApplicationSystemTestCase
 
   test "the profile fits a phone, in English and in Arabic" do
     visit user_url(users(:david))
-    assert_selector ".preference-choice__option", count: 3
+    assert_selector ".preference-choice__option", count: 2
     assert_no_horizontal_scroll
 
     click_on "العربية"

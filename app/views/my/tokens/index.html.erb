@@ -20,25 +20,25 @@
   <% end %>
 
   <%= form_with model: @token, scope: :token, url: my_tokens_path, data: { turbo: false }, html: { class: "flex flex-column gap" } do |form| %>
-    <strong><%= t(".mint_heading") %></strong>
+    <h2 class="txt-medium margin-none"><%= t(".mint_heading") %></h2>
 
     <% if @token.errors.any? %>
       <p class="txt-negative margin-none"><%= @token.errors.full_messages.to_sentence %></p>
     <% end %>
 
     <div class="flex flex-column gap-half">
-      <%= form.label :label, t(".name") %>
+      <strong><%= form.label :label, t(".name") %></strong>
       <%= form.text_field :label, class: "input", placeholder: t(".placeholder"), required: true,
             autocomplete: "off", data: { "1p-ignore": "" } %>
       <span class="txt-small txt-subtle"><%= t(".replace_hint") %></span>
     </div>
 
     <fieldset class="flex flex-column gap-half borderless unpad margin-none">
-      <legend class="margin-block-end-half"><%= t(".scopes_legend") %></legend>
+      <legend class="margin-block-end-half unpad"><strong><%= t(".scopes_legend") %></strong></legend>
       <%= hidden_field_tag "token[scopes][]", "", id: nil %>
       <% scope_descriptions.each do |scope, description| %>
         <label class="flex align-center gap-half">
-          <%= check_box_tag "token[scopes][]", scope, @token.scopes.include?(scope), id: "token_scope_#{scope}" %>
+          <%= check_box_tag "token[scopes][]", scope, @token.scopes.include?(scope), id: "token_scope_#{scope}", class: "checkbox" %>
           <span><strong><%= scope %></strong> — <%= description %></span>
         </label>
       <% end %>

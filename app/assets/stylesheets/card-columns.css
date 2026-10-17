@@ -2,11 +2,11 @@
   /* Layout adjustments for contained scrolling
   /* ------------------------------------------------------------------------ */
 
-  /* Scroll columns individually on mobile */
+  /* On a phone the board fills the window exactly: the lanes scroll inside it, never the page. */
   @media (max-width: 639px) {
     body.contained-scrolling {
       block-size: 100dvh;
-      grid-template-rows: 1fr var(--footer-height);
+      grid-template-rows: 1fr auto;
 
       #global-container {
         display: grid;
@@ -16,8 +16,8 @@
 
       #main {
         display: grid;
-        grid-template-rows: auto auto 1fr;
-        overflow: auto;
+        grid-template-rows: auto minmax(0, 1fr);
+        overflow: hidden;
         padding: 0 var(--paper-clearance);
       }
     }
@@ -26,9 +26,12 @@
   /* Column container
   /* ------------------------------------------------------------------------ */
 
-  /* The lanes keep inside the paper's frame. */
+  /* The lanes keep inside the paper's frame, and take the height the board tools leave. */
   #main:has(.card-columns) {
     --main-padding: var(--paper-clearance);
+
+    display: flex;
+    flex-direction: column;
   }
 
   .card-columns {
@@ -56,16 +59,8 @@
     position: relative;
 
     &:has(.cards) {
-      block-size: 100%;
+      flex: 1 0 auto;
       min-block-size: min(20lh, 50dvh);
-    }
-
-    /* A centred lane leaves room for a neighbouring lane on each side, inside the frame. */
-    @media (max-width: 639px) {
-      --column-width-expanded: calc(100vw - 2 * (var(--paper-clearance) + var(--column-width-collapsed) + var(--column-gap)));
-
-      padding-inline: var(--column-gap);
-      scroll-snap-type: inline mandatory;
     }
 
     @media (min-width: 640px) {
@@ -193,12 +188,6 @@
 
     .is-expanded & {
       padding: var(--column-padding) var(--column-padding) calc(var(--column-padding) + var(--custom-safe-inset-bottom));
-
-      /* Use the rest of the column height for scrolling */
-      @media (max-width: 639px) {
-        flex: 1;
-        padding-inline: calc(var(--column-padding) / 4);
-      }
     }
 
     [aria-selected] & .card[aria-selected] {
@@ -368,17 +357,21 @@
       writing-mode: vertical-rl;
     }
 
+    /* The collapse icon hangs off the end of the name, so the name alone centres over the cards. */
     .cards.is-expanded & {
       align-items: center;
       display: flex;
-      gap: 0.25ch;
       max-inline-size: 100%;
+      overflow: visible;
+      position: relative;
     }
 
     .icon--collapse {
-    --icon-size: 1.15em;
+      --icon-size: 1.15em;
 
+      inset-inline-start: calc(100% + 0.25ch);
       opacity: 0.66;
+      position: absolute;
       transition: 150ms ease-out;
       transition-property: opacity, scale;
 
@@ -467,8 +460,6 @@
       gap: 0.4ch;
     }
 
-    .card__when--overdue { color: var(--color-negative); }
-    .card__when--soon { color: oklch(var(--lch-yellow-dark)); }
     .card__steps--complete { color: var(--color-positive); }
 
     .card__notes .icon--comment {
@@ -490,11 +481,16 @@
     justify-content: center;
     padding: var(--block-space) var(--inline-space) var(--block-space-half);
 
-    .btn--link,
-    .due-toggle {
-      --btn-padding: 0.55em 1.5em;
+    /* One row on a phone, so the lanes keep the height. */
+    @media (max-width: 639px) {
+      padding-block: var(--block-space-half);
 
-      font-size: 1.05em;
+      .btn:is(.btn--link, .due-toggle) {
+        --btn-padding: 0.5em 1em;
+
+        font-size: var(--text-small);
+        white-space: nowrap;
+      }
     }
   }
 
@@ -589,6 +585,200 @@
 
       .cards.is-collapsed .cards__expander:hover .cards__expander-count {
         scale: 1;
+      }
+    }
+  }
+
+  /* Stacked lanes: a phone held upright
+  /* ------------------------------------------------------------------------ */
+
+  /* A narrow screen has height to spare and no width, so the board turns on its side: the lanes
+     stack top to bottom as bars, and the open lane's cards run sideways in a strip under its bar.
+     The stack is a size container filling the window, and each card takes its measure from the
+     height it leaves for the strip (the stack less the four bars): slim on a short screen,
+     roomier as it grows. One card always leaves the edge of the next in view, so the strip
+     reads as one to swipe. */
+  @media (max-width: 639px) {
+    .card-columns {
+      --lane-bars: calc(4 * var(--column-width-collapsed) + 4 * var(--column-gap) + 2 * var(--column-gap));
+
+      container: lane-stack / size;
+      flex-direction: column;
+      justify-content: start;
+      overflow: hidden;
+      padding-block-end: var(--column-gap);
+    }
+
+    .card-columns .cards {
+      flex-shrink: 0;
+      inline-size: 100%;
+      scroll-snap-align: none;
+
+      &.is-expanded {
+        display: flex;
+        flex: 0 1 auto;
+        flex-direction: column;
+        min-block-size: 0;
+      }
+    }
+
+    .card-columns .cards .cards__transition-container {
+      border-radius: 0;
+      margin-block-start: 0;
+      min-block-size: 0;
+    }
+
+    .card-columns .cards.is-expanded .cards__transition-container {
+      flex: 0 1 auto;
+    }
+
+    /* Every lane is a bar: the bead with its count at the start, then the name. */
+    .card-columns .cards .cards__header {
+      block-size: var(--column-width-collapsed);
+      display: block;
+      padding-inline: 0;
+    }
+
+    .card-columns .cards .cards__expander {
+      block-size: var(--column-width-collapsed);
+      flex-direction: row;
+      gap: 1.25ch;
+      inline-size: 100%;
+      justify-content: start;
+      letter-spacing: 0.05em;
+
+      &::before {
+        background: color-mix(in srgb, var(--card-color) 8%, var(--color-canvas));
+        border: 1px solid color(from var(--card-color) srgb r g b / 0.22);
+        border-radius: 99rem;
+        content: "";
+        inline-size: 100%;
+        inset: 0;
+        margin-inline: 0;
+        position: absolute;
+        z-index: -2;
+      }
+
+      &::after {
+        background: radial-gradient(circle at 50% 32%,
+          color-mix(in srgb, var(--card-color) 78%, white) 0%,
+          var(--card-color) 48%,
+          color-mix(in srgb, var(--card-color) 80%, black) 100%);
+        block-size: var(--column-width-collapsed);
+        inline-size: var(--column-width-collapsed);
+        inset-block: 0;
+        inset-inline: 0 auto;
+        margin-inline: 0;
+        max-block-size: none;
+        opacity: 1;
+      }
+    }
+
+    /* The open lane's bar is a shade deeper, so it reads as the one the strip belongs to. */
+    .card-columns .cards.is-expanded .cards__expander::before {
+      background: color-mix(in srgb, var(--card-color) 18%, var(--color-canvas));
+      border-color: color(from var(--card-color) srgb r g b / 0.45);
+    }
+
+    .card-columns .cards .cards__expander-count {
+      display: block;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .card-columns .cards .cards__expander-title {
+      max-inline-size: calc(100% - var(--column-width-collapsed) - 4ch);
+      writing-mode: horizontal-tb;
+    }
+
+    /* The strip */
+    .card-columns .cards.is-expanded .cards__list {
+      align-items: start;
+      flex: 0 1 auto;
+      flex-direction: row;
+      gap: 0.6rem;
+      min-block-size: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      padding: var(--column-gap) 2px;
+      scroll-padding-inline: 2px;
+      scroll-snap-type: x mandatory;
+
+      .blank-slate {
+        inline-size: 100%;
+      }
+    }
+
+    /* Slim, for a short strip: the title and the details line only. */
+    .card-columns .cards__list .card {
+      --card-padding-block: 0.7em;
+      --card-padding-inline: 0.85em;
+
+      flex: 0 0 auto;
+      font-size: 0.6rem;
+      inline-size: clamp(8.5rem, 46cqi, 12rem);
+      max-block-size: calc(100cqb - var(--lane-bars));
+      overflow: hidden;
+      scroll-snap-align: start;
+
+      .card__title {
+        --lines: 2;
+      }
+
+      /* Collapsed rather than hidden: the line-clamp utility owns its display. */
+      .card__excerpt {
+        margin-block: 0;
+        max-block-size: 0;
+      }
+
+      .card__details {
+        margin-block-start: 0.5em;
+      }
+    }
+
+    /* Compact: room for a short excerpt. */
+    @container lane-stack (min-height: 24rem) {
+      .card-columns .cards__list .card {
+        font-size: 0.65rem;
+        inline-size: clamp(10rem, 64cqi, 15rem);
+
+        .card__excerpt {
+          --lines: 2;
+
+          margin-block: 0.35em 0;
+          max-block-size: none;
+        }
+      }
+    }
+
+    /* Healthy: a tall strip gives each card more width, title and excerpt. */
+    @container lane-stack (min-height: 30rem) {
+      .card-columns .cards__list .card {
+        --card-padding-block: 0.9em;
+        --card-padding-inline: 1.1em;
+
+        font-size: 0.72rem;
+        inline-size: clamp(12rem, 80cqi, 19rem);
+
+        .card__title {
+          --lines: 3;
+        }
+
+        .card__excerpt {
+          --lines: 4;
+        }
+      }
+    }
+
+    /* Tall: the card can carry most of its description. */
+    @container lane-stack (min-height: 39rem) {
+      .card-columns .cards__list .card {
+        font-size: 0.78rem;
+
+        .card__excerpt {
+          --lines: 8;
+        }
       }
     }
   }

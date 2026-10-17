@@ -39,7 +39,7 @@ en:
       save: Save
       title: Boards
     new:
-      back: Home
+      back: Boards
       blank: Board names can’t be blank
       cancel: Cancel and go back
       placeholder: Name it…
@@ -90,7 +90,7 @@ en:
         save: Save
         title: Edit Passkey
       index:
-        back: My profile
+        back: Profile
         cancelled: Passkey registration was cancelled. Try again when you are ready.
         duplicate: You already have a passkey registered on this device. Remove the
           existing one first and try again.
@@ -129,7 +129,7 @@ en:
       destroy:
         revoked: Token revoked
       index:
-        back: My profile
+        back: Profile
         intro: A token lets a script or an AI agent use Mudda as you, through the
           API or MCP. Give each one its own name, so you can tell what it did and
           revoke it on its own.
@@ -201,14 +201,14 @@ en:
   users:
     edit:
       avatar_label: Profile avatar for %{name}
-      back: profile
+      back: Profile
       cancel: Cancel and go back
       confirm_delete_avatar: Are you sure you want to remove your avatar? This can't
         be undone.
       delete_avatar: Delete avatar
-      email_placeholder: Email address
+      email_label: Email address
       errors_heading: 'Your changes couldn''t be saved:'
-      name_placeholder: Name
+      name_label: Name
       save: Save changes
       title: Edit your profile
     plan:
@@ -220,9 +220,10 @@ en:
         other: "%{count} cards of %{limit} used."
     show:
       avatar_alt: Profile avatar for %{name}
-      back: Home
+      back: Boards
       change_password: Change password
       edit: Edit profile
+      heading: Profile
       passkeys: Manage passkeys
       security: Security
       sign_out: Sign out of Mudda on this device

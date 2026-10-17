@@ -1,10 +1,11 @@
 @layer components {
   .circled-text {
     --circled-color: oklch(var(--lch-blue-dark));
-    --circled-padding: -0.5ch;
+    --circled-padding: -0.3ch;
 
     background: none;
     color: var(--circled-color);
+    margin-inline: 0.35ch; /* room for the circle, so it doesn't run into the next word */
     position: relative;
     white-space: nowrap;
 

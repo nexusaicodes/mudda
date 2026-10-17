@@ -52,6 +52,7 @@
     flex-direction: column;
     gap: 0.2em;
     min-inline-size: 0;
+    text-align: start;
     text-decoration: none;
   }
 

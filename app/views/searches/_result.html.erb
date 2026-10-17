@@ -17,8 +17,8 @@
     </div>
 
     <div class="search__meta">
-      <span class="search__lane" style="--column-color: <%= card.column.color %>"><%= lane_name(card.column) %></span>
       <%= render "cards/display/preview/due", card: card %>
+      <span class="search__lane" style="--column-color: <%= card.column.color %>"><%= lane_name(card.column) %></span>
     </div>
   <% end %>
 </li>

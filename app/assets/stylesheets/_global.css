@@ -53,7 +53,7 @@
 
   /* Components */
   --btn-size: 2.65em;
-  --footer-height: 4.5rem;
+  --control-height: 2.6rem;
 
   /* Focus rings for keyboard navigation */
   --focus-ring-color: var(--color-link);

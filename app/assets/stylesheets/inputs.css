@@ -13,6 +13,16 @@
     padding: var(--input-padding, 0.5em 0.8em);
     resize: none;
 
+    /* Single-line fields in a panel's form share the buttons' height. */
+    .panel &:is(input, select, label):not([type=checkbox], [type=radio]) {
+      font-size: var(--text-normal);
+      min-block-size: var(--control-height);
+    }
+
+    .panel & &:is(input, select) {
+      min-block-size: 0;
+    }
+
     &:autofill,
     &:-webkit-autofill,
     &:-webkit-autofill:hover,
@@ -122,6 +132,14 @@
   /* Containers that act like (and contain) inputs */
   .input--actor {
     outline-offset: -1px;
+
+    /* A field that can't change reads as settled text, not as a box waiting for input. */
+    &:has(.input[readonly]) {
+      --input-background: var(--color-ink-lightest);
+      --input-border-color: transparent;
+
+      color: var(--color-ink-dark);
+    }
     transition: box-shadow 150ms ease, outline-offset 150ms ease;
 
     &:focus-within {

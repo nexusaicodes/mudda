@@ -1,9 +1,9 @@
 @layer base {
-  /* The page is a sheet of aged paper: a tan ground, broad stains stretched over the window,
-     and a repeating fibre grain. A ruled frame sits a little inside the window's edges: one
+  /* The page is a sheet of aged papyrus: a golden-ochre ground, broad stains stretched over the
+     window, a woven layer of horizontal strips over vertical ones, and a fine repeating grain. A ruled frame sits a little inside the window's edges: one
      tight band of a vermilion rule with a dark-brown hairline against each side of it. */
   :root {
-    --paper: #c99761;
+    --paper: #b8925a;
     --paper-rule: #c8462a;
     --paper-rule-edge: oklch(46% 0.07 55 / 0.6);
   }
@@ -11,8 +11,9 @@
   html {
     background:
       url("paper-grain.svg") 0 0 / 320px 320px repeat,
+      url("paper-fibres.svg") 0 0 / 720px 720px repeat,
       url("paper-stains.svg") 0 0 / 100vw 100vh no-repeat fixed,
-      radial-gradient(ellipse at center, transparent 55%, oklch(35% 0.06 55 / 0.18) 100%) 0 0 / 100vw 100vh no-repeat fixed,
+      radial-gradient(ellipse at center, transparent 55%, oklch(32% 0.06 60 / 0.26) 100%) 0 0 / 100vw 100vh no-repeat fixed,
       var(--paper);
   }
 

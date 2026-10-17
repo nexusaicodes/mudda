@@ -325,8 +325,9 @@ The browser is for an occasional look, since agents do most of the work through 
 chrome is small and there are **no keyboard shortcuts**: keys only act inside the field being
 typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
-- **One look.** Every page sits on aged paper (`paper.css`): a tan ground, broad stains
-  stretched over the window (`paper-stains.svg`), a repeating fibre grain (`paper-grain.svg`),
+- **One look.** Every page sits on aged papyrus (`paper.css`): a golden-ochre ground, broad stains
+  stretched over the window (`paper-stains.svg`), a woven layer of horizontal strips over
+  vertical ones (`paper-fibres.svg`), a repeating fine grain (`paper-grain.svg`),
   and a ruled frame (one tight band: a vermilion rule with a dark-brown hairline against each
   side) fixed a little inside the window's edges (`--paper-inset`). `--paper-clearance` keeps the header, the page, and the lanes
   inside the frame. There is no dark mode and no theme to choose.
@@ -349,6 +350,12 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   `?due=soon`, which narrows every lane (its header count and its frame, `boards/columns#show`
   with `due=soon`) to `Card.due_soon`: open cards due by tomorrow, overdue included. It is the
   only filter the board page takes. A lane repainted after a drop shows all its cards again.
+  On a phone (under 640px wide) the board turns on its side (`card-columns.css`, "Stacked
+  lanes"): the four lanes stack as bars, one open at a time, and the open lane's cards scroll
+  sideways in a strip under its bar. The board fills the window and never scrolls as a page.
+  Cards size themselves from the height the screen leaves for the strip (container queries on
+  the lane stack): slim (title and due date) on a short screen, then compact, healthy, and tall,
+  each wider and showing more of the description.
 - **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
   `?lane=doing`, `?indexed_by=pinned`), drawn as cards grouped under their board. Nothing in the
   UI links to them any more; they stay for URLs and the API. A `Filter` is read from the query for each request and never stored;
@@ -424,7 +431,9 @@ The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`
 `user_settings.locale` (chosen on the profile page through `My::PreferencesController`,
 and seeded once from `MUDDA_OWNER_LOCALE` when `db/seeds.rb` creates the owner, so a hosted board
 opens in the language its owner signed up in), else the
-browser's `Accept-Language`, else English. URLs carry no locale.
+browser's `Accept-Language`, else English. URLs carry no locale. The profile offers just English
+and Arabic, with the language in use marked; there is no "Automatic" choice, since an owner who
+never picks simply follows the browser (a blank `locale` through the API still returns to that).
 
 - **JSON, and so every MCP tool call, always answers in English**: errors, enum values, lane
   names, and the 401/403 refused before the action runs.

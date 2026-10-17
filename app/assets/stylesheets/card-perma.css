@@ -48,6 +48,13 @@
       --lexxy-bg-color: var(--card-bg-color);
 
       border: none;
+
+      /* A card with no description hugs its title and steps rather than holding the index-card shape. */
+      &:not(:has(.card__description, lexxy-editor)) {
+        --card-aspect-ratio: auto;
+
+        min-block-size: 16rem;
+      }
     }
 
     .card__header {
@@ -399,9 +406,6 @@
   }
 
   .card-compose__create {
-    --btn-padding: 0.7em 2.2em;
-
     box-shadow: 0 0.4rem 1rem -0.4rem oklch(var(--lch-ink-darkest) / 0.5);
-    font-size: var(--text-medium);
   }
 }
