@@ -274,3 +274,19 @@ Errors follow one contract:
   bilingual "Reference" on the HTML error pages (`JsonPublicExceptions`), and in MCP results.
 - **Test what is reported**, with `assert_error_reported`, `assert_no_error_reported` and
   `assert_event_reported`, never by reading the log.
+
+## Front end
+
+The UI is daisyUI components on Tailwind CSS v4 (see [AGENTS.md → Toolchain](AGENTS.md#toolchain)).
+
+- **Reach for a daisyUI component first** (`btn`, `input`, `card`, `badge`, `list`, `modal`,
+  `join`, `alert`, …), then Tailwind utilities to place it. Write CSS only in
+  `app/assets/tailwind/components/`, for what the kit can't express: the board's lanes, the
+  icon masks, attachments, print, and behaviour scripts depend on.
+- **Colours come from the theme** (`bg-base-100`, `text-error`, `badge-warning`), never a raw
+  value; a lane's colour arrives as `--card-color`/`--column-color` from the record.
+- **Directions are logical** (`ms-*`, `ps-*`, `start-*`, `text-start`), so Arabic mirrors.
+- **Class names a script, Ruby or a test depends on stay semantic and next to the kit's**:
+  `class="due-toggle btn"`, not a styled hook. The kit styles; the name identifies.
+- daisyUI puts its components in the `utilities` layer, so a component sheet that must
+  override one lives there too and wins by specificity.

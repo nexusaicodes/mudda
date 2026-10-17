@@ -334,12 +334,18 @@ The browser is for an occasional look, since agents do most of the work through 
 chrome is small and there are **no keyboard shortcuts**: keys only act inside the field being
 typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
-- **One look.** Every page sits on aged papyrus (`paper.css`): a golden-ochre ground, broad stains
+- **One look.** The components are daisyUI's, in its `retro` theme, the only theme and the
+  default (no `data-theme`, no dark mode): buttons, inputs, cards, badges, lists, modals,
+  dropdowns, toasts and tooltips come from the kit, and its palette also defines the lane
+  colours (`--color-card-*` in `app/assets/tailwind/theme.css`). Two things are the app's own:
+  the fonts (`fonts.css`, below) and the paper. Every page sits on aged papyrus
+  (`app/assets/tailwind/paper.css`): a golden-ochre ground, broad stains
   stretched over the window (`paper-stains.svg`), a woven layer of horizontal strips over
   vertical ones (`paper-fibres.svg`), a repeating fine grain (`paper-grain.svg`),
   and a ruled frame (one tight band: a vermilion rule with a dark-brown hairline against each
   side) fixed a little inside the window's edges (`--paper-inset`). `--paper-clearance` keeps the header, the page, and the lanes
-  inside the frame. There is no dark mode and no theme to choose.
+  inside the frame. The kit's own surfaces (cards, modals) sit on top of it. The static error
+  pages (`public/error.css`) mirror the look by hand, since they are served without the build.
 - **Home.** `/` is the boards list (`boards#index`, HTML; the JSON index is the API's): a big
   "New board" button, then every board by name with its card count, and at the top right of each
   row a pencil that renames it in place (`inline-edit` controller, Save and Cancel, Esc cancels)
@@ -455,8 +461,9 @@ never picks simply follows the browser (a blank `locale` through the API still r
   (`t(".key")`). Missing translations raise in dev and test. `make i18n` (also part of
   `make lint`) checks for missing, unused, and unnormalized keys, and `test/i18n_test.rb` runs
   the same checks.
-- `<html lang dir>` comes from the locale. CSS uses logical properties; where it can't, a
-  `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
+- `<html lang dir>` comes from the locale. daisyUI mirrors itself under `dir=rtl`, and the app's
+  utilities and CSS use logical directions (`ms-`, `pe-`, `start-`, `inset-inline`); where they
+  can't, a `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
   loaded only for Arabic code points. Latin text renders in El Messiri (`app/assets/fonts`, OFL, self-hosted, never fetched from Google). Dates show Western digits (`-u-nu-latn`).
 - The `public/*.html` error pages are static, so each carries both languages.
 
