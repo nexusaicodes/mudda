@@ -171,12 +171,12 @@
     }
   }
 
-  /* The bead's number is the lane's colour, darkened: legible on the theme's pastels and deep tones alike. */
+  /* The bead's number is black or white, whichever reads on the lane's colour. */
   .cards__expander-count {
     background-color: var(--card-color);
     block-size: 2rem;
     border-radius: 999px;
-    color: oklch(from var(--card-color) calc(l - 0.45) c h);
+    color: oklch(from var(--card-color) round(1.15 - l) 0 0);
     display: grid;
     flex-shrink: 0;
     font-size: 0.75rem;
@@ -229,7 +229,7 @@
     .cards.drag-and-drop__hover-container.is-off-screen::after {
       background-color: var(--card-color);
       border-radius: 999px;
-      color: oklch(from var(--card-color) calc(l - 0.45) c h);
+      color: oklch(from var(--card-color) round(1.15 - l) 0 0);
       content: attr(data-column-name);
       font-size: 0.75rem;
       font-weight: 600;

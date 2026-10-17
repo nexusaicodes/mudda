@@ -1,28 +1,27 @@
 <%= turbo_frame_tag @note, :container do %>
-  <div id="<%= dom_id(@note) %>" class="note flex align-start full-width">
-    <figure class="note__avatar flex-item-no-shrink" aria-hidden="true">
+  <div id="<%= dom_id(@note) %>" class="note flex items-start gap-3 w-full">
+    <div class="shrink-0" aria-hidden="true">
       <%= avatar_tag @note.creator, hidden_for_screen_reader: true %>
-    </figure>
+    </div>
 
-    <div class="note__content flex flex-column flex-item-grow full-width">
-      <div class="note__body" data-turbo-permanent>
-        <%= form_with model: [ @card.board, @card, @note ], class: "flex flex-column gap full-width",
+    <div class="card card-sm bg-base-100 shadow-sm grow min-w-0">
+      <div class="card-body" data-turbo-permanent>
+        <%= form_with model: [ @card.board, @card, @note ], class: "flex flex-col gap-3",
               data: { controller: "form", action: "keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel:stop" } do |form| %>
           <%= form.rich_textarea :body, required: true, dir: "auto", autofocus: true, placeholder: new_note_placeholder(@card) do %>
             <%= general_prompts(@card.board) %>
           <% end %>
-          <div class="flex gap-half justify-start align-center">
-            <%= form.button class: "btn btn--reversed", type: :submit do %>
+          <div class="flex items-center gap-2">
+            <%= form.button class: "btn btn-neutral btn-sm", type: :submit do %>
               <span><%= t(".save") %></span>
             <% end %>
-            <%= link_to board_card_note_path(@card.board, @card, @note), class: "btn", data: { form_target: "cancel" } do %>
+            <%= link_to board_card_note_path(@card.board, @card, @note), class: "btn btn-sm", data: { form_target: "cancel" } do %>
               <span><%= t(".cancel") %></span>
             <% end %>
 
-            <%= tag.button type: :submit, class: "btn btn--negative flex-item-justify-end", form: dom_id(@note, :delete_form),
-                  data: { turbo_confirm: t(".confirm_delete") } do %>
+            <%= tag.button type: :submit, class: "btn btn-ghost btn-sm btn-square text-error ms-auto", form: dom_id(@note, :delete_form),
+                  aria: { label: t(".delete") }, data: { turbo_confirm: t(".confirm_delete") } do %>
               <%= icon_tag "trash" %>
-              <span class="for-screen-reader"><%= t(".delete") %></span>
             <% end %>
           </div>
         <% end %>

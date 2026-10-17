@@ -6,11 +6,12 @@
     <%= render "cards/container/save_button", card: @card %>
   <% end %>
 
-  <%= form_with model: [ @card.board, @card ], id: dom_id(@card, :edit_form),
+  <%= form_with model: [ @card.board, @card ], id: dom_id(@card, :edit_form), class: "flex flex-col gap-3",
         data: { controller: "autoresize form local-save", local_save_key_value: "card-#{@card.id}", action: "turbo:submit-end->local-save#submit" } do |form| %>
-    <h1 class="card__title flex align-start gap-half">
-      <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
-        <%= form.text_area :title, class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
+    <h1 class="card__title">
+      <%= form.label :title, class: "autoresize__wrapper block", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
+        <span class="sr-only"><%= t(".title_placeholder") %></span>
+        <%= form.text_area :title, class: "card-field__title autoresize__textarea textarea textarea-ghost w-full min-h-0 px-0 text-2xl font-bold resize-none no-scrollbar focus:outline-none",
               required: true, autofocus: true, placeholder: t(".title_placeholder"), rows: 1, dir: "auto", maxlength: 255,
               data: { local_save_target: "input", autoresize_target: "textarea", action: "input->autoresize#resize input->local-save#save keydown.enter->form#submit:prevent keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent keydown.esc->form#cancel focus->form#select" } %>
       <% end %>
@@ -22,11 +23,11 @@
       <%= general_prompts(@card.board) %>
     <% end %>
 
-    <div class="card-field__due flex align-center">
-      <%= form.label :due_on, t(".due_date"), class: "card-field__due-label" %>
-      <%= form.date_field :due_on, required: @card.active?, class: "card-field__due-input input",
+    <fieldset class="fieldset p-0 mt-2 justify-items-start">
+      <%= form.label :due_on, t(".due_date"), class: "fieldset-legend" %>
+      <%= form.date_field :due_on, required: @card.active?, class: "card-field__due-input input input-sm w-auto",
             data: { action: "change->form#submit" } %>
-    </div>
+    </fieldset>
 
     <%= link_to t(".discard"), @card,
           data: { form_target: "cancel" }, hidden: true %>

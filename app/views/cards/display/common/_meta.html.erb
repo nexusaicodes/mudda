@@ -1,20 +1,11 @@
-<div class="card__meta" id="<%= dom_id(card, :meta) %>">
-  <div class="card__meta-avatars card__meta-avatars--author">
-    <%= avatar_tag card.creator, tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
+<div class="card__meta flex items-center gap-3 text-xs text-base-content/70" id="<%= dom_id(card, :meta) %>">
+  <%= avatar_tag card.creator, size: "w-8", tabindex: (local_assigns.key?(:preview) && local_assigns[:preview]) ? -1 : 0 %>
+
+  <div class="flex flex-col gap-0.5 min-w-0">
+    <span><%= t(".added_html", time: local_datetime_tag(card.created_at, style: :daysago)) %> · <%= t(".by_html", name: card.creator.familiar_name) %></span>
+    <span class="flex items-center gap-1 truncate">
+      <%= icon_tag "refresh--meta" %>
+      <%= t(".updated_html", time: local_datetime_tag(card.last_active_at, style: :daysago)) %>
+    </span>
   </div>
-
-  <span class="card__meta-text card__meta-text--added">
-    <%= t(".added_html", time: local_datetime_tag(card.created_at, style: :daysago)) %>
-  </span>
-
-  <span class="card__meta-text card__meta-text--author">
-    <%= t(".by_html", name: card.creator.familiar_name) %>
-  </span>
-
-  <span class="card__meta-text card__meta-text--updated overflow-ellipsis">
-    <%= icon_tag "refresh--meta" %>
-    <%= t(".updated_html", time: local_datetime_tag(card.last_active_at, style: :daysago)) %>
-  </span>
-
 </div>
-

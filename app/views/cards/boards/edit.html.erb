@@ -1,5 +1,5 @@
 <%= turbo_frame_tag "board_picker" do %>
-  <%= tag.div class: "max-width full-width", data: {
+  <%= tag.div class: "flex flex-col gap-2", data: {
         action: "turbo:before-cache@document->dialog#close dialog:show@document->navigable-list#reset keydown->navigable-list#navigate filter:changed->navigable-list#reset",
         controller: "filter navigable-list",
         dialog_target: "dialog",
@@ -7,17 +7,19 @@
         navigable_list_actionable_items_value: true } do %>
     <%= filter_title t(".title") %>
 
-    <%= text_field_tag :search, nil, placeholder: t(".filter"), class: "input input--transparent txt-small margin-block-half font-weight-normal", autofocus: true,
-          type: "search", autocorrect: "off", autocomplete: "off", data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" } %>
+    <%= text_field_tag :search, nil, placeholder: t(".filter"), class: "input input-sm w-full", autofocus: true,
+          type: "search", autocorrect: "off", autocomplete: "off", aria: { label: t(".filter") }, data: { "1p-ignore": "true", filter_target: "input", dialog_target: "focusMouse", action: "input->filter#filter" } %>
 
-    <ul class="popup__list margin-block-start-half margin-none-block-end" data-filter-target="list">
+    <%# button_to puts a form between the row and its button, so the rows are styled here, not by daisyUI's menu. %>
+    <ul class="flex flex-col gap-0.5 max-h-72 overflow-y-auto text-sm" data-filter-target="list">
       <% @boards.each do |board| %>
-        <li class="popup__item" data-filter-target="item" data-navigable-list-target="item" aria-checked="<%= @card.board == board %>">
+        <% current = @card.board == board %>
+        <li class="aria-selected:[&_button]:bg-base-200" data-filter-target="item" data-navigable-list-target="item" aria-checked="<%= current %>">
           <%= button_to board_card_path(@card.board, @card, params: { card: { board_id: board.id } }), method: :patch,
-                class: "popup__btn btn",
-                form_class: "max-width flex-item-grow" do %>
-            <span class="overflow-ellipsis flex-item-grow" dir="auto"><%= board.name %></span>
-            <%= icon_tag "check", size: 18, class: "checked flex-item-no-shrink flex-item-justify-end", style: "--icon-size: 1em" %>
+                class: class_names("flex w-full items-center justify-between gap-2 rounded-field px-3 py-1.5 cursor-pointer text-start hover:bg-base-200", "bg-neutral text-neutral-content hover:bg-neutral": current),
+                form_class: "w-full" do %>
+            <span class="truncate" dir="auto"><%= board.name %></span>
+            <%= icon_tag "check" if current %>
           <% end %>
         </li>
       <% end %>

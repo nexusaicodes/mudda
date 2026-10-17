@@ -5,66 +5,67 @@
   <%= link_back_to_board @board %>
 <% end %>
 
-<section class="card-perma card-perma--draft" style="--card-color: <%= @card.color %>;">
-  <div class="card-perma__bg">
-    <article class="card">
-      <%# The card does not exist yet: everything on this screen travels in one create.
-          local-save keeps the form in the browser until it does. %>
-      <%= form_with model: [ @board, @card ], id: "card_form",
-            data: { controller: "autoresize form local-save step-fields",
-                    local_save_key_value: "new-card-#{@board.id}",
-                    action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent" } do |form| %>
-        <h1 class="card__title">
-          <%= form.label :title, class: "flex flex-column align-center autoresize__wrapper", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
-            <%= form.text_area :title, placeholder: t(".title_placeholder"),
-                  class: "card-field__title autoresize__textarea input input--textarea full-width borderless txt-align-start hide-focus-ring hide-scrollbar",
-                  autofocus: true, rows: 1, dir: "auto", maxlength: 255,
-                  data: { autoresize_target: "textarea", local_save_target: "input", action: "input->autoresize#resize input->local-save#save" } %>
-          <% end %>
-        </h1>
-
-        <%= form.rich_textarea :description, class: "card__description lexxy-content", dir: "auto",
-              placeholder: t(".description_placeholder"),
-              data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restore" } do %>
-          <%= general_prompts(@board) %>
+<section class="card-perma card-perma--draft w-full max-w-4xl mx-auto mt-2 rounded-box bg-(--card-color)/20 p-3 sm:p-6 flex flex-col gap-4 text-start" style="--card-color: <%= @card.color %>;">
+  <article class="card-perma__bg card bg-base-100 shadow-md">
+    <%# The card does not exist yet: everything on this screen travels in one create.
+        local-save keeps the form in the browser until it does. %>
+    <%= form_with model: [ @board, @card ], id: "card_form", class: "card-body gap-4",
+          data: { controller: "autoresize form local-save step-fields",
+                  local_save_key_value: "new-card-#{@board.id}",
+                  action: "turbo:submit-end->local-save#submit local-save:expand->step-fields#expand keydown.ctrl+enter->form#submit:prevent keydown.meta+enter->form#submit:prevent" } do |form| %>
+      <h1 class="card__title">
+        <%= form.label :title, class: "autoresize__wrapper block", data: { autoresize_target: "wrapper", autoresize_clone_value: "" } do %>
+          <span class="sr-only"><%= t(".title_placeholder") %></span>
+          <%= form.text_area :title, placeholder: t(".title_placeholder"),
+                class: "card-field__title autoresize__textarea textarea textarea-ghost w-full min-h-0 px-0 text-2xl font-bold resize-none no-scrollbar focus:outline-none",
+                autofocus: true, rows: 1, dir: "auto", maxlength: 255,
+                data: { autoresize_target: "textarea", local_save_target: "input", action: "input->autoresize#resize input->local-save#save" } %>
         <% end %>
+      </h1>
 
-        <div class="card-compose__fields">
-          <div class="card-field__due">
-            <%= form.label :due_on, class: "card-field__due-label" do %>
-              <%= icon_tag "calendar" %>
-              <span><%= t(".due_date") %></span>
-            <% end %>
-            <%= form.date_field :due_on, class: "card-field__due-input input",
-                  data: { local_save_target: "input", action: "change->local-save#save" } %>
-          </div>
+      <%= form.rich_textarea :description, class: "card__description lexxy-content", dir: "auto",
+            placeholder: t(".description_placeholder"),
+            data: { local_save_target: "input", action: "lexxy:change->local-save#save turbo:morph-element->local-save#restore" } do %>
+        <%= general_prompts(@board) %>
+      <% end %>
 
+      <div class="border-t border-base-300 pt-4 grid gap-4 sm:grid-cols-[auto_minmax(0,1fr)]">
+        <fieldset class="fieldset p-0">
+          <%= form.label :due_on, class: "fieldset-legend gap-1" do %>
+            <%= icon_tag "calendar" %>
+            <span><%= t(".due_date") %></span>
+          <% end %>
+          <%= form.date_field :due_on, class: "card-field__due-input input input-sm",
+                data: { local_save_target: "input", action: "change->local-save#save" } %>
+        </fieldset>
+
+        <div class="flex flex-col gap-1">
           <%# A trailing blank row so a step can be typed without asking for one first. Blank
               rows are dropped on create, so an untouched one costs nothing. %>
-          <ol class="steps txt-small" data-step-fields-target="list">
+          <ul class="flex flex-col gap-1 text-sm" data-step-fields-target="list">
             <% @card.steps.each do |step| %>
               <%= render "cards/new/step_field", content: step.content %>
             <% end %>
             <%= render "cards/new/step_field", content: nil %>
-          </ol>
+          </ul>
 
           <template data-step-fields-target="template">
             <%= render "cards/new/step_field", content: nil %>
           </template>
 
-          <button type="button" class="btn btn--plain card-compose__add-step txt-small" data-action="step-fields#add">
+          <button type="button" class="btn btn-ghost btn-sm self-start" data-action="step-fields#add">
             <%= icon_tag "add" %>
             <span><%= t(".add_step") %></span>
           </button>
         </div>
+      </div>
 
-        <%= render "cards/new/allowance", account: @board.account %>
-      <% end %>
-    </article>
-  </div>
+      <%= render "cards/new/allowance", account: @board.account %>
+    <% end %>
+  </article>
 
-  <%# Outside the form so it sits on the card's bottom edge; `form:` ties it back. %>
-  <div class="card-perma__notch card-perma__notch--bottom">
-    <%= button_tag t(".create"), type: "submit", form: "card_form", class: "btn card-compose__create" %>
+  <%# Outside the form so it sits under the card; `form:` ties it back. %>
+  <div class="flex justify-center">
+    <%= button_tag t(".create"), type: "submit", form: "card_form", class: "btn btn-primary" %>
   </div>
 </section>

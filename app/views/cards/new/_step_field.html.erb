@@ -1,7 +1,7 @@
-<li class="step">
-  <input type="checkbox" class="checkbox" disabled>
+<li class="flex items-center gap-2">
+  <input type="checkbox" class="checkbox checkbox-sm" disabled aria-hidden="true">
   <%= text_field_tag "card[steps_attributes][][content]", content, id: nil,
-        class: "input step__content hide-focus-ring", placeholder: t(".placeholder"), dir: "auto",
+        class: "step__content input input-ghost input-sm grow", placeholder: t(".placeholder"), dir: "auto",
         autocomplete: "off", aria: { label: t(".label") },
         data: { "1p-ignore": "true", local_save_target: "input", action: "input->local-save#save" } %>
 </li>

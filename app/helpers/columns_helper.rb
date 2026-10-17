@@ -7,13 +7,16 @@ module ColumnsHelper
   def button_to_set_column(card, column)
     current = column == card.column
     button_to \
-      tag.span(lane_name(column), class: "overflow-ellipsis"),
+      tag.span(lane_name(column), class: "truncate"),
       board_card_column_path(card.board, card, column_id: column.id),
       method: :patch,
-      class: [ "card__column-name btn", { "card__column-name--current": current } ],
+      # The current lane is disabled but keeps its colour, overriding daisyUI's greyed-out look.
+      class: [ "card__column-name btn btn-sm join-item w-full", { "card__column-name--current disabled:bg-(--column-color)! disabled:text-[oklch(from_var(--column-color)_round(1.15-l)_0_0)]! disabled:border-transparent!": current } ],
       disabled: current,
+      aria: { checked: current },
+      role: "radio",
       style: "--column-color: #{column.color}",
-      form_class: "flex gap-half",
+      form_class: "contents",
       data: { turbo_frame: "_top", scroll_to_target: current ? "target" : nil }
   end
 
