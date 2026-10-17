@@ -9,7 +9,7 @@
   <label class="input input-ghost grow focus-within:outline-none">
     <%= icon_tag "search", class: "opacity-60" %>
     <%= text_field_tag :q, query_terms,
-          class: "search__input grow",
+          class: "search__input grow [&::-webkit-search-cancel-button]:appearance-none",
           aria: { label: t(".label") },
           type: "search",
           placeholder: t(".placeholder"),
