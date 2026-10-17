@@ -8,42 +8,42 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
-  <p class="font-weight-medium margin-none">
+<section class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 text-start gap-4 flex-none">
+  <p class="font-medium m-0">
     <%= t(".intro") %>
   </p>
 
   <% if @tokens.any? %>
-    <ul class="margin-none unpad">
+    <ul class="list bg-base-200/40 rounded-box">
       <%= render partial: "my/tokens/token", collection: @tokens %>
     </ul>
   <% end %>
 
-  <%= form_with model: @token, scope: :token, url: my_tokens_path, data: { turbo: false }, html: { class: "flex flex-column gap" } do |form| %>
-    <h2 class="txt-medium margin-none"><%= t(".mint_heading") %></h2>
+  <%= form_with model: @token, scope: :token, url: my_tokens_path, data: { turbo: false }, html: { class: "flex flex-col gap-4" } do |form| %>
+    <h2 class="text-base m-0"><%= t(".mint_heading") %></h2>
 
     <% if @token.errors.any? %>
-      <p class="txt-negative margin-none"><%= @token.errors.full_messages.to_sentence %></p>
+      <p role="alert" class="alert alert-error alert-soft text-sm"><%= @token.errors.full_messages.to_sentence %></p>
     <% end %>
 
-    <div class="flex flex-column gap-half">
-      <strong><%= form.label :label, t(".name") %></strong>
-      <%= form.text_field :label, class: "input", placeholder: t(".placeholder"), required: true,
+    <div class="fieldset p-0">
+      <%= form.label :label, t(".name"), class: "fieldset-legend" %>
+      <%= form.text_field :label, class: "input w-full", placeholder: t(".placeholder"), required: true,
             autocomplete: "off", data: { "1p-ignore": "" } %>
-      <span class="txt-small txt-subtle"><%= t(".replace_hint") %></span>
+      <span class="text-sm text-base-content/60"><%= t(".replace_hint") %></span>
     </div>
 
-    <fieldset class="flex flex-column gap-half borderless unpad margin-none">
-      <legend class="margin-block-end-half unpad"><strong><%= t(".scopes_legend") %></strong></legend>
+    <fieldset class="fieldset p-0 gap-2">
+      <legend class="fieldset-legend"><%= t(".scopes_legend") %></legend>
       <%= hidden_field_tag "token[scopes][]", "", id: nil %>
       <% scope_descriptions.each do |scope, description| %>
-        <label class="flex align-center gap-half">
-          <%= check_box_tag "token[scopes][]", scope, @token.scopes.include?(scope), id: "token_scope_#{scope}", class: "checkbox" %>
+        <label class="flex items-center gap-2">
+          <%= check_box_tag "token[scopes][]", scope, @token.scopes.include?(scope), id: "token_scope_#{scope}", class: "checkbox checkbox-sm" %>
           <span><strong><%= scope %></strong> — <%= description %></span>
         </label>
       <% end %>
     </fieldset>
 
-    <%= form.submit t(".submit"), class: "btn btn--link center" %>
+    <%= form.submit t(".submit"), class: "btn btn-primary self-center" %>
   <% end %>
 </section>

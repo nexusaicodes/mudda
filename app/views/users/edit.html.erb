@@ -8,44 +8,39 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<div class="panel panel--centered">
-  <div class="flex flex-column gap txt-medium">
-    <%= form_with model: @user, method: :patch, class: "flex flex-column gap", data: { controller: "form upload-preview" } do |form| %>
-      <div class="align-center center avatar__form gap">
-        <span class="btn btn--placeholder txt-small"></span>
-
-        <label class="avatar btn btn--circle input--file txt-xx-large center fill-white">
-          <%= image_tag user_avatar_path(@user), aria: { hidden: "true" }, class: "avatar", size: 128, data: { upload_preview_target: "image" } %>
-          <%= form.file_field :avatar, id: "file", class: "input", accept: User::Avatar::ALLOWED_AVATAR_CONTENT_TYPES.join(","),
+<div class="card bg-base-100 shadow-xl w-full max-w-sm m-auto text-start">
+  <div class="card-body gap-4">
+    <%= form_with model: @user, method: :patch, class: "flex flex-col gap-4", data: { controller: "form upload-preview" } do |form| %>
+      <div class="flex items-end justify-center gap-2">
+        <label class="avatar cursor-pointer" title="<%= t(".avatar_label", name: @user.name) %>">
+          <div class="w-32 rounded-full ring-2 ring-base-300 ring-offset-2 ring-offset-base-100">
+            <%= image_tag user_avatar_path(@user), aria: { hidden: "true" }, size: 128, data: { upload_preview_target: "image" } %>
+          </div>
+          <%= form.file_field :avatar, id: "file", class: "sr-only", accept: User::Avatar::ALLOWED_AVATAR_CONTENT_TYPES.join(","),
                 data: { upload_preview_target: "input", action: "upload-preview#previewImage" } %>
-          <span class="for-screen-reader"><%= t(".avatar_label", name: @user.name) %></span>
+          <span class="sr-only"><%= t(".avatar_label", name: @user.name) %></span>
         </label>
 
         <% if @user.avatar.attached? %>
-          <%= tag.button type: :submit, form: "avatar-delete-form", class: "btn btn--negative txt-small", data: { turbo_confirm: t(".confirm_delete_avatar") } do %>
+          <%= tag.button type: :submit, form: "avatar-delete-form", class: "btn btn-ghost btn-circle btn-sm text-error", aria: { label: t(".delete_avatar") }, data: { turbo_confirm: t(".confirm_delete_avatar") } do %>
             <%= icon_tag "minus" %>
-            <span class="for-screen-reader"><%= t(".delete_avatar") %></span>
           <% end %>
         <% end %>
       </div>
 
-      <div class="flex flex-column gap-half txt-align-start">
-        <strong><%= form.label :name, t(".name_label") %></strong>
-        <div class="flex align-center gap input input--actor">
-          <%= form.text_field :name, class: "input full-width", autocomplete: "name", dir: "auto", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
-        </div>
-      </div>
-      <div class="flex flex-column gap-half txt-align-start">
-        <strong><%= form.label :email_address, t(".email_label") %></strong>
-        <div class="flex align-center gap input input--actor">
-          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", required: true, readonly: true, value: @user.email_address %>
-        </div>
-      </div>
+      <fieldset class="fieldset p-0">
+        <%= form.label :name, t(".name_label"), class: "fieldset-legend" %>
+        <%= form.text_field :name, class: "input w-full", autocomplete: "name", dir: "auto", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
+      </fieldset>
+      <fieldset class="fieldset p-0">
+        <%= form.label :email_address, t(".email_label"), class: "fieldset-legend" %>
+        <%= form.email_field :email_address, class: "input w-full bg-base-200", autocomplete: "username", required: true, readonly: true, value: @user.email_address %>
+      </fieldset>
 
       <% if @user.errors.any? %>
-        <div class="margin-block-half txt-negative txt-small" style="text-align: start;">
-          <p class="margin-block-none font-weight-bold"><%= t(".errors_heading") %></p>
-          <ul class="margin-block-none">
+        <div role="alert" class="alert alert-error alert-soft text-sm flex-col items-start">
+          <p class="font-bold"><%= t(".errors_heading") %></p>
+          <ul class="list-disc ps-5">
             <% @user.errors.full_messages.each do |message| %>
               <li><%= message %></li>
             <% end %>
@@ -53,7 +48,7 @@
         </div>
       <% end %>
 
-      <button type="submit" id="log_in" class="btn btn--link center" data-form-target="submit">
+      <button type="submit" id="log_in" class="btn btn-primary btn-block" data-form-target="submit">
         <span><%= t(".save") %></span>
       </button>
 

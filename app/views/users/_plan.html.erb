@@ -1,13 +1,14 @@
 <%# The plan's card ceiling when there is one, and the way to lift it when the platform gave an upgrade URL. %>
-<section class="settings__section">
-  <h2><%= t(".heading") %></h2>
+<section class="flex flex-col gap-3">
+  <h2 class="card-title text-base"><%= t(".heading") %></h2>
   <% if account.card_limited? %>
-    <p>
+    <progress class="progress progress-primary w-full" value="<%= account.cards_created_count %>" max="<%= account.card_limit %>"></progress>
+    <p class="text-sm">
       <%= t(".used", count: account.cards_created_count, limit: account.card_limit) %>
       <%= t(".no_refund") %>
     </p>
   <% end %>
   <% if account.upgrade_url %>
-    <%= link_to t(".upgrade"), account_upgrade_path, class: "btn btn--link", data: { turbo: false } %>
+    <%= link_to t(".upgrade"), account_upgrade_path, class: "btn btn-primary self-start", data: { turbo: false } %>
   <% end %>
 </section>

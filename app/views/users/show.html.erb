@@ -8,58 +8,56 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= t(".heading") %></h1>
 <% end %>
 
-<div class="settings">
-  <div class="settings__panel panel shadow txt-align-center">
-    <div class="flex flex-column gap position-relative">
-      <%= link_to edit_user_path(@user), class: "user-edit-link btn", data: { controller: "tooltip" } do %>
-        <%= icon_tag "pencil" %>
-        <span class="for-screen-reader"><%= t(".edit") %></span>
-      <% end %>
-
-      <div class="avatar txt-xx-large center fill-white btn--circle hide-focus-ring">
-        <%= image_tag user_avatar_path(@user), alt: t(".avatar_alt", name: @user.name) %>
+<div class="settings w-full max-w-xl mx-auto flex flex-col gap-4 text-start">
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body items-center text-center gap-3 relative">
+      <div class="absolute top-3 end-3 tooltip tooltip-left" data-tip="<%= t(".edit") %>">
+        <%= link_to edit_user_path(@user), class: "user-edit-link btn btn-ghost btn-circle btn-sm", aria: { label: t(".edit") } do %>
+          <%= icon_tag "pencil" %>
+        <% end %>
       </div>
 
-      <div class="flex flex-column gap-half">
-        <h2 class="txt-x-large margin-none" dir="auto"><%= @user.name %></h2>
-        <div class="txt-medium txt-subtle" dir="ltr"><%= @user.email_address %></div>
+      <div class="avatar">
+        <div class="w-24 rounded-full">
+          <%= image_tag user_avatar_path(@user), alt: t(".avatar_alt", name: @user.name) %>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-bold" dir="auto"><%= @user.name %></h2>
+        <div class="text-base-content/60" dir="ltr"><%= @user.email_address %></div>
       </div>
     </div>
   </div>
 
-  <div class="settings__panel panel shadow">
-    <%= render "users/language" %>
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body"><%= render "users/language" %></div>
   </div>
 
   <% if Current.account.card_limited? || Current.account.upgrade_url %>
-    <div class="settings__panel panel shadow">
-      <%= render "users/plan", account: Current.account %>
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body"><%= render "users/plan", account: Current.account %></div>
     </div>
   <% end %>
 
-  <div class="settings__panel panel shadow">
-    <section class="settings__section">
-      <h2><%= t(".security") %></h2>
-      <div class="settings__actions">
+  <div class="card bg-base-100 shadow-sm">
+    <div class="card-body gap-3">
+      <h2 class="card-title text-base"><%= t(".security") %></h2>
+      <ul class="list -mx-2">
         <% if OwnerPassword.set_for?(Current.user) %>
-          <%= link_to edit_my_password_path, class: "btn" do %>
-            <%= icon_tag "password" %>
-            <span><%= t(".change_password") %></span>
-          <% end %>
+          <li><%= link_to edit_my_password_path, class: "list-row items-center hover:bg-base-200 rounded-field" do %>
+            <%= icon_tag "password" %><span><%= t(".change_password") %></span><%= icon_tag "arrow-right", class: "opacity-50" %>
+          <% end %></li>
         <% end %>
-
-        <%= link_to my_passkeys_path, class: "btn" do %>
-          <%= icon_tag "authentication" %>
-          <span><%= t(".passkeys") %></span>
-        <% end %>
-
-        <%= link_to my_tokens_path, class: "btn" do %>
-          <%= icon_tag "bolt" %>
-          <span><%= t(".tokens") %></span>
-        <% end %>
-      </div>
-    </section>
+        <li><%= link_to my_passkeys_path, class: "list-row items-center hover:bg-base-200 rounded-field" do %>
+          <%= icon_tag "authentication" %><span><%= t(".passkeys") %></span><%= icon_tag "arrow-right", class: "opacity-50" %>
+        <% end %></li>
+        <li><%= link_to my_tokens_path, class: "list-row items-center hover:bg-base-200 rounded-field" do %>
+          <%= icon_tag "bolt" %><span><%= t(".tokens") %></span><%= icon_tag "arrow-right", class: "opacity-50" %>
+        <% end %></li>
+      </ul>
+    </div>
   </div>
 
-  <%= button_to t(".sign_out"), session_path, method: :delete, class: "settings__sign-out", form: { class: "settings__sign-out-form", data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } %>
+  <%= button_to t(".sign_out"), session_path, method: :delete, class: "settings__sign-out btn btn-block", form: { data: { turbo: false, controller: "clear-offline-cache", action: "submit->clear-offline-cache#clearCache" } } %>
 </div>

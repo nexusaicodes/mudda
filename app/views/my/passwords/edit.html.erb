@@ -8,34 +8,34 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+<section class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 text-start gap-4 flex-none">
   <% if Current.user.errors.any? %>
-    <ul class="txt-negative margin-none" role="alert">
+    <ul class="alert alert-error alert-soft text-sm flex-col items-start list-disc ps-8" role="alert">
       <% Current.user.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
     </ul>
   <% end %>
 
-  <%= form_with url: my_password_path, method: :patch, html: { class: "flex flex-column gap" } do |form| %>
-    <div class="flex flex-column gap-half">
-      <strong><%= form.label :current_password, t(".current") %></strong>
-      <%= form.password_field :current_password, required: true, autofocus: true, class: "input", autocomplete: "current-password", dir: "ltr" %>
+  <%= form_with url: my_password_path, method: :patch, html: { class: "flex flex-col gap-4" } do |form| %>
+    <div class="fieldset p-0">
+      <%= form.label :current_password, t(".current"), class: "fieldset-legend" %>
+      <%= form.password_field :current_password, required: true, autofocus: true, class: "input w-full", autocomplete: "current-password", dir: "ltr" %>
     </div>
 
-    <div class="flex flex-column gap-half">
-      <strong><%= label_tag "user_password", t(".new") %></strong>
-      <%= password_field_tag "user[password]", nil, id: "user_password", required: true, minlength: 8, class: "input", autocomplete: "new-password", dir: "ltr" %>
-      <small class="txt-subtle"><%= t(".hint") %></small>
+    <div class="fieldset p-0">
+      <%= label_tag "user_password", t(".new"), class: "fieldset-legend" %>
+      <%= password_field_tag "user[password]", nil, id: "user_password", required: true, minlength: 8, class: "input w-full", autocomplete: "new-password", dir: "ltr" %>
+      <p class="label"><%= t(".hint") %></p>
     </div>
 
-    <div class="flex flex-column gap-half">
-      <strong><%= label_tag "user_password_confirmation", t(".confirm") %></strong>
-      <%= password_field_tag "user[password_confirmation]", nil, id: "user_password_confirmation", required: true, minlength: 8, class: "input", autocomplete: "new-password", dir: "ltr" %>
+    <div class="fieldset p-0">
+      <%= label_tag "user_password_confirmation", t(".confirm"), class: "fieldset-legend" %>
+      <%= password_field_tag "user[password_confirmation]", nil, id: "user_password_confirmation", required: true, minlength: 8, class: "input w-full", autocomplete: "new-password", dir: "ltr" %>
     </div>
 
-    <%= form.submit t(".save"), class: "btn btn--link center" %>
+    <%= form.submit t(".save"), class: "btn btn-primary self-center" %>
   <% end %>
 
-  <p class="txt-small txt-subtle txt-balance margin-none"><%= t(".note") %></p>
+  <p class="text-sm text-base-content/60 text-balance m-0"><%= t(".note") %></p>
 </section>

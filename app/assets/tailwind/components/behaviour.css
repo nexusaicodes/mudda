@@ -12,6 +12,12 @@
     display: none !important;
   }
 
+  /* A link in running text, with no class of its own, reads as a link. */
+  a:not([class]) {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
   /* Letter-spacing breaks Arabic joining; Arabic needs a taller line. */
   :lang(ar) {
     letter-spacing: normal !important;

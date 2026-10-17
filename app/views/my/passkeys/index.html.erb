@@ -8,22 +8,22 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<section class="panel panel--wide shadow center">
-  <p class="font-weight-medium margin-none-block-start"><%= t(".intro") %></p>
+<section class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 gap-4 flex-none">
+  <p class="font-medium mt-0"><%= t(".intro") %></p>
 
   <% if @passkeys.any? %>
-    <ul class="margin-none-block-start margin-block-end-double unpad">
+    <ul class="list bg-base-200/40 rounded-box">
       <%= render partial: "my/passkeys/passkey", collection: @passkeys %>
     </ul>
   <% end %>
 
-  <footer>
-    <%= passkey_registration_button my_passkeys_path, options: @registration_options, error: { class: "txt-negative margin-block-half", message: t(".error") }, cancellation: { class: "txt-subtle margin-block-half", message: t(".cancelled") }, duplicate: { class: "txt-negative margin-block-half", message: t(".duplicate") }, class: "btn btn--link center txt-medium" do %>
+  <footer class="flex flex-col items-center gap-2">
+    <%= passkey_registration_button my_passkeys_path, options: @registration_options, error: { class: "text-error my-2", message: t(".error") }, cancellation: { class: "text-base-content/60 my-2", message: t(".cancelled") }, duplicate: { class: "text-error my-2", message: t(".duplicate") }, class: "btn btn-primary self-center" do %>
       <%= icon_tag "add" %>
       <span><%= t(".register") %></span>
     <% end %>
 
-    <p class="txt-small txt-subtle txt-balance margin-none-block-end">
+    <p class="text-sm text-base-content/60 text-balance mb-0">
       <%= t(".hint") %>
     </p>
   </footer>

@@ -8,27 +8,26 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
-  <p class="margin-none">
+<section class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 text-start gap-4 flex-none">
+  <p class="m-0">
     <%= t(".summary_html", label: tag.strong(@token.label, dir: "auto"), scopes: tag.strong(@token.scopes.to_sentence),
           date: l(@token.expires_at.to_date, format: :app_long)) %>
   </p>
 
-  <div class="flex align-center gap-half" data-controller="clipboard">
-    <%= text_field_tag :token, @token.token, readonly: true, class: "input", style: "font-family: var(--font-mono)", data: { clipboard_target: "source", action: "focus->clipboard#select" } %>
-    <button type="button" class="btn" data-action="clipboard#copy">
+  <div class="join w-full" data-controller="clipboard">
+    <%= text_field_tag :token, @token.token, readonly: true, class: "input join-item w-full font-mono", aria: { label: t(".copy") }, data: { clipboard_target: "source", action: "focus->clipboard#select" } %>
+    <button type="button" class="btn join-item" data-action="clipboard#copy" aria-label="<%= t(".copy") %>">
       <%= icon_tag "copy-paste" %>
-      <span class="for-screen-reader"><%= t(".copy") %></span>
     </button>
   </div>
 
-  <div class="flex flex-column gap-half">
+  <div class="flex flex-col gap-2">
     <strong><%= t(".mcp") %></strong>
-    <code class="txt-small" style="overflow-wrap: anywhere">claude mcp add --transport http mudda <%= request.base_url %>/mcp --header "Authorization: Bearer &lt;token&gt;"</code>
+    <code class="text-sm break-all bg-base-200 rounded-field p-2">claude mcp add --transport http mudda <%= request.base_url %>/mcp --header "Authorization: Bearer &lt;token&gt;"</code>
   </div>
 
-  <div class="flex flex-column gap-half">
+  <div class="flex flex-col gap-2">
     <strong><%= t(".api") %></strong>
-    <code class="txt-small" style="overflow-wrap: anywhere">curl -H "Authorization: Bearer &lt;token&gt;" <%= request.base_url %>/boards.json</code>
+    <code class="text-sm break-all bg-base-200 rounded-field p-2">curl -H "Authorization: Bearer &lt;token&gt;" <%= request.base_url %>/boards.json</code>
   </div>
 </section>

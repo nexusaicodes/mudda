@@ -58,7 +58,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     put user_path(users(:kevin)), params: { user: { avatar: svg_file } }
     assert_response :unprocessable_entity
     assert_select "form[action='#{user_path(users(:kevin))}']"
-    assert_select ".txt-negative", text: /must be a JPEG, PNG, GIF, or WebP image/
+    assert_select "[role=alert]", text: /must be a JPEG, PNG, GIF, or WebP image/
   end
 
   test "update with oversized avatar shows validation error" do
@@ -70,7 +70,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     put user_path(users(:kevin)), params: { user: { avatar: png_file } }
     assert_response :unprocessable_entity
-    assert_select ".txt-negative", text: /width must be less than 4096px/
+    assert_select "[role=alert]", text: /width must be less than 4096px/
   end
 
   test "update with valid avatar" do
