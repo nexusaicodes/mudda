@@ -55,7 +55,8 @@ defaults are in `docker-compose.yml`.
 make test                                                         # unit and integration tests
 make test-system                                                  # system tests (test/system/), which make test skips
 make lint                                                         # RuboCop and the i18n checks
-docker compose run --rm web bin/rails test PATH                   # one test file
+make css                                                          # build the stylesheet (make test does it first)
+docker compose run --rm web bin/rails test PATH                   # one test file, after make css
 docker compose run --rm -e PARALLEL_WORKERS=1 web bin/rails test  # a serial run
 ```
 
@@ -78,6 +79,14 @@ authenticator.
 - The `:bc` git_source (`github.com/basecamp/...`) in the `Gemfile` resolves real upstream gems.
   Do **not** repoint it.
 - Style is `rubocop-rails-omakase` with a thin house override in `.rubocop.yml`.
+- The UI is Tailwind CSS v4 with daisyUI 5 (the `retro` theme), and there is no Node. The
+  `tailwindcss-rails` gem carries the standalone Tailwind binary, and daisyUI's two plugin files
+  are vendored, unmodified, in `app/assets/tailwind/` (the version is noted in
+  `application.css`), so a build fetches nothing. `app/assets/tailwind/application.css` builds
+  to `app/assets/builds/tailwind.css` (git-ignored): the Puma plugin in `config/puma.rb` rebuilds
+  it while the dev server runs, `make test` builds it first, and `assets:precompile` builds it
+  for the production image. The layouts link `tailwind` and `lexxy` (the editor's theme,
+  `app/assets/stylesheets/lexxy.css`) by name.
 
 ## Architecture
 

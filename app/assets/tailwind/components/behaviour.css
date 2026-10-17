@@ -1,0 +1,76 @@
+/* Rules that scripts, Turbo or Ruby-rendered markup depend on. Nothing visual lives here. */
+
+@layer base {
+  /* Turbo frames wrap content without boxing it. */
+  turbo-frame,
+  turbo-cable-stream-source {
+    display: contents;
+  }
+
+  /* Scripts toggle `hidden`; it must win over any display utility. */
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Letter-spacing breaks Arabic joining; Arabic needs a taller line. */
+  :lang(ar) {
+    letter-spacing: normal !important;
+    line-height: 1.6;
+  }
+
+  code,
+  pre {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+}
+
+@layer components {
+  /* The infinite-scroll sentinel: observed, never seen. */
+  .pagination-link--active-when-observed {
+    block-size: 0;
+    inline-size: 0;
+    overflow: hidden;
+    visibility: hidden;
+
+    turbo-frame:has(&):has(~ turbo-frame) & {
+      display: none;
+    }
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Auto-growing textareas: where field-sizing is unsupported, the autoresize controller mirrors
+     the value into the wrapper's ::after, which sizes the shared grid cell. */
+  @supports not (field-sizing: content) {
+    .autoresize__wrapper {
+      display: grid !important;
+      position: relative;
+
+      > *, &::after {
+        grid-area: 1 / 1 / 2 / 2;
+      }
+
+      &::after {
+        content: attr(data-autoresize-clone-value) " ";
+        font: inherit;
+        line-height: inherit;
+        visibility: hidden;
+        white-space: pre-wrap;
+      }
+    }
+
+    .autoresize__textarea {
+      inset: 0;
+      overflow: hidden;
+      position: absolute;
+      resize: none;
+    }
+  }
+}

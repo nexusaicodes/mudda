@@ -3,41 +3,43 @@
 @import url("lexxy-editor.css") layer(base);
 
 :root {
-  --lexxy-color-ink: var(--color-ink);
-  --lexxy-color-ink-medium: var(--color-ink-dark);
-  --lexxy-color-ink-light: var(--color-ink-medium);
-  --lexxy-color-ink-lighter: var(--color-ink-light);
-  --lexxy-color-ink-lightest: var(--color-ink-lighter);
-  --lexxy-color-ink-inverted: var(--color-ink-inverted);
+  /* Lexxy's palette, mapped onto the daisyUI theme. This sheet is linked beside tailwind.css, so it
+     reads only the theme's own variables (--color-*), never Tailwind theme values like --text-*. */
+  --lexxy-color-ink: var(--color-base-content);
+  --lexxy-color-ink-medium: color-mix(in oklab, var(--color-base-content) 80%, transparent);
+  --lexxy-color-ink-light: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  --lexxy-color-ink-lighter: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+  --lexxy-color-ink-lightest: color-mix(in oklab, var(--color-base-content) 20%, transparent);
+  --lexxy-color-ink-inverted: var(--color-base-100);
 
-  --lexxy-color-canvas: var(--color-canvas);
+  --lexxy-color-canvas: var(--color-base-100);
 
-  --lexxy-color-accent-dark: var(--color-ink-dark);
-  --lexxy-color-accent-medium: var(--color-ink-medium);
-  --lexxy-color-accent-light: var(--color-ink-light);
-  --lexxy-color-accent-lightest: var(--color-ink-lighter);
+  --lexxy-color-accent-dark: var(--color-neutral);
+  --lexxy-color-accent-medium: color-mix(in oklab, var(--color-neutral) 70%, transparent);
+  --lexxy-color-accent-light: color-mix(in oklab, var(--color-neutral) 40%, transparent);
+  --lexxy-color-accent-lightest: color-mix(in oklab, var(--color-neutral) 15%, transparent);
 
-  --lexxy-color-red: oklch(var(--lch-red-medium));
-  --lexxy-color-green: oklch(var(--lch-green-medium));
-  --lexxy-color-blue: oklch(var(--lch-blue-medium));
-  --lexxy-color-purple: oklch(var(--lch-purple-medium));
+  --lexxy-color-red: var(--color-error);
+  --lexxy-color-green: var(--color-success);
+  --lexxy-color-blue: var(--color-info);
+  --lexxy-color-purple: var(--color-accent);
 
-  --lexxy-color-code-token-att: var(--color-code-token__att);
-  --lexxy-color-code-token-comment: var(--color-code-token__comment);
-  --lexxy-color-code-token-function: var(--color-code-token__function);
-  --lexxy-color-code-token-operator: var(--color-code-token__operator);
-  --lexxy-color-code-token-property: var(--color-code-token__property);
-  --lexxy-color-code-token-punctuation: var(--color-code-token__punctuation);
-  --lexxy-color-code-token-selector: var(--color-code-token__selector);
-  --lexxy-color-code-token-variable: var(--color-code-token__variable);
+  --lexxy-color-code-token-att: var(--color-warning);
+  --lexxy-color-code-token-comment: color-mix(in oklab, var(--color-base-content) 55%, transparent);
+  --lexxy-color-code-token-function: var(--color-info);
+  --lexxy-color-code-token-operator: var(--color-error);
+  --lexxy-color-code-token-property: var(--color-secondary);
+  --lexxy-color-code-token-punctuation: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+  --lexxy-color-code-token-selector: var(--color-success);
+  --lexxy-color-code-token-variable: var(--color-accent);
 
-  --lexxy-color-selected: oklch(var(--lch-blue-light));
-  --lexxy-color-selected-dark: oklch(var(--lch-blue-medium));
+  --lexxy-color-selected: color-mix(in oklab, var(--color-info) 30%, transparent);
+  --lexxy-color-selected-dark: var(--color-info);
 
-  --lexxy-color-table-cell-border: var(--color-ink-ligher);
+  --lexxy-color-table-cell-border: var(--color-base-300);
   --lexxy-color-table-cell-selected-bg: var(--lexxy-color-selected);
   --lexxy-color-table-cell-toggle: var(--lexxy-color-selected);
-  --lexxy-color-table-cell-remove: oklch(var(--lch-red-medium) / 20%);
+  --lexxy-color-table-cell-remove: color-mix(in oklab, var(--color-error) 20%, transparent);
 
   --lexxy-focus-ring-offset: 2px;
 }
@@ -47,7 +49,7 @@
   /* ------------------------------------------------------------------------ */
 
   lexxy-editor {
-    --lexxy-border-color: oklch(var(--lch-ink-darkest) / 20%);
+    --lexxy-border-color: color-mix(in oklab, var(--color-base-content) 20%, transparent);
     --lexxy-editor-padding: 0;
     --lexxy-toolbar-button-size: 2rem;
 
@@ -71,12 +73,12 @@
 
     &[aria-pressed="true"],
     &[aria-expanded="true"] {
-      background-color: oklch(var(--lch-blue-medium) / 20%);
+      background-color: color-mix(in oklab, var(--color-info) 20%, transparent);
     }
 
     @media(any-hover: hover) {
       &:hover:not([aria-pressed="true"]) {
-        background-color: oklch(var(--lch-ink-dark) / 20%);
+        background-color: color-mix(in oklab, var(--color-base-content) 20%, transparent);
       }
     }
   }
@@ -104,16 +106,16 @@
       }
 
       &[value="link"] {
-        background-color: var(--color-link);
-        color: var(--color-ink-inverted);
+        background-color: var(--color-primary);
+        color: var(--color-primary-content);
 
         &:hover {
-          background-color: var(--color-link);
+          background-color: var(--color-primary);
         }
       }
 
       &[value="unlink"] {
-        border: 1px solid var(--color-ink-light);
+        border: 1px solid var(--color-base-300);
       }
     }
   }
@@ -127,7 +129,7 @@
   }
 
   lexxy-table-tools {
-    font-size: var(--text-x-small);
+    font-size: 0.75rem;
   }
 
   [data-lexical-cursor] {
@@ -174,13 +176,13 @@
     }
 
     blockquote {
-      border-inline-start: 0.25em solid var(--color-ink-lighter);
+      border-inline-start: 0.25em solid var(--color-base-300);
       padding-block: 0;
     }
 
     code {
-      background: var(--color-canvas);
-      border: 1px solid var(--color-ink-lighter);
+      background: var(--color-base-100);
+      border: 1px solid var(--color-base-300);
     }
 
     .horizontal-divider {
@@ -198,12 +200,12 @@
 
     table {
       th, td {
-        font-size: var(--text-small);
+        font-size: 0.875rem;
         padding-block: 0.75ch;
       }
       tr:not([data-action="delete"]) {
-        th:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-ink-lightest); }
-        td:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-canvas); }
+        th:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-base-200); }
+        td:not([class*="selected"], [data-action="delete"], [data-action="toggle"]) { background-color: var(--color-base-100); }
       }
     }
 
@@ -235,7 +237,7 @@
       inset-inline-start: -0.25ch;
 
       .lexxy-floating-controls__group {
-        background-color: oklch(var(--lch-blue-dark));
+        background-color: var(--color-info);
         border-radius: 50%;
       }
     }

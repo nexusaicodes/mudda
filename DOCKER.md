@@ -146,7 +146,8 @@ container.
 | `make reset-db`* | Drop, recreate, and reseed the database |
 | `make reset-auth` | Remove every passkey and any changed password, and end every session, API token, and OAuth grant |
 | `make token` / `make tokens` / `make revoke` | Mint, list, and revoke API tokens (see [API.md → Managing tokens](API.md#managing-tokens)) |
-| `make test` | The unit and integration tests |
+| `make css` | Build `app/assets/builds/tailwind.css`; the running app rebuilds it as files change |
+| `make test` | Build the stylesheet, then run the unit and integration tests |
 | `make test-system` | The system tests, in a `selenium` Chromium container that it starts and then removes |
 | `make lint` | RuboCop and the translation checks |
 | `make lint-fix` | RuboCop with autocorrect |

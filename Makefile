@@ -102,12 +102,16 @@ revoke: ## Revoke the API tokens carrying a label (make revoke LABEL=claude)
 
 ##@ Quality
 
+.PHONY: css
+css: ## Build app/assets/builds/tailwind.css (the running app rebuilds it on change)
+	$(RUN) bin/rails tailwindcss:build
+
 .PHONY: test
-test: ## Run the unit test suite
+test: css ## Run the unit test suite
 	$(RUN) bin/rails test
 
 .PHONY: test-system
-test-system: ## Run the system tests in a Selenium Chromium container
+test-system: css ## Run the system tests in a Selenium Chromium container
 	$(COMPOSE) --profile system up -d --wait selenium
 	$(COMPOSE) run --rm -e SELENIUM_REMOTE_URL=http://selenium:4444 $(SERVICE) bin/rails test:system; \
 	  status=$$?; $(COMPOSE) --profile system rm -sf selenium; exit $$status

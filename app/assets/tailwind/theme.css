@@ -1,0 +1,50 @@
+/* Tokens the kit doesn't provide. Colours, radii, sizes and shadows come from the daisyUI retro
+   theme; only what the app itself depends on is defined here. */
+
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", "El Messiri", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Mudda", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, monospace;
+
+  /* The flash fades in, holds, and fades out; element-removal drops it on animationend. */
+  --animate-appear-then-fade: appear-then-fade 3s ease-out both;
+
+  @keyframes appear-then-fade {
+    0%   { opacity: 0; translate: 0 -0.5rem; }
+    8%   { opacity: 1; translate: 0 0; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+}
+
+:root {
+  color-scheme: light;
+
+  /* Safe areas, overridable by the native apps' injected insets */
+  --custom-safe-inset-top: var(--injected-safe-inset-top, env(safe-area-inset-top, 0px));
+  --custom-safe-inset-right: var(--injected-safe-inset-right, env(safe-area-inset-right, 0px));
+  --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
+
+  /* The page sits inside the paper's frame; see paper.css */
+  --paper-inset: clamp(10px, 2.2vmin, 26px);
+  --paper-clearance: calc(var(--paper-inset) + 14px);
+
+  --z-popup: 10;
+  --z-nav: 20;
+  --z-flash: 30;
+  --z-tooltip: 40;
+  --z-nav-open: 100;
+
+  /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
+     of the data and the API; their values come from the kit's palette. */
+  --color-card-default: var(--color-neutral);
+  --color-card-complete: var(--color-success);
+  --color-card-1: var(--color-primary);
+  --color-card-2: var(--color-secondary);    /* Backlog */
+  --color-card-3: var(--color-info);         /* Todo */
+  --color-card-4: var(--color-success);      /* Done */
+  --color-card-5: var(--color-warning);      /* Doing */
+  --color-card-6: var(--color-accent);
+  --color-card-7: var(--color-error);
+  --color-card-8: var(--color-base-content);
+}
