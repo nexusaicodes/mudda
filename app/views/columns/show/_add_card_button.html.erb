@@ -1,3 +1,4 @@
+<%# locals: (board:, due_soon:) -%>
 <div class="board-tools">
   <% if board.account.card_limit_reached? %>
     <span class="txt-small"><%= t(".limit_reached", count: board.account.card_limit) %></span>
@@ -11,4 +12,5 @@
       <span><%= t(".add") %></span>
     <% end %>
   <% end %>
+  <%= render "boards/show/due_toggle", board: board, due_soon: due_soon %>
 </div>

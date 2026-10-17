@@ -20,56 +20,41 @@ class My::PreferencesControllerTest < ActionDispatch::IntegrationTest
     assert_nil users(:kevin).reload.locale
   end
 
-  test "update the theme without touching the locale" do
-    users(:kevin).settings.update!(locale: "ar")
+  test "the app has one look, so pages carry no theme" do
+    get user_path(users(:kevin))
 
-    patch my_preferences_path, params: { theme: "dark" }
-
-    assert_equal "dark", users(:kevin).reload.theme
-    assert_equal "ar", users(:kevin).locale
+    assert_select "html[data-theme]", count: 0
+    assert_select "button.preference-choice__option", text: "Dark", count: 0
   end
 
-  test "the theme is rendered on the page by the server" do
-    get user_path(users(:kevin))
-    assert_select "html:not([data-theme])"
+  test "with no language chosen, the profile marks the one the browser asked for" do
+    get user_path(users(:kevin)), headers: { "Accept-Language" => "ar" }
 
-    users(:kevin).settings.update!(theme: "light")
-    get user_path(users(:kevin))
-    assert_select "html[data-theme=light]"
+    assert_select "button.preference-choice__option", count: 2
+    assert_select "button.preference-choice__option[aria-pressed=true]", text: "العربية"
   end
 
-  test "a change of theme is not served from the cache" do
-    get user_path(users(:kevin))
-    etag = response.headers["ETag"]
+  test "the profile marks the chosen language over the browser's" do
+    users(:kevin).settings.update!(locale: "en")
 
-    users(:kevin).settings.update!(theme: "dark")
-    get user_path(users(:kevin)), headers: { "If-None-Match" => etag }
+    get user_path(users(:kevin)), headers: { "Accept-Language" => "ar" }
 
-    assert_response :success
-  end
-
-  test "the profile marks the chosen options" do
-    users(:kevin).settings.update!(theme: "dark")
-
-    get user_path(users(:kevin))
-
-    assert_select "button.preference-choice__option[aria-pressed=true]", text: "Dark"
-    assert_select "button.preference-choice__option[aria-pressed=true]", text: "Automatic"
+    assert_select "button.preference-choice__option[aria-pressed=true]", text: "English"
   end
 
   test "read and write as JSON" do
     get my_preferences_path, as: :json
-    assert_equal({ "locale" => nil, "theme" => "auto" }, @response.parsed_body)
+    assert_equal({ "locale" => nil }, @response.parsed_body)
 
-    patch my_preferences_path, params: { theme: "light", locale: "en" }, as: :json
+    patch my_preferences_path, params: { locale: "en" }, as: :json
     assert_response :no_content
-    assert_equal [ "en", "light" ], [ users(:kevin).reload.locale, users(:kevin).theme ]
+    assert_equal "en", users(:kevin).reload.locale
   end
 
   test "a body wrapped in the resource name is accepted" do
-    patch my_preferences_path, params: { preferences: { theme: "dark" } }, as: :json
+    patch my_preferences_path, params: { preferences: { locale: "ar" } }, as: :json
     assert_response :no_content
-    assert_equal "dark", users(:kevin).reload.theme
+    assert_equal "ar", users(:kevin).reload.locale
   end
 
   test "a browser reading preferences is sent to the profile" do
@@ -77,14 +62,9 @@ class My::PreferencesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to user_path(users(:kevin))
   end
 
-  test "an unknown theme or locale is a 422 as JSON" do
-    patch my_preferences_path, params: { theme: "sepia" }, as: :json
-    assert_response :unprocessable_entity
-    assert @response.parsed_body.dig("errors", "theme").present?
-
+  test "an unknown locale is a 422 as JSON" do
     patch my_preferences_path, params: { locale: "fr" }, as: :json
     assert_response :unprocessable_entity
     assert @response.parsed_body.dig("errors", "locale").present?
-    assert_equal "auto", users(:kevin).reload.theme
   end
 end

@@ -4,7 +4,11 @@
   <%= back_link_to t(".back"), user_path(@user) %>
 <% end %>
 
-<div class="panel shadow center" style="--panel-size: 45ch;">
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<div class="panel panel--centered">
   <div class="flex flex-column gap txt-medium">
     <%= form_with model: @user, method: :patch, class: "flex flex-column gap", data: { controller: "form upload-preview" } do |form| %>
       <div class="align-center center avatar__form gap">
@@ -25,14 +29,16 @@
         <% end %>
       </div>
 
-      <div class="flex align-center gap">
-        <label class="flex align-center gap input input--actor">
-          <%= form.text_field :name, class: "input full-width", autocomplete: "name", dir: "auto", placeholder: t(".name_placeholder"), autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
-        </label>
-      </div>
-      <div class="flex align-center gap">
+      <div class="flex flex-column gap-half txt-align-start">
+        <strong><%= form.label :name, t(".name_label") %></strong>
         <div class="flex align-center gap input input--actor">
-          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", placeholder: t(".email_placeholder"), required: true, readonly: true, value: @user.email_address %>
+          <%= form.text_field :name, class: "input full-width", autocomplete: "name", dir: "auto", autofocus: true, required: true, data: { "1p-ignore": true, action: "keydown.esc@document->form#cancel" } %>
+        </div>
+      </div>
+      <div class="flex flex-column gap-half txt-align-start">
+        <strong><%= form.label :email_address, t(".email_label") %></strong>
+        <div class="flex align-center gap input input--actor">
+          <%= form.email_field :email_address, class: "input full-width", autocomplete: "username", required: true, readonly: true, value: @user.email_address %>
         </div>
       </div>
 
@@ -47,7 +53,7 @@
         </div>
       <% end %>
 
-      <button type="submit" id="log_in" class="btn btn--reversed center" data-form-target="submit">
+      <button type="submit" id="log_in" class="btn btn--link center" data-form-target="submit">
         <span><%= t(".save") %></span>
       </button>
 

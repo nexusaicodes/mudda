@@ -56,7 +56,7 @@ export default class extends Controller {
 
   frameColumnOnMobile(event) {
     if (!this.#isDesktop) {
-      event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center" })
+      event.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" })
     }
   }
 
@@ -118,8 +118,11 @@ export default class extends Controller {
       localStorage.setItem(key, true)
     }
 
-    if (window.matchMedia('(max-width: 639px)').matches) {
-      column.scrollIntoView({ behavior: scrollBehavior, inline: "center" })
+    // On a phone the lanes stack and fit the window, so the open lane is only brought into view
+    // if something scrolled it out; its card strip starts back at the first card.
+    if (!this.#isDesktop) {
+      column.scrollIntoView({ behavior: scrollBehavior, block: "nearest", inline: "nearest" })
+      column.querySelector(".cards__list")?.scrollTo({ left: 0 })
     }
   }
 

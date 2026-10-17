@@ -6,7 +6,7 @@ Guidance for AI coding agents, and anyone else, working in this repository.
 
 Mudda is a personal project-management and issue-tracking app: a single-person Kanban tool for
 **cards** (tasks) on **boards**, moved through a **fixed set of four columns**, with progress
-captured in **notes**. Opening the app lands you on the board you last had open. It is built and
+captured in **notes**. Opening the app lands you on the list of boards. It is built and
 maintained by **Nexus AI**.
 
 It is a **single-tenant, single-person, standalone** app on SQLite, run through Docker Compose.
@@ -39,6 +39,8 @@ treat any trace of them in the code as a leftover:
   `Tag`/`Tagging`, `Card::Goldness` (now the `pinned` boolean on `cards`), the `Entropy` auto-postpone
   system (replaced by due dates), the `drafted`/`published` card states, the card background
   image, the Triage lane (folded into Backlog), and stored filters.
+- **Looks**: dark mode and the theme preference (`user_settings.theme`). The UI has one
+  deliberate look; see [Web UI](#web-ui).
 - **Pages**: the recent-activity timeline. `Event` rows are still written as an audit trail,
   but nothing renders them.
 
@@ -91,8 +93,7 @@ endpoint work.
   depend on it (see `Users::AvatarsController`).
 - **`account_id` lives on `users` and `boards`, and nowhere else.** Everything below a board
   reaches its account through the board (`Account#cards` joins through `boards`), so a record's
-  tenant is written down in one place. `accounts.id` keys the browser-local "last opened board"
-  (`ApplicationHelper#last_board_storage_key`) and names the account in error context.
+  tenant is written down in one place. `accounts.id` names the account in error context.
 - Background jobs carry `Current.account` explicitly (see [Background jobs](#background-jobs)).
 
 ### Authentication
@@ -200,7 +201,8 @@ has a credential to refuse.
 `Triageable`. Every board has the same four fixed columns (below).
 
 **Column**: a fixed workflow lane (`Colored`, `Positioned`) with `has_many :cards`. Names are
-fixed (`attr_readonly :name`, since lane predicates key off them); only color is editable.
+fixed (`attr_readonly :name`, since lane predicates key off them), and so are their colors: each lane
+keeps the color it was created with, and nothing edits it.
 
 **Card**: the main work item, with a per-board `number`, a rich-text description, steps, and
 notes. Concerns: `Attachments`, `Colored`, `Notable`, `Due`, `Eventable`, `Pinnable`,
@@ -297,7 +299,7 @@ collection, since a card can carry thousands; it embeds only the most recent
 The card index answers at both levels: `/cards` spans every board and `/boards/:board_id/cards`
 narrows to one, with the same filters. A board's four columns travel with the board
 (`boards/show.json.jbuilder`); what is left under `boards/:id/columns` is the browser's lane
-frame and colour picker. `/prompts/cards` is the `#` card-reference autocomplete, and stays
+frame. `/prompts/cards` is the `#` card-reference autocomplete, and stays
 cross-board.
 
 **JSON** lives on the same URLs, rendered by jbuilder views; there is no separate API surface.
@@ -323,27 +325,44 @@ The browser is for an occasional look, since agents do most of the work through 
 chrome is small and there are **no keyboard shortcuts**: keys only act inside the field being
 typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
-- **Landing.** `/` (`LandingsController`) sends you to the board you last had open, remembered
-  in `localStorage`, or else the most recently active one. The `last-board` Stimulus controller writes it, and the landing page reads
-  it (an inline script on a full load, the `landing` controller on a Turbo visit).
-- **One-row header** (`layouts/application`): the logo on the left of every signed-in page,
-  then the page's back link if it has one (`content_for :header_start`), the page title in the
-  centre, and the avatar on the right (`my/_account_link`), a plain link to the profile. The
-  profile (`users/show`) holds appearance, language, the plan, password, passkeys, API tokens, and sign
+- **One look.** Every page sits on aged papyrus (`paper.css`): a golden-ochre ground, broad stains
+  stretched over the window (`paper-stains.svg`), a woven layer of horizontal strips over
+  vertical ones (`paper-fibres.svg`), a repeating fine grain (`paper-grain.svg`),
+  and a ruled frame (one tight band: a vermilion rule with a dark-brown hairline against each
+  side) fixed a little inside the window's edges (`--paper-inset`). `--paper-clearance` keeps the header, the page, and the lanes
+  inside the frame. There is no dark mode and no theme to choose.
+- **Home.** `/` is the boards list (`boards#index`, HTML; the JSON index is the API's): a big
+  "New board" button, then every board by name with its card count, and at the top right of each
+  row a pencil that renames it in place (`inline-edit` controller, Save and Cancel, Esc cancels)
+  and a trash button that deletes it behind a confirmation (`boards/_delete`). Signing in, the
+  logo, and deleting a board all land here, and a browser rename comes back here. There is no
+  board settings page.
+- **One-row header** (`layouts/application`): the logo on the left of every signed-in page (a
+  link to `/`), then the page's back link if it has one (`content_for :header_start`), the page
+  title in the centre, and on the right the search button (`bar/_bar`) and the avatar
+  (`my/_account_link`), a plain link to the profile. The
+  profile (`users/show`) holds language, the plan, password, passkeys, API tokens, and sign
   out; there is no account settings page and no account name.
-- **Board title** (`boards/_title`): clicking the name renames the board in place
-  (`inline-edit` controller) with just Save and Cancel; the input takes the title's own type, so
-  the header doesn't jump. There is no board settings page.
-- **Switcher**: the ▾ beside a board or view title (`my/_switcher`), loading `my/menus#show` on
-  first open. It lists every board (the current one ticked and shaded) with "New board" after
-  them, then the cross-board views in `Filter::VIEWS` with their counts (the current one ticked,
-  an empty one dimmed), and, on a board, "Delete this board…" last, behind a confirmation
-  (`boards/_delete`).
+- **Board page** (`boards/show`, `boards/_title`): the header is the logo, the board's name
+  alone in the centre, then search and the avatar; there is no back link, since the logo goes
+  home. Above the lanes, beside "Add a card", sits a "Due soon" toggle with the board's count
+  (`boards/show/_due_toggle`). The toggle is a link to
+  `?due=soon`, which narrows every lane (its header count and its frame, `boards/columns#show`
+  with `due=soon`) to `Card.due_soon`: open cards due by tomorrow, overdue included. It is the
+  only filter the board page takes. A lane repainted after a drop shows all its cards again.
+  On a phone (under 640px wide) the board turns on its side (`card-columns.css`, "Stacked
+  lanes"): the four lanes stack as bars, one open at a time, and the open lane's cards scroll
+  sideways in a strip under its bar. The board fills the window and never scrolls as a page.
+  Cards size themselves from the height the screen leaves for the strip (container queries on
+  the lane stack): slim (title and due date) on a short screen, then compact, healthy, and tall,
+  each wider and showing more of the description.
 - **Cross-board views** are the card index with a view's filter (`/cards?due=soon`,
-  `?lane=doing`, `?indexed_by=pinned`), drawn as cards grouped under their board. The board page
-  itself takes no filters. A `Filter` is read from the query for each request and never stored;
+  `?lane=doing`, `?indexed_by=pinned`), drawn as cards grouped under their board. Nothing in the
+  UI links to them any more; they stay for URLs and the API. A `Filter` is read from the query for each request and never stored;
   a value outside its list is refused (`400`, or `422` for JSON).
-- **Search** is a pill floating at the bottom centre (`bar/_bar`). Results open above it,
+- **Search** is a button in the header (`bar/_bar`, `bar` controller). Pressed, it opens a modal
+  panel over the dimmed page: the search box at its top, searching as you type, and the results
+  below it. Esc, a click on the dimmed page, or following a result closes it. Results are
   grouped by board with the board you searched from first: one row per card, the five latest per
   board, and a link to the rest (`User::Searcher#search_counts_by_board`, `#search_boards`).
 
@@ -409,10 +428,12 @@ is part of every ETag, so neither is served across a change of day or zone.
 
 The browser UI speaks English and Arabic (right-to-left). `CurrentLocale`
 (`app/controllers/concerns/current_locale.rb`) picks each request's locale: the user's
-`user_settings.locale` (chosen on the profile page through `My::PreferencesController`, which also saves the theme,
+`user_settings.locale` (chosen on the profile page through `My::PreferencesController`,
 and seeded once from `MUDDA_OWNER_LOCALE` when `db/seeds.rb` creates the owner, so a hosted board
 opens in the language its owner signed up in), else the
-browser's `Accept-Language`, else English. URLs carry no locale.
+browser's `Accept-Language`, else English. URLs carry no locale. The profile offers just English
+and Arabic, with the language in use marked; there is no "Automatic" choice, since an owner who
+never picks simply follows the browser (a blank `locale` through the API still returns to that).
 
 - **JSON, and so every MCP tool call, always answers in English**: errors, enum values, lane
   names, and the 401/403 refused before the action runs.
@@ -427,7 +448,7 @@ browser's `Accept-Language`, else English. URLs carry no locale.
   the same checks.
 - `<html lang dir>` comes from the locale. CSS uses logical properties; where it can't, a
   `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
-  loaded only for Arabic code points. Dates show Western digits (`-u-nu-latn`).
+  loaded only for Arabic code points. Latin text renders in El Messiri (`app/assets/fonts`, OFL, self-hosted, never fetched from Google). Dates show Western digits (`-u-nu-latn`).
 - The `public/*.html` error pages are static, so each carries both languages.
 
 ### Hosting platform sync

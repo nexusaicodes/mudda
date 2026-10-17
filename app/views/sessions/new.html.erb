@@ -11,13 +11,13 @@
   <% if password_enabled %>
     <%= form_with url: session_password_path, class: "flex flex-column gap-half txt-medium" do |form| %>
       <label class="flex align-center gap input input--actor">
-        <%= form.email_field :email_address, required: true, class: "input txt-large full-width", autofocus: true, autocomplete: "username webauthn", placeholder: t(".email_placeholder") %>
+        <%= form.email_field :email_address, required: true, class: "input full-width", autofocus: true, autocomplete: "username webauthn", placeholder: t(".email_placeholder") %>
       </label>
       <label class="flex align-center gap input input--actor">
-        <%= form.password_field :password, required: true, class: "input txt-large full-width", autocomplete: "current-password", placeholder: t(".password_placeholder") %>
+        <%= form.password_field :password, required: true, class: "input full-width", autocomplete: "current-password", placeholder: t(".password_placeholder") %>
       </label>
 
-      <button type="submit" id="log_in" class="btn btn--link center txt-medium">
+      <button type="submit" id="log_in" class="btn btn--link center">
         <span><%= t(".submit") %></span>
         <%= icon_tag "arrow-right" %>
       </button>
@@ -34,7 +34,7 @@
           mediation: "conditional",
           error: { class: "txt-negative margin-block-half", message: t(".passkey_error") },
           cancellation: { class: "txt-subtle margin-block-half", message: t(".passkey_cancelled") },
-          class: "btn btn--link center txt-medium" %>
+          class: "btn btn--link center" %>
   <% end %>
 
   <% unless password_enabled || passkeys_exist %>

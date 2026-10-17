@@ -34,7 +34,6 @@
     print-color-adjust: exact;
   }
 
-  .switcher,
   .header__actions {
     display: none;
   }

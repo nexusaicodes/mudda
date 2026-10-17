@@ -8,11 +8,11 @@
     --header-actions-width: calc((var(--header-btn-size) + var(--header-gap)) * var(--header-button-count));
 
     display: grid;
-    grid-template-columns: var(--header-actions-width) 1fr var(--header-actions-width);
+    grid-template-columns: var(--header-actions-width) minmax(0, 1fr) var(--header-actions-width);
     grid-template-areas: "actions-start title actions-end";
     align-items: center;
     max-inline-size: 100dvw;
-    padding-block: calc(var(--block-space-half) + var(--custom-safe-inset-top)) var(--block-space-half);
+    padding-block: calc(var(--paper-clearance) + var(--custom-safe-inset-top)) var(--block-space-half);
     padding-inline: var(--main-padding);
     position: relative;
     z-index: var(--z-nav);
@@ -25,15 +25,10 @@
     &:has(dialog[open]) {
       z-index: var(--z-nav-open);
     }
-
-    &:has(~ #main .card-columns) {
-      inline-size: 100dvw;
-      margin-inline: auto;
-      max-inline-size: var(--main-width);
-    }
   }
 
   .header__actions {
+    align-items: center;
     display: flex;
     font-size: var(--text-x-small);
     gap: var(--header-gap);
@@ -57,8 +52,13 @@
     font-weight: 900;
     grid-area: title;
     margin: 0 auto;
+    max-inline-size: 100%; /* auto margins size it to its text; a long name is cut, not pushed into the buttons */
     min-inline-size: 0;
     text-align: center;
+
+    @media (max-width: 639px) {
+      font-size: var(--text-medium);
+    }
   }
 
   .header__skip-navigation {
@@ -113,6 +113,17 @@
       overflow: visible;
       width: auto;
     }
+  }
+
+  /* Public pages show the logo tile with the wordmark beside it, sized by the content rather than
+     by the signed-in action columns. Sign-in carries its own logo in the panel. */
+  .public .header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .header__logo--wordmark {
+    align-items: center;
+    display: inline-flex;
   }
 
   .sign-in .header__logo {

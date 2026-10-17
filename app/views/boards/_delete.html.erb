@@ -1,15 +1,15 @@
-<%# locals: (board:) -%>
-<%# The last row of the board switcher: deleting is kept away from renaming, behind a confirmation. %>
+<%# locals: (board:, card_count:) -%>
+<%# A board's delete button on the boards list, behind a confirmation. %>
 <div class="board-delete" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-  <button type="button" class="popup__btn btn txt-negative" data-action="dialog#open">
-    <%= icon_tag "trash", class: "popup__icon" %>
-    <span class="overflow-ellipsis flex-item-grow"><%= t(".open") %></span>
+  <button type="button" class="btn btn--circle borderless txt-negative" data-action="dialog#open" title="<%= t(".open") %>">
+    <%= icon_tag "trash" %>
+    <span class="for-screen-reader"><%= t(".open") %></span>
   </button>
 
   <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
     <h3 class="txt-large txt-bold"><%= t(".heading_html", name: tag.span(board.name, dir: "auto")) %></h3>
     <p class="txt-medium margin-block-half">
-      <%= t(".body", count: board.cards.count) %>
+      <%= t(".body", count: card_count) %>
     </p>
     <div class="flex gap-half justify-center margin-block-start">
       <button type="button" class="btn" data-action="dialog#close"><%= t(".cancel") %></button>

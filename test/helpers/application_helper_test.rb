@@ -14,10 +14,4 @@ class ApplicationHelperTest < ActionView::TestCase
 
     assert_select parse(page_title_tag), "title", text: "Holodeck | Mudda"
   end
-
-  test "last_board_storage_key is scoped to the account" do
-    account = accounts("37s")
-
-    assert_equal "mudda:last-board:#{account.id}", last_board_storage_key(account)
-  end
 end

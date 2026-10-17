@@ -1,0 +1,8 @@
+<%# locals: (board:, due_soon:) -%>
+<%# Narrows every lane to the cards due by tomorrow, overdue ones included, and back. %>
+<%= link_to (due_soon ? board_path(board) : board_path(board, due: "soon")),
+      class: "btn due-toggle", aria: { pressed: due_soon }, title: t(".hint") do %>
+  <%= icon_tag "calendar" %>
+  <span><%= t(".label") %></span>
+  <span class="due-toggle__count"><%= board.cards.due_soon.count %></span>
+<% end %>

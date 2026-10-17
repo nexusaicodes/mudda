@@ -1,8 +1,8 @@
-# How the interface looks to its owner: the language (blank follows the browser's
-# Accept-Language, see CurrentLocale) and the theme (auto follows the device's colour scheme).
+# The owner's interface language: blank follows the browser's Accept-Language (see
+# CurrentLocale).
 # Only the keys sent are changed. A browser reads them on the profile.
 class My::PreferencesController < ApplicationController
-  wrap_parameters :preferences, include: %i[ locale theme ]
+  wrap_parameters :preferences, include: %i[ locale ]
 
   serves_json :show, :update
 
@@ -24,7 +24,7 @@ class My::PreferencesController < ApplicationController
 
   private
     def preference_params
-      params.fetch(:preferences, params).permit(:locale, :theme).to_h.tap do |preferences|
+      params.fetch(:preferences, params).permit(:locale).to_h.tap do |preferences|
         preferences[:locale] = preferences[:locale].presence if preferences.key?(:locale)
       end
     end

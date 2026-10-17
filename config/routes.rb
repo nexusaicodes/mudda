@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root "landings#show"
+  root "boards#index"
 
   namespace :account do
     resource :upgrade, only: :show
@@ -13,9 +13,9 @@ Rails.application.routes.draw do
 
   resources :boards, except: :edit do
     # A board's columns are fixed and travel with the board itself, so what is left is the
-    # browser's: one lane's cards, and the color picker.
+    # browser's: one lane's cards.
     scope module: :boards do
-      resources :columns, only: %i[ show update ]
+      resources :columns, only: :show
     end
 
     # Card numbers run per board, so a card is addressed by its board and its number.
@@ -46,8 +46,6 @@ Rails.application.routes.draw do
     end
   end
 
-  resource :landing, only: :show
-
   # Mudda as an OAuth 2.1 authorization server for MCP clients; see MCP.md → OAuth.
   use_doorkeeper do
     controllers authorizations: "oauth/authorizations"
@@ -77,7 +75,6 @@ Rails.application.routes.draw do
     resources :tokens, only: %i[ index create destroy ]
     resource :timezone, only: :update
     resource :preferences, only: %i[ show update ]
-    resource :menu, only: :show
   end
 
   namespace :prompts do

@@ -1,13 +1,16 @@
 <% @page_title = @board&.name || @filter.view_name || @filter.boards_label %>
 <% turbo_exempts_page_from_cache %>
 
+<% content_for :header_start do %>
+  <%= back_link_to t(".back"), root_path %>
+<% end %>
+
 <% content_for :header do %>
   <div class="header__title board-title">
     <div class="board-title__display">
       <h1 class="board-title__name">
         <span class="overflow-ellipsis txt-capitalize-first-letter"><%= @page_title %></span>
       </h1>
-      <%= render "my/switcher", board: @single_board, view: @filter.view&.key %>
     </div>
   </div>
 <% end %>

@@ -289,30 +289,6 @@
     }
   }
 
-  .hide-on-dark-mode {
-    html[data-theme="dark"] & {
-      display: none;
-    }
-
-    html:not([data-theme]) & {
-      @media (prefers-color-scheme: dark) {
-        display: none;
-      }
-    }
-  }
-
-  .hide-on-light-mode {
-    html[data-theme="light"] & {
-      display: none;
-    }
-
-    html:not([data-theme]) & {
-      @media (prefers-color-scheme: light) {
-        display: none;
-      }
-    }
-  }
-
   /* Letter-spacing breaks Arabic cursive joining */
   :lang(ar) :is(.search__group-title, .cards__expander, .card-group__title, .card__due) {
     letter-spacing: 0;

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="<%= I18n.locale %>" dir="<%= html_direction %>" <%= tag.attributes(data: { theme: html_theme }) %>>
+<html lang="<%= I18n.locale %>" dir="<%= html_direction %>">
   <%= render "layouts/shared/head" %>
 
-  <body class="<%= @body_class %>" <%= tag.attributes(data: { html_theme: html_theme }) %>
+  <body class="<%= @body_class %>"
     data-controller="local-time timezone-cookie turbo-navigation"
     data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
     data-turbo-navigation-label-value="<%= @page_title %>"
@@ -22,6 +22,9 @@
 
         <% if Current.user %>
           <div class="header__actions header__actions--end">
+            <div id="header_search" data-turbo-permanent="true">
+              <%= render "bar/bar" %>
+            </div>
             <%= render "my/account_link" %>
           </div>
         <% end %>
@@ -37,12 +40,6 @@
 
     <footer id="footer">
       <%= yield :footer %>
-
-      <% if Current.user && !@hide_footer_frames %>
-        <div id="footer_frames" data-turbo-permanent="true">
-          <%= render "bar/bar" %>
-        </div>
-      <% end %>
     </footer>
   </body>
 </html>

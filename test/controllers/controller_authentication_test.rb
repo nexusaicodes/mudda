@@ -36,7 +36,7 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
       email_address: users(:kevin).email_address, password: owner_password
     }
 
-    assert_redirected_to landing_url
+    assert_redirected_to root_url
   end
 
   # A deactivated owner keeps the API token they were issued: it is refused for as long as they

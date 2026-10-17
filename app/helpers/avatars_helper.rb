@@ -1,6 +1,17 @@
 module AvatarsHelper
+  AVATAR_FONT_PATH = Rails.root.join("app/assets/fonts/el-messiri-latin-wght-normal.woff2")
+
   def avatar_background_color(user)
     user.avatar_background_color
+  end
+
+  # An SVG shown through <img> can't fetch fonts, so the initials' face travels inside it.
+  def avatar_font_data_uri
+    AvatarsHelper.avatar_font_data_uri
+  end
+
+  def self.avatar_font_data_uri
+    @avatar_font_data_uri ||= "data:font/woff2;base64,#{Base64.strict_encode64(AVATAR_FONT_PATH.binread)}"
   end
 
   def avatar_tag(user, hidden_for_screen_reader: false, **options)
