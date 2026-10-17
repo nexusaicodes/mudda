@@ -37,10 +37,10 @@
 
   /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
      of the data and the API; their values come from the kit's palette. */
-  --color-card-default: var(--color-neutral);
+  --color-card-default: var(--color-info);
   --color-card-complete: var(--color-success);
   --color-card-1: var(--color-primary);
-  --color-card-2: var(--color-secondary);    /* Backlog */
+  --color-card-2: var(--color-neutral);      /* Backlog */
   --color-card-3: var(--color-info);         /* Todo */
   --color-card-4: var(--color-success);      /* Done */
   --color-card-5: var(--color-warning);      /* Doing */

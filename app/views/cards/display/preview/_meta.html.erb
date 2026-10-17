@@ -1,13 +1,14 @@
 <%# locals: (card:, show_lane:) -%>
-<%# One quiet line of facts under the title. The lane is named only where a list spans lanes. %>
-<footer class="card__details" id="<%= dom_id(card, :meta) %>">
+<%# One quiet row of badges under the title. The lane is named only where a list spans lanes. %>
+<footer class="card__details flex flex-wrap items-center gap-1 mt-1 empty:hidden" id="<%= dom_id(card, :meta) %>">
   <%= render "cards/display/preview/due", card: card %>
-
   <%= render "cards/display/preview/steps", card: card %>
-  <%= icon_tag "attachment", class: "card__details-attachments" if card.has_attachments? %>
+  <% if card.has_attachments? %>
+    <span class="badge badge-sm badge-ghost"><%= icon_tag "attachment" %></span>
+  <% end %>
   <%= render "cards/display/preview/notes", card: card %>
 
   <% if show_lane %>
-    <span class="card__details-lane overflow-ellipsis"><%= lane_name(card.column) %></span>
+    <span class="badge badge-sm badge-outline text-(--card-color) truncate"><%= lane_name(card.column) %></span>
   <% end %>
 </footer>

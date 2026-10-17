@@ -359,8 +359,8 @@ typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
   `?due=soon`, which narrows every lane (its header count and its frame, `boards/columns#show`
   with `due=soon`) to `Card.due_soon`: open cards due by tomorrow, overdue included. It is the
   only filter the board page takes. A lane repainted after a drop shows all its cards again.
-  On a phone (under 640px wide) the board turns on its side (`card-columns.css`, "Stacked
-  lanes"): the four lanes stack as bars, one open at a time, and the open lane's cards scroll
+  On a phone (under 640px wide) the board turns on its side (`app/assets/tailwind/components/board.css`,
+  "Phones"): the four lanes stack as bars, one open at a time, and the open lane's cards scroll
   sideways in a strip under its bar. The board fills the window and never scrolls as a page.
   Cards size themselves from the height the screen leaves for the strip (container queries on
   the lane stack): slim (title and due date) on a short screen, then compact, healthy, and tall,
