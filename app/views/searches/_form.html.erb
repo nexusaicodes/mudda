@@ -2,7 +2,7 @@
   class: "search__form flex align-center justify-center gap-half",
   data: {
     controller: "search-form",
-    action: "search-form:reset->bar#reset",
+    action: "search-form:reset->bar#close",
     bar_target: "form",
     turbo_action: defined?(turbo_action) ? turbo_action : nil,
     turbo_frame: defined?(target_turbo_frame) ? target_turbo_frame : nil } do |form| %>
@@ -16,7 +16,7 @@
         data: {
           search_form_target: "searchInput",
           bar_target: "searchInput",
-          action: "keydown.enter->bar#showModalAndSubmit:prevent keydown.esc->bar#reset" } %>
+          action: "input->bar#searchAsYouType keydown.enter->bar#submit:prevent" } %>
   <button hidden><%= t(".submit") %></button>
   <button class="search__reset btn btn--circle borderless" data-action="search-form#clearInput">
     <%= icon_tag "close" %>

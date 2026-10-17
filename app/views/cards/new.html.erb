@@ -29,38 +29,42 @@
           <%= general_prompts(@board) %>
         <% end %>
 
-        <div class="card-field__due flex align-center">
-          <%= form.label :due_on, t(".due_date"), class: "card-field__due-label" %>
-          <%= form.date_field :due_on, class: "card-field__due-input input",
-                data: { local_save_target: "input", action: "change->local-save#save" } %>
+        <div class="card-compose__fields">
+          <div class="card-field__due">
+            <%= form.label :due_on, class: "card-field__due-label" do %>
+              <%= icon_tag "calendar" %>
+              <span><%= t(".due_date") %></span>
+            <% end %>
+            <%= form.date_field :due_on, class: "card-field__due-input input",
+                  data: { local_save_target: "input", action: "change->local-save#save" } %>
+          </div>
+
+          <%# A trailing blank row so a step can be typed without asking for one first. Blank
+              rows are dropped on create, so an untouched one costs nothing. %>
+          <ol class="steps txt-small" data-step-fields-target="list">
+            <% @card.steps.each do |step| %>
+              <%= render "cards/new/step_field", content: step.content %>
+            <% end %>
+            <%= render "cards/new/step_field", content: nil %>
+          </ol>
+
+          <template data-step-fields-target="template">
+            <%= render "cards/new/step_field", content: nil %>
+          </template>
+
+          <button type="button" class="btn btn--plain card-compose__add-step txt-small" data-action="step-fields#add">
+            <%= icon_tag "add" %>
+            <span><%= t(".add_step") %></span>
+          </button>
         </div>
-
-        <%# A trailing blank row so a step can be typed without asking for one first. Blank
-            rows are dropped on create, so an untouched one costs nothing. %>
-        <ol class="steps txt-small" data-step-fields-target="list">
-          <% @card.steps.each do |step| %>
-            <%= render "cards/new/step_field", content: step.content %>
-          <% end %>
-          <%= render "cards/new/step_field", content: nil %>
-        </ol>
-
-        <template data-step-fields-target="template">
-          <%= render "cards/new/step_field", content: nil %>
-        </template>
-
-        <button type="button" class="btn btn--link txt-small" data-action="step-fields#add">
-          <%= icon_tag "add" %>
-          <span><%= t(".add_step") %></span>
-        </button>
 
         <%= render "cards/new/allowance", account: @board.account %>
-
-        <div class="card-perma__notch card-perma__notch--bottom flex-column">
-          <div class="card-perma__notch-new-card-buttons">
-            <%= form.submit t(".create"), class: "btn", data: { form_target: "submit" } %>
-          </div>
-        </div>
       <% end %>
     </article>
+  </div>
+
+  <%# Outside the form so it sits on the card's bottom edge; `form:` ties it back. %>
+  <div class="card-perma__notch card-perma__notch--bottom">
+    <%= button_tag t(".create"), type: "submit", form: "card_form", class: "btn card-compose__create" %>
   </div>
 </section>

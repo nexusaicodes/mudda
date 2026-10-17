@@ -12,7 +12,7 @@ class PhoneLayoutTest < ApplicationSystemTestCase
 
   test "the profile fits a phone, in English and in Arabic" do
     visit user_url(users(:david))
-    assert_selector ".preference-choice__option", count: 6
+    assert_selector ".preference-choice__option", count: 3
     assert_no_horizontal_scroll
 
     click_on "العربية"
@@ -20,12 +20,13 @@ class PhoneLayoutTest < ApplicationSystemTestCase
     assert_no_horizontal_scroll
   end
 
-  test "the board and its switcher fit a phone" do
-    visit board_url(boards(:writebook))
+  test "the boards list and a board fit a phone" do
+    visit root_url
+    assert_link "New board"
     assert_no_horizontal_scroll
 
-    find(".switcher__trigger").click
-    within(".switcher__menu") { assert_link "New board" }
+    visit board_url(boards(:writebook))
+    assert_selector ".due-toggle"
     assert_no_horizontal_scroll
   end
 

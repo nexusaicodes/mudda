@@ -1,3 +1,4 @@
+<%# locals: (board:, due_soon: false) -%>
 <%= tag.div class: "card-columns hide-scrollbar", data: {
       controller: "collapsible-columns drag-and-drop navigable-list",
       drag_and_drop_dragged_item_class: "drag-and-drop__dragged-item",
@@ -20,5 +21,6 @@
         drop->drag-and-drop#drop
         dragend->drag-and-drop#dragEnd
         click@document->navigable-list#deselectWhenClickingOutside" } do %>
-  <%= render partial: "boards/show/column", collection: board.columns.sorted, cached: ->(column){ [ column, I18n.locale ] } %>
+  <%= render partial: "boards/show/column", collection: board.columns.sorted, locals: { due_soon: due_soon },
+      cached: ->(column){ [ column, I18n.locale, due_soon, (Date.current if due_soon) ] } %>
 <% end %>

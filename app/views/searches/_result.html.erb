@@ -5,7 +5,7 @@
 
 <li>
   <%= link_to board_card_path(card.board, card), class: "search__result", style: "--card-color: #{card.color}",
-        data: { turbo_frame: "_top", action: "bar#reset" } do %>
+        data: { turbo_frame: "_top", action: "bar#close" } do %>
     <div class="search__result-main">
       <h4 class="search__title margin-none" dir="auto"><%= title_match.card_title %></h4>
 

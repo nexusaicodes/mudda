@@ -105,19 +105,39 @@
       }
     }
 
+    /* The compose screen's due date and steps, set apart from the description by a rule. */
+    .card-compose__fields {
+      border-block-start: 1px solid var(--color-ink-lighter);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25ch;
+      margin-block-start: 1.5ch;
+      padding-block-start: 2ch;
+    }
+
     .card-field__due {
-      gap: 0.75ch;
-      margin-block-start: 1ch;
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5ch;
     }
 
     .card-field__due-label {
-      font-size: var(--text-small);
+      align-items: center;
+      color: var(--color-ink-dark);
+      display: inline-flex;
+      font-size: var(--text-x-small);
       font-weight: 600;
+      gap: 0.6ch;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
     .card-field__due-input {
-      --input-padding: 0.4em 0.7em;
+      --input-border-radius: 0.5em;
+      --input-padding: 0.35em 0.7em;
+
+      font-size: var(--text-small);
 
       inline-size: auto;
       min-inline-size: 0;
@@ -132,16 +152,6 @@
         margin-inline-start: 0.1em;
         opacity: 0.55;
         transition: opacity 150ms ease;
-
-        html[data-theme="dark"] & {
-          filter: invert(1);
-        }
-
-        @media (prefers-color-scheme: dark) {
-          html:not([data-theme]) & {
-            filter: invert(1);
-          }
-        }
       }
 
       &:hover::-webkit-calendar-picker-indicator,
@@ -347,16 +357,51 @@
     }
   }
 
-  .card-perma__notch-new-card-buttons {
-    display: flex;
-    gap: var(--inline-space-half);
+  /* Steps on the compose screen: a muted box that can't be ticked yet, then the step's text. */
+  .card-perma--draft {
+    .steps {
+      gap: 0.4ch;
+    }
 
-    @media (max-width: 479px) {
-      flex-direction: column;
+    .step {
+      align-items: center;
 
-      .btn {
-        inline-size: 100%;
+      .checkbox {
+        color: var(--color-ink-dark);
+        opacity: 0.6;
+        transform: none;
       }
     }
+
+    .step__content {
+      margin-block-end: 0;
+
+      &::placeholder {
+        color: var(--color-ink-dark);
+      }
+    }
+  }
+
+  .card-compose__add-step {
+    --btn-gap: 0.5ch;
+    --btn-icon-size: 0.9em;
+
+    align-self: flex-start;
+    color: var(--card-color);
+    font-weight: 600;
+
+    @media (any-hover: hover) {
+      &:hover {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+      }
+    }
+  }
+
+  .card-compose__create {
+    --btn-padding: 0.7em 2.2em;
+
+    box-shadow: 0 0.4rem 1rem -0.4rem oklch(var(--lch-ink-darkest) / 0.5);
+    font-size: var(--text-medium);
   }
 }

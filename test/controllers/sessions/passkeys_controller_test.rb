@@ -22,7 +22,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert cookies[:session_token].present?
-    assert_redirected_to landing_path
+    assert_redirected_to root_path
   end
 
   test "updates sign count" do

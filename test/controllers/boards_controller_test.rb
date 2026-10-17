@@ -15,14 +15,41 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "the board's name renames it in place, and the switcher sits beside it" do
+  test "the home page lists every board, each with rename and delete" do
+    get root_path
+
+    assert_response :success
+    assert_select "a.boards-list__new[href=?]", new_board_path
+    users(:kevin).boards.each do |board|
+      assert_select "#board_#{board.id}" do
+        assert_select "a.boards-list__link[href=?]", board_path(board), text: /#{board.name}/
+        assert_select ".boards-list__editor[hidden] form[action=?]", board_path(board)
+        assert_select "form[action=?] input[name=_method][value=delete]", board_path(board)
+      end
+    end
+  end
+
+  test "the board's header is the logo, the name alone, then search and the avatar" do
     get board_path(boards(:writebook))
 
-    assert_select ".board-title__rename", text: boards(:writebook).name
-    assert_select ".board-title__editor[hidden] form[action=?]", board_path(boards(:writebook))
-    assert_select ".board-title__editor button", count: 2
-    assert_select ".board-title__editor form[action=?] input[name=_method][value=delete]", board_path(boards(:writebook)), count: 0
-    assert_select ".switcher turbo-frame#my_menu[src=?]", my_menu_path(board_id: boards(:writebook).id)
+    assert_select "header .header__actions--start > *", count: 1
+    assert_select "header a.header__logo[href=?]", root_path
+    assert_select ".board-title", text: boards(:writebook).name
+    assert_select ".board-title a, .board-title form", count: 0
+    assert_select "header .header__actions--end .bar__trigger"
+    assert_select "header .header__actions--end a.account-link"
+  end
+
+  test "the due-soon toggle narrows every lane and links back to the whole board" do
+    board = boards(:writebook)
+
+    get board_path(board)
+    assert_select ".board-tools a.due-toggle[aria-pressed=false][href=?]", board_path(board, due: "soon")
+    assert_select "turbo-frame[src=?]", board_column_path(board, columns(:writebook_doing))
+
+    get board_path(board, due: "soon")
+    assert_select "a.due-toggle[aria-pressed=true][href=?]", board_path(board)
+    assert_select "turbo-frame[src=?]", board_column_path(board, columns(:writebook_doing), due: "soon")
   end
 
   test "the avatar is a plain link to the profile" do
@@ -70,7 +97,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
       board: { name: "Writebook bugs" }
     }
 
-    assert_redirected_to board_path(boards(:writebook))
+    assert_redirected_to root_path
     assert_equal "Writebook bugs", boards(:writebook).reload.name
   end
 

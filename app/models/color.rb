@@ -8,15 +8,11 @@ class Color
     end
   end
 
-  def name
-    I18n.t("colors.#{key}")
-  end
-
   def to_s
     value
   end
 
-  # The API always speaks English, whatever the request locale.
+  # Colours are named only in the API, which always speaks English.
   def as_json(*)
     { "name" => I18n.t("colors.#{key}", locale: :en), "value" => value }
   end

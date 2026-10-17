@@ -22,7 +22,7 @@ class Filter
   DUES = %w[ soon ]
   LANES = Board::Triageable::DEFAULT_COLUMNS.map { |column| column[:name].downcase }
 
-  # The cross-board views the board switcher offers: each is a filter with a name.
+  # The cross-board views, reached as `/cards?…`: each is a filter with a name.
   View = Data.define(:key, :icon, :params) do
     def name
       I18n.t("filters.views.#{key}", lane: params[:lane] && I18n.t("lanes.#{params[:lane]}"))

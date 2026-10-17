@@ -12,7 +12,7 @@
     grid-template-areas: "actions-start title actions-end";
     align-items: center;
     max-inline-size: 100dvw;
-    padding-block: calc(var(--block-space-half) + var(--custom-safe-inset-top)) var(--block-space-half);
+    padding-block: calc(var(--paper-clearance) + var(--custom-safe-inset-top)) var(--block-space-half);
     padding-inline: var(--main-padding);
     position: relative;
     z-index: var(--z-nav);
@@ -34,6 +34,7 @@
   }
 
   .header__actions {
+    align-items: center;
     display: flex;
     font-size: var(--text-x-small);
     gap: var(--header-gap);

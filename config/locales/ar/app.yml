@@ -31,8 +31,24 @@ ar:
           عن ذلك.
       cancel: إلغاء
       heading_html: حذف «%{name}»؟
-      open: حذف هذه اللوحة…
+      open: حذف هذه اللوحة
       submit: حذف اللوحة
+    index:
+      blank: لا يمكن أن يكون اسم اللوحة فارغًا
+      cancel: إلغاء
+      cards:
+        few: "%{count} بطاقات"
+        many: "%{count} بطاقة"
+        one: بطاقة واحدة
+        other: "%{count} بطاقة"
+        two: بطاقتان
+        zero: لا بطاقات
+      empty: لا توجد لوحات بعد. أنشئ واحدة للبدء.
+      name_label: اسم اللوحة
+      new: لوحة جديدة
+      rename: إعادة تسمية هذه اللوحة
+      save: حفظ
+      title: اللوحات
     new:
       back: الرئيسية
       blank: لا يمكن أن يكون اسم اللوحة فارغًا
@@ -40,12 +56,10 @@ ar:
       placeholder: سمّها…
       submit: إنشاء اللوحة
       title: إنشاء لوحة جديدة
-    title:
-      blank: لا يمكن أن يكون اسم اللوحة فارغًا
-      cancel: إلغاء
-      name_label: اسم اللوحة
-      rename: إعادة تسمية هذه اللوحة
-      save: حفظ
+    show:
+      due_toggle:
+        hint: اعرض فقط البطاقات المستحقة حتى الغد، بما فيها المتأخرة
+        label: مستحقة قريبًا
   columns:
     show:
       add_card_button:
@@ -61,14 +75,6 @@ ar:
   date:
     formats:
       app_long: "%-d %B %Y"
-  landings:
-    show:
-      create: إنشاء لوحة
-      empty_body: أنشئ لوحتك الأولى للبدء.
-      empty_heading: لا توجد لوحات بعد
-      open: فتح اللوحة
-      opening: جارٍ فتح لوحتك…
-      title: الرئيسية
   layouts:
     application:
       skip: انتقل إلى المحتوى الرئيسي
@@ -85,11 +91,6 @@ ar:
   my:
     account_link:
       profile: الملف الشخصي
-    menus:
-      show:
-        boards: اللوحات
-        new_board: لوحة جديدة
-        views: طرق العرض
     passkeys:
       create:
         failed: تعذّر تسجيل مفتاح المرور. حاول مرة أخرى.
@@ -129,8 +130,6 @@ ar:
       update:
         changed: تم تغيير كلمة المرور.
         wrong_password: هذه ليست كلمة المرور الحالية.
-    switcher:
-      switch: تبديل اللوحة
     tokens:
       create:
         api: أو استدعِ واجهة API
@@ -245,8 +244,3 @@ ar:
       security: الأمان
       sign_out: تسجيل الخروج من Mudda على هذا الجهاز
       tokens: رموز API
-    theme:
-      auto: تلقائي
-      dark: داكن
-      heading: المظهر
-      light: فاتح

@@ -152,7 +152,7 @@ next loads a page in a browser set to another zone, the same browser included.
 | `GET` `PATCH` | `/users/:id.json` | `PATCH` takes `name` and `avatar`. Always the signed-in user, whatever the `:id` |
 | `DELETE` | `/users/:id/avatar.json` | Removes the avatar |
 | `PATCH` | `/my/timezone.json` | `timezone`: an IANA name (`Asia/Kolkata`), the same key `/my/user.json` reports. Saves the owner's zone (see [Time zone](#time-zone)) and answers `204`. A missing or blank zone is a `400`, and a name that isn't a zone a `422` |
-| `GET` `PATCH` | `/my/preferences.json` | The owner's `locale` (`en`, `ar`, or `null` to follow the browser) and `theme` (`auto`, `light`, `dark`). `PATCH` changes only the keys sent and answers `204`; an unknown value is a `422` |
+| `GET` `PATCH` | `/my/preferences.json` | The owner's `locale` (`en`, `ar`, or `null` to follow the browser). `PATCH` answers `204`; an unknown locale is a `422` |
 
 A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `avatar_url`.
 
@@ -169,7 +169,7 @@ A user is `id`, `name`, `email_address`, `active`, `created_at`, `url`, and `ava
 Every board has the same four fixed lanes: Backlog, Todo, Doing, Done. They can't be created,
 reordered, or deleted, so **columns have no endpoints of their own**. Each one in the board's
 `columns` carries `id`, `name`, `color`, `position`, `created_at`, and a `cards_url`: the board's card index
-narrowed to that lane with `column_ids[]`. Lane colour is set from the board page only.
+narrowed to that lane with `column_ids[]`. Lane colours are fixed per lane and can't be changed.
 
 ### Cards
 
@@ -286,9 +286,9 @@ tables above, not from the route list.
 
 The browser has endpoints for things the API reads and writes as fields. A card's lane
 (`…/cards/:number/column`), board picker (`…/board/edit`), pin (`…/pin`), steps (`…/steps`), and
-drop target (`…/drops/column`), the compose screen (`…/cards/new`), and a lane's colour
+drop target (`…/drops/column`), the compose screen (`…/cards/new`), and a lane's cards frame
 (`/boards/:board_id/columns/:id`) all answer `406`. `PUT` or `POST` the card, or read the
-board, instead. Every `new` and `edit` page, `/`, `/landing`, `/my/menu`, `/my/tokens`,
+board, instead. Every `new` and `edit` page, `/`, `/my/tokens`,
 `/my/passkeys`, `/account/upgrade`, and `/prompts/cards` are the browser's
 too.
 

@@ -1,0 +1,48 @@
+<% @page_title = t(".title") %>
+
+<% content_for :header do %>
+  <h1 class="header__title"><%= @page_title %></h1>
+<% end %>
+
+<section class="boards-list">
+  <%= link_to new_board_path, class: "btn btn--link boards-list__new" do %>
+    <%= icon_tag "board-add" %>
+    <span><%= t(".new") %></span>
+  <% end %>
+
+  <% if @boards.any? %>
+    <ul class="boards-list__items" role="list">
+      <% @boards.each do |board| %>
+        <li class="boards-list__item panel" id="<%= dom_id(board) %>" data-controller="inline-edit">
+          <div class="boards-list__display" data-inline-edit-target="display">
+            <% card_count = @card_counts.fetch(board.id, 0) %>
+            <%= link_to board_path(board), class: "boards-list__link" do %>
+              <strong class="overflow-ellipsis txt-medium" dir="auto"><%= board.name %></strong>
+              <span class="boards-list__meta"><%= t(".cards", count: card_count) %></span>
+            <% end %>
+
+            <div class="boards-list__actions">
+              <button type="button" class="btn btn--circle borderless" data-action="inline-edit#edit" title="<%= t(".rename") %>">
+                <%= icon_tag "pencil" %>
+                <span class="for-screen-reader"><%= t(".rename") %></span>
+              </button>
+              <%= render "boards/delete", board: board, card_count: card_count %>
+            </div>
+          </div>
+
+          <div class="boards-list__editor" data-inline-edit-target="editor" hidden>
+            <%= form_with model: board, class: "boards-list__form", data: { controller: "form", action: "submit->form#preventEmptySubmit keydown.esc->inline-edit#cancel" } do |form| %>
+              <%= form.label :name, t(".name_label"), class: "for-screen-reader" %>
+              <%= form.text_field :name, required: true, autocomplete: "off", class: "input boards-list__input", dir: "auto",
+                    data: { inline_edit_target: "input", form_target: "input", validation_message: t(".blank"), "1p-ignore": "true" } %>
+              <%= form.button t(".save"), class: "btn btn--link txt-small" %>
+              <button type="button" class="btn txt-small" data-action="inline-edit#cancel"><%= t(".cancel") %></button>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="boards-list__empty"><%= t(".empty") %></p>
+  <% end %>
+</section>

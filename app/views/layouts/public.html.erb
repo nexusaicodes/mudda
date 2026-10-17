@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html lang="<%= I18n.locale %>" dir="<%= html_direction %>" <%= tag.attributes(data: { theme: html_theme }) %>>
+<html lang="<%= I18n.locale %>" dir="<%= html_direction %>">
   <%= render "layouts/shared/head" %>
 
-  <body class="public <%= @body_class %>" <%= tag.attributes(data: { html_theme: html_theme }) %> data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
+  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
     <div id="global-container">
       <header class="header" id="header">
         <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t(".skip") %></a>
         <nav>
           <%= link_to root_path, class: "header__logo center flex-inline align-center" do %>
             <span><%= image_tag "logo.png", alt: "" %></span>
-            <%= image_tag "wordmark-dark.svg", alt: "Mudda", class: "hide-on-light-mode" %>
-            <%= image_tag "wordmark-light.svg", alt: "Mudda", class: "hide-on-dark-mode" %>
+            <%= image_tag "wordmark-light.svg", alt: "Mudda" %>
           <% end %>
         </nav>
 

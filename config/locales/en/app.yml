@@ -24,8 +24,20 @@ en:
           be undone.
       cancel: Cancel
       heading_html: Delete “%{name}”?
-      open: Delete this board…
+      open: Delete this board
       submit: Delete board
+    index:
+      blank: Board names can’t be blank
+      cancel: Cancel
+      cards:
+        one: "%{count} card"
+        other: "%{count} cards"
+      empty: No boards yet. Create one to get started.
+      name_label: Board name
+      new: New board
+      rename: Rename this board
+      save: Save
+      title: Boards
     new:
       back: Home
       blank: Board names can’t be blank
@@ -33,12 +45,10 @@ en:
       placeholder: Name it…
       submit: Create board
       title: Create a new board
-    title:
-      blank: Board names can’t be blank
-      cancel: Cancel
-      name_label: Board name
-      rename: Rename this board
-      save: Save
+    show:
+      due_toggle:
+        hint: Show only cards due by tomorrow, overdue ones included
+        label: Due soon
   columns:
     show:
       add_card_button:
@@ -50,14 +60,6 @@ en:
   date:
     formats:
       app_long: "%B %-d, %Y"
-  landings:
-    show:
-      create: Create a board
-      empty_body: Create your first board to get started.
-      empty_heading: No boards yet
-      open: Open board
-      opening: Opening your board…
-      title: Home
   layouts:
     application:
       skip: Skip to main content
@@ -74,11 +76,6 @@ en:
   my:
     account_link:
       profile: Profile
-    menus:
-      show:
-        boards: Boards
-        new_board: New board
-        views: Views
     passkeys:
       create:
         failed: That passkey couldn't be registered. Try again.
@@ -119,8 +116,6 @@ en:
       update:
         changed: Password changed.
         wrong_password: That isn’t your current password.
-    switcher:
-      switch: Switch board
     tokens:
       create:
         api: Or call the API
@@ -232,8 +227,3 @@ en:
       security: Security
       sign_out: Sign out of Mudda on this device
       tokens: API tokens
-    theme:
-      auto: Automatic
-      dark: Dark
-      heading: Appearance
-      light: Light

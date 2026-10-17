@@ -11,16 +11,6 @@
     span {
       opacity: 0.5;
       mix-blend-mode: multiply;
-
-      html[data-theme="dark"] & {
-        mix-blend-mode: screen;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        html:not([data-theme]) & {
-          mix-blend-mode: screen;
-        }
-      }
     }
 
     span::before,
