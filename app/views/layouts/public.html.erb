@@ -2,23 +2,28 @@
 <html lang="<%= I18n.locale %>" dir="<%= html_direction %>">
   <%= render "layouts/shared/head" %>
 
-  <body class="public <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
-    <div id="global-container">
-      <header class="header" id="header">
-        <a href="#main" class="header__skip-navigation btn" data-turbo="false"><%= t(".skip") %></a>
-        <nav>
-          <%= link_to root_path, class: "header__logo header__logo--wordmark" do %>
-            <span><%= image_tag "logo.png", alt: "" %></span>
-            <%= image_tag "wordmark-light.svg", alt: "Mudda" %>
-          <% end %>
-        </nav>
+  <body class="public min-h-dvh flex flex-col <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
+    <div id="global-container" class="contents">
+      <header id="header" class="navbar grid grid-cols-[1fr_minmax(0,max-content)_1fr] relative z-(--z-nav) gap-2 min-h-0 px-[calc(var(--paper-clearance)+var(--custom-safe-inset-left))] pt-[calc(var(--paper-clearance)+var(--custom-safe-inset-top))] pb-2">
+        <a href="#main" class="btn btn-sm sr-only focus:not-sr-only focus:absolute focus:top-16 focus:start-4" data-turbo="false"><%= t(".skip") %></a>
+        <%# Sign-in carries its own logo in the card, so the header's is left out there. %>
+        <% unless @body_class == "sign-in" %>
+          <nav class="col-start-1 flex items-center">
+            <%= link_to root_path, class: "header__logo btn btn-ghost gap-2" do %>
+              <%= image_tag "logo.png", alt: "", class: "size-7 object-contain" %>
+              <%= image_tag "wordmark-light.svg", alt: "Mudda", class: "h-4" %>
+            <% end %>
+          </nav>
+        <% end %>
 
-        <%= yield :header %>
+        <div class="col-start-2 flex justify-center min-w-0">
+          <%= yield :header %>
+        </div>
       </header>
 
       <%= render "layouts/shared/flash" %>
 
-      <main id="main">
+      <main id="main" class="flex-1 w-full text-center px-[calc(var(--paper-clearance)+var(--custom-safe-inset-left))] pb-[calc(var(--paper-clearance)+var(--custom-safe-inset-bottom))]">
         <%= yield %>
       </main>
     </div>

@@ -18,7 +18,7 @@ class ArabicTest < ApplicationSystemTestCase
     visit cards_url(column_ids: [ columns(:writebook_doing).id ])
     click_on cards(:text).title
 
-    assert_selector "a.btn--back", text: "العودة إلى"
+    assert_selector "a.back-link", text: "العودة إلى"
   end
 
   test "search finds Arabic text without its vowel marks or article" do

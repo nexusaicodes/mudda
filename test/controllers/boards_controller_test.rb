@@ -32,12 +32,12 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   test "the board's header is the logo, the name alone, then search and the avatar" do
     get board_path(boards(:writebook))
 
-    assert_select "header .header__actions--start > *", count: 1
     assert_select "header a.header__logo[href=?]", root_path
+    assert_select "header a.back-link", count: 0
     assert_select ".board-title", text: boards(:writebook).name
     assert_select ".board-title a, .board-title form", count: 0
-    assert_select "header .header__actions--end .bar__trigger"
-    assert_select "header .header__actions--end a.account-link"
+    assert_select "header .bar__trigger"
+    assert_select "header a.account-link"
   end
 
   test "the due-soon toggle narrows every lane and links back to the whole board" do

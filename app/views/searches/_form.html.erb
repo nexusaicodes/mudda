@@ -1,25 +1,27 @@
 <%= form_with url: search_path, method: :get,
-  class: "search__form flex align-center justify-center gap-half",
+  class: "search__form flex items-center gap-2",
   data: {
     controller: "search-form",
     action: "search-form:reset->bar#close",
     bar_target: "form",
     turbo_action: defined?(turbo_action) ? turbo_action : nil,
     turbo_frame: defined?(target_turbo_frame) ? target_turbo_frame : nil } do |form| %>
-  <%= form.label :q, t(".label"), class: "font-weight-black txt-nowrap" %>
-  <%= text_field_tag :q, query_terms,
-        class: "search__input input",
-        type: "search",
-        placeholder: t(".placeholder"),
-        autocomplete: "off",
-        autofocus: true,
-        data: {
-          search_form_target: "searchInput",
-          bar_target: "searchInput",
-          action: "input->bar#searchAsYouType keydown.enter->bar#submit:prevent" } %>
+  <label class="input input-ghost grow focus-within:outline-none">
+    <%= icon_tag "search", class: "opacity-60" %>
+    <%= text_field_tag :q, query_terms,
+          class: "search__input grow",
+          aria: { label: t(".label") },
+          type: "search",
+          placeholder: t(".placeholder"),
+          autocomplete: "off",
+          autofocus: true,
+          data: {
+            search_form_target: "searchInput",
+            bar_target: "searchInput",
+            action: "input->bar#searchAsYouType keydown.enter->bar#submit:prevent" } %>
+  </label>
   <button hidden><%= t(".submit") %></button>
-  <button class="search__reset btn btn--circle borderless" data-action="search-form#clearInput">
+  <button class="search__reset btn btn-ghost btn-circle btn-sm" data-action="search-form#clearInput" aria-label="<%= t(".close") %>">
     <%= icon_tag "close" %>
-    <span class="for-screen-reader"><%= t(".close") %></span>
   </button>
 <% end %>

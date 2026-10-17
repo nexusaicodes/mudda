@@ -8,8 +8,8 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
     visit filter_url
     click_on cards(:text).title
 
-    assert_selector "a.btn--back strong", text: "Back to all boards"
-    find("a.btn--back").click
+    assert_selector "a.back-link strong", text: "Back to all boards"
+    find("a.back-link").click
     assert_current_path filter_url, ignore_query: false
   end
 
@@ -21,6 +21,6 @@ class BackLinkNavigationTest < ApplicationSystemTestCase
     visit board_url(boards(:writebook))
     click_on cards(:text).title
 
-    assert_selector "a.btn--back strong", text: "Back to Writebook"
+    assert_selector "a.back-link strong", text: "Back to Writebook"
   end
 end

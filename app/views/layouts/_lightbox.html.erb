@@ -1,15 +1,16 @@
-<%= tag.dialog class:"lightbox", aria: { label: t(".label") },
+<%# A full-screen viewer for images in rich text. The lightbox controller clears it on the dialog's
+    closing transitionend, so the modal must keep its transition. %>
+<%= tag.dialog class: "lightbox modal bg-neutral/85", aria: { label: t(".label") },
     data: { controller: "dialog", dialog_target: "dialog", dialog_modal_value: "true", lightbox_target: "dialog", action: "keydown.esc->dialog#close:stop transitionend->lightbox#handleTransitionEnd" } do %>
 
-  <figure class="lightbox__figure">
-    <img src="" class="lightbox__image" data-lightbox-target="zoomedImage" />
-    <figcaption class="lightbox__caption" data-lightbox-target="caption" tabindex="-1" data-dialog-target="focusTouch">&nbsp</figcaption>
+  <figure class="modal-box w-auto max-w-[min(92vw,80rem)] bg-transparent p-0 shadow-none flex flex-col items-center gap-3">
+    <img src="" class="lightbox__image max-h-[80dvh] max-w-full rounded-box object-contain" data-lightbox-target="zoomedImage" />
+    <figcaption class="text-neutral-content text-sm text-center" data-lightbox-target="caption" tabindex="-1" data-dialog-target="focusTouch">&nbsp</figcaption>
   </figure>
 
-  <div class="lightbox__actions">
-    <button class="btn fill-white" data-action="dialog#close" data-controller="tooltip" data-dialog-target="focusMouse">
+  <div class="absolute top-[var(--paper-clearance)] end-[var(--paper-clearance)] tooltip tooltip-left" data-tip="<%= t(".close") %>">
+    <button class="btn btn-circle" data-action="dialog#close" data-dialog-target="focusMouse" aria-label="<%= t(".close") %>">
       <%= icon_tag "remove" %>
-      <span class="for-screen-reader"><%= t(".close") %></span>
     </button>
   </div>
 <% end %>

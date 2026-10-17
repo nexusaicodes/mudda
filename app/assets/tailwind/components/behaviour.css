@@ -18,6 +18,13 @@
     line-height: 1.6;
   }
 
+  /* A short form on a touch screen keeps its natural height, so the keyboard doesn't push it around. */
+  @media (any-hover: none) {
+    body.compact-on-touch {
+      min-height: auto;
+    }
+  }
+
   code,
   pre {
     direction: ltr;

@@ -14,20 +14,12 @@ module AvatarsHelper
     @avatar_font_data_uri ||= "data:font/woff2;base64,#{Base64.strict_encode64(AVATAR_FONT_PATH.binread)}"
   end
 
-  def avatar_tag(user, hidden_for_screen_reader: false, **options)
-    link_to user_path(user), class: class_names("avatar btn btn--circle", options.delete(:class)), data: { turbo_frame: "_top" },
+  def avatar_tag(user, size: "w-9", hidden_for_screen_reader: false, **options)
+    link_to user_path(user), class: class_names("avatar", options.delete(:class)), data: { turbo_frame: "_top" },
       aria: { hidden: hidden_for_screen_reader, label: user.name },
       tabindex: hidden_for_screen_reader ? -1 : nil,
       **options do
-      avatar_image_tag(user)
-    end
-  end
-
-  def avatar_preview_tag(user, hidden_for_screen_reader: false, **options)
-    tag.span class: class_names("avatar", options.delete(:class)),
-      aria: { hidden: hidden_for_screen_reader, label: user.name },
-      tabindex: hidden_for_screen_reader ? -1 : nil do
-      avatar_image_tag(user, **options)
+      tag.div(avatar_image_tag(user), class: "#{size} rounded-full")
     end
   end
 

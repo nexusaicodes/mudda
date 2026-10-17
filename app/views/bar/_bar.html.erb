@@ -1,18 +1,19 @@
-<%# A search button in the header. It opens a panel over the dimmed page: the search box at its
-    top and the results, grouped by board, below it, updating as you type. %>
-<div class="bar" data-controller="bar">
-  <button type="button" class="bar__trigger btn btn--circle borderless" data-action="bar#open">
-    <%= icon_tag "search" %>
-    <span class="for-screen-reader"><%= t(".search") %></span>
+<%# A search button in the header. It opens a modal over the dimmed page: the search box at its top
+    and the results, grouped by board, below it, updating as you type. A click outside the box lands
+    on the dialog itself, which bar#closeOnBackdrop takes as a close. %>
+<div data-controller="bar">
+  <button type="button" class="bar__trigger btn btn-ghost btn-circle" data-action="bar#open" aria-label="<%= t(".search") %>">
+    <%= icon_tag "search", class: "[--icon-size:1.25rem]" %>
   </button>
 
-  <dialog class="bar__panel" data-bar-target="dialog"
+  <dialog class="bar__panel modal items-start" data-bar-target="dialog"
       data-action="click->bar#closeOnBackdrop keydown.esc->bar#close:prevent close->bar#reset">
-    <div class="bar__input">
-      <%= icon_tag "search", class: "bar__input-icon" %>
-      <%= render "searches/form", query_terms: "", target_turbo_frame: "bar_content" %>
-    </div>
+    <div class="modal-box mt-[12dvh] w-full max-w-2xl p-0 flex flex-col max-h-[76dvh]">
+      <div class="p-3 border-b border-base-300">
+        <%= render "searches/form", query_terms: "", target_turbo_frame: "bar_content" %>
+      </div>
 
-    <%= turbo_frame_tag "bar_content", class: "bar__results", data: { bar_target: "turboFrame" } %>
+      <%= turbo_frame_tag "bar_content", class: "bar__results block min-h-0 overflow-y-auto overscroll-contain", data: { bar_target: "turboFrame" } %>
+    </div>
   </dialog>
 </div>
