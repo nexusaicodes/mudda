@@ -21,8 +21,7 @@ Then open http://app.mudda.localhost:3006 and sign in as the owner (see
 | Doc | For |
 |---|---|
 | [DOCKER.md](DOCKER.md) | Running Mudda locally and in production: commands, the owner, env vars |
-| [API.md](API.md) | Driving Mudda from a script or agent over JSON |
-| [MCP.md](MCP.md) | Connecting an AI agent over MCP |
+| [docs.mudda.today](https://docs.mudda.today) | Driving Mudda from a script or agent over JSON, and connecting an AI agent over MCP |
 | [AGENTS.md](AGENTS.md) | The architecture, for anyone changing the code |
 | [ERD.md](ERD.md) | The database schema |
 | [STYLE.md](STYLE.md) | House style |

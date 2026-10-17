@@ -63,7 +63,7 @@ module Authentication
     end
 
     # Non-browser clients present the same signed id the JSON sign-in hands back, as
-    # `Authorization: Bearer <token>`, or an OAuth client's access token. See API.md and MCP.md.
+    # `Authorization: Bearer <token>`, or an OAuth client's access token. See docs.mudda.today (Authentication, and MCP → OAuth).
     def find_session_by_bearer_token
       authenticate_with_http_token do |token, _options|
         Session.token.minted.find_signed(token) || Session.find_by_oauth_token(token)

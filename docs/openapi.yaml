@@ -1,0 +1,1170 @@
+openapi: 3.1.0
+info:
+  title: Mudda API
+  version: "1.0"
+  summary: The JSON API a script or agent drives Mudda through.
+  description: |
+    Every resource has a JSON representation on the same URL as its page: `GET /boards/123`
+    returns a page, `GET /boards/123.json` returns the board. URLs carry no account prefix; the
+    account is whoever the credential belongs to.
+
+    Requests and responses are JSON. A write accepts its attributes flat (`{"title":"…"}`) or
+    wrapped in the resource's name (`{"card":{"title":"…"}}`); attributes an endpoint doesn't
+    take are ignored. A create answers `201` with the record and a `Location`; a delete answers
+    `204`. Timestamps are UTC, but "today" (`overdue`, `due=soon`, `creation`) is the owner's day.
+
+    JSON is opt-in: an endpoint not listed here answers a JSON request with `406` before the
+    action runs. Every failure comes back in one envelope, in English, carrying the request id.
+
+    This file is the published contract consumed by the mudda-docs site, and
+    `test/integration/openapi_spec_test.rb` keeps it in step with the routes.
+servers:
+  - url: https://{board}.mudda.today
+    description: A hosted board
+    variables:
+      board:
+        default: your-board
+        description: The board's subdomain.
+security:
+  - bearerToken: []
+tags:
+  - name: Users & account
+    description: The signed-in user, their account, preferences, and time zone.
+  - name: Boards
+    description: Boards and their four fixed columns (Backlog, Todo, Doing, Done).
+  - name: Cards
+    description: Cards, addressed per board by their `number`.
+  - name: Steps
+    description: |
+      A card's checklist. Steps have no JSON endpoints of their own: they are read in a card's
+      `steps` and written through `steps_attributes` on `POST`/`PUT` of the card.
+  - name: Notes
+    description: The timestamped log on a card.
+  - name: Search
+    description: Full-text search across every board.
+  - name: Tokens
+    description: |
+      Minting tokens over JSON. Tokens are also minted from the profile's API tokens page,
+      `make token`, and OAuth (see https://docs.mudda.today/mcp/oauth/); those are not JSON endpoints.
+  - name: Sessions
+    description: Ending the session that makes the request.
+
+paths:
+  /my/user.json:
+    get:
+      tags: [Users & account]
+      operationId: getCurrentUser
+      summary: Get the signed-in user
+      description: |
+        The signed-in user, with the `account` nested in it, the `timezone` the request was
+        reckoned in, and, for a token, its `label` and `scopes`. Open to every token whatever
+        its scopes.
+      x-scopes: []
+      responses:
+        "200":
+          description: The signed-in user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CurrentUser" }
+              examples: { default: { $ref: "#/components/examples/CurrentUser" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /users/{id}.json:
+    parameters:
+      - $ref: "#/components/parameters/UserId"
+    get:
+      tags: [Users & account]
+      operationId: getUser
+      summary: Get the user
+      description: Always the signed-in user, whatever the `:id`.
+      x-scopes: [read]
+      responses:
+        "200":
+          description: The user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+              examples: { default: { $ref: "#/components/examples/User" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      tags: [Users & account]
+      operationId: updateUser
+      summary: Update the user
+      description: |
+        Changes the signed-in user's `name` and `avatar` (an Active Storage signed blob id).
+        Always the signed-in user, whatever the `:id`.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserInput" }
+            example: { name: Ayesha K. }
+      responses:
+        "200":
+          description: The updated user.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+              examples: { default: { $ref: "#/components/examples/User" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /users/{user_id}/avatar.json:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema: { type: integer }
+        example: 1
+    delete:
+      tags: [Users & account]
+      operationId: deleteAvatar
+      summary: Remove the avatar
+      description: Removes the user's avatar; the monogram is shown in its place.
+      x-scopes: [delete]
+      responses:
+        "204": { description: Removed. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /my/timezone.json:
+    patch:
+      tags: [Users & account]
+      operationId: updateTimezone
+      summary: Set the owner's time zone
+      description: |
+        Saves the zone "today" is reckoned in for tokens. It lasts only until the owner next
+        loads a page in a browser set to another zone. A missing or blank zone is a `400`, and a
+        name that isn't a zone a `422`.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timezone]
+              properties:
+                timezone: { type: string, description: An IANA zone name. }
+            example: { timezone: Asia/Kolkata }
+      responses:
+        "204": { description: Saved. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /my/preferences.json:
+    get:
+      tags: [Users & account]
+      operationId: getPreferences
+      summary: Get preferences
+      description: The owner's `locale` (`null` follows the browser) and `theme`.
+      x-scopes: [read]
+      responses:
+        "200":
+          description: The preferences.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Preferences" }
+              example: { locale: en, theme: auto }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    patch:
+      tags: [Users & account]
+      operationId: updatePreferences
+      summary: Update preferences
+      description: Changes only the keys sent. An unknown value is a `422`.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Preferences" }
+            example: { locale: ar }
+      responses:
+        "204": { description: Saved. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /boards.json:
+    get:
+      tags: [Boards]
+      operationId: listBoards
+      summary: List boards
+      description: Every board, most recently updated first.
+      x-scopes: [read]
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Previous"
+      responses:
+        "200":
+          description: A page of boards.
+          headers:
+            X-Total-Count: { $ref: "#/components/headers/XTotalCount" }
+            Link: { $ref: "#/components/headers/Link" }
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - properties:
+                      data: { type: array, items: { $ref: "#/components/schemas/Board" } }
+              examples: { default: { $ref: "#/components/examples/BoardPage" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    post:
+      tags: [Boards]
+      operationId: createBoard
+      summary: Create a board
+      description: Creates a board with its four fixed columns.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BoardInput" }
+            example: { name: Writebook }
+      responses:
+        "201":
+          description: The new board, with its columns.
+          headers:
+            Location: { $ref: "#/components/headers/Location" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BoardWithColumns" }
+              examples: { default: { $ref: "#/components/examples/BoardWithColumns" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /boards/{id}.json:
+    parameters:
+      - $ref: "#/components/parameters/BoardIdPath"
+    get:
+      tags: [Boards]
+      operationId: getBoard
+      summary: Get a board
+      description: |
+        The board with its four `columns`, in lane order. Columns have no endpoints of their
+        own; each carries a `cards_url` narrowing the card index to that lane.
+      x-scopes: [read]
+      responses:
+        "200":
+          description: The board.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BoardWithColumns" }
+              examples: { default: { $ref: "#/components/examples/BoardWithColumns" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Boards]
+      operationId: updateBoard
+      summary: Rename a board
+      description: Renames the board. `PATCH` is accepted too.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BoardInput" }
+            example: { name: Writebook 2 }
+      responses:
+        "200":
+          description: The board.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BoardWithColumns" }
+              examples: { default: { $ref: "#/components/examples/BoardWithColumns" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    delete:
+      tags: [Boards]
+      operationId: deleteBoard
+      summary: Delete a board
+      description: Permanently deletes the board with every card and note on it.
+      x-scopes: [delete]
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /cards.json:
+    get:
+      tags: [Cards]
+      operationId: listCards
+      summary: List cards on every board
+      description: Cards across every board, narrowed by the filters.
+      x-scopes: [read]
+      parameters:
+        - $ref: "#/components/parameters/BoardIds"
+        - $ref: "#/components/parameters/ColumnIds"
+        - $ref: "#/components/parameters/CardIds"
+        - $ref: "#/components/parameters/Terms"
+        - $ref: "#/components/parameters/Creation"
+        - $ref: "#/components/parameters/Due"
+        - $ref: "#/components/parameters/Lane"
+        - $ref: "#/components/parameters/IndexedBy"
+        - $ref: "#/components/parameters/SortedBy"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Previous"
+      responses:
+        "200": { $ref: "#/components/responses/CardPage" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /boards/{board_id}/cards.json:
+    parameters:
+      - $ref: "#/components/parameters/BoardId"
+    get:
+      tags: [Cards]
+      operationId: listBoardCards
+      summary: List a board's cards
+      description: That board's cards, with the same filters as `/cards.json`.
+      x-scopes: [read]
+      parameters:
+        - $ref: "#/components/parameters/BoardIds"
+        - $ref: "#/components/parameters/ColumnIds"
+        - $ref: "#/components/parameters/CardIds"
+        - $ref: "#/components/parameters/Terms"
+        - $ref: "#/components/parameters/Creation"
+        - $ref: "#/components/parameters/Due"
+        - $ref: "#/components/parameters/Lane"
+        - $ref: "#/components/parameters/IndexedBy"
+        - $ref: "#/components/parameters/SortedBy"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Previous"
+      responses:
+        "200": { $ref: "#/components/responses/CardPage" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    post:
+      tags: [Cards, Steps]
+      operationId: createCard
+      summary: Create a card
+      description: |
+        Creates the whole card, steps included, in the board's Backlog. A `board_id` or
+        `column_id` in the body is ignored. Past a hosted plan's card limit it is a `422`.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CardInput" }
+            example:
+              title: Ship it
+              due_on: "2026-12-01"
+              steps_attributes: [{ content: First }, { content: Second }]
+      responses:
+        "201":
+          description: The new card.
+          headers:
+            Location: { $ref: "#/components/headers/Location" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CardDetail" }
+              examples: { default: { $ref: "#/components/examples/CardDetail" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /boards/{board_id}/cards/{number}.json:
+    parameters:
+      - $ref: "#/components/parameters/BoardId"
+      - $ref: "#/components/parameters/CardNumber"
+    get:
+      tags: [Cards]
+      operationId: getCard
+      summary: Get a card
+      description: |
+        The whole card: its fields, all of its `steps`, its 20 most recent `notes`, and
+        `notes_truncated`. When that is `true`, `notes_url` pages through the whole log.
+      x-scopes: [read]
+      responses:
+        "200":
+          description: The card.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CardDetail" }
+              examples: { default: { $ref: "#/components/examples/CardDetail" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Cards, Steps]
+      operationId: updateCard
+      summary: Update a card
+      description: |
+        Any writable field, plus `column_id` to change lane and `board_id` to move boards,
+        applied in one write or refused with nothing written. A card in Todo or Doing needs a
+        `due_on`. Moved to another board, the card is renumbered there: the `Location` header
+        and the body's `url` carry its new address. `steps_attributes` adds (no `id`), edits
+        (`id` plus fields), or removes (`id` plus `"_destroy": true`, which needs `delete`)
+        steps. `PATCH` is accepted too.
+      x-scopes: [write, "delete (when removing steps)"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CardUpdate" }
+            example:
+              title: Ship it
+              column_id: 4
+              pinned: true
+              steps_attributes: [{ id: 12, completed: true }, { content: A new step }]
+      responses:
+        "200":
+          description: The card. `Location` is sent only when it moved boards.
+          headers:
+            Location: { $ref: "#/components/headers/Location" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CardDetail" }
+              examples: { default: { $ref: "#/components/examples/CardDetail" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    delete:
+      tags: [Cards]
+      operationId: deleteCard
+      summary: Delete a card
+      description: Permanently deletes the card with its steps and notes.
+      x-scopes: [delete]
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /boards/{board_id}/cards/{card_number}/notes.json:
+    parameters:
+      - $ref: "#/components/parameters/BoardId"
+      - $ref: "#/components/parameters/CardNumberNested"
+    get:
+      tags: [Notes]
+      operationId: listNotes
+      summary: List a card's notes
+      description: |
+        The card's whole note log, oldest first. Only needed when the card's
+        `notes_truncated` is `true`.
+      x-scopes: [read]
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Previous"
+      responses:
+        "200":
+          description: A page of notes.
+          headers:
+            X-Total-Count: { $ref: "#/components/headers/XTotalCount" }
+            Link: { $ref: "#/components/headers/Link" }
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - properties:
+                      data: { type: array, items: { $ref: "#/components/schemas/Note" } }
+              examples: { default: { $ref: "#/components/examples/NotePage" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    post:
+      tags: [Notes]
+      operationId: createNote
+      summary: Add a note
+      description: Adds a timestamped note to the card's log.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NoteInput" }
+            example: { body: Deployed to staging. }
+      responses:
+        "201":
+          description: The new note.
+          headers:
+            Location: { $ref: "#/components/headers/Location" }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Note" }
+              examples: { default: { $ref: "#/components/examples/Note" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /boards/{board_id}/cards/{card_number}/notes/{id}.json:
+    parameters:
+      - $ref: "#/components/parameters/BoardId"
+      - $ref: "#/components/parameters/CardNumberNested"
+      - name: id
+        in: path
+        required: true
+        description: The note's id.
+        schema: { type: integer }
+        example: 31
+    get:
+      tags: [Notes]
+      operationId: getNote
+      summary: Get a note
+      x-scopes: [read]
+      responses:
+        "200":
+          description: The note.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Note" }
+              examples: { default: { $ref: "#/components/examples/Note" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Notes]
+      operationId: updateNote
+      summary: Edit a note
+      description: Replaces the note's body. Only its creator may. `PATCH` is accepted too.
+      x-scopes: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NoteInput" }
+            example: { body: Deployed to production. }
+      responses:
+        "200":
+          description: The note.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Note" }
+              examples: { default: { $ref: "#/components/examples/Note" } }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    delete:
+      tags: [Notes]
+      operationId: deleteNote
+      summary: Delete a note
+      description: Permanently deletes the note. Only its creator may.
+      x-scopes: [delete]
+      responses:
+        "204": { description: Deleted. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /search.json:
+    get:
+      tags: [Search]
+      operationId: search
+      summary: Search cards
+      description: |
+        Searches card titles, descriptions, and notes across every board, and returns the
+        matching cards, most recently active first. Every word must match; `OR`, `AND`, `NOT`
+        and `NEAR` are words, not operators; double quotes match a phrase. A blank `q` returns
+        nothing. A card number is searched as plain text.
+      x-scopes: [read]
+      parameters:
+        - name: q
+          in: query
+          description: The search text.
+          schema: { type: string }
+          example: deploy staging
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Previous"
+      responses:
+        "200": { $ref: "#/components/responses/CardPage" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+
+  /session/password.json:
+    post:
+      tags: [Tokens]
+      operationId: signInWithPassword
+      summary: Mint a token with the password
+      description: |
+        Signs in with the owner's email and password and mints a token, valid for 90 days.
+        `label` names it (default `json-sign-in`); a label holds one live token, so give every
+        client its own. `scopes` (a string or list) defaults to `read write`. The credentials
+        may also be wrapped in `session`. Rate limited to 10 attempts every 3 minutes per IP.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PasswordSignIn" }
+            example:
+              email_address: you@example.com
+              password: correct horse battery staple
+              label: claude
+              scopes: [read, write]
+      responses:
+        "200":
+          description: The new token.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session_token, scopes]
+                properties:
+                  session_token: { type: string }
+                  scopes: { type: array, items: { $ref: "#/components/schemas/Scope" } }
+              example: { session_token: eyJfcmFpbHMiOnsi…, scopes: [read, write] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /session/passkey.json:
+    post:
+      tags: [Tokens]
+      operationId: signInWithPasskey
+      summary: Mint a token with a passkey
+      description: |
+        Completes a WebAuthn passkey sign-in and mints a `json-sign-in` token with the default
+        scopes. The body is the browser's WebAuthn assertion.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The WebAuthn assertion produced by `navigator.credentials.get`.
+              additionalProperties: true
+            example:
+              passkey:
+                id: AbC123…
+                client_data_json: eyJ0eXBlIjoid2ViYXV0aG4uZ2V0Ii…
+                authenticator_data: SZYN5YgOjGh0NBcPZHZgW4…
+                signature: MEUCIQD…
+      responses:
+        "200":
+          description: The new token.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session_token]
+                properties:
+                  session_token: { type: string }
+              example: { session_token: eyJfcmFpbHMiOnsi… }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /session.json:
+    delete:
+      tags: [Sessions]
+      operationId: signOut
+      summary: End this session
+      description: Ends the token (or session) making the request. Open to every token whatever its scopes.
+      x-scopes: []
+      responses:
+        "204": { description: Ended. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+components:
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      description: |
+        `Authorization: Bearer <token>` (or `Token <token>`; the scheme is case-sensitive). A
+        token does what its scopes grant, decided by the request's verb: `read` for `GET`,
+        `write` for `POST`/`PUT`/`PATCH`, `delete` for `DELETE` or a write that removes nested
+        records (`"_destroy": true`). Tokens get `read write` unless `delete` is asked for. A
+        request outside a token's scopes is a `403` before the action runs. Each operation's
+        `x-scopes` names the scope it needs. Each token may make 600 requests a minute.
+
+  parameters:
+    UserId:
+      name: id
+      in: path
+      required: true
+      description: Ignored; always the signed-in user.
+      schema: { type: integer }
+      example: 1
+    BoardIdPath:
+      name: id
+      in: path
+      required: true
+      description: The board's id.
+      schema: { type: integer }
+      example: 1
+    BoardId:
+      name: board_id
+      in: path
+      required: true
+      description: The board's id.
+      schema: { type: integer }
+      example: 1
+    CardNumber:
+      name: number
+      in: path
+      required: true
+      description: The card's number on its board (not its id).
+      schema: { type: integer }
+      example: 7
+    CardNumberNested:
+      name: card_number
+      in: path
+      required: true
+      description: The card's number on its board (not its id).
+      schema: { type: integer }
+      example: 7
+    Page:
+      name: page
+      in: query
+      description: The page to read. Prefer following `paging.next`.
+      schema: { type: integer, minimum: 1 }
+    Previous:
+      name: previous
+      in: query
+      description: Accepted on every endpoint; used by the browser's paging.
+      schema: { type: string }
+    BoardIds:
+      name: board_ids[]
+      in: query
+      description: Board ids.
+      schema: { type: array, items: { type: integer } }
+      style: form
+      explode: true
+    ColumnIds:
+      name: column_ids[]
+      in: query
+      description: Column ids, from a board's `columns`.
+      schema: { type: array, items: { type: integer } }
+      style: form
+      explode: true
+    CardIds:
+      name: card_ids[]
+      in: query
+      description: Card `id`s (not numbers).
+      schema: { type: array, items: { type: integer } }
+      style: form
+      explode: true
+    Terms:
+      name: terms[]
+      in: query
+      description: Full-text terms.
+      schema: { type: array, items: { type: string } }
+      style: form
+      explode: true
+    Creation:
+      name: creation
+      in: query
+      description: When the card was created.
+      schema:
+        type: string
+        enum: [today, yesterday, thisweek, thismonth, thisyear, lastweek, lastmonth, lastyear]
+    Due:
+      name: due
+      in: query
+      description: "`soon`: open cards due by tomorrow, the most overdue first."
+      schema: { type: string, enum: [soon] }
+    Lane:
+      name: lane
+      in: query
+      description: That lane on every board, in any case.
+      schema: { type: string, enum: [backlog, todo, doing, done] }
+    IndexedBy:
+      name: indexed_by
+      in: query
+      schema: { type: string, enum: [all, pinned], default: all }
+    SortedBy:
+      name: sorted_by
+      in: query
+      description: |
+        `latest` (most recently active first), `newest`, or `oldest` (by creation). With
+        `due=soon`, only `newest` and `oldest` override its order.
+      schema: { type: string, enum: [latest, newest, oldest], default: latest }
+
+  headers:
+    Location:
+      description: The record's URL.
+      schema: { type: string, format: uri }
+    XTotalCount:
+      description: The total number of records.
+      schema: { type: integer }
+    Link:
+      description: '`<…?page=2>; rel="next"` while there is a next page.'
+      schema: { type: string }
+
+  responses:
+    CardPage:
+      description: A page of cards.
+      headers:
+        X-Total-Count: { $ref: "#/components/headers/XTotalCount" }
+        Link: { $ref: "#/components/headers/Link" }
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Page"
+              - properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/Card" } }
+          examples: { default: { $ref: "#/components/examples/CardPage" } }
+    BadRequest:
+      description: The body is missing the object a write needs, or isn't valid JSON.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { card: ["is missing"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+    Unauthorized:
+      description: No credential, or a revoked or expired token.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { base: ["Unauthorized"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+    Forbidden:
+      description: The user is deactivated, the record isn't yours to change, or the token lacks the scope.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { base: ["This token is not granted the write scope"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+    NotFound:
+      description: No such record or route.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { base: ["Not found"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+    Conflict:
+      description: A concurrent change took the same unique value; retry.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { base: ["Conflict; retry"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+    Unprocessable:
+      description: Validation failed, a query parameter isn't recognised, or a filter value is outside its list.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { due_on: ["can't be blank in Todo or Doing"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+    TooManyRequests:
+      description: The sign-in rate limit or the token's allowance; see `Retry-After`.
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Errors" }
+          example: { errors: { base: ["Try again later."] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
+
+  schemas:
+    Errors:
+      type: object
+      description: Every failure's envelope. `request_id` matches the `X-Request-Id` header.
+      required: [errors]
+      properties:
+        errors:
+          type: object
+          description: Messages keyed by field; `base` when no field is to blame.
+          additionalProperties: { type: array, items: { type: string } }
+        request_id: { type: string }
+    Paging:
+      type: object
+      description: Pages ramp 15, 30, 50, then 100 records; read `total` and `pages`.
+      required: [total, page, pages, next]
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        pages: { type: integer }
+        next: { type: [string, "null"], format: uri, description: "The following page, or null on the last." }
+    Page:
+      type: object
+      required: [data, paging]
+      properties:
+        data: { type: array, items: {} }
+        paging: { $ref: "#/components/schemas/Paging" }
+    Scope:
+      type: string
+      enum: [read, write, delete]
+    User:
+      type: object
+      required: [id, name, email_address, active, created_at, url, avatar_url]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email_address: { type: string, format: email }
+        active: { type: boolean }
+        created_at: { type: string, format: date-time }
+        url: { type: string, format: uri }
+        avatar_url: { type: string, format: uri }
+    CurrentUser:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          required: [timezone, account]
+          properties:
+            timezone: { type: string, description: The zone this request's dates were reckoned in. }
+            account:
+              type: object
+              properties:
+                id: { type: integer }
+                created_at: { type: string, format: date-time }
+            token:
+              type: object
+              description: Present only when a token made the request.
+              properties:
+                label: { type: string }
+                scopes: { type: array, items: { $ref: "#/components/schemas/Scope" } }
+    UserInput:
+      type: object
+      properties:
+        name: { type: string }
+        avatar: { type: string, description: An Active Storage signed blob id. }
+    Preferences:
+      type: object
+      properties:
+        locale: { type: [string, "null"], enum: [en, ar, null], description: "`null` follows the browser." }
+        theme: { type: string, enum: [auto, light, dark] }
+    Column:
+      type: object
+      required: [id, name, color, position, created_at, cards_url]
+      properties:
+        id: { type: integer }
+        name: { type: string, enum: [Backlog, Todo, Doing, Done] }
+        color: { type: string }
+        position: { type: integer }
+        created_at: { type: string, format: date-time }
+        cards_url: { type: string, format: uri, description: The board's card index narrowed to this lane. }
+    Board:
+      type: object
+      required: [id, name, created_at, url, creator]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        created_at: { type: string, format: date-time }
+        url: { type: string, format: uri }
+        creator: { $ref: "#/components/schemas/User" }
+    BoardWithColumns:
+      allOf:
+        - $ref: "#/components/schemas/Board"
+        - type: object
+          required: [columns]
+          properties:
+            columns: { type: array, items: { $ref: "#/components/schemas/Column" } }
+    BoardInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+    Step:
+      type: object
+      required: [id, content, completed]
+      properties:
+        id: { type: integer }
+        content: { type: string }
+        completed: { type: boolean }
+    StepAttributes:
+      type: object
+      description: No `id` adds a step; an `id` edits it, or removes it with `_destroy` (needs `delete`).
+      properties:
+        id: { type: integer }
+        content: { type: string }
+        completed: { type: boolean }
+        _destroy: { type: boolean }
+    Card:
+      type: object
+      required: [id, number, title, description, description_html, has_attachments, closed, backlogged,
+        pinned, overdue, color, due_on, last_active_at, created_at, url, board, creator, notes_url]
+      properties:
+        id: { type: integer }
+        number: { type: integer, description: The card's number on its board. }
+        title: { type: string }
+        description: { type: string, description: Plain text. }
+        description_html: { type: string, description: Write the description back from this. }
+        has_attachments: { type: boolean }
+        closed: { type: boolean, description: In Done. }
+        backlogged: { type: boolean, description: In Backlog. }
+        pinned: { type: boolean }
+        overdue: { type: boolean }
+        color: { type: string, description: Its lane's colour. }
+        due_on: { type: [string, "null"], format: date }
+        last_active_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+        url: { type: string, format: uri }
+        board: { $ref: "#/components/schemas/Board" }
+        column: { $ref: "#/components/schemas/Column" }
+        creator: { $ref: "#/components/schemas/User" }
+        notes_url: { type: string, format: uri }
+    CardDetail:
+      allOf:
+        - $ref: "#/components/schemas/Card"
+        - type: object
+          required: [steps, notes, notes_truncated]
+          properties:
+            steps: { type: array, items: { $ref: "#/components/schemas/Step" } }
+            notes: { type: array, items: { $ref: "#/components/schemas/Note" }, description: The 20 most recent. }
+            notes_truncated: { type: boolean }
+    CardInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        description: { type: string, description: "Rich text, as plain text or HTML." }
+        due_on: { type: [string, "null"], format: date }
+        pinned: { type: boolean }
+        created_at: { type: string, format: date-time }
+        last_active_at: { type: string, format: date-time }
+        steps_attributes: { type: array, items: { $ref: "#/components/schemas/StepAttributes" } }
+    CardUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        due_on: { type: [string, "null"], format: date }
+        pinned: { type: boolean }
+        created_at: { type: string, format: date-time }
+        last_active_at: { type: string, format: date-time }
+        steps_attributes: { type: array, items: { $ref: "#/components/schemas/StepAttributes" } }
+        column_id: { type: integer, description: A lane on the board the card ends on. }
+        board_id: { type: integer, description: "Moves the card to that board, renumbering it." }
+    Note:
+      type: object
+      required: [id, created_at, updated_at, body, creator, card, url]
+      properties:
+        id: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        body:
+          type: object
+          properties:
+            plain_text: { type: string }
+            html: { type: string }
+        creator: { $ref: "#/components/schemas/User" }
+        card:
+          type: object
+          properties:
+            id: { type: integer, description: The card's database id. }
+            url: { type: string, format: uri }
+        url: { type: string, format: uri }
+    NoteInput:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, description: "Rich text, as plain text or HTML." }
+        created_at: { type: string, format: date-time }
+    PasswordSignIn:
+      type: object
+      required: [email_address, password]
+      properties:
+        email_address: { type: string, format: email }
+        password: { type: string }
+        label: { type: string, default: json-sign-in }
+        scopes:
+          oneOf:
+            - type: string
+            - type: array
+              items: { $ref: "#/components/schemas/Scope" }
+
+  examples:
+    User:
+      value: &user
+        id: 1
+        name: Ayesha Khan
+        email_address: ayesha@example.com
+        active: true
+        created_at: "2026-01-04T09:12:00Z"
+        url: https://your-board.mudda.today/users/1
+        avatar_url: https://your-board.mudda.today/users/1/avatar
+    CurrentUser:
+      value:
+        <<: *user
+        timezone: Asia/Kolkata
+        account: { id: 1, created_at: "2026-01-04T09:12:00Z" }
+        token: { label: claude, scopes: [read, write] }
+    Board:
+      value: &board
+        id: 1
+        name: Writebook
+        created_at: "2026-01-04T09:15:00Z"
+        url: https://your-board.mudda.today/boards/1
+        creator: *user
+    BoardWithColumns:
+      value:
+        <<: *board
+        columns:
+          - { id: 1, name: Backlog, color: "var(--color-card-default)", position: 0, created_at: "2026-01-04T09:15:00Z", cards_url: "https://your-board.mudda.today/boards/1/cards?column_ids%5B%5D=1" }
+          - { id: 2, name: Todo, color: "var(--color-card-1)", position: 1, created_at: "2026-01-04T09:15:00Z", cards_url: "https://your-board.mudda.today/boards/1/cards?column_ids%5B%5D=2" }
+          - &doing { id: 3, name: Doing, color: "var(--color-card-2)", position: 2, created_at: "2026-01-04T09:15:00Z", cards_url: "https://your-board.mudda.today/boards/1/cards?column_ids%5B%5D=3" }
+          - { id: 4, name: Done, color: "var(--color-card-3)", position: 3, created_at: "2026-01-04T09:15:00Z", cards_url: "https://your-board.mudda.today/boards/1/cards?column_ids%5B%5D=4" }
+    BoardPage:
+      value:
+        data: [*board]
+        paging: { total: 1, page: 1, pages: 1, next: null }
+    Note:
+      value: &note
+        id: 31
+        created_at: "2026-10-16T14:02:11Z"
+        updated_at: "2026-10-16T14:02:11Z"
+        body:
+          plain_text: Deployed to staging.
+          html: "<div>Deployed to staging.</div>"
+        creator: *user
+        card: { id: 57, url: https://your-board.mudda.today/boards/1/cards/7 }
+        url: https://your-board.mudda.today/boards/1/cards/7/notes/31
+    NotePage:
+      value:
+        data: [*note]
+        paging: { total: 1, page: 1, pages: 1, next: null }
+    Card:
+      value: &card
+        id: 57
+        number: 7
+        title: Ship it
+        description: Cut the release and announce it.
+        description_html: "<div>Cut the release and announce it.</div>"
+        has_attachments: false
+        closed: false
+        backlogged: false
+        pinned: true
+        overdue: false
+        color: "var(--color-card-2)"
+        due_on: "2026-12-01"
+        last_active_at: "2026-10-16T14:02:11Z"
+        created_at: "2026-10-01T08:30:00Z"
+        url: https://your-board.mudda.today/boards/1/cards/7
+        board: *board
+        column: *doing
+        creator: *user
+        notes_url: https://your-board.mudda.today/boards/1/cards/7/notes
+    CardDetail:
+      value:
+        <<: *card
+        steps:
+          - { id: 12, content: First, completed: true }
+          - { id: 13, content: Second, completed: false }
+        notes: [*note]
+        notes_truncated: false
+    CardPage:
+      value:
+        data: [*card]
+        paging: { total: 42, page: 1, pages: 3, next: "https://your-board.mudda.today/cards.json?page=2" }

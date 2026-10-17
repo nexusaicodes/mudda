@@ -5,6 +5,7 @@ module Mudda::Mcp::Tools
     description "Every board in the account. Paged: follow paging.next or pass `page`."
     arguments(properties: { page: { type: "integer", minimum: 1 } })
     kind :read
+    calls :get, "/boards.json"
 
     def self.call(page: nil, server_context:)
       respond api(server_context).get("/boards", page_query(page))
@@ -21,6 +22,7 @@ module Mudda::Mcp::Tools
     TEXT
     arguments(properties: { board_id: { type: "integer" } }, required: %w[ board_id ])
     kind :read
+    calls :get, "/boards/{id}.json"
 
     def self.call(board_id:, server_context:)
       respond api(server_context).get("/boards/#{Integer(board_id)}")
@@ -33,6 +35,7 @@ module Mudda::Mcp::Tools
     description "Creates a board. It comes with the four fixed columns; they can't be added, removed, or renamed."
     arguments(properties: { name: { type: "string" } }, required: %w[ name ])
     kind :create
+    calls :post, "/boards.json"
 
     def self.call(name:, server_context:)
       respond api(server_context).post("/boards", { name: name })
@@ -48,6 +51,7 @@ module Mudda::Mcp::Tools
       required: %w[ board_id name ]
     )
     kind :update
+    calls :put, "/boards/{id}.json"
 
     def self.call(board_id:, name:, server_context:)
       respond api(server_context).put("/boards/#{Integer(board_id)}", { name: name })
@@ -60,6 +64,7 @@ module Mudda::Mcp::Tools
     description "Permanently deletes a board and every card and note on it. This can't be undone."
     arguments(properties: { board_id: { type: "integer" } }, required: %w[ board_id ])
     kind :delete
+    calls :delete, "/boards/{id}.json"
 
     def self.call(board_id:, server_context:)
       respond api(server_context).delete("/boards/#{Integer(board_id)}")

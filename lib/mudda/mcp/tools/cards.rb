@@ -31,6 +31,7 @@ module Mudda::Mcp::Tools
       }
     )
     kind :read
+    calls :get, "/cards.json", "/boards/{board_id}/cards.json"
 
     def self.call(board_id: nil, server_context:, **filters)
       respond api(server_context).get(index_path(board_id), filters.slice(*FILTERS).compact)
@@ -51,6 +52,7 @@ module Mudda::Mcp::Tools
     TEXT
     arguments(properties: CARD_ADDRESS, required: %w[ board_id number ])
     kind :read
+    calls :get, "/boards/{board_id}/cards/{number}.json"
 
     def self.call(board_id:, number:, server_context:)
       respond api(server_context).get("/boards/#{Integer(board_id)}/cards/#{Integer(number)}")
@@ -78,6 +80,7 @@ module Mudda::Mcp::Tools
       required: %w[ board_id title ]
     )
     kind :create
+    calls :post, "/boards/{board_id}/cards.json"
 
     def self.call(board_id:, steps: [], server_context:, **attributes)
       card = attributes.slice(:title, :due_on, :description, :pinned)
@@ -124,6 +127,7 @@ module Mudda::Mcp::Tools
     )
     # Repeating a call adds its new steps again, and `remove` deletes steps.
     kind :update, destructive_hint: true, idempotent_hint: false
+    calls :put, "/boards/{board_id}/cards/{number}.json"
 
     def self.call(board_id:, number:, to_board_id: nil, steps: nil, server_context:, **attributes)
       card = attributes.slice(:title, :due_on, :description, :pinned, :column_id)
@@ -149,6 +153,7 @@ module Mudda::Mcp::Tools
     TEXT
     arguments(properties: CARD_ADDRESS, required: %w[ board_id number ])
     kind :delete
+    calls :delete, "/boards/{board_id}/cards/{number}.json"
 
     def self.call(board_id:, number:, server_context:)
       respond api(server_context).delete("/boards/#{Integer(board_id)}/cards/#{Integer(number)}")
