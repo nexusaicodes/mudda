@@ -1,21 +1,21 @@
 <%# locals: (board:, card_count:) -%>
 <%# A board's delete button on the boards list, behind a confirmation. %>
 <div class="board-delete" data-controller="dialog" data-dialog-modal-value="true" data-action="keydown.esc->dialog#close:stop">
-  <button type="button" class="btn btn--circle borderless txt-negative" data-action="dialog#open" title="<%= t(".open") %>">
+  <button type="button" class="btn btn-ghost btn-circle btn-sm text-error" data-action="dialog#open" title="<%= t(".open") %>" aria-label="<%= t(".open") %>">
     <%= icon_tag "trash" %>
-    <span class="for-screen-reader"><%= t(".open") %></span>
   </button>
 
-  <dialog class="dialog panel fill-white shadow gap flex-column" style="--panel-size: 40ch" data-dialog-target="dialog">
-    <h3 class="txt-large txt-bold"><%= t(".heading_html", name: tag.span(board.name, dir: "auto")) %></h3>
-    <p class="txt-medium margin-block-half">
-      <%= t(".body", count: card_count) %>
-    </p>
-    <div class="flex gap-half justify-center margin-block-start">
-      <button type="button" class="btn" data-action="dialog#close"><%= t(".cancel") %></button>
-      <%= button_to board_path(board), method: :delete, class: "btn txt-negative", data: { turbo_frame: "_top" } do %>
-        <span><%= t(".submit") %></span>
-      <% end %>
+  <dialog class="modal" data-dialog-target="dialog">
+    <div class="modal-box text-start">
+      <h3 class="text-lg font-bold"><%= t(".heading_html", name: tag.span(board.name, dir: "auto")) %></h3>
+      <p class="py-3"><%= t(".body", count: card_count) %></p>
+      <div class="modal-action">
+        <button type="button" class="btn" data-action="dialog#close"><%= t(".cancel") %></button>
+        <%= button_to board_path(board), method: :delete, class: "btn btn-error", data: { turbo_frame: "_top" } do %>
+          <span><%= t(".submit") %></span>
+        <% end %>
+      </div>
     </div>
+    <form method="dialog" class="modal-backdrop"><button><%= t(".cancel") %></button></form>
   </dialog>
 </div>

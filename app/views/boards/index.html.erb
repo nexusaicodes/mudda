@@ -4,45 +4,42 @@
   <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<section class="boards-list">
-  <%= link_to new_board_path, class: "btn btn--link boards-list__new" do %>
+<section class="boards-list w-full max-w-xl mx-auto flex flex-col gap-4">
+  <%= link_to new_board_path, class: "boards-list__new btn btn-primary self-center" do %>
     <%= icon_tag "board-add" %>
     <span><%= t(".new") %></span>
   <% end %>
 
   <% if @boards.any? %>
-    <ul class="boards-list__items" role="list">
+    <ul class="boards-list__items list bg-base-100 rounded-box shadow-sm" role="list">
       <% @boards.each do |board| %>
-        <li class="boards-list__item panel" id="<%= dom_id(board) %>" data-controller="inline-edit">
-          <div class="boards-list__display" data-inline-edit-target="display">
+        <li class="boards-list__item list-row items-center" id="<%= dom_id(board) %>" data-controller="inline-edit">
+          <div class="boards-list__display list-col-grow flex items-center gap-2 min-w-0" data-inline-edit-target="display">
             <% card_count = @card_counts.fetch(board.id, 0) %>
-            <%= link_to board_path(board), class: "boards-list__link" do %>
-              <strong class="overflow-ellipsis txt-medium" dir="auto"><%= board.name %></strong>
-              <span class="boards-list__meta"><%= t(".cards", count: card_count) %></span>
+            <%= link_to board_path(board), class: "boards-list__link flex flex-col grow min-w-0 text-start" do %>
+              <strong class="truncate" dir="auto"><%= board.name %></strong>
+              <span class="text-xs text-base-content/60"><%= t(".cards", count: card_count) %></span>
             <% end %>
 
-            <div class="boards-list__actions">
-              <button type="button" class="btn btn--circle borderless" data-action="inline-edit#edit" title="<%= t(".rename") %>">
-                <%= icon_tag "pencil" %>
-                <span class="for-screen-reader"><%= t(".rename") %></span>
-              </button>
-              <%= render "boards/delete", board: board, card_count: card_count %>
-            </div>
+            <button type="button" class="btn btn-ghost btn-circle btn-sm" data-action="inline-edit#edit" title="<%= t(".rename") %>" aria-label="<%= t(".rename") %>">
+              <%= icon_tag "pencil" %>
+            </button>
+            <%= render "boards/delete", board: board, card_count: card_count %>
           </div>
 
           <div class="boards-list__editor" data-inline-edit-target="editor" hidden>
-            <%= form_with model: board, class: "boards-list__form", data: { controller: "form", action: "submit->form#preventEmptySubmit keydown.esc->inline-edit#cancel" } do |form| %>
-              <%= form.label :name, t(".name_label"), class: "for-screen-reader" %>
-              <%= form.text_field :name, required: true, autocomplete: "off", class: "input boards-list__input", dir: "auto",
+            <%= form_with model: board, class: "boards-list__form join w-full", data: { controller: "form", action: "submit->form#preventEmptySubmit keydown.esc->inline-edit#cancel" } do |form| %>
+              <%= form.label :name, t(".name_label"), class: "sr-only" %>
+              <%= form.text_field :name, required: true, autocomplete: "off", class: "input join-item w-full", dir: "auto",
                     data: { inline_edit_target: "input", form_target: "input", validation_message: t(".blank"), "1p-ignore": "true" } %>
-              <%= form.button t(".save"), class: "btn btn--link txt-small" %>
-              <button type="button" class="btn txt-small" data-action="inline-edit#cancel"><%= t(".cancel") %></button>
+              <%= form.button t(".save"), class: "btn btn-primary join-item" %>
+              <button type="button" class="btn join-item" data-action="inline-edit#cancel"><%= t(".cancel") %></button>
             <% end %>
           </div>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p class="boards-list__empty"><%= t(".empty") %></p>
+    <p class="text-base-content/60"><%= t(".empty") %></p>
   <% end %>
 </section>
