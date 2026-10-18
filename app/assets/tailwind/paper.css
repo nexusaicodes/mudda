@@ -1,11 +1,9 @@
 @layer base {
-  /* The page is a sheet of aged papyrus: a golden-ochre ground, broad stains stretched over the
-     window, a woven layer of horizontal strips over vertical ones, and a fine repeating grain. A ruled frame sits a little inside the window's edges: one
-     tight band of a vermilion rule with a dark-brown hairline against each side of it. */
+  /* The page is a manuscript leaf: flat cream paper and navy ink, headings set in Amiri, and the
+     kit's surfaces (cards, modals, menus, alerts) drawn as hairline-ruled panels on the paper
+     rather than lifted off it. The one accent, vermilion, marks focus. */
   :root {
-    --paper: #b8925a;
-    --paper-rule: #c8462a;
-    --paper-rule-edge: oklch(46% 0.07 55 / 0.6);
+    --paper: var(--cream);
 
     /* daisyUI's page colour, so its own effects (a modal's dimming) tint the paper. */
     --root-bg: var(--paper);
@@ -13,38 +11,38 @@
 
   /* html:root outranks daisyUI's :root background, which would otherwise paint the theme's base colour. */
   html:root {
-    background:
-      url("paper-grain.svg") 0 0 / 320px 320px repeat,
-      url("paper-fibres.svg") 0 0 / 720px 720px repeat,
-      url("paper-stains.svg") 0 0 / 100vw 100vh no-repeat fixed,
-      radial-gradient(ellipse at center, transparent 55%, oklch(32% 0.06 60 / 0.26) 100%) 0 0 / 100vw 100vh no-repeat fixed,
-      var(--paper);
+    background: var(--paper);
   }
 
   body {
     background: none;
   }
 
-  /* The rule is the border; the hairlines are shadows touching it, one outside and one inside. */
-  body::before {
-    border: 1.5px solid var(--paper-rule);
-    box-shadow:
-      0 0 0 1.5px var(--paper-rule-edge),
-      inset 0 0 0 1.5px var(--paper-rule-edge);
-    content: "";
-    inset: var(--paper-inset);
-    pointer-events: none;
-    position: fixed;
-    z-index: var(--z-nav);
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--vermilion);
+    outline-offset: 2px;
   }
 
   @media print {
     html:root {
       background: none;
     }
+  }
+}
 
-    body::before {
-      display: none;
-    }
+/* The kit's components sit in the utilities layer, so the hairline rule lives there too. */
+@layer utilities {
+  .card,
+  .modal-box,
+  .dropdown-content,
+  .alert {
+    border: 1px solid var(--hairline);
   }
 }

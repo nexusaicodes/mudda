@@ -1,12 +1,13 @@
-/* Static error pages, served without the app's stylesheet. The colours are the app's: the papyrus
-   ground (paper.css) and daisyUI's retro theme for the stamp. There is one look and no dark mode. */
+/* Static error pages, served without the app's stylesheet. The colours are the app's manuscript
+   palette (theme.css): navy ink on cream paper, the stamp in vermilion. There is one look and no
+   dark mode. */
 :root {
   color-scheme: light;
 
-  --color-page: #b8925a;
-  --color-canvas: oklch(91.637% 0.034 90.515);
-  --color-ink: oklch(41% 0.112 45.904);
-  --color-accent: oklch(64% 0.222 41.116);
+  --color-page: #f1e6ce;
+  --color-canvas: #f1e6ce;
+  --color-ink: #1b2a4a;
+  --color-accent: #b3341c;
 
   --text-large: 6rem;
   --text-medium: 2rem;
@@ -68,7 +69,6 @@ body {
 
   align-items: center;
   background-color: var(--color-canvas);
-  box-shadow: 0 0.5rem 1.5rem oklch(32% 0.06 60 / 0.3);
   border-radius: calc(var(--stroke-width) * 2);
   border: calc(var(--stroke-width) * 1) dashed var(--color-accent);
   color: var(--color-accent);

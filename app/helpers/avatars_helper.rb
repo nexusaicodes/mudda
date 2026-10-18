@@ -1,5 +1,5 @@
 module AvatarsHelper
-  AVATAR_FONT_PATH = Rails.root.join("app/assets/fonts/el-messiri-latin-wght-normal.woff2")
+  AVATAR_FONT_PATH = Rails.root.join("app/assets/fonts/amiri-latin-700-normal.woff2")
 
   def avatar_background_color(user)
     user.avatar_background_color

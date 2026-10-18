@@ -1,9 +1,19 @@
-/* Tokens the kit doesn't provide. Colours, radii, sizes and shadows come from the daisyUI retro
-   theme; only what the app itself depends on is defined here. */
+/* Tokens over the daisyUI retro theme: the manuscript palette, type, corners and flat surfaces
+   replace the theme's own, and what the app itself depends on is defined here. */
 
 @theme {
-  --font-sans: "IBM Plex Sans Arabic", "El Messiri", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Mudda", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Mudda", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-display: Amiri, "Noto Naskh Arabic", Georgia, serif;
   --font-mono: ui-monospace, monospace;
+
+  /* The manuscript look is flat: surfaces are told apart by hairlines, never shadows. */
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
 
   /* The flash fades in, holds, and fades out; element-removal drops it on animationend. */
   --animate-appear-then-fade: appear-then-fade 3s ease-out both;
@@ -19,13 +29,47 @@
 :root {
   color-scheme: light;
 
+  /* The manuscript palette over the retro theme: navy ink on cream paper, slate for quieter text,
+     brass for small labels, vermilion as the one accent. Corners are near-square. */
+  --ink: #1b2a4a;
+  --ink-muted: #46536e;
+  --brass: #8c6a2e;
+  --vermilion: #b3341c;
+  --cream: #f1e6ce;
+  --hairline: rgb(27 42 74 / 0.2);
+
+  --color-base-100: var(--cream);
+  --color-base-200: #e9dcc0;
+  --color-base-300: #dfd0b0;
+  --color-base-content: var(--ink);
+  --color-primary: var(--ink);
+  --color-primary-content: var(--cream);
+  --color-secondary: var(--brass);
+  --color-secondary-content: var(--cream);
+  --color-accent: var(--vermilion);
+  --color-accent-content: var(--cream);
+  --color-neutral: var(--ink-muted);
+  --color-neutral-content: var(--cream);
+  --color-info: var(--ink-muted);
+  --color-info-content: var(--cream);
+  --color-success: var(--ink);
+  --color-success-content: var(--cream);
+  --color-warning: var(--brass);
+  --color-warning-content: var(--cream);
+  --color-error: var(--vermilion);
+  --color-error-content: var(--cream);
+
+  --radius-selector: 3px;
+  --radius-field: 3px;
+  --radius-box: 3px;
+
   /* Safe areas, overridable by the native apps' injected insets */
   --custom-safe-inset-top: var(--injected-safe-inset-top, env(safe-area-inset-top, 0px));
   --custom-safe-inset-right: var(--injected-safe-inset-right, env(safe-area-inset-right, 0px));
   --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
   --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
 
-  /* The page sits inside the paper's frame; see paper.css */
+  /* The page's margin from the window's edges, which the header, page and lanes keep clear of */
   --paper-inset: clamp(10px, 2.2vmin, 26px);
   --paper-clearance: calc(var(--paper-inset) + 14px);
 
@@ -36,14 +80,15 @@
   --z-nav-open: 100;
 
   /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
-     of the data and the API; their values come from the kit's palette. */
+     of the data and the API; their values come from the palette above, and the four lanes differ in
+     lightness as well as hue. */
   --color-card-default: var(--color-info);
   --color-card-complete: var(--color-success);
   --color-card-1: var(--color-primary);
-  --color-card-2: var(--color-neutral);      /* Backlog */
-  --color-card-3: var(--color-info);         /* Todo */
-  --color-card-4: var(--color-success);      /* Done */
-  --color-card-5: var(--color-warning);      /* Doing */
+  --color-card-2: var(--ink-muted);          /* Backlog */
+  --color-card-3: var(--brass);              /* Todo */
+  --color-card-4: var(--ink);                /* Done */
+  --color-card-5: var(--vermilion);          /* Doing */
   --color-card-6: var(--color-accent);
   --color-card-7: var(--color-error);
   --color-card-8: var(--color-base-content);

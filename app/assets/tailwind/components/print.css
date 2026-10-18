@@ -1,5 +1,5 @@
-/* Printing: ink on white paper, no chrome. The page's own content prints; the header, buttons,
-   dialogs and the paper's frame and texture don't (paper.css drops the background). */
+/* Printing: ink on white paper, no chrome. The page's own content prints; the header, buttons
+   and dialogs don't, nor the paper's cream (paper.css drops the background). */
 
 @media print {
   @layer utilities {
@@ -9,8 +9,7 @@
     .board-tools,
     dialog,
     .toast,
-    lexxy-toolbar,
-    body::before {
+    lexxy-toolbar {
       display: none !important;
     }
 
