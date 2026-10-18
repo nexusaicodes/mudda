@@ -13,10 +13,6 @@ ar:
       empty_placeholder:
         drag_cards: اسحب البطاقات إلى هنا
         no_cards: لا توجد بطاقات هنا
-    show:
-      color_picker:
-        column_color: لون العمود
-        save_color: حفظ اللون
   cards:
     boards:
       edit:
@@ -80,6 +76,7 @@ ar:
       due_date: تاريخ الاستحقاق
       title_placeholder: سمّها…
     index:
+      back: اللوحات
       empty: لا شيء هنا الآن.
     new:
       add_step: أضف خطوة

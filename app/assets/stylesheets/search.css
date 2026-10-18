@@ -41,15 +41,6 @@ summary {
     &::-webkit-search-cancel-button {
       display: none;
     }
-
-    .bar__input & {
-      --focus-ring-size: 0;
-      --input-border-color: var(--color-ink-light);
-      --input-border-radius: 0;
-      --input-padding: 0.1em;
-
-      border-width: 0 0 1px;
-    }
   }
 
   .search__reset {
@@ -147,6 +138,7 @@ summary {
     gap: 1ch;
     letter-spacing: 0.05em;
     margin: 0;
+    padding-inline: 0.7rem; /* in line with the rows' text */
     text-transform: uppercase;
   }
 
@@ -217,11 +209,16 @@ summary {
     gap: 1ch;
   }
 
+  /* The lane reads as the card's due chip does: a tint of its colour, not an outline. */
   .search__lane {
-    border: 1px solid currentColor;
-    border-radius: 0.2em;
+    background-color: color-mix(in srgb, var(--column-color, var(--color-ink)) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--column-color, var(--color-ink)) 30%, transparent);
+    border-radius: var(--border-radius);
     color: var(--column-color, var(--color-ink-dark));
-    padding: 0.05em 0.5em;
+    font-size: var(--text-x-small);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.2em 0.6ch;
     text-transform: uppercase;
   }
 

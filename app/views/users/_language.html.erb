@@ -1,5 +1,5 @@
-<%= render "users/preference_choice", heading: t(".title"), name: :locale, current: Current.user.locale, options: [
-      { value: nil, label: t(".automatic"), icon: "globe" },
+<%# Until one is picked the language follows the browser, and the one in use shows as chosen. %>
+<%= render "users/preference_choice", heading: t(".title"), name: :locale, current: Current.user.locale || I18n.locale.to_s, options: [
       { value: "en", label: "English", lang: "en", dir: "ltr" },
       { value: "ar", label: "العربية", lang: "ar", dir: "rtl" }
     ] %>

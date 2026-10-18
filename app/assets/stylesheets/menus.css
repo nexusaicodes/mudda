@@ -1,39 +1,6 @@
 @layer components {
-  /* Header menus: the board switcher beside a page title, and the avatar link at the right.
+  /* The avatar link at the right of the header.
   /* ------------------------------------------------------------------------ */
-
-  .switcher {
-    display: inline-flex;
-    position: relative;
-  }
-
-  .menu.popup {
-    --panel-padding: 0.6rem;
-    --popup-display: grid;
-
-    font-size: var(--text-small);
-    font-weight: normal;
-    gap: 0.25rem;
-    inset: calc(100% + 0.5rem) auto auto 50%;
-    min-inline-size: min(30ch, calc(100vw - 2rem));
-    text-align: start;
-    text-transform: none;
-  }
-
-  .menu .popup__section-title {
-    color: var(--color-ink-dark);
-    font-size: var(--text-x-small);
-    letter-spacing: 0.04em;
-  }
-
-  @media (max-width: 639px) {
-    .switcher__menu.popup {
-      inset: calc(var(--custom-safe-inset-top) + 3.5rem) 1rem auto 1rem;
-      max-inline-size: none;
-      position: fixed;
-      translate: 0;
-    }
-  }
 
   /* A 44px tap target around a 2rem avatar. */
   .account-link {
@@ -50,48 +17,7 @@
     }
   }
 
-  .nav__section {
-    border-block-start: 1px solid var(--color-ink-lighter);
-    font-size: var(--text-small);
-    padding-block-start: 0.4rem;
-
-    &:first-child {
-      border-block-start: 0;
-      padding-block-start: 0;
-    }
-  }
-
-  .popup__item--current .popup__btn {
-    background: var(--color-selected);
-    font-weight: 700;
-  }
-
-  .popup__item--muted .popup__btn {
-    color: var(--color-ink-dark);
-  }
-
-  @media (max-width: 639px) {
-    .menu .popup__btn {
-      min-block-size: 2.75rem;
-    }
-  }
-
-  .menu__check {
-    color: var(--color-link);
-  }
-
-  .menu__count {
-    color: var(--color-ink-dark);
-    font-size: var(--text-x-small);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .menu__footer {
-    border-block-start: 1px solid var(--color-ink-lighter);
-    padding-block-start: 0.4rem;
-  }
-
-  /* Board title: the name renames the board in place; the ▾ beside it switches boards.
+  /* Board title: the name alone, centred.
   /* ------------------------------------------------------------------------ */
 
   .board-title {
@@ -100,81 +26,11 @@
     min-inline-size: 0;
   }
 
-  .board-title__display {
-    align-items: center;
-    display: flex;
-    gap: 0.25ch;
-    min-inline-size: 0;
-  }
-
   .board-title__name {
+    display: flex;
     font-size: inherit;
     font-weight: inherit;
     margin: 0;
     min-inline-size: 0;
-  }
-
-  .board-title__rename {
-    background: none;
-    border: 0;
-    border-radius: 0.3em;
-    color: inherit;
-    cursor: text;
-    display: flex;
-    font: inherit;
-    max-inline-size: 100%;
-    padding: 0 0.2em;
-    text-decoration: underline 0.08em transparent;
-    text-underline-offset: 0.18em;
-    transition: text-decoration-color 150ms ease;
-
-    @media (any-hover: hover) {
-      &:hover {
-        text-decoration-color: var(--color-ink-light);
-      }
-    }
-  }
-
-  .switcher__trigger {
-    --btn-size: 1.75rem;
-
-    font-size: var(--text-normal);
-  }
-
-  .board-title__editor {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5ch 1ch;
-    justify-content: center;
-
-    &[hidden] {
-      display: none;
-    }
-  }
-
-  .board-title__form {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5ch;
-    justify-content: center;
-    min-inline-size: 0;
-
-    .btn {
-      min-block-size: 2.25rem;
-    }
-  }
-
-  /* Takes the title's own type, so opening the editor doesn't make the header jump. */
-  .board-title__input {
-    font: inherit;
-    inline-size: min(24ch, 100%);
-    padding: 0.1em 0.4em;
-    text-align: start;
-
-    @media (max-width: 639px) {
-      flex: 1 0 100%;
-    }
   }
 }

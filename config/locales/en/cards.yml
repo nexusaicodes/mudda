@@ -13,10 +13,6 @@ en:
       empty_placeholder:
         drag_cards: Drag cards here
         no_cards: No cards here
-    show:
-      color_picker:
-        column_color: Column color
-        save_color: Save color
   cards:
     boards:
       edit:
@@ -76,6 +72,7 @@ en:
       due_date: Due date
       title_placeholder: Name it…
     index:
+      back: Boards
       empty: Nothing here right now.
     new:
       add_step: Add a step

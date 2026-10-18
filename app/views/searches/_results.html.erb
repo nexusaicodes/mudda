@@ -19,7 +19,7 @@
 
       <% if count > cards.size %>
         <%= link_to t(".show_all", count: count), cards_path(board_ids: [ board.id ], terms: [ query ]),
-              class: "search__more btn btn--plain txt-small", data: { turbo_frame: "_top", action: "bar#reset" } %>
+              class: "search__more btn btn--plain txt-small", data: { turbo_frame: "_top", action: "bar#close" } %>
       <% end %>
     </section>
   <% end %>

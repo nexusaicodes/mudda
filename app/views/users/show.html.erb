@@ -4,6 +4,10 @@
   <%= back_link_to t(".back"), root_path %>
 <% end %>
 
+<% content_for :header do %>
+  <h1 class="header__title"><%= t(".heading") %></h1>
+<% end %>
+
 <div class="settings">
   <div class="settings__panel panel shadow txt-align-center">
     <div class="flex flex-column gap position-relative">
@@ -17,16 +21,10 @@
       </div>
 
       <div class="flex flex-column gap-half">
-        <h1 class="txt-x-large margin-none" dir="auto"><%= @user.name %></h1>
-        <div class="txt-medium">
-          <%= mail_to @user.email_address %>
-        </div>
+        <h2 class="txt-x-large margin-none" dir="auto"><%= @user.name %></h2>
+        <div class="txt-medium txt-subtle" dir="ltr"><%= @user.email_address %></div>
       </div>
     </div>
-  </div>
-
-  <div class="settings__panel panel shadow">
-    <%= render "users/theme" %>
   </div>
 
   <div class="settings__panel panel shadow">

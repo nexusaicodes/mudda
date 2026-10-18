@@ -16,7 +16,7 @@
   }
 
   .panel--wide {
-    --panel-size: 60ch;
+    --panel-size: min(40rem, 100%);
   }
 
   .panel--centered {

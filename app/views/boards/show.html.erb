@@ -6,10 +6,7 @@
   <%= render "boards/title", board: @board %>
 <% end %>
 
-<%= turbo_frame_tag :cards_container, data: {
-      controller: "last-board",
-      last_board_id_value: @board.id,
-      last_board_key_value: last_board_storage_key } do %>
-  <%= render "columns/show/add_card_button", board: @board %>
-  <%= render "boards/show/columns", board: @board %>
+<%= turbo_frame_tag :cards_container do %>
+  <%= render "columns/show/add_card_button", board: @board, due_soon: @due_soon %>
+  <%= render "boards/show/columns", board: @board, due_soon: @due_soon %>
 <% end %>

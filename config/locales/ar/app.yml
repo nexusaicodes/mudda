@@ -31,21 +31,35 @@ ar:
           عن ذلك.
       cancel: إلغاء
       heading_html: حذف «%{name}»؟
-      open: حذف هذه اللوحة…
+      open: حذف هذه اللوحة
       submit: حذف اللوحة
+    index:
+      blank: لا يمكن أن يكون اسم اللوحة فارغًا
+      cancel: إلغاء
+      cards:
+        few: "%{count} بطاقات"
+        many: "%{count} بطاقة"
+        one: بطاقة واحدة
+        other: "%{count} بطاقة"
+        two: بطاقتان
+        zero: لا بطاقات
+      empty: لا توجد لوحات بعد. أنشئ واحدة للبدء.
+      name_label: اسم اللوحة
+      new: لوحة جديدة
+      rename: إعادة تسمية هذه اللوحة
+      save: حفظ
+      title: اللوحات
     new:
-      back: الرئيسية
+      back: اللوحات
       blank: لا يمكن أن يكون اسم اللوحة فارغًا
       cancel: إلغاء والعودة
       placeholder: سمّها…
       submit: إنشاء اللوحة
       title: إنشاء لوحة جديدة
-    title:
-      blank: لا يمكن أن يكون اسم اللوحة فارغًا
-      cancel: إلغاء
-      name_label: اسم اللوحة
-      rename: إعادة تسمية هذه اللوحة
-      save: حفظ
+    show:
+      due_toggle:
+        hint: اعرض فقط البطاقات المستحقة حتى الغد، بما فيها المتأخرة
+        label: مستحقة قريبًا
   columns:
     show:
       add_card_button:
@@ -61,14 +75,6 @@ ar:
   date:
     formats:
       app_long: "%-d %B %Y"
-  landings:
-    show:
-      create: إنشاء لوحة
-      empty_body: أنشئ لوحتك الأولى للبدء.
-      empty_heading: لا توجد لوحات بعد
-      open: فتح اللوحة
-      opening: جارٍ فتح لوحتك…
-      title: الرئيسية
   layouts:
     application:
       skip: انتقل إلى المحتوى الرئيسي
@@ -85,11 +91,6 @@ ar:
   my:
     account_link:
       profile: الملف الشخصي
-    menus:
-      show:
-        boards: اللوحات
-        new_board: لوحة جديدة
-        views: طرق العرض
     passkeys:
       create:
         failed: تعذّر تسجيل مفتاح المرور. حاول مرة أخرى.
@@ -103,7 +104,7 @@ ar:
         save: حفظ
         title: تعديل مفتاح المرور
       index:
-        back: ملفي الشخصي
+        back: الملف الشخصي
         cancelled: أُلغي تسجيل مفتاح المرور. حاول مرة أخرى عندما تكون مستعدًا.
         duplicate: لديك بالفعل مفتاح مرور مسجّل على هذا الجهاز. أزل المفتاح الحالي
           أولًا ثم حاول مرة أخرى.
@@ -129,8 +130,6 @@ ar:
       update:
         changed: تم تغيير كلمة المرور.
         wrong_password: هذه ليست كلمة المرور الحالية.
-    switcher:
-      switch: تبديل اللوحة
     tokens:
       create:
         api: أو استدعِ واجهة API
@@ -144,7 +143,7 @@ ar:
       destroy:
         revoked: تم إلغاء الرمز
       index:
-        back: ملفي الشخصي
+        back: الملف الشخصي
         intro: يتيح الرمز لبرنامج نصي أو وكيل ذكاء اصطناعي استخدام Mudda باسمك عبر
           واجهة API أو MCP. امنح كل رمز اسمًا خاصًا به لتعرف ما فعله وتلغيه وحده.
         mint_heading: إنشاء رمز
@@ -220,9 +219,9 @@ ar:
       confirm_delete_avatar: هل أنت متأكد من أنك تريد إزالة صورتك الرمزية؟ لا يمكن
         التراجع عن ذلك.
       delete_avatar: حذف الصورة الرمزية
-      email_placeholder: البريد الإلكتروني
+      email_label: البريد الإلكتروني
       errors_heading: 'تعذّر حفظ تغييراتك:'
-      name_placeholder: الاسم
+      name_label: الاسم
       save: حفظ التغييرات
       title: تعديل ملفك الشخصي
     plan:
@@ -238,15 +237,11 @@ ar:
         zero: لم تُستخدم أي بطاقة من %{limit}.
     show:
       avatar_alt: الصورة الرمزية لـ %{name}
-      back: الرئيسية
+      back: اللوحات
       change_password: تغيير كلمة المرور
       edit: تعديل الملف الشخصي
+      heading: الملف الشخصي
       passkeys: إدارة مفاتيح المرور
       security: الأمان
       sign_out: تسجيل الخروج من Mudda على هذا الجهاز
       tokens: رموز API
-    theme:
-      auto: تلقائي
-      dark: داكن
-      heading: المظهر
-      light: فاتح

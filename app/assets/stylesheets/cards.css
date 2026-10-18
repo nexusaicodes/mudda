@@ -27,16 +27,6 @@
     text-align: start;
     z-index: 1;
 
-    html[data-theme="dark"] & {
-      box-shadow: 0 0 0 1px var(--color-ink-lighter);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        box-shadow: 0 0 0 1px var(--color-ink-lighter);
-      }
-    }
-
     .popup {
       inline-size: 260px;
     }
@@ -95,6 +85,10 @@
       vertical-align: middle;
     }
   }
+
+  /* A due date in a list (a lane, search) is plain text in the same tones as the chip. */
+  .card__when--overdue { color: var(--color-negative); }
+  .card__when--soon    { color: oklch(var(--lch-yellow-dark)); }
 
   .card__board {
     align-items: center;
@@ -260,11 +254,10 @@
     font-size: var(--text-x-small);
     font-weight: 500;
     grid-template-areas:
-      "avatars-author text-added text-updated avatars-assignees"
-      "avatars-author text-author text-assignees avatars-assignees";
-    grid-template-columns: auto auto 1fr auto;
+      "avatars-author text-added text-updated"
+      "avatars-author text-author text-updated";
+    grid-template-columns: auto auto auto;
     inline-size: fit-content;
-    text-transform: uppercase;
 
     strong,
     .local-time-value {
@@ -298,25 +291,24 @@
     }
   }
 
-  /* Top */
-  .card__meta-text:nth-of-type(odd) {
-    border-block-end: var(--card-border);
-    padding-block-end: var(--meta-spacer-block);
-  }
-
-  /* Bottom */
-  .card__meta-text:nth-of-type(even) {
-    padding-block-start: var(--meta-spacer-block);
-  }
-
-  /* Left */
-  .card__meta-text:nth-of-type(-n+2) {
+  /* "Added" over "by" on the left, ruled off from "updated", which centres on the right. */
+  .card__meta-text--added,
+  .card__meta-text--author {
     border-inline-end: var(--card-border);
     padding-inline-end: var(--meta-spacer-inline);
   }
 
-  /* Right */
-  .card__meta-text:nth-of-type(n+3) {
+  .card__meta-text--added {
+    border-block-end: var(--card-border);
+    padding-block-end: var(--meta-spacer-block);
+  }
+
+  .card__meta-text--author {
+    padding-block-start: var(--meta-spacer-block);
+  }
+
+  .card__meta-text--updated {
+    align-self: center;
     padding-inline-start: var(--meta-spacer-inline);
   }
 

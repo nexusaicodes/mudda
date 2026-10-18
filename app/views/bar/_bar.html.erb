@@ -1,20 +1,18 @@
-<%# A small search pill floating at the bottom centre; it widens to a search box when used, and
-    its results open in a panel above it. %>
-<div class="bar" data-controller="bar" data-bar-dialog-outlet="#bar-modal"
-    data-bar-search-url-value="<%= search_path %>">
-  <%= tag.dialog id: "bar-modal", class: "bar__modal", data: {
-        controller: "dialog", dialog_target: "dialog", dialog_orient_value: false, action: "keydown.esc@document->bar#reset:stop" } do %>
-    <%= turbo_frame_tag "bar_content", data: { bar_target: "turboFrame" } %>
-  <% end %>
+<%# A search button in the header. It opens a panel over the dimmed page: the search box at its
+    top and the results, grouped by board, below it, updating as you type. %>
+<div class="bar" data-controller="bar">
+  <button type="button" class="bar__trigger btn btn--circle borderless" data-action="bar#open">
+    <%= icon_tag "search" %>
+    <span class="for-screen-reader"><%= t(".search") %></span>
+  </button>
 
-  <div class="bar__pill">
-    <button type="button" class="bar__trigger" data-bar-target="buttonsContainer" data-action="bar#search">
-      <%= icon_tag "search" %>
-      <span><%= t(".search") %></span>
-    </button>
-
-    <div class="bar__input" data-bar-target="search" hidden>
+  <dialog class="bar__panel" data-bar-target="dialog"
+      data-action="click->bar#closeOnBackdrop keydown.esc->bar#close:prevent close->bar#reset">
+    <div class="bar__input">
+      <%= icon_tag "search", class: "bar__input-icon" %>
       <%= render "searches/form", query_terms: "", target_turbo_frame: "bar_content" %>
     </div>
-  </div>
+
+    <%= turbo_frame_tag "bar_content", class: "bar__results", data: { bar_target: "turboFrame" } %>
+  </dialog>
 </div>

@@ -28,16 +28,6 @@
       }
     }
 
-    html[data-theme="dark"] & {
-      --btn-hover-brightness: 1.25;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      html:not([data-theme]) & {
-        --btn-hover-brightness: 1.25;
-      }
-    }
-
     &[disabled],
     &:has([disabled]),
     [disabled] &[type=submit],
@@ -90,6 +80,14 @@
     --btn-border-color: var(--color-canvas);
     --btn-color: var(--color-ink-inverted);
     --focus-ring-color: var(--color-link);
+  }
+
+  /* Labelled actions share one height and text size, whatever text surrounds them. */
+  :is(.btn--link, .btn--reversed, .due-toggle):not(.btn--circle, .btn--circle-mobile, .btn--plain) {
+    --btn-padding: 0.5em 1.4em;
+
+    font-size: var(--text-normal);
+    min-block-size: var(--control-height);
   }
 
   .btn--circle,

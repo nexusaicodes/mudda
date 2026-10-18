@@ -1,74 +1,43 @@
 import { Controller } from "@hotwired/stimulus"
-import { post } from "@rails/request.js"
-import { nextFrame } from "helpers/timing_helpers";
+import { debounce } from "helpers/timing_helpers"
 
+// The header's search panel: a modal dialog with the search box at its top and the results
+// below. Typing searches after a short pause; Esc, a click on the dimmed page, or following a
+// result closes it.
 export default class extends Controller {
-  static targets = [ "turboFrame", "search", "searchInput", "form", "buttonsContainer" ]
-  static outlets = [ "dialog" ]
-  static values = {
-    searchUrl: String,
+  static targets = [ "dialog", "turboFrame", "searchInput", "form" ]
+
+  initialize() {
+    this.searchAsYouType = debounce(this.submit.bind(this), 250)
   }
 
-  dialogOutletConnected(outlet, element) {
-    outlet.close()
-    this.#clearTurboFrame()
+  open() {
+    this.dialogTarget.showModal()
+    this.searchInputTarget.focus()
+    this.searchInputTarget.select()
   }
 
+  close() {
+    if (this.dialogTarget.open) this.dialogTarget.close()
+  }
+
+  // Runs on the dialog's close, however it was closed.
   reset() {
-    this.dialogOutlet.close()
-    this.#clearTurboFrame()
-
-    this.#showItem(this.buttonsContainerTarget)
-    this.#hideItem(this.searchTarget)
-  }
-
-  showModalAndSubmit(event) {
-    this.showModal()
-    this.formTarget.requestSubmit()
-    this.#restoreFocusAfterTurboFrameLoads()
-  }
-
-  showModal() {
-    this.dialogOutlet.open()
-  }
-
-  search(event) {
-    this.#showItem(this.searchTarget)
-    this.#hideItem(this.buttonsContainerTarget)
-
-    if (this.searchInputTarget.value.trim()) {
-      this.showModalAndSubmit()
-    } else {
-      this.#loadTurboFrame()
-    }
-  }
-
-  #restoreFocusAfterTurboFrameLoads() {
-    this.turboFrameTarget.addEventListener("turbo:frame-load", () => {
-      this.searchInputTarget.focus()
-    }, { once: true })
-  }
-
-  #loadTurboFrame() {
-    this.turboFrameTarget.src = this.searchUrlValue
-  }
-
-  #clearTurboFrame() {
+    this.searchInputTarget.value = ""
     this.turboFrameTarget.removeAttribute("src")
-    this.turboFrameTarget.innerHtml = ""
+    this.turboFrameTarget.innerHTML = ""
   }
 
-  async #showItem(element) {
-    element.removeAttribute("hidden")
-
-    const autofocusElement = element.querySelector("[autofocus]")
-
-    autofocusElement?.focus()
-    await nextFrame()
-    autofocusElement?.select()
+  // A click on the dialog itself, not on anything inside it, is a click on the backdrop.
+  closeOnBackdrop(event) {
+    if (event.target === this.dialogTarget) this.close()
   }
 
-  #hideItem(element) {
-    element.setAttribute("hidden", "hidden")
+  submit() {
+    if (this.searchInputTarget.value.trim()) {
+      this.formTarget.requestSubmit()
+    } else {
+      this.turboFrameTarget.innerHTML = ""
+    }
   }
 }

@@ -62,8 +62,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
       fill_in "password", with: owner_password
       find("#log_in").click
 
-      # The landing page redirects (client-side) to the last/most-recent board.
-      assert_current_path %r{/boards/}
+      # Signing in lands on the boards list, or on whatever page a stray request from the test
+      # before asked for; either way it has left the sign-in page.
+      assert_no_current_path new_session_path
     end
 
     # Narrows the window to a phone. The browser outlives the test, so pair it with

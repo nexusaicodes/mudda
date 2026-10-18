@@ -187,7 +187,7 @@ paths:
       operationId: getPreferences
       summary: Get preferences
       description: |
-        The owner's `locale` (`null` follows the browser) and `theme`. **Scope:** `read`.
+        The owner's `locale` (`null` follows the browser). **Scope:** `read`.
       x-scopes: [read]
       responses:
         "200":
@@ -195,7 +195,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Preferences" }
-              example: { locale: en, theme: auto }
+              example: { locale: en }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
@@ -204,7 +204,7 @@ paths:
       operationId: updatePreferences
       summary: Update preferences
       description: |
-        Changes only the keys sent. An unknown value is a `422`. **Scope:** `write`.
+        An unknown locale is a `422`. **Scope:** `write`.
       x-scopes: [write]
       requestBody:
         required: true
@@ -1133,7 +1133,6 @@ components:
       type: object
       properties:
         locale: { type: [string, "null"], enum: [en, ar, null], description: "`null` follows the browser." }
-        theme: { type: string, enum: [auto, light, dark] }
     Color:
       type: object
       description: A colour by its English name and the CSS value the page paints it with.

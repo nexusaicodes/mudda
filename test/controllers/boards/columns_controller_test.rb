@@ -26,6 +26,18 @@ class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".card .card__details-board", count: 0
   end
 
+  test "due=soon narrows a lane to its cards due by tomorrow" do
+    frame = { "Turbo-Frame" => "column_#{columns(:writebook_doing).id}_cards" }
+
+    cards(:text).update!(due_on: Date.yesterday)
+    get board_column_path(boards(:writebook), columns(:writebook_doing), due: "soon"), headers: frame
+    assert_select ".card .card__title", text: cards(:text).title
+
+    cards(:text).update!(due_on: 2.weeks.from_now)
+    get board_column_path(boards(:writebook), columns(:writebook_doing), due: "soon"), headers: frame
+    assert_select ".card .card__title", text: cards(:text).title, count: 0
+  end
+
   # A board's columns are fixed, so they have no JSON representation of their own — they
   # travel with the board, and each one names the card index that answers for it.
   test "a lane's JSON lives on its board" do
