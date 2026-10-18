@@ -46,7 +46,7 @@ Rails.application.routes.draw do
     end
   end
 
-  # Mudda as an OAuth 2.1 authorization server for MCP clients; see MCP.md → OAuth.
+  # Mudda as an OAuth 2.1 authorization server for MCP clients; see docs.mudda.today/mcp/oauth/.
   use_doorkeeper do
     controllers authorizations: "oauth/authorizations"
     skip_controllers :applications, :authorized_applications, :token_info

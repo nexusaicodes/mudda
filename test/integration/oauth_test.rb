@@ -1,7 +1,7 @@
 require "test_helper"
 
 # Connecting an MCP client over OAuth 2.1, end to end: discovery, registration, consent, the
-# PKCE code exchange, using the token, refreshing it, and revoking it. See MCP.md → OAuth.
+# PKCE code exchange, using the token, refreshing it, and revoking it. See docs.mudda.today/mcp/oauth/.
 class OauthTest < ActionDispatch::IntegrationTest
   REDIRECT_URI = "https://claude.ai/api/mcp/auth_callback"
 

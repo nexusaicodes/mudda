@@ -3,7 +3,7 @@
 # registers itself (Oauth::RegistrationsController), sends the user here to consent
 # (Oauth::AuthorizationsController), and redeems the code with PKCE. What it is granted is a
 # token Session like any other (Session::Oauth), so scopes, the rate limit, agent attribution,
-# and revocation all work the same. See MCP.md → OAuth.
+# and revocation all work the same. See docs.mudda.today/mcp/oauth/.
 Doorkeeper.configure do
   orm :active_record
 

@@ -8,6 +8,7 @@ module Mudda::Mcp::Tools
     TEXT
     arguments(properties: CARD_ADDRESS.merge(page: { type: "integer", minimum: 1 }), required: %w[ board_id number ])
     kind :read
+    calls :get, "/boards/{board_id}/cards/{card_number}/notes.json"
 
     def self.call(board_id:, number:, page: nil, server_context:)
       respond api(server_context).get("/boards/#{Integer(board_id)}/cards/#{Integer(number)}/notes", page_query(page))
@@ -23,6 +24,7 @@ module Mudda::Mcp::Tools
       required: %w[ board_id number body ]
     )
     kind :create
+    calls :post, "/boards/{board_id}/cards/{card_number}/notes.json"
 
     def self.call(board_id:, number:, body:, server_context:)
       respond api(server_context).post("/boards/#{Integer(board_id)}/cards/#{Integer(number)}/notes", { body: body })
@@ -41,6 +43,7 @@ module Mudda::Mcp::Tools
       required: %w[ board_id number note_id body ]
     )
     kind :update
+    calls :put, "/boards/{board_id}/cards/{card_number}/notes/{id}.json"
 
     def self.call(board_id:, number:, note_id:, body:, server_context:)
       respond api(server_context).put(
@@ -54,6 +57,7 @@ module Mudda::Mcp::Tools
     description "Permanently deletes a note from a card's log. Only the note's creator may delete it."
     arguments(properties: CARD_ADDRESS.merge(note_id: { type: "integer" }), required: %w[ board_id number note_id ])
     kind :delete
+    calls :delete, "/boards/{board_id}/cards/{card_number}/notes/{id}.json"
 
     def self.call(board_id:, number:, note_id:, server_context:)
       respond api(server_context).delete("/boards/#{Integer(board_id)}/cards/#{Integer(number)}/notes/#{Integer(note_id)}")
