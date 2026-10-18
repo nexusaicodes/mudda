@@ -1,19 +1,9 @@
-/* Tokens over the daisyUI retro theme: the manuscript palette, type, corners and flat surfaces
-   replace the theme's own, and what the app itself depends on is defined here. */
+/* What the app itself depends on, over the mudda-theme gem's look: the body stack with the Segoe
+   fallback, the flash animation, safe areas, the page inset, layers and the lane colours. */
 
 @theme {
   --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Mudda", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-display: Amiri, "Noto Naskh Arabic", Georgia, serif;
   --font-mono: ui-monospace, monospace;
-
-  /* The manuscript look is flat: surfaces are told apart by hairlines, never shadows. */
-  --shadow-2xs: none;
-  --shadow-xs: none;
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
-  --shadow-xl: none;
-  --shadow-2xl: none;
 
   /* The flash fades in, holds, and fades out; element-removal drops it on animationend. */
   --animate-appear-then-fade: appear-then-fade 3s ease-out both;
@@ -28,40 +18,6 @@
 
 :root {
   color-scheme: light;
-
-  /* The manuscript palette over the retro theme: navy ink on cream paper, slate for quieter text,
-     brass for small labels, vermilion as the one accent. Corners are near-square. */
-  --ink: #1b2a4a;
-  --ink-muted: #46536e;
-  --brass: #8c6a2e;
-  --vermilion: #b3341c;
-  --cream: #f1e6ce;
-  --hairline: rgb(27 42 74 / 0.2);
-
-  --color-base-100: var(--cream);
-  --color-base-200: #e9dcc0;
-  --color-base-300: #dfd0b0;
-  --color-base-content: var(--ink);
-  --color-primary: var(--ink);
-  --color-primary-content: var(--cream);
-  --color-secondary: var(--brass);
-  --color-secondary-content: var(--cream);
-  --color-accent: var(--vermilion);
-  --color-accent-content: var(--cream);
-  --color-neutral: var(--ink-muted);
-  --color-neutral-content: var(--cream);
-  --color-info: var(--ink-muted);
-  --color-info-content: var(--cream);
-  --color-success: var(--ink);
-  --color-success-content: var(--cream);
-  --color-warning: var(--brass);
-  --color-warning-content: var(--cream);
-  --color-error: var(--vermilion);
-  --color-error-content: var(--cream);
-
-  --radius-selector: 3px;
-  --radius-field: 3px;
-  --radius-box: 3px;
 
   /* Safe areas, overridable by the native apps' injected insets */
   --custom-safe-inset-top: var(--injected-safe-inset-top, env(safe-area-inset-top, 0px));
@@ -80,7 +36,7 @@
   --z-nav-open: 100;
 
   /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
-     of the data and the API; their values come from the palette above, and the four lanes differ in
+     of the data and the API; their values come from the theme's inks, and the four lanes differ in
      lightness as well as hue. */
   --color-card-default: var(--color-info);
   --color-card-complete: var(--color-success);

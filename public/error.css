@@ -1,13 +1,11 @@
-/* Static error pages, served without the app's stylesheet. The colours are the app's manuscript
-   palette (theme.css): navy ink on cream paper, the stamp in vermilion. There is one look and no
-   dark mode. */
+/* Static error pages, served without the app's stylesheet. The colours are the mudda-theme gem's
+   tokens, from public/mudda-theme/tokens.css (bin/rails mudda_theme:sync_static): navy ink on
+   cream paper, the stamp in vermilion. There is one look and no dark mode. */
 :root {
-  color-scheme: light;
-
-  --color-page: #f1e6ce;
-  --color-canvas: #f1e6ce;
-  --color-ink: #1b2a4a;
-  --color-accent: #b3341c;
+  --color-page: var(--paper);
+  --color-canvas: var(--paper);
+  --color-ink: var(--ink);
+  --color-accent: var(--vermilion);
 
   --text-large: 6rem;
   --text-medium: 2rem;

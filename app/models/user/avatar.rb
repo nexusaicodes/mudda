@@ -5,8 +5,8 @@ module User::Avatar
 
   ALLOWED_AVATAR_CONTENT_TYPES = %w[ image/jpeg image/png image/gif image/webp ].freeze
   MAX_AVATAR_DIMENSIONS = { width: 4096, height: 4096 }.freeze
-  # The manuscript palette's inks (navy, slate, brass, vermilion), each dark enough for cream initials.
-  AVATAR_COLORS = %w[ #1B2A4A #46536E #8C6A2E #B3341C ].freeze
+  # The theme's inks (navy, slate, brass, vermilion), each dark enough for paper-coloured initials.
+  AVATAR_COLORS = MuddaTheme::INKS
 
   included do
     has_one_attached :avatar, dependent: :purge_later do |attachable|

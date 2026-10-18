@@ -3,7 +3,11 @@
    write CSS only in components/ for what the kit can't express.
 
    daisyui.mjs and daisyui-theme.mjs are vendored, unmodified, from daisyUI v5.7.50
-   (https://github.com/saadeghi/daisyui/releases/tag/v5.7.50), so builds fetch nothing. */
+   (https://github.com/saadeghi/daisyui/releases/tag/v5.7.50), so builds fetch nothing.
+
+   The look (palette, type, fonts, flat surfaces) is the mudda-theme gem's. tailwindcss-rails
+   writes builds/tailwind/mudda_theme.css to import its adapter, which follows the daisyUI plugin so
+   it overrides the retro theme. */
 
 @import "tailwindcss";
 
@@ -17,9 +21,9 @@
   logs: false;
 }
 
+@import "../builds/tailwind/mudda_theme";
 @import "./theme.css";
 @import "./fonts.css";
-@import "./paper.css";
 
 @import "./components/behaviour.css";
 @import "./components/icons.css";

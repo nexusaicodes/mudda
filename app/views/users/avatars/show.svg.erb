@@ -12,7 +12,7 @@
   <g>
     <rect width="100%" height="100%" rx="50" fill="<%= avatar_background_color(@user) %>" />
 
-    <text x="50%" y="50%" fill="#F1E6CE"
+    <text x="50%" y="50%" fill="<%= MuddaTheme::PALETTE[:light][:paper] %>"
       text-anchor="middle" dy="0.35em"
       <%=raw 'textLength="85%" lengthAdjust="spacingAndGlyphs"' if @user.initials.size >= 3 %>
       font-family="Amiri, Georgia, serif"

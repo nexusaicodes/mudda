@@ -1,5 +1,5 @@
 /* Printing: ink on white paper, no chrome. The page's own content prints; the header, buttons
-   and dialogs don't, nor the paper's cream (paper.css drops the background). */
+   and dialogs don't, nor the paper's cream (the mudda-theme gem's base.css drops the background). */
 
 @media print {
   @layer utilities {
