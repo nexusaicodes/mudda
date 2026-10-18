@@ -24,7 +24,12 @@ The single user can reach every board and card in their account.
 `docs/openapi.yaml` and `docs/mcp-tools.json` are the published contract the mudda-docs repo
 renders, so they change in the same commit as the endpoint or tool they describe.
 `test/integration/published_contract_test.rb` fails when a route serving JSON and the spec
-disagree, when a tool calls an operation the spec lacks, or when `docs/mcp-tools.json` is stale.
+disagree, when a tool calls an operation the spec lacks, when `docs/mcp-tools.json` is stale,
+when a real response (the signed-in user, a board, a card, a note, the card indexes) or one of
+the spec's own examples doesn't match the spec's schema, or when the spec uses a YAML anchor or
+alias: the docs site's loader renders `<<` merge keys literally, so examples are written out in
+full. The direct-upload and passkey-challenge endpoints are framework controllers outside
+`serves_json`, so the test lists them by hand.
 
 ### Not in Mudda
 
