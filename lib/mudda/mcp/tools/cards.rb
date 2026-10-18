@@ -100,7 +100,7 @@ module Mudda::Mcp::Tools
       in the result from then on; with no `column_id` it lands in that board's Backlog. In Todo
       and Doing a card needs a `due_on`, so set one in the same write that moves it there. Steps:
       an entry with no `id` adds one; with an `id` it edits that step, or removes it when
-      `remove` is true.
+      `remove` is true. Removing a step needs the delete scope; adding and editing need only write.
     TEXT
     arguments(
       properties: CARD_ADDRESS.merge(

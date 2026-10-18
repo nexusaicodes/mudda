@@ -419,7 +419,7 @@
   {
     "name": "update_card",
     "title": "Update a card",
-    "description": "Changes any of a card's fields in one write — all of it applies or none of it does. Move\nit between lanes with `column_id` (a column of the board it ends up on). Move it to\nanother board with `to_board_id`: it is renumbered there, so use the `number` and `url`\nin the result from then on; with no `column_id` it lands in that board's Backlog. In Todo\nand Doing a card needs a `due_on`, so set one in the same write that moves it there. Steps:\nan entry with no `id` adds one; with an `id` it edits that step, or removes it when\n`remove` is true.\n",
+    "description": "Changes any of a card's fields in one write — all of it applies or none of it does. Move\nit between lanes with `column_id` (a column of the board it ends up on). Move it to\nanother board with `to_board_id`: it is renumbered there, so use the `number` and `url`\nin the result from then on; with no `column_id` it lands in that board's Backlog. In Todo\nand Doing a card needs a `due_on`, so set one in the same write that moves it there. Steps:\nan entry with no `id` adds one; with an `id` it edits that step, or removes it when\n`remove` is true. Removing a step needs the delete scope; adding and editing need only write.\n",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
