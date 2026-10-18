@@ -7,13 +7,16 @@ module ColumnsHelper
   def button_to_set_column(card, column)
     current = column == card.column
     button_to \
-      tag.span(lane_name(column), class: "overflow-ellipsis"),
+      tag.span(lane_name(column), class: "sm:truncate"),
       board_card_column_path(card.board, card, column_id: column.id),
       method: :patch,
-      class: [ "card__column-name btn", { "card__column-name--current": current } ],
+      # The current lane is disabled but keeps its colour, overriding daisyUI's greyed-out look.
+      class: [ "card__column-name btn btn-sm join-item w-full max-sm:h-auto max-sm:min-h-8 max-sm:px-1 max-sm:py-1 max-sm:text-xs max-sm:leading-tight max-sm:whitespace-normal", { "card__column-name--current disabled:bg-(--column-color)! disabled:text-[oklch(from_var(--column-color)_round(1.15-l)_0_0)]! disabled:border-transparent!": current } ],
       disabled: current,
+      aria: { checked: current },
+      role: "radio",
       style: "--column-color: #{column.color}",
-      form_class: "flex gap-half",
+      form_class: "contents",
       data: { turbo_frame: "_top", scroll_to_target: current ? "target" : nil }
   end
 
@@ -37,8 +40,7 @@ module ColumnsHelper
 
     tag.section(id: id, class: classes, tabindex: "0", "aria-selected": selected, data: data, **properties) do
       tag.div(class: "cards__transition-container", data: {
-        controller: "navigable-list css-variable-counter",
-        css_variable_counter_property_name_value: "--card-count",
+        controller: "navigable-list",
         navigable_list_supports_horizontal_navigation_value: "false",
         navigable_list_prevent_handled_keys_value: "true",
         navigable_list_auto_select_value: "false",

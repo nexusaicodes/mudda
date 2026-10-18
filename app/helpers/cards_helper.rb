@@ -2,7 +2,7 @@ module CardsHelper
   def card_article_tag(card, id: dom_id(card, :article), data: {}, **options, &block)
     classes = [
       options.delete(:class),
-      ("card--pinned" if card.pinned?),
+      ("card--pinned ring-2 ring-warning" if card.pinned?),
       ("card--active" if card.active?)
     ].compact.join(" ")
 
@@ -41,6 +41,11 @@ module CardsHelper
     else
       "later"
     end
+  end
+
+  # The badge colour for a due date's tone: only late or imminent dates stand out.
+  def card_due_badge_class(card)
+    { "overdue" => "badge-error", "soon" => "badge-warning" }.fetch(card_due_tone(card), "badge-ghost")
   end
 
   # Relative while it's close, then the date: "Overdue 2d", "Today", "Tomorrow", "Fri", "Oct 24".

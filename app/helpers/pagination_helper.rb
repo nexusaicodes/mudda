@@ -17,7 +17,7 @@ module PaginationHelper
 
   def link_to_next_page(namespace, page, activate_when_observed: false, label: default_pagination_label(activate_when_observed), data: {}, **attributes)
     if page.before_last? && !params[:previous]
-      attributes[:class] = class_names(attributes[:class], "btn txt-small center-block center": !activate_when_observed)
+      attributes[:class] = class_names(attributes[:class], "btn btn-ghost btn-sm mx-auto": !activate_when_observed)
       pagination_link(namespace, page.number + 1, label: label, activate_when_observed: activate_when_observed, data: data, **attributes)
     end
   end
@@ -71,7 +71,7 @@ module PaginationHelper
       classes = properties.delete(:class)
       properties[:id] ||= "#{name}-pagination-list"
       tag.public_send tag_element,
-        class: token_list(name, "display-contents", classes),
+        class: token_list(name, "contents", classes),
         data: { controller: "pagination", pagination_paginate_on_intersection_value: paginate_on_scroll },
         **properties,
         &block

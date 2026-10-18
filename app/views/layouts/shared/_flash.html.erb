@@ -1,8 +1,10 @@
 <%= turbo_frame_tag :flash do %>
-  <% if notice = flash[:notice] || flash[:alert] %>
-    <div class="flash" data-controller="element-removal" data-action="animationend->element-removal#remove">
-      <div class="flash__inner shadow">
-        <%= notice %>
+  <% if message = flash[:notice] || flash[:alert] %>
+    <%# The toast fades in and out on its own; element-removal drops it when that animation ends. %>
+    <div class="toast toast-top toast-center z-(--z-flash) pt-[calc(var(--paper-clearance)+var(--custom-safe-inset-top))]"
+      data-controller="element-removal" data-action="animationend->element-removal#remove">
+      <div role="status" class="alert <%= flash[:alert] ? "alert-error" : "alert-info" %> shadow-lg animate-appear-then-fade">
+        <span><%= message %></span>
       </div>
     </div>
   <% end %>

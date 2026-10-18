@@ -2,7 +2,7 @@
 # by Search::Query; words of the text are normalized before comparing, so an Arabic word is marked as written, vowels and article included. The text is
 # HTML-escaped and only the marks are left as markup.
 class Search::Highlighter
-  OPENING_MARK = "<mark class=\"circled-text\"><span></span>"
+  OPENING_MARK = "<mark class=\"rounded-sm bg-warning/30 px-0.5 text-inherit\">"
   CLOSING_MARK = "</mark>"
   ELIPSIS = "..."
   WORD = /\p{Word}+/

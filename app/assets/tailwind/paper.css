@@ -6,9 +6,13 @@
     --paper: #b8925a;
     --paper-rule: #c8462a;
     --paper-rule-edge: oklch(46% 0.07 55 / 0.6);
+
+    /* daisyUI's page colour, so its own effects (a modal's dimming) tint the paper. */
+    --root-bg: var(--paper);
   }
 
-  html {
+  /* html:root outranks daisyUI's :root background, which would otherwise paint the theme's base colour. */
+  html:root {
     background:
       url("paper-grain.svg") 0 0 / 320px 320px repeat,
       url("paper-fibres.svg") 0 0 / 720px 720px repeat,
@@ -35,7 +39,7 @@
   }
 
   @media print {
-    html {
+    html:root {
       background: none;
     }
 

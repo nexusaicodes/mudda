@@ -5,26 +5,26 @@
 <% end %>
 
 <% content_for :header do %>
-  <h1 class="header__title"><%= @page_title %></h1>
+  <h1 class="text-lg sm:text-xl font-bold truncate"><%= @page_title %></h1>
 <% end %>
 
-<section class="panel panel--wide shadow center txt-align-start flex flex-column gap">
+<section class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 text-start gap-4 flex-none">
   <% if params[:created] %>
-    <p class="margin-none"><%= t(".created") %></p>
+    <p class="m-0"><%= t(".created") %></p>
   <% end %>
 
-  <%= form_with model: @passkey, scope: :passkey, url: my_passkey_path(@passkey), html: { class: "flex flex-column gap" } do |form| %>
-    <div class="flex flex-column gap-half">
-      <strong><%= form.label :name, t(".name_label") %></strong>
-      <%= form.text_field :name, autofocus: true, class: "input", dir: "auto", placeholder: t(".placeholder"), data: { "1p-ignore": "" }, autocomplete: "off" %>
+  <%= form_with model: @passkey, scope: :passkey, url: my_passkey_path(@passkey), html: { class: "flex flex-col gap-4" } do |form| %>
+    <div class="fieldset p-0">
+      <%= form.label :name, t(".name_label"), class: "fieldset-legend" %>
+      <%= form.text_field :name, autofocus: true, class: "input w-full", dir: "auto", placeholder: t(".placeholder"), data: { "1p-ignore": "" }, autocomplete: "off" %>
     </div>
 
-    <%= form.submit t(".save"), class: "btn btn--link center" %>
+    <%= form.submit t(".save"), class: "btn btn-primary self-center" %>
   <% end %>
 
-  <div class="txt-align-center">
+  <div class="text-center">
     <%= button_to my_passkey_path(@passkey), method: :delete,
-          class: "btn txt-negative borderless txt-small",
+          class: "btn btn-ghost btn-sm text-error",
           data: { turbo_confirm: t(".confirm_remove") } do %>
       <%= icon_tag "trash" %>
       <span><%= t(".remove") %></span>

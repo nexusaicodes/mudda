@@ -8,6 +8,7 @@ gem "rails", github: "rails/rails", branch: "main"
 gem "importmap-rails"
 gem "propshaft"
 gem "stimulus-rails"
+gem "tailwindcss-rails", "~> 4.6"
 gem "turbo-rails", github: "hotwired/turbo-rails", branch: "offline-cache"
 
 # Drivers

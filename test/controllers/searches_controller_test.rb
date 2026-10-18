@@ -32,7 +32,7 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     get search_path(q: "haggis")
     assert_select "li .search__title", text: /Just haggis/, count: 1
     assert_select "li .search__excerpt", text: /More haggis/
-    assert_match(/<mark class="circled-text"><span><\/span>haggis<\/mark>/, response.body)
+    assert_includes response.body, "#{Search::Highlighter::OPENING_MARK}haggis</mark>"
 
     get search_path(q: "nothingmatchesthis")
     assert_select ".search__blank-slate", text: "No matches"
@@ -137,6 +137,6 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     # Should escape <b> tags
     assert response.body.include?("&lt;b&gt;")
     # But should preserve highlight marks around "testing"
-    assert_match(/<mark class="circled-text"><span><\/span>testing<\/mark>/, response.body)
+    assert_includes response.body, "#{Search::Highlighter::OPENING_MARK}testing</mark>"
   end
 end

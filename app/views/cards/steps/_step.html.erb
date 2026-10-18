@@ -1,8 +1,8 @@
 <%= turbo_frame_tag step do %>
-  <li class="step">
-    <%= form_with model: [step.card.board, step.card, step], data: { controller: "form" } do |form| %>
-      <%= form.check_box :completed, { class: "checkbox", data: { action: "change->form#submit" } } %>
+  <li class="flex items-center gap-2 min-h-8">
+    <%= form_with model: [step.card.board, step.card, step], class: "flex", data: { controller: "form" } do |form| %>
+      <%= form.check_box :completed, { class: "checkbox checkbox-sm", aria: { label: step.content }, data: { action: "change->form#submit" } } %>
     <% end %>
-    <%= link_to step.content, edit_board_card_step_path(step.card.board, step.card, step), class: "step__content", dir: "auto" %>
+    <%= link_to step.content, edit_board_card_step_path(step.card.board, step.card, step), class: class_names("step__content hover:underline", "line-through text-base-content/50": step.completed?), dir: "auto" %>
   </li>
 <% end %>

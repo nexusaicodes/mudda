@@ -1,9 +1,15 @@
-<div class="card__board" data-controller="dialog" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames">
-  <%= render "cards/display/common/board", card: card do %>
-    <%= icon_tag "caret-down", class: "txt-xx-small", hidden: card.closed? %>
+<%# The card's board, and a dropdown to move it to another; the list loads when first wanted. %>
+<div class="card__board relative" data-controller="dialog" data-action="keydown.esc->dialog#close:stop click@document->dialog#closeOnClickOutside mouseenter->dialog#loadLazyFrames">
+  <% if card.closed? %>
+    <%= render "cards/display/common/board", card: card %>
+  <% else %>
+    <button type="button" class="cursor-pointer" data-action="click->dialog#open:stop" aria-label="<%= t(".choose_board") %>">
+      <%= render "cards/display/common/board", card: card do %>
+        <%= icon_tag "caret-down", class: "[--icon-size:0.75em]" %>
+      <% end %>
+    </button>
   <% end %>
-  <button class="card__board-picker-button btn btn--plain" data-action="click->dialog#open:stop" aria-label="<%= t(".choose_board") %>" <%= "hidden" if card.closed? %>></button>
-  <dialog class="popup popup--align-right panel flex-column align-start gap-half fill-white shadow" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
+  <dialog class="absolute inset-auto top-full start-0 mt-1 z-(--z-popup) w-72 max-w-[80vw] rounded-box bg-base-100 p-2 shadow-lg border border-base-300 text-start" data-dialog-target="dialog" data-action="turbo:before-morph-attribute->dialog#preventCloseOnMorphing turbo:submit-end->dialog#close">
     <%= turbo_frame_tag "board_picker", src: edit_board_card_board_path(card.board, card), target: "_top", loading: :lazy, refresh: "morph" %>
   </dialog>
 </div>

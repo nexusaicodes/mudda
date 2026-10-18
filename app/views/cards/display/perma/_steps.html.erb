@@ -1,12 +1,12 @@
-<ol class="steps txt-small margin-block-start-auto">
+<ul class="steps-list flex flex-col gap-1 text-sm">
   <%= render partial: "cards/steps/step", collection: card.steps, as: :step %>
 
   <% unless card.closed? %>
-    <li id="<%= dom_id(card, :new_step) %>" class="step">
-      <input type="checkbox" class="checkbox" disabled>
-      <%= form_with model: [card.board, card, Step.new], url: board_card_steps_path(card.board, card), class: "min-width", data: { controller: "form", action: "submit->form#preventEmptySubmit submit->form#preventComposingSubmit turbo:submit-end->form#reset" } do |form| %>
-        <%= form.text_field :content, class: "input step__content hide-focus-ring", placeholder: t(".placeholder"), autocomplete: "off", data: { form_target: "input", "1p-ignore": "true", action: "compositionstart->form#compositionStart compositionend->form#compositionEnd" }, dir: "auto", aria: { label: t(".label") } %>
+    <li id="<%= dom_id(card, :new_step) %>" class="flex items-center gap-2">
+      <input type="checkbox" class="checkbox checkbox-sm" disabled aria-hidden="true">
+      <%= form_with model: [card.board, card, Step.new], url: board_card_steps_path(card.board, card), class: "grow min-w-0", data: { controller: "form", action: "submit->form#preventEmptySubmit submit->form#preventComposingSubmit turbo:submit-end->form#reset" } do |form| %>
+        <%= form.text_field :content, class: "step__content input input-ghost input-sm w-full", placeholder: t(".placeholder"), autocomplete: "off", data: { form_target: "input", "1p-ignore": "true", action: "compositionstart->form#compositionStart compositionend->form#compositionEnd" }, dir: "auto", aria: { label: t(".label") } %>
       <% end %>
     </li>
   <% end %>
-</ol>
+</ul>

@@ -1,5 +1,5 @@
-<h1 class="card__title flex align-start gap-half">
-  <%= link_to card_html_title(card), edit_board_card_path(card.board, card), class: "card__title-link", dir: "auto" %>
+<h1 class="card__title text-2xl font-bold leading-tight">
+  <%= link_to card_html_title(card), edit_board_card_path(card.board, card), class: "card__title-link hover:underline", dir: "auto" %>
 </h1>
 
 <% unless card.description.blank? %>

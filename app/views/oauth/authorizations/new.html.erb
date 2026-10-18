@@ -5,40 +5,40 @@
      code_challenge: @pre_auth.code_challenge, code_challenge_method: @pre_auth.code_challenge_method,
      resource: params[:resource] } %>
 
-<div class="panel panel--wide shadow center txt-align-start flex flex-column gap">
-  <h1 class="txt-large margin-none"><%= t(".heading_html", client: tag.strong(@pre_auth.client.name, dir: "auto")) %></h1>
+<div class="card bg-base-100 shadow-sm w-full max-w-2xl mx-auto p-6 text-start gap-4 flex-none">
+  <h1 class="text-lg font-bold m-0"><%= t(".heading_html", client: tag.strong(@pre_auth.client.name, dir: "auto")) %></h1>
 
-  <p class="margin-none">
+  <p class="m-0">
     <%= t(".acts_as_html", user: tag.span(Current.user.name, dir: "auto"), client: tag.strong(@pre_auth.client.name, dir: "auto"),
           link: link_to(t(".tokens_link"), my_tokens_path)) %>
   </p>
 
-  <p class="txt-small txt-subtle margin-none">
+  <p class="text-sm text-base-content/60 m-0">
     <%= t(".redirect_html", host: tag.strong(redirect&.host.presence || @pre_auth.redirect_uri, dir: "ltr")) %>
   </p>
 
-  <%= form_tag oauth_authorization_path, method: :post, data: { turbo: false }, class: "flex flex-column gap" do %>
+  <%= form_tag oauth_authorization_path, method: :post, data: { turbo: false }, class: "flex flex-col gap-4" do %>
     <% request_fields.each do |name, value| %>
       <%= hidden_field_tag name, value, id: nil %>
     <% end %>
 
-    <fieldset class="flex flex-column gap-half borderless unpad margin-none">
-      <legend class="margin-block-end-half"><%= t(".allow_legend") %></legend>
+    <fieldset class="fieldset p-0 gap-2">
+      <legend class="fieldset-legend"><%= t(".allow_legend") %></legend>
       <% scope_descriptions(@pre_auth.scopes.to_a).each do |scope, description| %>
-        <label class="flex align-center gap-half">
-          <%= check_box_tag "granted_scopes[]", scope, true, id: "granted_scope_#{scope}" %>
+        <label class="flex items-center gap-2">
+          <%= check_box_tag "granted_scopes[]", scope, true, id: "granted_scope_#{scope}", class: "checkbox checkbox-sm" %>
           <span><%= description %></span>
         </label>
       <% end %>
     </fieldset>
 
-    <%= submit_tag t(".allow"), class: "btn btn--link center" %>
+    <%= submit_tag t(".allow"), class: "btn btn-primary self-center" %>
   <% end %>
 
-  <%= form_tag oauth_authorization_path, method: :delete, data: { turbo: false }, class: "txt-align-center" do %>
+  <%= form_tag oauth_authorization_path, method: :delete, data: { turbo: false }, class: "text-center" do %>
     <% request_fields.each do |name, value| %>
       <%= hidden_field_tag name, value, id: nil %>
     <% end %>
-    <%= submit_tag t(".deny"), class: "btn borderless txt-small" %>
+    <%= submit_tag t(".deny"), class: "btn btn-ghost btn-sm" %>
   <% end %>
 </div>

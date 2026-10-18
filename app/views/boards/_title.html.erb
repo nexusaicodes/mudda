@@ -1,7 +1,7 @@
 <%# locals: (board:) -%>
 <%# The board's name, alone in the centre of the header. Renaming and deleting live on the boards list. %>
-<div class="header__title board-title">
-  <h1 class="board-title__name">
-    <span class="overflow-ellipsis" dir="auto"><%= board.name %></span>
+<div class="board-title min-w-0">
+  <h1 class="board-title__name text-lg sm:text-xl font-bold truncate">
+    <span dir="auto"><%= board.name %></span>
   </h1>
 </div>

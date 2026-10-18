@@ -1,14 +1,16 @@
 <%# Shown only under a card ceiling (the account's plan has one), and only once it's close. %>
 <% if account.card_limit_near? %>
-  <p class="txt-small <%= "txt-negative" if account.card_limit_reached? %>">
-    <% if account.card_limit_reached? %>
-      <%= t(".reached", limit: account.card_limit) %>
-    <% else %>
-      <%= t(".remaining", count: account.cards_remaining, limit: account.card_limit) %>
-    <% end %>
+  <div role="alert" class="alert <%= account.card_limit_reached? ? "alert-error" : "alert-warning" %> alert-soft text-sm">
+    <p>
+      <% if account.card_limit_reached? %>
+        <%= t(".reached", limit: account.card_limit) %>
+      <% else %>
+        <%= t(".remaining", count: account.cards_remaining, limit: account.card_limit) %>
+      <% end %>
+    </p>
 
     <% if account.upgrade_url %>
-      <%= link_to t(".upgrade"), account.upgrade_url, class: "btn btn--link", data: { turbo: false } %>
+      <%= link_to t(".upgrade"), account.upgrade_url, class: "btn btn-primary btn-sm", data: { turbo: false } %>
     <% end %>
-  </p>
+  </div>
 <% end %>

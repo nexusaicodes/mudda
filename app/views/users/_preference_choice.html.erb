@@ -1,12 +1,13 @@
 <%# One preference as equal-width options; each is its own PATCH, so it works without JavaScript. %>
-<section class="settings__section">
-  <h2><%= heading %></h2>
+<section class="flex flex-col gap-3">
+  <h2 class="card-title text-base"><%= heading %></h2>
 
-  <div class="preference-choice" role="group" aria-label="<%= heading %>">
+  <div class="join grid grid-flow-col auto-cols-fr w-full" role="group" aria-label="<%= heading %>">
     <% options.each do |option| %>
+      <% chosen = option[:value] == current %>
       <%= button_to my_preferences_path, method: :patch, params: { name => option[:value].to_s },
-            class: "btn preference-choice__option", aria: { pressed: option[:value] == current },
-            form: { data: { turbo: false } } do %>
+            class: class_names("preference-choice__option btn join-item w-full", "btn-neutral": chosen), aria: { pressed: chosen },
+            form: { class: "contents", data: { turbo: false } } do %>
         <%= icon_tag option[:icon] if option[:icon] %>
         <%= tag.span option[:label], lang: option[:lang], dir: option[:dir] %>
       <% end %>

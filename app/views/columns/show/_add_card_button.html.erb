@@ -1,14 +1,13 @@
 <%# locals: (board:, due_soon:) -%>
-<div class="board-tools">
+<div class="board-tools flex flex-wrap items-center justify-center gap-2 py-3 max-sm:py-2">
   <% if board.account.card_limit_reached? %>
-    <span class="txt-small"><%= t(".limit_reached", count: board.account.card_limit) %></span>
+    <span class="text-sm"><%= t(".limit_reached", count: board.account.card_limit) %></span>
     <% if upgrade_url = board.account.upgrade_url %>
-      <%= link_to t(".upgrade"), upgrade_url, class: "btn btn--link", data: { turbo: false } %>
+      <%= link_to t(".upgrade"), upgrade_url, class: "btn btn-primary max-sm:btn-sm", data: { turbo: false } %>
     <% end %>
   <% else %>
-    <%= link_to new_board_card_path(board), class: "btn btn--link",
-          data: { turbo_frame: "_top" } do %>
-      <%= icon_tag "add", class: "show-on-touch" %>
+    <%= link_to new_board_card_path(board), class: "btn btn-primary max-sm:btn-sm", data: { turbo_frame: "_top" } do %>
+      <%= icon_tag "add" %>
       <span><%= t(".add") %></span>
     <% end %>
   <% end %>

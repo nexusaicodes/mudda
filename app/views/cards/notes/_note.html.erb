@@ -1,32 +1,32 @@
 <% cache [ note, I18n.locale ] do %>
   <%= turbo_frame_tag note, :container do %>
-    <div id="<%= dom_id(note) %>" class="note align-start full-width">
-      <figure class="note__avatar flex-item-no-shrink" aria-hidden="true">
+    <div id="<%= dom_id(note) %>" class="note flex items-start gap-3 w-full">
+      <div class="shrink-0" aria-hidden="true">
         <%= avatar_tag note.creator, hidden_for_screen_reader: true %>
-      </figure>
+      </div>
 
-      <div class="note__content flex flex-column flex-item-grow full-width">
-        <div class="note__author flex align-center gap-half">
-          <h3 class="font-weight-normal txt-normal flex-item-justify-start min-width overflow-ellipsis">
-            <strong>
-              <%= link_to note.creator.name, note.creator, class: "txt-ink btn btn--plain fill-transparent", dir: "auto", data: { turbo_frame: "_top" } %>
-            </strong>
+      <div class="card card-sm bg-base-100 shadow-sm grow min-w-0">
+        <div class="card-body gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <h3 class="text-sm grow min-w-0 truncate">
+              <strong>
+                <%= link_to note.creator.name, note.creator, class: "link link-hover", dir: "auto", data: { turbo_frame: "_top" } %>
+              </strong>
+              <%= link_to note, class: "link link-hover text-base-content/60", data: { turbo_frame: "_top" } do %>
+                <%= local_datetime_tag note.created_at, style: :agoorweekday %>,
+                <%= local_datetime_tag note.created_at, style: :time %>
+              <% end %>
+            </h3>
 
-            <%= link_to note, class: "note__permalink-title", data: { turbo_frame: "_top" } do %>
-              <%= local_datetime_tag note.created_at, style: :agoorweekday %>,
-              <%= local_datetime_tag note.created_at, style: :time %>
+            <%= link_to edit_board_card_note_path(note.card.board, note.card, note),
+                  class: "note__edit btn btn-ghost btn-circle btn-xs", aria: { label: t(".edit") } do %>
+              <%= icon_tag "menu-dots-horizontal" %>
             <% end %>
-          </h3>
+          </div>
 
-          <%= link_to edit_board_card_note_path(note.card.board, note.card, note),
-                class: "note__edit btn btn--circle borderless translucent" do %>
-            <%= icon_tag "menu-dots-horizontal" %>
-            <span class="for-screen-reader"><%= t(".edit") %></span>
-          <% end %>
-        </div>
-
-        <div class="note__body lexxy-content" dir="auto" data-controller="syntax-highlight retarget-links" data-turbo-permanent>
-          <%= note.body %>
+          <div class="note__body lexxy-content" dir="auto" data-controller="syntax-highlight retarget-links" data-turbo-permanent>
+            <%= note.body %>
+          </div>
         </div>
       </div>
     </div>

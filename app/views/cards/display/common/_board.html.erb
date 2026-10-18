@@ -1,8 +1,7 @@
-<div class="card__id" data-number-prefix="<%= t(".number_prefix") %>">
-  <span class="for-screen-reader"><%= t(".card_number") %></span>
-  <%= card.number %>
-</div>
-<div class="card__board-name">
-  <span class="overflow-ellipsis" dir="auto"><%= card.board.name %></span>
+<span class="badge badge-neutral gap-1 max-w-full">
+  <span class="sr-only"><%= t(".card_number") %></span>
+  <span class="opacity-70"><%= t(".number_prefix") %></span><%= card.number %>
+  <span class="opacity-40">·</span>
+  <span class="truncate" dir="auto"><%= card.board.name %></span>
   <%= yield %>
-</div>
+</span>
