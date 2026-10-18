@@ -1,6 +1,6 @@
 require "test_helper"
 
-# The MCP endpoint an agent drives Mudda through. Each tool is one API.md call, so these pin
+# The MCP endpoint an agent drives Mudda through. Each tool is one JSON API call, so these pin
 # the translation — arguments in, the API's answer out — rather than re-testing the API.
 class McpTest < ActionDispatch::IntegrationTest
   setup do

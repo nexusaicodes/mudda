@@ -524,6 +524,7 @@ DEPENDENCIES
   image_processing (~> 1.14)
   importmap-rails
   jbuilder
+  json_schemer
   lexxy (= 0.9.14.beta)
   mcp (~> 1.6)
   minitest-reporters

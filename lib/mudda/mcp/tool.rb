@@ -11,7 +11,7 @@ module Mudda::Mcp
     }
 
     class << self
-      attr_reader :scope
+      attr_reader :scope, :endpoints
 
       # Mudda reaches nothing outside itself, so no tool is open-world. A tool that does more
       # than its kind suggests corrects the hints it gets from it.
@@ -20,6 +20,17 @@ module Mudda::Mcp
 
         @scope = hints[:scope]
         annotations hints.except(:scope).merge(open_world_hint: false)
+      end
+
+      # The API operations the tool makes, as docs/openapi.yaml names them, so the published
+      # tool list (docs/mcp-tools.json, `bin/rails mcp:schema`) can point at each one.
+      def calls(verb, *paths)
+        @endpoints = paths.map { |path| { method: verb.to_s.upcase, path: path } }
+      end
+
+      # The tool as docs/mcp-tools.json publishes it: what MCP lists, plus its scope and calls.
+      def to_contract
+        to_h.merge(scope: scope, calls: endpoints)
       end
 
       # An argument the tool doesn't name is refused by name, rather than reaching a call

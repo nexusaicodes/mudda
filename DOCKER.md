@@ -50,8 +50,8 @@ the first `make setup`: the owner is found by email, so changing it later leaves
 the new address, and reseeding then provisions a second account rather than renaming the first.
 
 Lost password or broken passkeys? `make reset-auth` removes every passkey and any changed
-password, and ends every session; sign back in with `MUDDA_OWNER_PASSWORD`. Driving the app from a script or agent? See [API.md](API.md) and
-[MCP.md](MCP.md).
+password, and ends every session; sign back in with `MUDDA_OWNER_PASSWORD`. Driving the app from a script or agent? See the developer docs at
+<https://docs.mudda.today>.
 
 ### Hosting platform sync
 
@@ -145,7 +145,7 @@ container.
 | `make seed`* | Run `db/seeds.rb` (idempotent) |
 | `make reset-db`* | Drop, recreate, and reseed the database |
 | `make reset-auth` | Remove every passkey and any changed password, and end every session, API token, and OAuth grant |
-| `make token` / `make tokens` / `make revoke` | Mint, list, and revoke API tokens (see [API.md → Managing tokens](API.md#managing-tokens)) |
+| `make token` / `make tokens` / `make revoke` | Mint, list, and revoke API tokens (see [Authentication → Managing tokens](https://docs.mudda.today/guides/authentication/#managing-tokens)) |
 | `make css` | Build `app/assets/builds/tailwind.css`; the running app rebuilds it as files change |
 | `make test` | Build the stylesheet, then run the unit and integration tests |
 | `make test-system` | The system tests, in a `selenium` Chromium container that it starts and then removes |

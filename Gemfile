@@ -45,6 +45,7 @@ end
 
 group :test do
   gem "capybara"
+  gem "json_schemer"
   gem "minitest-reporters", require: false
   gem "mocha"
   gem "selenium-webdriver"

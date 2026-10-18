@@ -1,6 +1,6 @@
 require "test_helper"
 
-# The contract a script or agent drives Mudda through. See API.md.
+# The contract a script or agent drives Mudda through. See docs/openapi.yaml and docs.mudda.today.
 class ApiTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:david)
@@ -419,7 +419,7 @@ class ApiTest < ActionDispatch::IntegrationTest
   end
 
   # Every JSON failure carries the same envelope, so a client never has to branch on the
-  # response shape to find out what went wrong. See API.md.
+  # response shape to find out what went wrong. See docs.mudda.today → Errors.
 
   test "an unauthenticated JSON request carries the error envelope" do
     get boards_path(format: :json)
