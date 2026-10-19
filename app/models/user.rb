@@ -36,10 +36,4 @@ class User < ApplicationRecord
     assign_attributes(attributes)
     save(context: :password_change)
   end
-
-  # Sessions survive: Authorization is what refuses a deactivated user, and it needs a live
-  # credential to answer a JSON client 403 rather than 401.
-  def deactivate
-    update! active: false
-  end
 end

@@ -2,7 +2,7 @@ require "application_system_test_case"
 
 class BackLinkNavigationTest < ApplicationSystemTestCase
   test "card back link returns to global filter view when navigating from it" do
-    sign_in_as(users(:kevin))
+    sign_in_as(users(:david))
 
     filter_url = cards_url(column_ids: [ columns(:writebook_doing).id ])
     visit filter_url

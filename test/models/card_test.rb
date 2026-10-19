@@ -25,8 +25,8 @@ class CardTest < ActiveSupport::TestCase
     board_a = Account.find(board.account_id).boards.find(board.id)
     board_b = Account.find(board.account_id).boards.find(board.id)
 
-    card_a = board_a.cards.create!(title: "A", creator: users(:kevin), due_on: 1.week.from_now)
-    card_b = board_b.cards.create!(title: "B", creator: users(:kevin), due_on: 1.week.from_now)
+    card_a = board_a.cards.create!(title: "A", creator: users(:david), due_on: 1.week.from_now)
+    card_b = board_b.cards.create!(title: "B", creator: users(:david), due_on: 1.week.from_now)
 
     assert_not_equal card_a.number, card_b.number
     assert_equal card_a.number + 1, card_b.number

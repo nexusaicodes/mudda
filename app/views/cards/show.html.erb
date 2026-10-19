@@ -1,10 +1,6 @@
 <% @page_title = @card.title %>
 <% @header_class = "header--card" %>
 
-<% content_for :head do %>
-  <%= card_social_tags(@card) %>
-<% end %>
-
 <% content_for :header_start do %>
   <%= link_back_to_board @card.board, prefer_referrer: [ root_path, cards_path, board_path(@card.board) ] %>
 <% end %>

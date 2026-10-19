@@ -27,8 +27,4 @@ class Current < ActiveSupport::CurrentAttributes
   def with_account(value, &)
     with(account: value, &)
   end
-
-  def without_account(&)
-    with(account: nil, &)
-  end
 end

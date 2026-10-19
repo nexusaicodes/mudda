@@ -2,7 +2,7 @@ require "test_helper"
 
 class User::SettingsTest < ActiveSupport::TestCase
   test "locale is one the app speaks, or blank" do
-    settings = users(:kevin).settings
+    settings = users(:david).settings
 
     assert settings.update(locale: "ar")
     assert settings.update(locale: nil)
@@ -10,7 +10,7 @@ class User::SettingsTest < ActiveSupport::TestCase
   end
 
   test "timezone_name names a zone, or is blank" do
-    settings = users(:kevin).settings
+    settings = users(:david).settings
 
     assert settings.update(timezone_name: "Asia/Kolkata")
     assert settings.update(timezone_name: "Eastern Time (US & Canada)")
@@ -20,7 +20,7 @@ class User::SettingsTest < ActiveSupport::TestCase
   end
 
   test "timezone_name is saved as sent, aliases included" do
-    settings = users(:kevin).settings
+    settings = users(:david).settings
 
     { "Asia/Calcutta" => "Asia/Calcutta", "Europe/Amsterdam" => "Europe/Amsterdam", "  Asia/Kolkata " => "Asia/Kolkata" }.each do |sent, saved|
       settings.update!(timezone_name: sent)
@@ -35,7 +35,7 @@ class User::SettingsTest < ActiveSupport::TestCase
   end
 
   test "a zone saved before zones were checked doesn't block another setting" do
-    settings = users(:kevin).settings
+    settings = users(:david).settings
     settings.update_column :timezone_name, "bogus"
 
     assert settings.update(locale: "ar")
@@ -43,7 +43,7 @@ class User::SettingsTest < ActiveSupport::TestCase
   end
 
   test "timezone is UTC until a zone is saved" do
-    settings = users(:kevin).settings
+    settings = users(:david).settings
 
     assert_equal ActiveSupport::TimeZone["UTC"], settings.timezone
 

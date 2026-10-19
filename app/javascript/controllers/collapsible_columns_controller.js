@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 import { nextFrame, debounce } from "helpers/timing_helpers";
-import { isNative } from "helpers/platform_helpers";
 
 export default class extends Controller {
   static classes = [ "collapsed", "expanded", "noTransitions", "titleNotVisible" ]
@@ -108,7 +107,7 @@ export default class extends Controller {
     localStorage.removeItem(key)
   }
 
-  #expand({ column, saveState = true, scrollBehavior = "smooth" }) {
+  #expand({ column, saveState = true }) {
     this.#buttonFor(column)?.setAttribute("aria-expanded", "true")
     column.classList.remove(this.collapsedClass)
     column.classList.add(this.expandedClass)
@@ -121,7 +120,7 @@ export default class extends Controller {
     // On a phone the lanes stack and fit the window, so the open lane is only brought into view
     // if something scrolled it out; its card strip starts back at the first card.
     if (!this.#isDesktop) {
-      column.scrollIntoView({ behavior: scrollBehavior, block: "nearest", inline: "nearest" })
+      column.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" })
       column.querySelector(".cards__list")?.scrollTo({ left: 0 })
     }
   }
@@ -140,7 +139,7 @@ export default class extends Controller {
     const key = this.#localStorageKeyFor(column)
     if (localStorage.getItem(key)) {
       this.#collapseAllExcept(column)
-      this.#expand({ column, scrollBehavior: isNative() ? "instant" : "smooth" })
+      this.#expand({ column })
     }
   }
 

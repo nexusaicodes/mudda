@@ -2,7 +2,7 @@ require "test_helper"
 
 class ActionPackPasskeyInferNameFromAaguidTest < ActiveSupport::TestCase
   setup do
-    @user = users(:kevin)
+    @user = users(:david)
     @private_key = OpenSSL::PKey::EC.generate("prime256v1")
 
     ActionPack::WebAuthn::Current.host = "www.example.com"

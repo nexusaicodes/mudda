@@ -2,7 +2,7 @@ require "test_helper"
 
 class Prompts::CardsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "index" do

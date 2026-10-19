@@ -43,7 +43,6 @@ module Card::Eventable
     def track_title_change
       if old_title = tracked_change_was("title").presence
         track_event "title_changed", particulars: { old_title: old_title, new_title: title }
-        events.touch_all
       end
     end
 end

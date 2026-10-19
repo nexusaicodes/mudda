@@ -2,7 +2,7 @@ require "test_helper"
 
 class Cards::StepsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "create" do

@@ -5,7 +5,7 @@
   <%= link_back_to_board @board %>
 <% end %>
 
-<section class="card-perma card-perma--draft w-full max-w-4xl mx-auto mt-2 rounded-box bg-(--card-color)/20 p-3 sm:p-6 flex flex-col gap-4 text-start" style="--card-color: <%= @card.color %>;">
+<section class="card-perma w-full max-w-4xl mx-auto mt-2 rounded-box bg-(--card-color)/20 p-3 sm:p-6 flex flex-col gap-4 text-start" style="--card-color: <%= @card.color %>;">
   <article class="card-perma__bg card bg-base-100 shadow-md">
     <%# The card does not exist yet: everything on this screen travels in one create.
         local-save keeps the form in the browser until it does. %>

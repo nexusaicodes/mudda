@@ -621,7 +621,7 @@
   {
     "name": "update_note",
     "title": "Edit a note",
-    "description": "Replaces a note's body. Only the note's creator may edit it.",
+    "description": "Replaces a note's body.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {
@@ -667,7 +667,7 @@
   {
     "name": "delete_note",
     "title": "Delete a note",
-    "description": "Permanently deletes a note from a card's log. Only the note's creator may delete it.",
+    "description": "Permanently deletes a note from a card's log.",
     "inputSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "properties": {

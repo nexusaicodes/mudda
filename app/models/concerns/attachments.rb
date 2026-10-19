@@ -11,8 +11,6 @@ module Attachments
     # the gif can be rendered with all its frame intact.
     #
     # Only `n` is accepted as an override, using the full parameter name `intent` doesn’t work.
-    #
-    # This was cargo-culted from know-it-all and I imagine it may be fixed at some point.
     large: { loader: { n: -1 }, resize_to_limit: [ 1024, 768 ] }
   }
 

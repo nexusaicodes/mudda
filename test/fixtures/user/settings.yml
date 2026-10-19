@@ -4,17 +4,5 @@ _fixture:
 david_settings:
   user: david
 
-jz_settings:
-  user: jz
-
-kevin_settings:
-  user: kevin
-
-system_settings:
-  user: system
-
 mike_settings:
   user: mike
-
-system_initech_settings:
-  user: system_initech

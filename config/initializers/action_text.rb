@@ -13,11 +13,7 @@ module ActionText
       end
 
       def accessible_to?(user)
-        record.try(:accessible_to?, user) || record.try(:publicly_accessible?)
-      end
-
-      def publicly_accessible?
-        record.try(:publicly_accessible?)
+        record.try(:accessible_to?, user)
       end
     end
   end

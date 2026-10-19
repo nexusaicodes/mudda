@@ -13,7 +13,3 @@ export function isAndroid() {
 export function isMobile() {
   return isIos() || isAndroid()
 }
-
-export function isNative() {
-  return /Hotwire Native/.test(navigator.userAgent)
-}

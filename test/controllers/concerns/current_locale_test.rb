@@ -20,34 +20,34 @@ class CurrentLocaleTest < ActionDispatch::IntegrationTest
   end
 
   test "the user's setting wins over the browser" do
-    users(:kevin).settings.update!(locale: "ar")
-    sign_in_as :kevin
+    users(:david).settings.update!(locale: "ar")
+    sign_in_as :david
 
-    get user_path(users(:kevin)), headers: { "Accept-Language" => "en" }
+    get user_path(users(:david)), headers: { "Accept-Language" => "en" }
 
     assert_select "html[lang=ar][dir=rtl]"
   end
 
   test "JSON answers in English for an Arabic user" do
-    users(:kevin).settings.update!(locale: "ar")
+    users(:david).settings.update!(locale: "ar")
     card = cards(:text)
 
     put board_card_path(card.board, card, format: :json),
       params: { due_on: nil },
-      headers: bearer_headers_for(users(:kevin)).merge("Accept-Language" => "ar"), as: :json
+      headers: bearer_headers_for(users(:david)).merge("Accept-Language" => "ar"), as: :json
 
     assert_response :unprocessable_entity
     assert_equal [ "can't be blank in Todo or Doing" ], @response.parsed_body.dig("errors", "due_on")
   end
 
   test "the ETag changes with the language" do
-    sign_in_as :kevin
+    sign_in_as :david
 
-    get user_path(users(:kevin))
+    get user_path(users(:david))
     english = @response.headers["ETag"]
 
-    users(:kevin).settings.update!(locale: "ar")
-    get user_path(users(:kevin))
+    users(:david).settings.update!(locale: "ar")
+    get user_path(users(:david))
 
     assert_not_equal english, @response.headers["ETag"]
   end

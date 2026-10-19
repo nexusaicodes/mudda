@@ -73,17 +73,6 @@ class Card::EventableTest < ActiveSupport::TestCase
       card.events.where(action: "card_board_changed").last.particulars)
   end
 
-  test "renaming a card touches its events so the activity feed cache invalidates" do
-    card = cards(:logo)
-    event = card.events.first
-    assert_not_nil event, "expected the card to have at least one event"
-
-    travel_to 1.hour.from_now do
-      card.update!(title: "Renamed logo")
-      assert_equal Time.current, event.reload.updated_at
-    end
-  end
-
   test "an event names the agent whose token made the change, and only a token" do
     token = users(:david).sessions.create!(kind: :token, label: "claude")
     card = Current.set(session: token) { boards(:writebook).cards.create!(title: "Via agent", due_on: Date.tomorrow, creator: users(:david)) }

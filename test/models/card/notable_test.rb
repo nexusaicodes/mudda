@@ -6,7 +6,7 @@ class Card::NotableTest < ActiveSupport::TestCase
   end
 
   test "a new card has no notes" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "New", due_on: 1.week.from_now
+    card = boards(:writebook).cards.create! creator: users(:david), title: "New", due_on: 1.week.from_now
 
     assert_empty card.notes
   end

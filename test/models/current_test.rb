@@ -2,9 +2,9 @@ require "test_helper"
 
 class CurrentTest < ActiveSupport::TestCase
   test "setting a session derives the user and account" do
-    Current.session = sessions(:kevin)
+    Current.session = sessions(:david)
 
-    assert_equal users(:kevin), Current.user
+    assert_equal users(:david), Current.user
     assert_equal accounts("37s"), Current.account
   end
 
@@ -16,7 +16,7 @@ class CurrentTest < ActiveSupport::TestCase
   end
 
   test "clearing the session clears everything derived from it" do
-    Current.session = sessions(:kevin)
+    Current.session = sessions(:david)
     Current.session = nil
 
     assert_nil Current.user
@@ -26,16 +26,16 @@ class CurrentTest < ActiveSupport::TestCase
   # Authorization is what refuses a deactivated user; Current still names them, so the
   # refusal can tell a signed-out browser apart from a forbidden token.
   test "a deactivated user is still identified but has no account" do
-    users(:kevin).update!(active: false)
+    users(:david).update!(active: false)
 
-    Current.session = sessions(:kevin)
+    Current.session = sessions(:david)
 
-    assert_equal users(:kevin), Current.user
+    assert_equal users(:david), Current.user
     assert_nil Current.account
   end
 
   test "with_account overrides the derived account for the block" do
-    Current.session = sessions(:kevin)
+    Current.session = sessions(:david)
 
     Current.with_account(accounts(:initech)) do
       assert_equal accounts(:initech), Current.account

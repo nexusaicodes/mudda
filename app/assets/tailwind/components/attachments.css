@@ -21,21 +21,13 @@
     font-size: 0.875rem;
 
     textarea {
-      --input-border-radius: 0.3em;
-      --input-border-size: 0;
-      --input-padding: 0;
-
-      background-color: var(--input-background, transparent);
+      background-color: transparent;
       border: none;
       color: inherit;
       inline-size: 100%;
       max-inline-size: 100%;
       resize: none;
       text-align: center;
-
-      &:focus {
-        --focus-ring-size: 0;
-      }
 
       @supports (field-sizing: content) {
         field-sizing: content;

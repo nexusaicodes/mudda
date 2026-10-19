@@ -6,7 +6,7 @@ writebook:
 
 private:
   name: Private board
-  creator: kevin
+  creator: david
   account: 37s
   cards_count: 0
 
