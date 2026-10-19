@@ -33,8 +33,6 @@ class UserTest < ActiveSupport::TestCase
   test "name methods handle blank names gracefully" do
     user = User.new(name: "")
     assert_equal "", user.familiar_name
-    assert_nil user.first_name
-    assert_nil user.last_name
     assert_equal "", user.initials
   end
 

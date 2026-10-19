@@ -13,7 +13,6 @@ module Attachments
     # Only `n` is accepted as an override, using the full parameter name `intent` doesn’t work.
     #
     # This was cargo-culted from know-it-all and I imagine it may be fixed at some point.
-    small: { loader: { n: -1 }, resize_to_limit: [ 800, 600 ] },
     large: { loader: { n: -1 }, resize_to_limit: [ 1024, 768 ] }
   }
 
@@ -23,22 +22,6 @@ module Attachments
 
   def has_attachments?
     attachments.any?
-  end
-
-  def remote_images
-    @remote_images ||= rich_text_record&.body&.attachables&.grep(ActionText::Attachables::RemoteImage) || []
-  end
-
-  def has_remote_images?
-    remote_images.any?
-  end
-
-  def remote_videos
-    @remote_videos ||= rich_text_record&.body&.attachables&.grep(ActionText::Attachables::RemoteVideo) || []
-  end
-
-  def has_remote_videos?
-    remote_videos.any?
   end
 
   private

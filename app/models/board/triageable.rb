@@ -2,8 +2,8 @@ module Board::Triageable
   extend ActiveSupport::Concern
 
   # Every board has the same four fixed lanes, in this order. They are all real
-  # Column rows — there are no separate lifecycle states. Names are fixed (only
-  # color is editable); Card section predicates key off these names.
+  # Column rows — there are no separate lifecycle states. Names and colors are
+  # fixed; Card section predicates key off these names.
   DEFAULT_COLUMNS = [
     { name: "Backlog", color: "var(--color-card-2)" },
     { name: "Todo",    color: "var(--color-card-3)" },

@@ -49,10 +49,6 @@ class Card < ApplicationRecord
     number.to_s
   end
 
-  def filled?
-    title.present? || description.present?
-  end
-
   def accessible_to?(user)
     user&.account_id == board.account_id
   end

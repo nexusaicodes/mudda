@@ -124,11 +124,4 @@ class CardTest < ActiveSupport::TestCase
     assert_equal note_events, note.events.ids
     assert card.events.exists?(action: "card_board_changed")
   end
-
-  test "a card is filled if it has either the title or the description set" do
-    assert Card.new(title: "Some title").filled?
-    assert Card.new(description: "Some description").filled?
-
-    assert_not Card.new.filled?
-  end
 end

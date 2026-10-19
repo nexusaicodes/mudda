@@ -90,10 +90,6 @@ Rails.application.routes.draw do
     route_for :board_card, note.card.board, note.card, options
   end
 
-  resolve "Event" do |event, options|
-    polymorphic_url(event.eventable, options)
-  end
-
   get "up", to: "rails/health#show", as: :rails_health_check
   get "metrics", to: "metrics#show"
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

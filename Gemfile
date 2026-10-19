@@ -19,12 +19,10 @@ gem "sqlite3", ">= 2.0"
 
 # Features
 gem "geared_pagination", "~> 1.2"
-gem "rouge"
 gem "jbuilder"
 gem "lexxy", "0.9.14.beta"
 gem "image_processing", "~> 1.14"
-gem "platform_agent"
-gem "useragent", bc: "useragent"
+gem "useragent", bc: "useragent" # what allow_browser parses the User-Agent with
 gem "mcp", "~> 1.6"
 gem "bcrypt", "~> 3.1" # the owner password the board stores once it is changed or reset
 gem "doorkeeper", "~> 5.9"

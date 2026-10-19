@@ -6,8 +6,7 @@
     data-controller="local-time timezone-cookie turbo-navigation"
     data-action="turbo:morph@window->local-time#refreshAll turbo:before-visit@document->turbo-navigation#rememberLocation"
     data-turbo-navigation-label-value="<%= @page_title %>"
-    data-turbo-navigation-back-template-value="<%= t("back_link.label", label: "%{label}") %>"
-    data-platform="<%= platform.type %>">
+    data-turbo-navigation-back-template-value="<%= t("back_link.label", label: "%{label}") %>">
     <div id="global-container" class="contents">
       <%# The header sits inside the paper's frame; it rises above the page while one of its dialogs is open. %>
       <header id="header" class="navbar grid grid-cols-[1fr_minmax(0,max-content)_1fr] relative z-(--z-nav) has-[dialog[open]]:z-(--z-nav-open) gap-2 min-h-0 px-[calc(var(--paper-clearance)+var(--custom-safe-inset-left))] pt-[calc(var(--paper-clearance)+var(--custom-safe-inset-top))] pb-2 <%= @header_class %>">

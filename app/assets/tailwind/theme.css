@@ -32,14 +32,12 @@
   --z-popup: 10;
   --z-nav: 20;
   --z-flash: 30;
-  --z-tooltip: 40;
   --z-nav-open: 100;
 
   /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
      of the data and the API; their values come from the theme's inks, and the four lanes differ in
      lightness as well as hue. */
   --color-card-default: var(--color-info);
-  --color-card-complete: var(--color-success);
   --color-card-1: var(--color-primary);
   --color-card-2: var(--ink-muted);          /* Backlog */
   --color-card-3: var(--brass);              /* Todo */
