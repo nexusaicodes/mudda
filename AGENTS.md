@@ -347,18 +347,25 @@ The browser is for an occasional look, since agents do most of the work through 
 chrome is small and there are **no keyboard shortcuts**: keys only act inside the field being
 typed in (Enter or Ctrl/Cmd+Enter submits, Esc cancels).
 
-- **One look.** The components are daisyUI's, in its `retro` theme, the only theme and the
-  default (no `data-theme`, no dark mode): buttons, inputs, cards, badges, lists, modals,
-  dropdowns, toasts and tooltips come from the kit, and its palette also defines the lane
-  colours (`--color-card-*` in `app/assets/tailwind/theme.css`). Two things are the app's own:
-  the fonts (`fonts.css`, below) and the paper. Every page sits on aged papyrus
-  (`app/assets/tailwind/paper.css`): a golden-ochre ground, broad stains
-  stretched over the window (`paper-stains.svg`), a woven layer of horizontal strips over
-  vertical ones (`paper-fibres.svg`), a repeating fine grain (`paper-grain.svg`),
-  and a ruled frame (one tight band: a vermilion rule with a dark-brown hairline against each
-  side) fixed a little inside the window's edges (`--paper-inset`). `--paper-clearance` keeps the header, the page, and the lanes
-  inside the frame. The kit's own surfaces (cards, modals) sit on top of it. The static error
-  pages (`public/error.css`) mirror the look by hand, since they are served without the build.
+- **One look: the manuscript.** The components are daisyUI's, in its `retro` theme, the only
+  theme and the default (no `data-theme`, no dark mode): buttons, inputs, cards, badges, lists,
+  modals, dropdowns, toasts and tooltips come from the kit. The look over it comes from the
+  **mudda-theme** gem (github.com/nexusaicodes/mudda-theme, public), which mudda-platform shares.
+  Its tokens are the manuscript palette: navy ink `--ink` #1B2A4A on cream `--paper` #F1E6CE,
+  slate `--ink-muted` for quieter text, brass `--brass` for large labels and marks, and vermilion
+  `--vermilion` as the one accent. It sets 3px corners and turns every shadow off. It sets h1-h3
+  in Amiri and rules the kit's surfaces (cards, modals, menus, alerts) with a hairline
+  (`--hairline`) instead of lifting them. It marks focus in vermilion and maps daisyUI's roles onto
+  the tokens. tailwindcss-rails writes `app/assets/builds/tailwind/mudda_theme.css` to import the
+  gem's adapter, and `app/assets/tailwind/application.css` imports that right after the daisyUI
+  plugin. Change the look in the gem, never here. To upgrade, bump the tag in the `Gemfile`, then
+  run `make build`, `bin/rails mudda_theme:sync_static` and `make css`.
+  `app/assets/tailwind/theme.css` holds only what is the app's own. The lane colours
+  (`--color-card-*`) come from the theme's inks: Backlog slate, Todo brass, Doing vermilion, Done
+  navy. `--paper-inset` and `--paper-clearance` keep the header, the page and the lanes clear of
+  the window's edges. The static error pages, served without the build, link
+  `public/mudda-theme/tokens.css`, a copy that `mudda_theme:sync_static` writes from the gem.
+  `test/lib/mudda_theme_test.rb` fails when that copy is stale.
 - **Home.** `/` is the boards list (`boards#index`, HTML; the JSON index is the API's): a big
   "New board" button, then every board by name with its card count, and at the top right of each
   row a pencil that renames it in place (`inline-edit` controller, Save and Cancel, Esc cancels)
@@ -476,8 +483,11 @@ never picks simply follows the browser (a blank `locale` through the API still r
   the same checks.
 - `<html lang dir>` comes from the locale. daisyUI mirrors itself under `dir=rtl`, and the app's
   utilities and CSS use logical directions (`ms-`, `pe-`, `start-`, `inset-inline`); where they
-  can't, a `[dir=rtl]` rule mirrors it. Arabic renders in IBM Plex Sans Arabic (`app/assets/fonts`, OFL),
-  loaded only for Arabic code points. Latin text renders in El Messiri (`app/assets/fonts`, OFL, self-hosted, never fetched from Google). Dates show Western digits (`-u-nu-latn`).
+  can't, a `[dir=rtl]` rule mirrors it. Body text renders in IBM Plex: IBM Plex Sans Arabic for
+  Arabic code points and IBM Plex Sans for Latin. Headings render in Amiri, which covers both
+  scripts. All three are OFL and self-hosted by the mudda-theme gem, never fetched from Google.
+  The avatar SVG embeds Amiri Bold (`MuddaTheme.font_path`), since an SVG in an `<img>` can't
+  fetch fonts. Dates show Western digits (`-u-nu-latn`).
 - The `public/*.html` error pages are static, so each carries both languages.
 
 ### Hosting platform sync

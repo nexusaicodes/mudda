@@ -1,8 +1,8 @@
-/* Tokens the kit doesn't provide. Colours, radii, sizes and shadows come from the daisyUI retro
-   theme; only what the app itself depends on is defined here. */
+/* What the app itself depends on, over the mudda-theme gem's look: the body stack with the Segoe
+   fallback, the flash animation, safe areas, the page inset, layers and the lane colours. */
 
 @theme {
-  --font-sans: "IBM Plex Sans Arabic", "El Messiri", "Adwaita Sans", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Mudda", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Mudda", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   --font-mono: ui-monospace, monospace;
 
   /* The flash fades in, holds, and fades out; element-removal drops it on animationend. */
@@ -25,7 +25,7 @@
   --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
   --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
 
-  /* The page sits inside the paper's frame; see paper.css */
+  /* The page's margin from the window's edges, which the header, page and lanes keep clear of */
   --paper-inset: clamp(10px, 2.2vmin, 26px);
   --paper-clearance: calc(var(--paper-inset) + 14px);
 
@@ -36,14 +36,15 @@
   --z-nav-open: 100;
 
   /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
-     of the data and the API; their values come from the kit's palette. */
+     of the data and the API; their values come from the theme's inks, and the four lanes differ in
+     lightness as well as hue. */
   --color-card-default: var(--color-info);
   --color-card-complete: var(--color-success);
   --color-card-1: var(--color-primary);
-  --color-card-2: var(--color-neutral);      /* Backlog */
-  --color-card-3: var(--color-info);         /* Todo */
-  --color-card-4: var(--color-success);      /* Done */
-  --color-card-5: var(--color-warning);      /* Doing */
+  --color-card-2: var(--ink-muted);          /* Backlog */
+  --color-card-3: var(--brass);              /* Todo */
+  --color-card-4: var(--ink);                /* Done */
+  --color-card-5: var(--vermilion);          /* Doing */
   --color-card-6: var(--color-accent);
   --color-card-7: var(--color-error);
   --color-card-8: var(--color-base-content);
