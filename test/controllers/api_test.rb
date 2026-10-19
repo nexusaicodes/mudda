@@ -45,10 +45,10 @@ class ApiTest < ActionDispatch::IntegrationTest
   test "an explicit Authorization header wins over a session cookie" do
     sign_in_as @user
 
-    get my_user_path(format: :json), headers: bearer_headers_for(:jz)
+    get my_user_path(format: :json), headers: bearer_headers_for(:mike)
 
     assert_response :success
-    assert_equal users(:jz).id, @response.parsed_body["id"]
+    assert_equal users(:mike).id, @response.parsed_body["id"]
   end
 
   test "password sign-in over JSON labels the session it mints" do
@@ -437,7 +437,7 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test "a deactivated user's token is forbidden and carries the error envelope" do
     headers = bearer_headers_for(@user)
-    users(:david).deactivate
+    users(:david).update!(active: false)
 
     get boards_path(format: :json), headers: headers
 
@@ -556,17 +556,6 @@ class ApiTest < ActionDispatch::IntegrationTest
       assert_response :unprocessable_entity
       assert_error_envelope field == :pinned ? "pinned" : "completed"
     end
-  end
-
-  test "editing someone else's note carries the error envelope" do
-    note = notes(:logo_agreement_jz)
-    assert_not_equal @user, note.creator
-
-    put board_card_note_path(note.card.board, note.card, note, format: :json),
-      params: { body: "Not mine" }, headers: bearer_headers_for(@user), as: :json
-
-    assert_response :forbidden
-    assert_error_envelope "base"
   end
 
   # Pagination

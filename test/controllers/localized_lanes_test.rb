@@ -2,11 +2,11 @@ require "test_helper"
 
 class LocalizedLanesTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "an Arabic-locale board shows Arabic lane labels and keeps English lane data" do
-    users(:kevin).settings.update!(locale: "ar")
+    users(:david).settings.update!(locale: "ar")
 
     get board_path(boards(:writebook))
 
@@ -23,7 +23,7 @@ class LocalizedLanesTest < ActionDispatch::IntegrationTest
       get board_card_path(card.board, card)
       assert_select ".card-perma__bg", text: /Due /
 
-      users(:kevin).settings.update!(locale: "ar")
+      users(:david).settings.update!(locale: "ar")
       get board_card_path(card.board, card)
 
       assert_select ".card-perma__bg", text: /الاستحقاق/

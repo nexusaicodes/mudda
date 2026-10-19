@@ -2,7 +2,7 @@ require "test_helper"
 
 class CardsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "index" do
@@ -17,7 +17,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a board's cards run on into the next page under the heading they started under" do
-    Current.user = users(:kevin)
+    Current.user = users(:david)
     board = boards(:writebook)
     20.times { |i| board.cards.create!(title: "Filler #{i}") }
 
@@ -266,7 +266,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
   test "show card with note containing malformed remote image attachment" do
     card = cards(:logo)
     card.notes.create! \
-      creator: users(:kevin),
+      creator: users(:david),
       body: '<action-text-attachment url="image.png" content-type="image/*" presentation="gallery"></action-text-attachment>'
 
     get board_card_path(card.board, card)
@@ -405,7 +405,7 @@ class CardsControllerTest < ActionDispatch::IntegrationTest
     card = Card.last
 
     # Adding a note overwrites last_active_at (this is expected)
-    card.notes.create!(creator: users(:kevin), body: "Imported note")
+    card.notes.create!(creator: users(:david), body: "Imported note")
     assert_not_equal last_active_time, card.reload.last_active_at
 
     # After import, restore the correct last_active_at

@@ -2,42 +2,42 @@ require "test_helper"
 
 class My::PreferencesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "update the locale" do
     patch my_preferences_path, params: { locale: "ar" }
 
-    assert_redirected_to user_path(users(:kevin))
-    assert_equal "ar", users(:kevin).reload.locale
+    assert_redirected_to user_path(users(:david))
+    assert_equal "ar", users(:david).reload.locale
   end
 
   test "a blank locale follows the browser" do
-    users(:kevin).settings.update!(locale: "ar")
+    users(:david).settings.update!(locale: "ar")
 
     patch my_preferences_path, params: { locale: "" }
 
-    assert_nil users(:kevin).reload.locale
+    assert_nil users(:david).reload.locale
   end
 
   test "the app has one look, so pages carry no theme" do
-    get user_path(users(:kevin))
+    get user_path(users(:david))
 
     assert_select "html[data-theme]", count: 0
     assert_select "button.preference-choice__option", text: "Dark", count: 0
   end
 
   test "with no language chosen, the profile marks the one the browser asked for" do
-    get user_path(users(:kevin)), headers: { "Accept-Language" => "ar" }
+    get user_path(users(:david)), headers: { "Accept-Language" => "ar" }
 
     assert_select "button.preference-choice__option", count: 2
     assert_select "button.preference-choice__option[aria-pressed=true]", text: "العربية"
   end
 
   test "the profile marks the chosen language over the browser's" do
-    users(:kevin).settings.update!(locale: "en")
+    users(:david).settings.update!(locale: "en")
 
-    get user_path(users(:kevin)), headers: { "Accept-Language" => "ar" }
+    get user_path(users(:david)), headers: { "Accept-Language" => "ar" }
 
     assert_select "button.preference-choice__option[aria-pressed=true]", text: "English"
   end
@@ -48,18 +48,18 @@ class My::PreferencesControllerTest < ActionDispatch::IntegrationTest
 
     patch my_preferences_path, params: { locale: "en" }, as: :json
     assert_response :no_content
-    assert_equal "en", users(:kevin).reload.locale
+    assert_equal "en", users(:david).reload.locale
   end
 
   test "a body wrapped in the resource name is accepted" do
     patch my_preferences_path, params: { preferences: { locale: "ar" } }, as: :json
     assert_response :no_content
-    assert_equal "ar", users(:kevin).reload.locale
+    assert_equal "ar", users(:david).reload.locale
   end
 
   test "a browser reading preferences is sent to the profile" do
     get my_preferences_path
-    assert_redirected_to user_path(users(:kevin))
+    assert_redirected_to user_path(users(:david))
   end
 
   test "an unknown locale is a 422 as JSON" do

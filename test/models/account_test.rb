@@ -8,7 +8,7 @@ class AccountTest < ActiveSupport::TestCase
   end
 
   test ".create_with_owner creates a new local account" do
-    Current.without_account do
+    Current.with_account(nil) do
       account = nil
 
       assert_changes -> { Account.count }, +1 do

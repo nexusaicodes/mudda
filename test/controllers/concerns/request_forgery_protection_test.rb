@@ -2,7 +2,7 @@ require "test_helper"
 
 class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
 
     @original_allow_forgery_protection = ActionController::Base.allow_forgery_protection
     ActionController::Base.allow_forgery_protection = true
@@ -57,7 +57,7 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_difference -> { Board.count }, +1 do
       post boards_path,
         params: { board: { name: "Test Board" } },
-        headers: bearer_headers_for(:kevin).merge("X-Forwarded-Proto" => "https"),
+        headers: bearer_headers_for(:david).merge("X-Forwarded-Proto" => "https"),
         as: :json
     end
 
@@ -70,7 +70,7 @@ class RequestForgeryProtectionTest < ActionDispatch::IntegrationTest
     assert_no_difference -> { Board.count } do
       post boards_path,
         params: { board: { name: "Test Board" } },
-        headers: bearer_headers_for(:kevin).merge("Sec-Fetch-Site" => "cross-site"),
+        headers: bearer_headers_for(:david).merge("Sec-Fetch-Site" => "cross-site"),
         as: :json
     end
 

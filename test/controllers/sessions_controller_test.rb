@@ -16,14 +16,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new redirects authenticated users" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     get new_session_path
     assert_redirected_to root_url
   end
 
   test "destroy" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     delete session_path
 
@@ -32,7 +32,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy via JSON" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     delete session_path(format: :json)
 

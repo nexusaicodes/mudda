@@ -74,7 +74,7 @@ class Platform::MessagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "ignores a session or token, which can't stand in for a signature" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     trusting_the_platform do
       send_message platform_message("plan.updated", { plan: "free" }, key: OpenSSL::PKey.generate_key("ED25519"))

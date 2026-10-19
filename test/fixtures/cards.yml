@@ -22,7 +22,7 @@ layout:
 text:
   number: 3
   board: writebook
-  creator: kevin
+  creator: david
   column: writebook_doing
   title: The text is too small
   due_on: <%= 2.weeks.from_now %>
@@ -32,7 +32,7 @@ text:
 shipping:
   number: 4
   board: writebook
-  creator: kevin
+  creator: david
   column: writebook_done
   title: We need to ship the app
   due_on: <%= 3.days.from_now %>

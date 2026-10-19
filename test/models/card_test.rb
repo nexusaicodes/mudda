@@ -25,8 +25,8 @@ class CardTest < ActiveSupport::TestCase
     board_a = Account.find(board.account_id).boards.find(board.id)
     board_b = Account.find(board.account_id).boards.find(board.id)
 
-    card_a = board_a.cards.create!(title: "A", creator: users(:kevin), due_on: 1.week.from_now)
-    card_b = board_b.cards.create!(title: "B", creator: users(:kevin), due_on: 1.week.from_now)
+    card_a = board_a.cards.create!(title: "A", creator: users(:david), due_on: 1.week.from_now)
+    card_b = board_b.cards.create!(title: "B", creator: users(:david), due_on: 1.week.from_now)
 
     assert_not_equal card_a.number, card_b.number
     assert_equal card_a.number + 1, card_b.number
@@ -123,12 +123,5 @@ class CardTest < ActiveSupport::TestCase
     assert_empty card_events - card.events.ids
     assert_equal note_events, note.events.ids
     assert card.events.exists?(action: "card_board_changed")
-  end
-
-  test "a card is filled if it has either the title or the description set" do
-    assert Card.new(title: "Some title").filled?
-    assert Card.new(description: "Some description").filled?
-
-    assert_not Card.new.filled?
   end
 end

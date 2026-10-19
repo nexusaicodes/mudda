@@ -34,7 +34,7 @@ module Mudda::Mcp::Tools
   class UpdateNote < Mudda::Mcp::Tool
     tool_name "update_note"
     title "Edit a note"
-    description "Replaces a note's body. Only the note's creator may edit it."
+    description "Replaces a note's body."
     arguments(
       properties: CARD_ADDRESS.merge(
         note_id: { type: "integer" },
@@ -54,7 +54,7 @@ module Mudda::Mcp::Tools
   class DeleteNote < Mudda::Mcp::Tool
     tool_name "delete_note"
     title "Delete a note"
-    description "Permanently deletes a note from a card's log. Only the note's creator may delete it."
+    description "Permanently deletes a note from a card's log."
     arguments(properties: CARD_ADDRESS.merge(note_id: { type: "integer" }), required: %w[ board_id number note_id ])
     kind :delete
     calls :delete, "/boards/{board_id}/cards/{card_number}/notes/{id}.json"

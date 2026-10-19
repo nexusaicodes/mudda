@@ -2,7 +2,7 @@ require "test_helper"
 
 class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "edit lists the boards a card can move to" do
@@ -11,7 +11,7 @@ class Cards::BoardsControllerTest < ActionDispatch::IntegrationTest
     get edit_board_card_board_path(card.board, card)
 
     assert_response :success
-    users(:kevin).boards.each { |board| assert_select "li", text: /#{board.name}/ }
+    users(:david).boards.each { |board| assert_select "li", text: /#{board.name}/ }
   end
 
   # The picker only offers the choice; CardsController#update is what moves the card.

@@ -60,11 +60,4 @@ module CardsHelper
     else           card_due_label(card)
     end
   end
-
-  def card_social_tags(card)
-    tag.meta(property: "og:title", content: "#{card.title} | #{card.board.name}") +
-    tag.meta(property: "og:description", content: format_excerpt(card&.description, length: 200)) +
-    tag.meta(property: "og:image", content: "#{request.base_url}/app-icon.png") +
-    tag.meta(property: "og:url", content: board_card_url(card.board, card))
-  end
 end

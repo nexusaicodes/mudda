@@ -12,8 +12,8 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "0", @response.cache_control[:max_age]
   end
 
-  test "show other initials with caching" do
-    get user_avatar_path(users(:kevin))
+  test "show another account's user's initials with caching" do
+    get user_avatar_path(users(:mike))
     assert_match "image/svg+xml", @response.content_type
     assert @response.cache_control[:private]
     assert_equal 30.minutes.to_s, @response.cache_control[:max_age]
@@ -28,13 +28,13 @@ class Users::AvatarsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to rails_blob_url(users(:david).avatar_thumbnail, disposition: "inline")
   end
 
-  test "show other image redirects to the blob url" do
-    users(:kevin).avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
-    assert users(:kevin).avatar.attached?
+  test "show another account's user's image redirects to the blob url" do
+    users(:mike).avatar.attach(io: File.open(file_fixture("moon.jpg")), filename: "moon.jpg", content_type: "image/jpeg")
+    assert users(:mike).avatar.attached?
 
-    get user_avatar_path(users(:kevin))
+    get user_avatar_path(users(:mike))
 
-    assert_redirected_to rails_blob_url(users(:kevin).avatar_thumbnail, disposition: "inline")
+    assert_redirected_to rails_blob_url(users(:mike).avatar_thumbnail, disposition: "inline")
   end
 
   test "delete self" do

@@ -4,7 +4,7 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   test "nothing is recorded until the platform configures webhooks" do
     trusting_the_platform do
       assert_no_difference -> { WebhookDelivery.count } do
-        users(:kevin).update!(name: "Kevin Renamed")
+        users(:david).update!(name: "David Renamed")
       end
     end
   end
@@ -12,20 +12,20 @@ class WebhookDeliveryTest < ActiveSupport::TestCase
   test "a rename is recorded with its time and sent after commit" do
     with_platform_webhooks do
       assert_enqueued_with(job: WebhookDeliveryJob) do
-        users(:kevin).update!(name: "Kevin Renamed")
+        users(:david).update!(name: "David Renamed")
       end
     end
 
     delivery = WebhookDelivery.last
     assert_equal "user.updated", delivery.kind
-    assert_equal "Kevin Renamed", delivery.payload["name"]
-    assert_equal users(:kevin).reload.name_changed_at.iso8601(6), delivery.payload["name_changed_at"]
+    assert_equal "David Renamed", delivery.payload["name"]
+    assert_equal users(:david).reload.name_changed_at.iso8601(6), delivery.payload["name_changed_at"]
   end
 
   test "a rename that fails to save records nothing" do
     with_platform_webhooks do
       assert_no_difference -> { WebhookDelivery.count } do
-        assert_not users(:kevin).update(name: "")
+        assert_not users(:david).update(name: "")
       end
     end
   end

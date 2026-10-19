@@ -6,7 +6,7 @@ class Card::DueTest < ActiveSupport::TestCase
   end
 
   test "a date is required in Todo and Doing, and optional in Backlog and Done" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Someday"
+    card = boards(:writebook).cards.create! creator: users(:david), title: "Someday"
     assert card.backlogged?
 
     %w[ todo doing ].each do |lane|
@@ -18,7 +18,7 @@ class Card::DueTest < ActiveSupport::TestCase
   end
 
   test "anything but a date is refused as invalid, and only that" do
-    card = boards(:writebook).cards.create! creator: users(:kevin), title: "Someday"
+    card = boards(:writebook).cards.create! creator: users(:david), title: "Someday"
 
     [ "2026-02-30", "next friday", 20261201, true, false ].each do |value|
       assert_not card.update(due_on: value), "Backlog took #{value.inspect}"

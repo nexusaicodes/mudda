@@ -2,7 +2,7 @@ require "test_helper"
 
 class Cards::ColumnsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "update moves the card to the picked lane" do

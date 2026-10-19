@@ -215,8 +215,8 @@ Premium" sends returning customers there.
 
 **User**: the principal (`belongs_to :account`). Carries `email_address`, `has_passkeys`, and
 `has_many :sessions`. Concerns: `Accessor`, `Avatar`, `Configurable`, `Named`, `Searcher`. Owns
-notes. `deactivate` sets `active: false` and leaves the sessions alone, so `Authorization` still
-has a credential to refuse.
+notes. Nothing in the app sets `active: false`; a user is deactivated from the console, which
+leaves the sessions alone, so `Authorization` still has a credential to refuse.
 
 **Board**: the primary organizational unit, named (never blank). Concerns: `Cards`,
 `Triageable`. Every board has the same four fixed columns (below).
@@ -233,8 +233,7 @@ it across a reload, and one POST creates the card with its steps. Pictures live 
 description, which uploads through Active Storage direct upload.
 
 **Note**: a timestamped, rich-text entry on a card (`Card::Notable`), created with
-`card.notes.create!`. Concerns: `Attachments`, `Eventable`, `Searchable`. Only its creator can
-edit or delete it.
+`card.notes.create!`. Concerns: `Attachments`, `Eventable`, `Searchable`.
 
 **Event**: an audit record of a card's creation, title change, lane change, or board change,
 or a note's creation. It has a polymorphic `eventable` and JSON `particulars`, and is written

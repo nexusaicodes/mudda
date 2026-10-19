@@ -11,7 +11,7 @@
 // Custom events (all bubble):
 //   passkey:start   — ceremony begun
 //   passkey:success — credential obtained, form about to submit
-//   passkey:error   — ceremony failed; detail: { error, cancelled }
+//   passkey:error   — ceremony failed; detail: { error, type } ("cancelled", "duplicate" or "error")
 //
 // Attributes (rendered by the Ruby form helpers):
 //   options       — JSON WebAuthn options (creation or request, on both)

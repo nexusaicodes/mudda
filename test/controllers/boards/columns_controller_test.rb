@@ -2,7 +2,7 @@ require "test_helper"
 
 class Boards::ColumnsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "a lane's cards load into its frame on the board" do

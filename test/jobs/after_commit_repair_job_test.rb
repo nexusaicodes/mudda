@@ -22,7 +22,7 @@ class AfterCommitRepairJobTest < ActiveJob::TestCase
   end
 
   test "a receiver deleted since is discarded without a report" do
-    note = notes(:logo_agreement_kevin)
+    note = notes(:logo_4)
     AfterCommitRepairJob.perform_later(note, "reindex")
     note.delete
 

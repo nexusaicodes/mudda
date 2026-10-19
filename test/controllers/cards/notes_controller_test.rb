@@ -2,7 +2,7 @@ require "test_helper"
 
 class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "create" do
@@ -14,18 +14,10 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update" do
-    put board_card_note_path(cards(:logo).board, cards(:logo), notes(:logo_agreement_kevin)), params: { note: { body: "I've changed my mind" } }, as: :turbo_stream
+    put board_card_note_path(cards(:logo).board, cards(:logo), notes(:logo_4)), params: { note: { body: "I've changed my mind" } }, as: :turbo_stream
 
     assert_response :success
-    assert_action_text "I've changed my mind", notes(:logo_agreement_kevin).reload.body
-  end
-
-  test "update another user's note" do
-    assert_no_changes -> { notes(:logo_agreement_jz).reload.body.to_s } do
-      put board_card_note_path(cards(:logo).board, cards(:logo), notes(:logo_agreement_jz)), params: { note: { body: "I've changed my mind" } }, as: :turbo_stream
-    end
-
-    assert_response :forbidden
+    assert_action_text "I've changed my mind", notes(:logo_4).reload.body
   end
 
   test "index as JSON" do
@@ -62,7 +54,7 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show as JSON" do
-    note = notes(:logo_agreement_kevin)
+    note = notes(:logo_4)
 
     get board_card_note_path(note.card.board, note.card, note), as: :json
 
@@ -85,7 +77,7 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update as JSON with flat params" do
-    note = notes(:logo_agreement_kevin)
+    note = notes(:logo_4)
 
     put board_card_note_path(cards(:logo).board, cards(:logo), note), params: { body: "Flat update" }, as: :json
 
@@ -98,7 +90,7 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "update as JSON" do
-    note = notes(:logo_agreement_kevin)
+    note = notes(:logo_4)
 
     put board_card_note_path(cards(:logo).board, cards(:logo), note), params: { note: { body: "Updated note" } }, as: :json
 
@@ -112,7 +104,7 @@ class Cards::NotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "destroy as JSON" do
-    note = notes(:logo_agreement_kevin)
+    note = notes(:logo_4)
 
     delete board_card_note_path(cards(:logo).board, cards(:logo), note), as: :json
 

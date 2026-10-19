@@ -19,11 +19,11 @@
 :root {
   color-scheme: light;
 
-  /* Safe areas, overridable by the native apps' injected insets */
-  --custom-safe-inset-top: var(--injected-safe-inset-top, env(safe-area-inset-top, 0px));
-  --custom-safe-inset-right: var(--injected-safe-inset-right, env(safe-area-inset-right, 0px));
-  --custom-safe-inset-bottom: var(--injected-safe-inset-bottom, env(safe-area-inset-bottom, 0px));
-  --custom-safe-inset-left: var(--injected-safe-inset-left, env(safe-area-inset-left, 0px));
+  /* Safe areas: the device's insets, such as a notch or a home indicator */
+  --custom-safe-inset-top: env(safe-area-inset-top, 0px);
+  --custom-safe-inset-right: env(safe-area-inset-right, 0px);
+  --custom-safe-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --custom-safe-inset-left: env(safe-area-inset-left, 0px);
 
   /* The page's margin from the window's edges, which the header, page and lanes keep clear of */
   --paper-inset: clamp(10px, 2.2vmin, 26px);
@@ -32,14 +32,12 @@
   --z-popup: 10;
   --z-nav: 20;
   --z-flash: 30;
-  --z-tooltip: 40;
   --z-nav-open: 100;
 
   /* Lane colours. columns.color stores these names (Color, Board::Triageable), so they are part
      of the data and the API; their values come from the theme's inks, and the four lanes differ in
      lightness as well as hue. */
   --color-card-default: var(--color-info);
-  --color-card-complete: var(--color-success);
   --color-card-1: var(--color-primary);
   --color-card-2: var(--ink-muted);          /* Backlog */
   --color-card-3: var(--brass);              /* Todo */

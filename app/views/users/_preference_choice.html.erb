@@ -8,7 +8,6 @@
       <%= button_to my_preferences_path, method: :patch, params: { name => option[:value].to_s },
             class: class_names("preference-choice__option btn join-item w-full", "btn-neutral": chosen), aria: { pressed: chosen },
             form: { class: "contents", data: { turbo: false } } do %>
-        <%= icon_tag option[:icon] if option[:icon] %>
         <%= tag.span option[:label], lang: option[:lang], dir: option[:dir] %>
       <% end %>
     <% end %>

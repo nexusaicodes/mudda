@@ -5,7 +5,7 @@ require "test_helper"
 class AfterCommitRepairTest < ActionDispatch::IntegrationTest
   setup do
     @card = cards(:logo)
-    @headers = bearer_headers_for(:kevin, label: "claude")
+    @headers = bearer_headers_for(:david, label: "claude")
   end
 
   test "a note whose indexing fails is created, reported and indexed by the repair job" do
@@ -46,22 +46,22 @@ class AfterCommitRepairTest < ActionDispatch::IntegrationTest
   end
 
   test "an avatar whose variant fails is saved, reported and its variant queued" do
-    sign_in_as :kevin
+    sign_in_as :david
     ActiveStorage::VariantWithRecord.any_instance.stubs(:process_from_io).raises(Vips::Error, "corrupt")
 
     assert_error_reported(Vips::Error) do
-      put user_path(users(:kevin)), params: { user: { avatar: fixture_file_upload("avatar.png", "image/png") } }
+      put user_path(users(:david)), params: { user: { avatar: fixture_file_upload("avatar.png", "image/png") } }
     end
-    assert_enqueued_with job: ActiveStorage::CreateVariantsJob, args: ->(args) { args.first == users(:kevin).reload.avatar.blob }
+    assert_enqueued_with job: ActiveStorage::CreateVariantsJob, args: ->(args) { args.first == users(:david).reload.avatar.blob }
 
-    assert_redirected_to user_path(users(:kevin))
-    assert users(:kevin).reload.avatar.attached?
+    assert_redirected_to user_path(users(:david))
+    assert users(:david).reload.avatar.attached?
   end
 
   test "a variant that can't be made serves the original" do
-    sign_in_as :kevin
-    users(:kevin).avatar.attach(fixture_file_upload("avatar.png", "image/png"))
-    blob = users(:kevin).avatar.blob
+    sign_in_as :david
+    users(:david).avatar.attach(fixture_file_upload("avatar.png", "image/png"))
+    blob = users(:david).avatar.blob
     ActiveStorage::VariantWithRecord.any_instance.stubs(:processed).raises(Vips::Error, "corrupt")
 
     assert_error_reported(Vips::Error) do

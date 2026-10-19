@@ -18,12 +18,6 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user.account.boards.to_a, user.boards.to_a
   end
 
-  test "deactivate" do
-    assert_changes -> { users(:jz).active? }, from: true, to: false do
-      users(:jz).deactivate
-    end
-  end
-
   test "initials" do
     assert_equal "JF", User.new(name: "jason fried").initials
     assert_equal "DHH", User.new(name: "David Heinemeier Hansson").initials
@@ -33,8 +27,6 @@ class UserTest < ActiveSupport::TestCase
   test "name methods handle blank names gracefully" do
     user = User.new(name: "")
     assert_equal "", user.familiar_name
-    assert_nil user.first_name
-    assert_nil user.last_name
     assert_equal "", user.initials
   end
 

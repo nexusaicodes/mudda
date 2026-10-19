@@ -2,7 +2,7 @@
 <html lang="<%= I18n.locale %>" dir="<%= html_direction %>">
   <%= render "layouts/shared/head" %>
 
-  <body class="public min-h-dvh flex flex-col <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll" data-platform="<%= platform.type %>">
+  <body class="public min-h-dvh flex flex-col <%= @body_class %>" data-controller="local-time timezone-cookie" data-action="turbo:morph@window->local-time#refreshAll">
     <div id="global-container" class="contents">
       <header id="header" class="navbar grid grid-cols-[1fr_minmax(0,max-content)_1fr] relative z-(--z-nav) gap-2 min-h-0 px-[calc(var(--paper-clearance)+var(--custom-safe-inset-left))] pt-[calc(var(--paper-clearance)+var(--custom-safe-inset-top))] pb-2">
         <a href="#main" class="btn btn-sm sr-only focus:not-sr-only focus:absolute focus:top-16 focus:start-4" data-turbo="false"><%= t(".skip") %></a>
@@ -27,9 +27,5 @@
         <%= yield %>
       </main>
     </div>
-
-    <footer id="footer">
-      <%= yield :footer %>
-    </footer>
   </body>
 </html>

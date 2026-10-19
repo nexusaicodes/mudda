@@ -2,7 +2,7 @@ require "test_helper"
 
 class BoardsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "new" do
@@ -20,7 +20,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a.boards-list__new[href=?]", new_board_path
-    users(:kevin).boards.each do |board|
+    users(:david).boards.each do |board|
       assert_select "#board_#{board.id}" do
         assert_select "a.boards-list__link[href=?]", board_path(board), text: /#{board.name}/
         assert_select ".boards-list__editor[hidden] form[action=?]", board_path(board)
@@ -54,7 +54,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
 
   test "the avatar is a plain link to the profile" do
     get board_path(boards(:writebook))
-    assert_select "header a.account-link[href=?]", user_path(users(:kevin))
+    assert_select "header a.account-link[href=?]", user_path(users(:david))
     assert_select "header dialog.account-menu__popup", count: 0
   end
 
@@ -111,7 +111,7 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   test "index as JSON" do
     get boards_path, as: :json
     assert_response :success
-    assert_equal users(:kevin).boards.count, @response.parsed_body.count
+    assert_equal users(:david).boards.count, @response.parsed_body.count
   end
 
   test "show as JSON" do
@@ -155,7 +155,9 @@ class BoardsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index avoids N+1 queries on creator" do
-    assert_queries_match(/FROM [`"]users[`"].* IN \(/, count: 1) do
+    # The preload is one query, `= ?` for a single creator and `IN (…)` for several; a lazy
+    # load per board would carry a LIMIT.
+    assert_queries_match(/FROM [`"]users[`"] WHERE [`"]users[`"]\.[`"]id[`"] (?:= \?|IN \()(?!.*LIMIT)/, count: 1) do
       get boards_path, as: :json
       assert_response :success
     end

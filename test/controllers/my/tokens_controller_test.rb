@@ -2,11 +2,11 @@ require "test_helper"
 
 class My::TokensControllerTest < ActionDispatch::IntegrationTest
   setup do
-    sign_in_as :kevin
+    sign_in_as :david
   end
 
   test "index lists the user's tokens" do
-    users(:kevin).sessions.create!(kind: :token, label: "claude")
+    users(:david).sessions.create!(kind: :token, label: "claude")
 
     get my_tokens_path
 
@@ -15,12 +15,12 @@ class My::TokensControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "minting shows the token once, with the scopes chosen" do
-    assert_difference -> { users(:kevin).sessions.token.count } do
+    assert_difference -> { users(:david).sessions.token.count } do
       post my_tokens_path, params: { token: { label: "cursor", scopes: [ "", "read", "delete" ] } }
     end
 
     assert_response :created
-    token = users(:kevin).sessions.token.find_by!(label: "cursor")
+    token = users(:david).sessions.token.find_by!(label: "cursor")
     assert_equal %w[ read delete ], token.scopes
 
     presented = css_select("input[name=token]").first["value"]
@@ -51,7 +51,7 @@ class My::TokensControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "revoking a token ends it" do
-    token = users(:kevin).sessions.create!(kind: :token, label: "claude")
+    token = users(:david).sessions.create!(kind: :token, label: "claude")
 
     delete my_token_path(token)
 
@@ -60,17 +60,17 @@ class My::TokensControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "another user's token, or a browser session, can't be revoked here" do
-    other = users(:david).sessions.create!(kind: :token, label: "claude")
+    other = users(:mike).sessions.create!(kind: :token, label: "claude")
 
     delete my_token_path(other)
     assert_response :not_found
 
-    delete my_token_path(users(:kevin).sessions.browser.first)
+    delete my_token_path(users(:david).sessions.browser.first)
     assert_response :not_found
   end
 
   test "a token can't manage tokens" do
-    headers = bearer_headers_for(:kevin)
+    headers = bearer_headers_for(:david)
 
     get my_tokens_path, headers: headers
     assert_response :forbidden

@@ -4,7 +4,7 @@ class Sessions::PasskeysControllerTest < ActionDispatch::IntegrationTest
   include WebauthnTestHelper
 
   setup do
-    @user = users(:kevin)
+    @user = users(:david)
 
     @credential = @user.passkeys.create!(
       name: "Test Passkey",

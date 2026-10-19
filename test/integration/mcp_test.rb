@@ -26,7 +26,7 @@ class McpTest < ActionDispatch::IntegrationTest
   end
 
   test "a deactivated user's token is forbidden" do
-    users(:david).deactivate
+    users(:david).update!(active: false)
 
     post "/mcp", params: rpc("tools/list").to_json, headers: mcp_headers(@headers)
 

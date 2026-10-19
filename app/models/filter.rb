@@ -23,16 +23,16 @@ class Filter
   LANES = Board::Triageable::DEFAULT_COLUMNS.map { |column| column[:name].downcase }
 
   # The cross-board views, reached as `/cards?…`: each is a filter with a name.
-  View = Data.define(:key, :icon, :params) do
+  View = Data.define(:key, :params) do
     def name
       I18n.t("filters.views.#{key}", lane: params[:lane] && I18n.t("lanes.#{params[:lane]}"))
     end
   end
 
   VIEWS = [
-    View.new(key: :due_soon, icon: "calendar",      params: { due: "soon" }),
-    View.new(key: :doing,    icon: "bolt",          params: { lane: Card::Triageable::DOING_COLUMN.downcase }),
-    View.new(key: :pinned,   icon: "pin",           params: { indexed_by: "pinned" })
+    View.new(key: :due_soon, params: { due: "soon" }),
+    View.new(key: :doing,    params: { lane: Card::Triageable::DOING_COLUMN.downcase }),
+    View.new(key: :pinned,   params: { indexed_by: "pinned" })
   ].freeze
 
   attr_reader :creator, :indexed_by, :sorted_by, :creation, :due, :lane, :terms, :card_ids, :column_ids, :board_ids

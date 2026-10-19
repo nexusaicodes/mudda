@@ -13,8 +13,6 @@ module User::Avatar
       attachable.variant :thumb, resize_to_fill: [ 256, 256 ], process: :immediately
     end
 
-    scope :with_avatars, -> { preload(:account, :avatar_attachment) }
-
     validate :avatar_content_type_allowed, :avatar_dimensions_allowed, if: :avatar_attached?
   end
 

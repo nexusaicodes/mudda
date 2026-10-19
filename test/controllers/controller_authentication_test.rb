@@ -8,7 +8,7 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
   end
 
   test "access with a session allows functional access" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     get cards_path
 
@@ -22,7 +22,7 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
 
     post session_password_path, params: {
-      email_address: users(:kevin).email_address, password: owner_password
+      email_address: users(:david).email_address, password: owner_password
     }
 
     assert_redirected_to board_card_url(card.board, card)
@@ -33,7 +33,7 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
 
     post session_password_path, params: {
-      email_address: users(:kevin).email_address, password: owner_password
+      email_address: users(:david).email_address, password: owner_password
     }
 
     assert_redirected_to root_url
@@ -42,8 +42,8 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
   # A deactivated owner keeps the API token they were issued: it is refused for as long as they
   # are deactivated, and works again once they are not — whatever format it asks for.
   test "a deactivated user's token is refused without being revoked" do
-    headers = bearer_headers_for(:kevin)
-    users(:kevin).update!(active: false)
+    headers = bearer_headers_for(:david)
+    users(:david).update!(active: false)
 
     assert_no_difference -> { Session.count } do
       get cards_path, as: :json, headers: headers
@@ -53,17 +53,17 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
       assert_response :forbidden
     end
 
-    users(:kevin).update!(active: true)
+    users(:david).update!(active: true)
     get cards_path, as: :json, headers: headers
     assert_response :success
   end
 
   # The session's kind decides, not the format: a browser asking for JSON is still a browser.
   test "a deactivated user's browser is signed out even when it asks for JSON" do
-    sign_in_as :kevin
-    users(:kevin).update!(active: false)
+    sign_in_as :david
+    users(:david).update!(active: false)
 
-    assert_difference -> { users(:kevin).sessions.browser.count }, -1 do
+    assert_difference -> { users(:david).sessions.browser.count }, -1 do
       get cards_path, as: :json
     end
 
@@ -72,8 +72,8 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
   end
 
   test "a deactivated user is signed out on a format the app does not render" do
-    sign_in_as :kevin
-    users(:kevin).update!(active: false)
+    sign_in_as :david
+    users(:david).update!(active: false)
 
     get cards_path(format: :png)
 
@@ -85,8 +85,8 @@ class ControllerAuthenticationTest < ActionDispatch::IntegrationTest
   # sign-in page would bounce an authenticated user to root and root would bounce it back
   # — forever.
   test "a deactivated user is signed out rather than looping" do
-    sign_in_as :kevin
-    users(:kevin).deactivate
+    sign_in_as :david
+    users(:david).update!(active: false)
 
     get cards_path
 

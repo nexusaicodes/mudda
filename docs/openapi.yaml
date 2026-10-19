@@ -607,7 +607,7 @@ paths:
       operationId: updateNote
       summary: Edit a note
       description: |
-        Replaces the note's body. Only its creator may. `PATCH` is accepted too. **Scope:** `write`.
+        Replaces the note's body. `PATCH` is accepted too. **Scope:** `write`.
       x-scopes: [write]
       requestBody:
         required: true
@@ -633,7 +633,7 @@ paths:
       operationId: deleteNote
       summary: Delete a note
       description: |
-        Permanently deletes the note. Only its creator may. **Scope:** `delete`.
+        Permanently deletes the note. **Scope:** `delete`.
       x-scopes: [delete]
       responses:
         "204": { description: Deleted. }
@@ -1026,7 +1026,7 @@ components:
           schema: { $ref: "#/components/schemas/Errors" }
           example: { errors: { base: ["Unauthorized"] }, request_id: 5f0c1e9a-2b7d-4c1e-9a63-0e4f8d2b1c55 }
     Forbidden:
-      description: The user is deactivated, the record isn't yours to change, or the token lacks the scope.
+      description: The user is deactivated, or the token lacks the scope.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Errors" }

@@ -4,7 +4,7 @@ class Account::UpgradesControllerTest < ActionDispatch::IntegrationTest
   UPGRADE_URL = "https://mudda.example/upgrade/new?token=signed"
 
   test "a signed-in owner is handed to the platform's upgrade page" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     on_the_free_plan(upgrade_url: UPGRADE_URL) { get account_upgrade_path }
 
@@ -12,7 +12,7 @@ class Account::UpgradesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the billing they picked is passed on, and anything else is dropped" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     on_the_free_plan(upgrade_url: UPGRADE_URL) { get account_upgrade_path(billing: "monthly") }
     assert_redirected_to "#{UPGRADE_URL}&billing=monthly"
@@ -29,7 +29,7 @@ class Account::UpgradesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "with no upgrade URL and no ceiling, the account already has unlimited cards" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     with_env("MUDDA_PLATFORM_KEYS" => nil) { get account_upgrade_path }
 
@@ -38,7 +38,7 @@ class Account::UpgradesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "with no upgrade URL under a ceiling, there is no upgrade to offer" do
-    sign_in_as :kevin
+    sign_in_as :david
 
     on_the_free_plan { get account_upgrade_path }
 

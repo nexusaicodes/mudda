@@ -3,32 +3,7 @@ david:
   email_address: david@example.com
   account: 37s
 
-jz:
-  name: JZ
-  email_address: jz@example.com
-  account: 37s
-
-jason:
-  name: Jason
-  email_address: jason@example.com
-  account: 37s
-
-kevin:
-  name: Kevin
-  email_address: kevin@example.com
-  account: 37s
-
-system:
-  name: System
-  email_address: system@example.com
-  account: 37s
-
 mike:
   name: Mike
   email_address: mike@example.com
-  account: initech
-
-system_initech:
-  name: System
-  email_address: system@initech.example.com
   account: initech

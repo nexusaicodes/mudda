@@ -2,8 +2,8 @@ require "application_system_test_case"
 
 class ArabicTest < ApplicationSystemTestCase
   setup do
-    users(:kevin).settings.update!(locale: "ar")
-    sign_in_as(users(:kevin))
+    users(:david).settings.update!(locale: "ar")
+    sign_in_as(users(:david))
   end
 
   test "the board reads right to left with Arabic lane names" do
@@ -22,8 +22,8 @@ class ArabicTest < ApplicationSystemTestCase
   end
 
   test "search finds Arabic text without its vowel marks or article" do
-    card = Current.set(session: users(:kevin).sessions.first) do
-      boards(:writebook).cards.create!(title: "مَرْحَباً بالكتاب", creator: users(:kevin))
+    card = Current.set(session: users(:david).sessions.first) do
+      boards(:writebook).cards.create!(title: "مَرْحَباً بالكتاب", creator: users(:david))
     end
 
     visit search_url(q: "مرحبا كتاب")
