@@ -15,10 +15,10 @@ GIT
 
 GIT
   remote: https://github.com/nexusaicodes/mudda-theme.git
-  revision: 15754486d5bf105b1cbd9139a4281e7c8950d003
-  tag: v0.1.0
+  revision: 326496e5513a709c850d449b7a412cefac02f2e5
+  tag: v0.1.1
   specs:
-    mudda-theme (0.1.0)
+    mudda-theme (0.1.1)
       railties (>= 7.1)
 
 GIT
