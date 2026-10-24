@@ -14,11 +14,11 @@ GIT
       railties (>= 7.1.0)
 
 GIT
-  remote: https://github.com/nexusaicodes/mudda-theme.git
-  revision: 326496e5513a709c850d449b7a412cefac02f2e5
-  tag: v0.1.1
+  remote: https://github.com/nexusaicodes/mudda-design.git
+  revision: 98bada57d2d3594a1978cabbddd12da1989a094e
+  tag: v0.2.0
   specs:
-    mudda-theme (0.1.1)
+    mudda-theme (0.2.0)
       railties (>= 7.1)
 
 GIT

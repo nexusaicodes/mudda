@@ -6,7 +6,7 @@ gem "rails", github: "rails/rails", branch: "main"
 
 # Assets & front end
 gem "importmap-rails"
-gem "mudda-theme", github: "nexusaicodes/mudda-theme", tag: "v0.1.1"
+gem "mudda-theme", github: "nexusaicodes/mudda-design", tag: "v0.2.0"
 gem "propshaft"
 gem "stimulus-rails"
 gem "tailwindcss-rails", "~> 4.6"
