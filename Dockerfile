@@ -102,10 +102,13 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # --- Final stage: slim production runtime (the default target) -----------------
 FROM prod-base AS production
 
-# curl: container healthcheck. libvips: Active Storage image variants.
+# ca-certificates: upgraded from Debian security.
+# curl: container healthcheck.
+# libvips: Active Storage image variants.
 # sqlite3: CLI for on-box backups of the SQLite database.
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
+      ca-certificates \
       curl \
       libvips \
       sqlite3 && \
